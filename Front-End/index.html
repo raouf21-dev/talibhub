@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TalibTimer</title>
+    <meta name="TalibTimer" content="TalibTimer aide les utilisateurs à améliorer leur productivité grâce à la technique Pomodoro, offrant des minuteurs personnalisables, des statistiques détaillées, des rappels et des listes de tâches pour une gestion optimale du temps." />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.js"></script>
+</head>
+<body>
+    <header id="nav">
+        <div class="contained">
+            <div id="logo">
+                <h1><a href="#"></a></h1>
+            </div>
+            <div class="container">
+                <div id="hamburger"><span></span><span></span><span></span></div>
+                <div id="close"><span></span></div>
+                <div id="menuWrapper">
+                    <ul>                            
+                        <li>
+                            <a href="#" onclick="navigateTo('iconSelection')">Home</a>
+                        </li>                            
+                        <li>
+                            <a href="#" onclick="navigateTo('talibtimer')">TalibTimer</a>
+                            <ul class="swingLft">
+                                <li><a href="#" onclick="navigateTo('apprentissage')">Apprentissage</a></li>
+                                <li><a href="#" onclick="navigateTo('todoLists')">Listes de Tâches</a></li>
+                                <li><a href="#" onclick="navigateTo('statistics')">Statistiques</a></li>
+                                <li><a href="#" onclick="navigateTo('todoLists')">Listes de Tâches</a></li>
+                            </ul>
+                        </li>                            
+                        <li>
+                            <a href="#" onclick="navigateTo('salatSurahSelector')">SurahSelector</a>
+                            <ul class="swingLft">
+                            </ul>
+                        </li>                                                
+                        <li>
+                            <a href="#" onclick="navigateTo('douaTime')">Doua Time</a>
+                            <ul class="swingLft">
+                            </ul>
+                        </li>                                  					
+                        <li>
+                            <a href="#" onclick="navigateTo('notifications')">Notifications</a>
+                            <ul class="swingLft">   
+                            </ul>
+                        </li>                           
+                        <li>
+                            <a href="#" onclick="navigateTo('profile')">Profil</a>
+                            <ul class="swingLft">
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="#">À propos</a>
+                            <ul class="swingLft">
+                            </ul>
+                        </li>                            
+                        <li>
+                            <a href="#" onclick="navigateTo('profile')">Abonnement</a>
+                            <ul class="swingLft">
+                            </ul>
+                        </li>          
+                    
+                        <li>
+                            <a href="#">Contact</a>
+                            <ul class="swingLft">
+                            </ul>
+                        </li>                          
+                    </ul>
+                    <div id="user-pseudo"></div>  
+                </div>
+            </div>
+        </div>
+    </header>
+    <div id="welcome" class="page active">
+        <header>
+            <h1>Bienvenue sur TimeMaster - Maîtrisez Votre Temps</h1>
+            <a href="#" class="cta-button" onclick="navigateTo('signup')">Commencer</a>
+        </header>
+    </div>
+    <div id="signup" class="page">
+        <section class="signup-section">
+            <div class="form-container">
+                <form id="signupForm">
+                    <h2>S'inscrire</h2>
+                    <input type="text" placeholder="Nom" id="lastName" required />
+                    <input type="text" placeholder="Prénom" id="firstName" required />
+                    <input type="text" placeholder="Pseudo" id="pseudo" required />
+                    <input type="number" placeholder="Âge" id="age" required />
+                    <label for="gender">Sexe:</label>
+                    <select id="gender" required>
+                        <option value="">Sélectionnez le sexe</option>
+                        <option value="male">Masculin</option>
+                        <option value="female">Féminin</option>
+                    </select>
+                    <input type="email" placeholder="Adresse e-mail" id="email" required />
+                    <input type="password" placeholder="Mot de passe" id="password" required />
+                    <input type="password" placeholder="Confirmer le mot de passe" id="confirmPassword" required />
+                    <label>
+                        <input type="checkbox" id="showPasswordToggle"> Afficher le mot de passe
+                    </label>
+                    <button type="submit">Créer un compte</button>
+                </form>
+    
+                <form id="loginForm">
+                    <h2>Connexion</h2>
+                    <input type="email" placeholder="Adresse e-mail" required />
+                    <input type="password" placeholder="Mot de passe" required />
+                    <button type="submit">Se connecter</button>
+                </form>
+            </div>
+        </section>
+        <button onclick="navigateTo('welcome')">Retour à l'accueil</button>
+    </div>  
+    
+    <div id="iconSelection" class="page">
+        <section class="icon-grid">
+            <div class="icon" onclick="navigateTo('talibtimer')">
+                <img src="path/to/icon1.png" alt="TalibTimer Icon" />
+                <p>TalibTimer</p>
+            </div>
+            <div class="icon" onclick="navigateTo('salatSurahSelector')">
+                <img src="path/to/icon2.png" alt="salatSurahSelector" />
+                <p>Fonctionnalité 2</p>
+            </div>
+            <div class="icon" onclick="navigateTo('douaTime')">
+                <img src="path/to/icon3.png" alt="douaTime" />
+                <p>Fonctionnalité 3</p>
+            </div>
+            <div class="icon">
+                <img src="path/to/icon4.png" alt="Icon 4" />
+                <p>Fonctionnalité 4</p>
+            </div>
+            <div class="icon">
+                <img src="path/to/icon5.png" alt="Icon 5" />
+                <p>Fonctionnalité 5</p>
+            </div>
+            <div class="icon">
+                <img src="path/to/icon6.png" alt="Icon 6" />
+                <p>Fonctionnalité 6</p>
+            </div>
+        </section>
+    </div>
+
+    <div id="talibtimer" class="page">
+        <section>
+            <h2>Résumé des Statistiques</h2>
+            <p>Aperçu des sessions de travail récentes et des tâches accomplies.</p>
+        </section>
+    </div>
+
+    <div id="apprentissage" class="page">
+        <section>
+            <h2>Sélectionnez une tâche</h2>
+            <select id="task-select" onchange="updateTaskTitle()">
+                <option value="">Sélectionnez une tâche</option>
+                <!-- Les options seront ajoutées ici dynamiquement -->
+            </select>
+            <div class="timers-container">
+                <div class="timer">
+                    <div id="focus-timer">
+                        <h2 id="timer-label">Travail</h2>
+                        <p id="time-left">25:00</p>
+                        <p id="break-time-left">Pause: 5:00</p>
+                        <button id="start_stop" onclick="toggleTimer()">Démarrer</button>
+                        <button id="stop" onclick="stopTimer()">Arrêter</button>
+                        <button id="reset" onclick="resetTimer()">Réinitialiser</button>
+                        <button id="save_timer" onclick="saveTimerData()">Enregistrer</button>
+                        <button onclick="updateTimerSettings()">Modifier Durée</button>
+                    </div>                   
+                </div>
+                <div class="timer">
+                    <h2>Chronomètre</h2>
+                    <p id="stopwatch-time">00:00:00</p>
+                    <button id="stopwatch-start" onclick="startStopwatch()">Démarrer</button>
+                    <button id="stopwatch-stop" onclick="stopStopwatch()">Arrêter</button>
+                    <button id="stopwatch-reset" onclick="resetStopwatch()">Réinitialiser</button>
+                    <button id="save_stopwatch" onclick="saveStopwatchData()">Enregistrer</button>
+                </div>
+            </div>
+            <div id="counter" class="counter-container">
+                <h2 id="counter-task-title">Sélectionnez une tâche</h2>
+                <div id="counter-display">
+                    <p id="counter-value">0</p>
+                </div>
+                <div id="counter-buttons">
+                    <button onclick="decrementCounter(1)">-1</button>
+                    <button onclick="incrementCounter(1)">+1</button>
+                    <button onclick="incrementCounter(3)">+3</button>
+                    <button onclick="incrementCounter(5)">+5</button>
+                    <button onclick="incrementCounter(10)">+10</button>
+                </div>
+                <button onclick="saveCounter()">Enregistrer</button>
+                <button onclick="resetCounter()">Réinitialiser</button>
+            </div>
+            <div class="manual-time-entry">
+                <h3>Ajouter manuellement le temps d'étude</h3>
+                <div>
+                    <label for="manual-hours">Heures:</label>
+                    <input type="number" id="manual-hours" min="0" placeholder="0" />
+                    <label for="manual-minutes">Minutes:</label>
+                    <input type="number" id="manual-minutes" min="0" max="59" placeholder="0" />
+                </div>
+                <button onclick="addManualTime()">Enregistrer le temps</button>
+            </div>
+            <button onclick="navigateTo('talibtimer')">Retour à l'accueil</button>
+        </section>
+    </div>
+
+    <div id="statistics" class="page">
+        <section>
+            <h2>Graphiques et Rapports</h2>
+            <div id="calendar"></div>
+            <div class="charts-container">
+                <div class="chart-wrapper">
+                    <canvas id="dailyChart"></canvas>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="weeklyChart"></canvas>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="monthlyChart"></canvas>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="yearlyChart"></canvas>
+                </div>
+            </div>
+            <button onclick="navigateTo('talibtimer')">Retour à l'accueil</button>
+        </section>
+    </div>
+
+    <div id="todoLists" class="page">
+        <section>
+            <h2>Organisez vos Tâches</h2>
+            <ul id="task-list">
+                <!-- Les tâches seront ajoutées ici dynamiquement -->
+            </ul>
+            <input type="text" id="new-task" placeholder="Nouvelle Tâche" />
+            <button onclick="addNewTask()">Ajouter</button>
+            <button onclick="navigateTo('talibtimer')">Retour à l'accueil</button>
+        </section>
+    </div>
+
+    <div id="notifications" class="page">
+        <section>
+            <h2>Messages des Admins</h2>
+            <div id="message-list">
+                <!-- Les messages seront ajoutés ici dynamiquement -->
+            </div>
+        </section>
+        <button onclick="navigateTo('talibtimer')">Retour à l'accueil</button>
+    </div>
+
+    <div id="profile" class="page">
+        <section>
+            <h2>Informations Personnelles</h2>
+            <form id="profileForm">
+                <label for="pseudo">Pseudo:</label>
+                <input type="text" id="pseudo" name="pseudo" placeholder="Pseudo" required />
+                <label for="last-name">Nom:</label>
+                <input type="text" id="last-name" name="last-name" placeholder="Nom" required />
+                <label for="first-name">Prénom:</label>
+                <input type="text" id="first-name" name="first-name" placeholder="Prénom" required />
+                <label for="age">Âge:</label>
+                <input type="number" id="age" name="age" placeholder="Âge" required />
+                <label for="gender">Sexe:</label>
+                <select id="gender" name="gender" required>
+                    <option value="">Sélectionnez le sexe</option>
+                    <option value="male">Masculin</option>
+                    <option value="female">Féminin</option>
+                </select>
+                <label for="email">Adresse e-mail:</label>
+                <input type="email" id="email" name="email" placeholder="Adresse e-mail" required />
+                <button type="submit">Mettre à jour</button>
+            </form>
+            <h2>Changer le mot de passe</h2>
+<form id="passwordChangeForm">
+    <label for="current-password">Mot de passe actuel:</label>
+    <input type="password" id="current-password" name="current-password" required />
+    
+    <label for="new-password">Nouveau mot de passe:</label>
+    <input type="password" id="new-password" name="new-password" required />
+    
+    <label for="confirm-new-password">Confirmer le nouveau mot de passe:</label>
+    <input type="password" id="confirm-new-password" name="confirm-new-password" required />
+    
+    <label>
+        <input type="checkbox" id="showNewPasswordToggle"> Afficher le mot de passe
+    </label>
+    <button type="submit">Changer le mot de passe</button>
+</form>
+            <button onclick="logout()">Déconnexion</button>
+            <button onclick="navigateTo('talibtimer')">Retour à l'accueil</button>
+        </section>
+    </div>
+
+    <div id="salatSurahSelector" class="page">
+        <section>
+            <div id="knownSouratesCount">Sourates connues : 0</div>
+            <h2>Sélectionnez les sourates que vous connaissez</h2>
+            <div id="sourateList">
+                <!-- La liste des sourates sera générée ici dynamiquement -->
+            </div>
+            <button onclick="saveKnownSourates()">Sauvegarder</button>
+            <button onclick="selectRandomSourates()">Sélectionner des sourates pour Salat</button>
+            <div>
+                <h3>1er raka: <span id="firstRaka"></span></h3>
+                <h3>2nd raka: <span id="secondRaka"></span></h3>
+            </div>
+        </section>
+    </div>
+    <div id="douaTime" class="page">
+        <section>
+        <h1>Calculate Last Third of the Night</h1>
+        <button onclick="getLocation()">Use My Location</button>
+        <br><br>
+        <label for="city">Or enter a city:</label>
+        <input type="text" id="city" placeholder="Enter city">
+        <button onclick="useCity()">Submit</button>
+        <br><br>
+        <label for="method">Calculation Method:</label>
+        <select id="method" onchange="toggleCustomMethodInput()">
+            <option value="3">Muslim World League</option>
+            <option value="2">Islamic Society of North America</option>
+            <option value="5">Egyptian General Authority of Survey</option>
+            <option value="7">Umm Al-Qura University, Makkah</option>
+            <option value="1">University of Islamic Sciences, Karachi</option>
+            <option value="6">Institute of Geophysics, University of Tehran</option>
+            <option value="17">Shia Ithna-Ashari, Leva Institute, Qum</option>
+            <option value="8">Gulf Region</option>
+            <option value="9">Kuwait</option>
+            <option value="10">Qatar</option>
+            <option value="11">Majlis Ugama Islam Singapura, Singapore</option>
+            <option value="12">Union Organization islamic de France</option>
+            <option value="13">Diyanet İşleri Başkanliği, Turkey</option>
+            <option value="18">Spiritual Administration of Muslims of Russia</option>
+            <option value="15">Moonsighting Committee</option>
+            <option value="14">Dubai, UAE</option>
+            <option value="19">Jabatan Kemajuan Islam Malaysia (JAKIM)</option>
+            <option value="16">Tunisia</option>
+            <option value="20">Algeria</option>
+            <option value="21">Kementerian Agama Republik Indonesia</option>
+            <option value="22">Morocco</option>
+            <option value="23">Comunidate Islamica de Lisboa (Portugal)</option>
+            <option value="24">Custom</option>
+        </select>
+        <br><br>
+        <div id="custom-method" style="display:none;">
+            <label for="fajr-angle">Fajr Angle:</label>
+            <input type="number" id="fajr-angle" placeholder="e.g., 18">
+            <br><br>
+            <label for="isha-angle">Isha Angle:</label>
+            <input type="number" id="isha-angle" placeholder="e.g., 17">
+        </div>
+        <div class="result">
+            <h2>Automatic Calculation</h2>
+            <p id="fajr-time"></p>
+            <p id="maghrib-time"></p>
+            <p id="last-third"></p>
+        </div>
+        <br><br>
+        <h2>Manual Adjustments</h2>
+        <label for="manual-fajr">Fajr Time (HH:MM):</label>
+        <input type="time" id="manual-fajr">
+        <br><br>
+        <label for="manual-maghrib">Maghrib Time (HH:MM):</label>
+        <input type="time" id="manual-maghrib">
+        <button onclick="manualCalculate()">Calculate Manually</button>
+        <div class="result">
+            <h2>Manual Calculation</h2>
+            <p id="manual-fajr-time"></p>
+            <p id="manual-maghrib-time"></p>
+            <p id="manual-last-third"></p>
+        </div>
+        <br><br>
+        <button onclick="navigateTo('iconSelection')">Retour à l'accueil</button>
+    </div>
+    </section>
+
+    <script src="script.js"></script>
+    <script src="script2.js"></script>
+    <script src="script3.js"></script> 

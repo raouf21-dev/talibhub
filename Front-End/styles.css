@@ -1,0 +1,842 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f5f5f5;
+  color: #333;
+  padding-top: 150px; /* Ajustez en fonction de la hauteur de votre header */
+  margin: 0;
+  overflow: hidden; /* Avoid scrolling */
+  transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+}
+
+.page {
+  display: none;
+  padding: 20px;
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+  height: calc(100vh - 40px); /* Full height minus header height */
+  overflow-y: auto; /* Allow scrolling within the page */
+}
+
+.page.active {
+  display: block;
+  opacity: 1;
+}
+
+header {
+  background: #a8e6cf;
+  padding: 20px;
+  text-align: center;
+  transition: background 0.3s ease-in-out;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+header h1 {
+  margin: 0;
+  color: #fff;
+}
+
+header button {
+  background-color: #56c596;
+  color: #fff;
+  padding: 10px 20px;
+  text-decoration: none;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease-in-out;
+}
+
+header button:hover {
+  background-color: #379a75;
+}
+
+.cta-button {
+  background-color: #56c596;
+  color: #fff;
+  padding: 10px 20px;
+  text-decoration: none;
+  border-radius: 5px;
+  display: inline-block;
+  margin-top: 20px;
+  transition: background-color 0.3s ease-in-out;
+}
+
+.cta-button:hover {
+  background-color: #379a75;
+}
+
+.icon-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  padding: 20px;
+}
+
+.icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 150px;
+  height: 150px;
+  margin: 10px;
+  padding: 10px;
+  border: 2px solid #ddd;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background-color: #f9f9f9;
+  transition: transform 0.3s, box-shadow 0.3s;
+  cursor: pointer;
+}
+
+.icon img {
+  max-width: 100px;
+  max-height: 100px;
+  margin-bottom: 10px;
+}
+
+.icon p {
+  font-size: 16px;
+  color: #333;
+}
+
+.icon:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+section {
+  margin: 20px 0;
+  text-align: center;
+}
+
+section h2 {
+  color: #56c596;
+  transition: color 0.3s ease-in-out;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+input[type="text"], input[type="email"], input[type="password"], #new-task {
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  width: 100%;
+  max-width: 300px;
+}
+
+button {
+  background-color: #56c596;
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease-in-out;
+}
+
+button:hover {
+  background-color: #379a75;
+}
+
+nav {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+nav a {
+  margin: 0 10px;
+  color: #56c596;
+  text-decoration: none;
+  transition: color 0.3s ease-in-out;
+}
+
+nav a:hover {
+  color: #379a75;
+}
+
+#timer, #stopwatch {
+  text-align: center;
+}
+
+#timer-label, #time-left, #stopwatch-time {
+  font-size: 2em;
+}
+
+.manual-time-entry {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.manual-time-entry label {
+  margin: 0 10px;
+}
+
+.manual-time-entry input {
+  width: 50px;
+  text-align: center;
+  margin-right: 10px;
+}
+
+
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+li {
+  padding: 10px;
+  margin: 5px 0;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  display: flex;
+  justify-content: space-between;
+}
+
+@media (max-width: 768px) {
+  .page {
+    padding: 10px;
+  }
+
+  header {
+    padding: 10px;
+  }
+
+  .cta-button, button {
+    padding: 5px 10px;
+  }
+
+  form, ul {
+    width: 100%;
+  }
+}
+
+.timers-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.timer {
+  flex: 1 1 calc(50% - 5px);
+  background: #fff;
+  padding: 20px;
+  margin: 5px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  text-align: center;
+  max-width: 45vw;
+}
+
+.counter-container {
+  background: #fff;
+  padding: 20px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  text-align: center;
+  margin-top: 20px;
+}
+
+#counter-buttons {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+#counter-buttons button {
+  margin: 0 5px;
+}
+
+/* Notifications */
+#message-list {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  background: #fff;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.message {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+.message-content {
+  flex: 1;
+}
+
+.message-time {
+  color: #aaa;
+  margin-left: 10px;
+}
+
+/* Salat Surah Selector */
+#sourateList {
+  max-height: 300px;
+  overflow-y: auto;
+  margin: 10px 0;
+  padding: 0 10px;
+  text-align: left;
+}
+
+#sourateList div {
+  margin: 5px 0;
+}
+
+#knownSouratesCount {
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+h3 {
+  margin: 10px 0;
+}
+
+#selectedSourate {
+  margin-top: 20px;
+  font-size: 1.2em;
+  font-weight: bold;
+}
+
+.icon-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  padding: 20px;
+}
+
+.icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background-color: #f5f5f5;
+  border: 2px solid #ddd;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s, box-shadow 0.3s;
+  cursor: pointer;
+}
+
+.icon img {
+  max-width: 100px;
+  max-height: 100px;
+  margin-bottom: 10px;
+}
+
+.icon p {
+  font-size: 16px;
+  color: #333;
+}
+
+.icon:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+
+/*.............DouaTime...................*/
+
+#douaTime {
+  padding: 20px;
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  text-align: center;
+}
+
+#douaTime .result {
+  margin-top: 20px;
+  font-size: 1.2em;
+}
+
+/*.............dropdown menu...................*/
+.hidden-header #nav {
+  display: none;
+}
+
+header#nav {
+    position: fixed;
+    top: 0;
+    z-index: 100;
+    width: 100vw;
+    background-color: #56c596;
+    height: 75px;
+}
+
+.contained {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+	padding-top:13px;
+}
+
+.container {
+    text-align: left;
+    display: inline-block;
+    height: 45px;
+    position: relative;
+}
+
+header#nav #menuWrapper {
+    height: auto;
+    display: block;
+}
+
+header#nav ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    display: inline-block;
+}
+
+header#nav ul > li {
+    position: relative;
+    display: inline-block;
+    margin: 0;
+    padding: 0 15px;
+		background-color:#56c596;
+}
+
+header#nav ul > li > a {
+    display: block;
+    color: #fff;
+    font-weight: lighter;
+    font-size: 14px;
+    text-transform: uppercase;
+    text-decoration: none;
+    border-bottom: 2px solid transparent;
+    -webkit-transition: all .3s ease;
+    -moz-transition: all .3s ease;
+    -ms-transition: all .3s ease;
+    -o-transition: all .3s ease;
+    transition: all .3s ease;
+		line-height:45px;
+}
+
+header#nav .container ul > li > ul {
+    position: absolute;
+    left: 10px;
+    opacity: 0;
+    min-width: 200px;
+    margin: 0;
+    pointer-events: none;
+	/* Adding a transition timing on here will cause mouse out bugs after hover! */
+}
+
+header#nav .container ul > li > ul > li {
+    padding: 0;
+		
+    float: left;
+    display: block;
+		width:100%;
+}
+
+header#nav .container ul > li > ul > li > a {
+    border-bottom: 0;
+    display: block;
+    padding: 0 5px;
+    color: #fff;
+    width: 90%;
+    padding: 0 5%;
+	text-transform:none;
+}
+
+/* General Animation settings */
+header#nav .container ul > li > ul {
+	opacity:0;
+	display:block;
+	perspective:1000px;
+	min-width:inherit;
+	width:200px;
+}
+
+header#nav .container ul > li > ul.dropin li {
+	opacity:1;
+	display:block;
+	width:100%;
+	background:#333;
+	padding:3px;
+	display:block;
+	float: left;
+}
+
+li:hover ul.hov {
+	animation-duration: 0.3s;
+	animation-delay : 0.3s;
+}
+
+li:hover ul.hov li {
+		animation-direction: normal;
+		animation-iteration-count:1;
+		animation-timing-function : ease-in-out;
+		background:#333;
+		animation-fill-mode: forwards;
+}
+
+/* Swing In Left */
+header#nav .container ul > li > ul.swingLft { 
+	transform: translate(50px,0) rotateY(90deg); 
+}
+li:hover ul.swingLft.hov {
+	animation-name: swingLft;
+	animation-fill-mode: forwards;
+}
+@keyframes swingLft {
+    0%   {opacity:0; transform: translate(50px,0) rotateY(90deg);}
+    100% {opacity:1; transform: translate(0,0) rotateY(0);}
+}
+@-webkit-keyframes swingLft {
+    0%   {opacity:0; transform: translate(50px,0) rotateY(-0deg); }
+    100% {opacity:1; transform: translate(0,0) rotateY(0);}
+}
+
+/* sort all the overing, going on... */
+header#nav ul li:hover a { 
+	color: #999;
+}
+header#nav .container ul > li:hover ul {
+		opacity:1;
+		top:24px;
+		pointer-events: auto;
+	}
+header#nav .container ul > li > ul .ico:hover, 
+header#nav .container ul > li > ul a:hover { background-color: rgba(0,0,0,0.3); }
+header#nav .container ul > li:hover ul { top :45px; }
+
+/* A non image based mobile menu and close button */
+#hamburger {
+    display: none;
+    width: 25px;
+    height: 24px;
+    position: fixed;
+    left: 15px;
+    top: 15px;
+    cursor: pointer;
+}
+
+#hamburger > span {
+    background: #fff;
+    display: block;
+    width: 100%;
+    height: 3px;
+    position: relative;
+    margin-top: 3px;
+    color: #fff;
+			-webkit-transition:all .3s ease;
+		-moz-transition:all .3s ease;
+		-ms-transition:all .3s ease;
+		-o-transition:all .3s ease;
+		transition:all .3s ease;
+}
+
+#close {
+    position: fixed;
+    top: 10px;
+    left: 13px;
+    width: 30px;
+    height: 30px;
+    z-index: 1200;
+    display: none;
+    cursor: pointer;
+}
+
+#close > span, #close > span::after {
+    content: "";
+    display: block;
+    width: 4px;
+    height: 100%;
+    background: #eee;
+    position: absolute;
+    right: 50%;
+    margin-right: -3px;
+    -webkit-transform: rotate(45deg);
+    -moz-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    -o-transform: rotate(45deg);
+    transform: rotate(45deg);
+}
+#close > span::after {
+	-webkit-transform: rotate(-90deg);
+	-moz-transform: rotate(-90deg);
+	-ms-transform: rotate(-90deg);
+	-o-transform: rotate(-90deg);
+	transform: rotate(-90deg);
+}
+#close:hover > span,
+#close:hover > span::after { background: #ccc; }
+#hamburger:hover > span,
+#hamburger:hover > span::after,
+#hamburger:hover > span::before {
+	background: rgba(250,250,250,0.5);
+}
+
+/* Sort the responsive menu */
+@media only screen and (max-width: 1000px) {
+	
+#hamburger {
+	display: block;
+	-webkit-transition: all .3s ease;
+	-moz-transition: all .3s ease;
+	-ms-transition: all .3s ease;
+	-o-transition: all .3s ease;
+	transition: all .3s ease;
+	-webkit-transform: translateY(0);
+	-moz-transform: translateY(0);
+	-ms-transform: translateY(0);
+	-o-transform: translateY(0);
+	transform: translateY(0);
+}
+
+#close {
+	-webkit-transition: all .3s ease;
+	-moz-transition: all .3s ease;
+	-ms-transition: all .3s ease;
+	-o-transition: all .3s ease;
+	transition: all .3s ease;
+	-webkit-transform: translateX(50px);
+	-moz-transform: translateX(50px);
+	-ms-transform: translateX(50px);
+	-o-transform: translateX(50px);
+	transform: translateX(50px);
+	display: block;
+}
+	
+header#nav {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	z-index: 1005;
+	height: 50px;
+	box-shadow: 0 0 15px 0 rgba(0, 0, 0, 0.1);
+	background-color: #56c596;
+}
+
+header#nav ul {
+	display: none;
+	opacity: 0;
+}
+
+header#nav ul > li {
+	float: none;
+	border-bottom: 1px solid #56c596;
+	display: block;
+	padding: 0;
+}
+
+header#nav ul > li:last-child {
+	border-bottom: none !important;
+}
+
+header#nav ul > li:last-child {
+	border-bottom: none;
+}
+
+header#nav ul > li > a {
+	display: block;
+	text-align: left;
+	padding: 10px 0;
+	color: #ccc;
+	width: 100%;
+	margin: 0 auto;
+	border-bottom: none;
+	font-size: 1.2em;
+}
+
+header#nav .container ul > li > ul {
+	top: 0;
+	padding: 2px 0;
+}
+
+header#nav.showNav {
+	background-color: white;
+	height: calc(100%);
+}
+
+header#nav.showNav #menuWrapper {
+	height: 300px;
+	overflow-y: auto;
+}
+
+header .contained {
+	padding-top: 5px;
+}
+
+header#nav .contained {
+	height: 50px;
+}
+
+header#nav.showNav .contained {
+	height: auto;
+}
+
+header#nav.showNav .container {
+	height: auto;
+	float: left;
+	display: block;
+	width: 100%;
+}
+
+header#nav.showNav ul {
+	opacity: 1;
+	display: block;
+	position: static;
+	padding: 0 5%;
+	width: 100%;
+	font-size: 0.8em;
+}
+
+header#nav.showNav #hamburger {
+	-webkit-transform: translateX(50px);
+	-moz-transform: translateX(50px);
+	-ms-transform: translateX(50px);
+	-o-transform: translateX(50px);
+	transform: translateX(50px);
+}
+
+header#nav.showNav #close {
+	-webkit-transform: translateX(0);
+	-moz-transform: translateX(0);
+	-ms-transform: translateX(0);
+	-o-transform: translateX(0);
+	transform: translateX(0);
+}
+
+header#nav ul:first-child {	
+	width:96%;
+	padding: 0 2%;
+	float: left;
+	display:block;
+}
+	
+header#nav ul li {
+	display: block;
+	clear: both;
+	overflow: hidden;
+	width:100%;
+}
+
+header#nav .container ul > li > ul {
+	position: static;
+	opacity: 1;
+	pointer-events: auto;
+	display: block;
+	width:100%;
+	float:left;
+	margin:0;
+	padding:0;
+}
+	
+	/* reset all the sub nav animations and styles! */
+	header#nav .container ul > li > ul > li, header#nav .container ul > li > ul {
+		border: none !important;
+		opacity:1 !important;
+		display:block !important;
+		transform: translate(0,0) rotate(0) !important;
+    animation: initial !important;
+    animation-play-state: initial !important;
+	}
+	
+header#nav .container ul > li > ul > li:hover,
+header#nav .container ul > li:hover,
+header#nav .container ul > li:hover a,
+header#nav .container ul > li > ul .ico:hover {
+	background-color: transparent;
+	border-bottom: none;
+	color: #fff;
+}
+
+header#nav ul > li > a:hover {
+	background-color: transparent;
+	border-bottom: none;
+}
+	
+}
+
+/* Styles spécifiques pour la section #signup */
+.signup-section .form-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    margin: 20px 0;
+}
+
+.signup-section form {
+    flex: 1;
+    min-width: 45%;
+    background-color: #fff;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.signup-section form h2 {
+    text-align: center;
+}
+
+.signup-section input[type="text"], 
+.signup-section input[type="email"], 
+.signup-section input[type="password"], 
+.signup-section #new-task {
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 100%;
+}
+
+.signup-section button {
+    background-color: #56c596;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease-in-out;
+    margin-top: 10px;
+}
+
+.signup-section button:hover {
+    background-color: #379a75;
+}
+
+.signup-section label {
+    margin-top: 10px;
+    display: block;
+}
+
+/* Responsiveness pour la section #signup */
+@media (max-width: 768px) {
+    .signup-section .form-container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .signup-section form {
+        min-width: 100%;
+        max-width: 100%;
+    }
+}
+
+/*Greeting*/
+#user-pseudo {
+  font-weight: bold;
+  color: white;
+}
