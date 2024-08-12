@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('passwordChangeForm')?.addEventListener('submit', handleChangePassword);
     document.getElementById('showNewPasswordToggle')?.addEventListener('click', toggleNewPasswordVisibility);
 
-    document.getElementById('task-select').addEventListener('change', updateTaskTitle);
+    document.getElementById('task-select').addEventListener('change', updateCounterTaskTitle);
     
 });
 
@@ -204,6 +204,18 @@ async function handleLogin(event) {
 
 //--------------------Tasks--------------------
 
+function getSelectedTaskDetails() {
+    const taskSelect = document.getElementById('task-select');
+    const selectedTaskId = taskSelect.value;
+    const selectedTaskName = taskSelect.options[taskSelect.selectedIndex]?.text || '';
+    
+    return {
+        id: selectedTaskId,
+        name: selectedTaskName
+    };
+}
+
+
 async function loadTasks() {
     try {
         const response = await fetch('http://localhost:3000/tasks/getAllTasks', {
@@ -366,7 +378,23 @@ async function loadTimerState() {
 }
 
 async function saveTimerState() {
-    const state = { isRunning, isWorkSession, workDuration, breakDuration, currentTime };
+    const selectedTask = getSelectedTaskDetails();
+
+    if (!selectedTask.id) {
+        alert('Veuillez sélectionner une tâche avant de sauvegarder l\'état du timer.');
+        return;
+    }
+
+    const state = {
+        isRunning,
+        isWorkSession,
+        workDuration,
+        breakDuration,
+        currentTime,
+        taskId: selectedTask.id,
+        taskName: selectedTask.name
+    };
+
     try {
         await fetch('http://localhost:3000/timer/saveState', {
             method: 'POST',
@@ -466,7 +494,9 @@ document.getElementById('save_timer').addEventListener('click', function() {
 });
 
 async function saveDataToServer(state, sessions) {
-    if (!state.taskId) {
+    const selectedTask = getSelectedTaskDetails();
+
+    if (!selectedTask.id) {
         alert('Veuillez sélectionner une tâche avant d\'enregistrer.');
         return;
     }
@@ -478,6 +508,8 @@ async function saveDataToServer(state, sessions) {
             navigateTo('login');
             return;
         }
+
+        state.taskId = selectedTask.id;
 
         await fetch('http://localhost:3000/timer/saveState', {
             method: 'POST',
@@ -512,10 +544,26 @@ function updateTimerDisplay() {
 }
 
 function toggleTimer() {
-    if (stopwatchInterval) {
+    const selectedTask = getSelectedTaskDetails();
+
+    if (!selectedTask.id) {
+        alert("Veuillez sélectionner une tâche avant de démarrer le Pomodoro Timer.");
+        return;
+    }
+
+    console.log("stopwatchInterval:", stopwatchInterval);
+    console.log("stopwatchTime:", stopwatchTime);
+
+    if (stopwatchInterval !== null) {  // Vérifier si le chronomètre est toujours actif
         alert("Veuillez arrêter le Chronomètre avant de démarrer le Pomodoro Timer.");
         return;
     }
+
+    if (stopwatchTime > 0) {
+        alert("Le chronomètre doit être à 0 avant de démarrer le Pomodoro Timer.");
+        return;
+    }
+
     if (isRunning) {
         clearInterval(timer);
         document.getElementById('start_stop').textContent = 'Démarrer';
@@ -524,9 +572,8 @@ function toggleTimer() {
         document.getElementById('start_stop').textContent = 'Pause';
     }
     isRunning = !isRunning;
-    saveTimerState();
+    saveTimerState();  // Sauvegarde avec les détails de la tâche
 }
-
 function resetTimer() {
     clearInterval(timer);
     isRunning = false;
@@ -567,7 +614,8 @@ function stopStopwatch() {
 }
 
 function resetStopwatch() {
-    clearInterval(stopwatchInterval);
+    clearInterval(stopwatchInterval); // Arrêter l'intervalle
+    stopwatchInterval = null; // Réinitialiser l'intervalle
     stopwatchTime = 0;
     document.getElementById('stopwatch-time').textContent = formatTime(stopwatchTime);
     document.getElementById('stopwatch-start').disabled = false;
@@ -594,10 +642,11 @@ function addCompletedTask(taskId, duration, type) {
 }
 
 function saveTimerData() {
-    const selectedTask = document.getElementById('task-select').value;
-    if (selectedTask && totalWorkTime > 0) {
-        addCompletedTask(selectedTask, totalWorkTime, 'duration');
-        alert('Données du Pomodoro Timer enregistrées.');
+    const selectedTask = getSelectedTaskDetails();
+
+    if (selectedTask.id && totalWorkTime > 0) {
+        addCompletedTask(selectedTask.id, totalWorkTime, 'duration');
+        alert('Données du Pomodoro Timer enregistrées pour la tâche : ' + selectedTask.name);
         totalWorkTime = 0;
         updateCharts();
     } else {
@@ -619,13 +668,11 @@ function saveStopwatchData() {
 const Counter = { taskId: '', value: 0 };
 
 function updateCounterTaskTitle() {
-    const taskSelect = document.getElementById('task-select');
+    const selectedTask = getSelectedTaskDetails();
     const selectedTaskTitle = document.getElementById('counter-task-title');
-    const selectedTask = taskSelect.options[taskSelect.selectedIndex].text;
-    selectedTaskTitle.textContent = selectedTask !== "" ? selectedTask : "Sélectionnez une tâche";
-    Counter.taskId = taskSelect.value;
+    selectedTaskTitle.textContent = selectedTask.name !== "" ? selectedTask.name : "Sélectionnez une tâche";
+    Counter.taskId = selectedTask.id;
 }
-
 
 
 function incrementCounter(amount) {
@@ -640,7 +687,9 @@ function decrementCounter(amount) {
 }
 
 async function saveCounter() {
-    if (!Counter.taskId) {
+    const selectedTask = getSelectedTaskDetails();
+
+    if (!selectedTask.id) {
         alert('Veuillez sélectionner une tâche avant d\'enregistrer.');
         return;
     }
@@ -652,7 +701,7 @@ async function saveCounter() {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
             },
-            body: JSON.stringify({ value: Counter.value, taskId: Counter.taskId }) // Assurez-vous d'inclure l'ID de la tâche dans les données envoyées
+            body: JSON.stringify({ value: Counter.value, taskId: selectedTask.id }) // Utilisation de l'ID de la tâche sélectionnée
         });
 
         if (!response.ok) {
@@ -665,8 +714,6 @@ async function saveCounter() {
         alert('Erreur lors de la sauvegarde des données du compteur.');
     }
 }
-
-
 
 async function loadCounter() {
     try {
@@ -711,6 +758,8 @@ function addManualTime() {
     document.getElementById('manual-hours').value = '';
     document.getElementById('manual-minutes').value = '';
 }
+
+//--------------------Profil--------------------
 
 async function loadProfile() {
     try {
@@ -847,6 +896,8 @@ async function handleChangePassword(event) {
         alert('Erreur lors du changement de mot de passe : ' + error.message);
     }
 }
+
+//--------------------Charts--------------------
 
 function initializeCharts() {
     const ctxDaily = document.getElementById('dailyChart').getContext('2d');
@@ -1063,6 +1114,10 @@ function getWeekNumber(d) {
     const weekNo = Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
     return weekNo;
 }
+
+
+
+//--------------------Notifications--------------------
 
 function saveNotifications(notifications) {
     localStorage.setItem('notifications', JSON.stringify(notifications));

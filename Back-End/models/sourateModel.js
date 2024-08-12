@@ -18,6 +18,7 @@ const saveKnownSourates = async (userId, sourates) => {
     }
 };
 
+
 module.exports = {
     getAllSourates,
     getKnownSourates,

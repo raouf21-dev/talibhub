@@ -38,7 +38,6 @@ async function loadAllSourates() {
     }
 }
 
-
 async function loadKnownSourates() {
     try {
         const response = await fetch('http://localhost:3000/sourates/known', {
@@ -48,6 +47,7 @@ async function loadKnownSourates() {
         });
         const data = await response.json();
         knownSourates = data;
+        localStorage.setItem('knownSourates', JSON.stringify(knownSourates));
     } catch (error) {
         console.error('Erreur lors du chargement des sourates connues :', error);
     }
@@ -55,11 +55,11 @@ async function loadKnownSourates() {
 
 async function saveKnownSourates() {
     const selectedSourates = Array.from(document.querySelectorAll('#sourateList input[type="checkbox"]'))
-        .filter(checkbox => checkbox.checked && checkbox.value != 1)
+        .filter(checkbox => checkbox.checked)
         .map(checkbox => parseInt(checkbox.value));
 
     try {
-        await fetch('http://localhost:3000/sourates/known', {
+        const response = await fetch('http://localhost:3000/sourates/known', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -67,6 +67,15 @@ async function saveKnownSourates() {
             },
             body: JSON.stringify({ sourates: selectedSourates })
         });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Erreur de sauvegarde des sourates : ${errorText}`);
+        }
+
+        console.log('Sourates connues sauvegardées avec succès');
+        knownSourates = selectedSourates;
+        localStorage.setItem('knownSourates', JSON.stringify(knownSourates));
         updateKnownSouratesCount();
     } catch (error) {
         console.error('Erreur lors de la sauvegarde des sourates connues :', error);
@@ -107,4 +116,41 @@ function updateKnownSouratesCount() {
     if (countElement) {
         countElement.textContent = `Sourates connues : ${knownSourates.length}`;
     }
+}
+
+function selectRandomSourates() {
+    const knownSourates = JSON.parse(localStorage.getItem('knownSourates')) || [];
+    if (knownSourates.length < 2) {
+        alert('Veuillez sélectionner au moins deux sourates que vous connaissez.');
+        return;
+    }
+
+    // Mélanger les sourates connues
+    const shuffledSourates = knownSourates.sort(() => 0.5 - Math.random());
+    let firstRakaSourate, secondRakaSourate;
+
+    // Sélectionner la première sourate
+    firstRakaSourate = shuffledSourates[0];
+
+    // Sélectionner la deuxième sourate différente de la première
+    for (let i = 1; i < shuffledSourates.length; i++) {
+        if (shuffledSourates[i] > firstRakaSourate) {
+            secondRakaSourate = shuffledSourates[i];
+            break;
+        }
+    }
+
+    if (!secondRakaSourate) {
+        alert('Pas assez de sourates disponibles pour la sélection.');
+        return;
+    }
+
+    // Afficher les sourates sélectionnées
+    document.getElementById('firstRaka').textContent = getSourateName(firstRakaSourate);
+    document.getElementById('secondRaka').textContent = getSourateName(secondRakaSourate);
+}
+
+function getSourateName(number) {
+    const sourate = sourates.find(s => s.number === number);
+    return sourate ? `${sourate.number}. ${sourate.name}` : '';
 }
