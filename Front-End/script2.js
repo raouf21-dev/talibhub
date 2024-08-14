@@ -1,7 +1,3 @@
-document.addEventListener('DOMContentLoaded', function() {
-    initializeApp();
-});
-
 async function initializeApp() {
     await loadAllSourates();
     await loadKnownSourates();

@@ -4,10 +4,20 @@ const jwt = require('jsonwebtoken');
 const transporter = require('../config/nodemailer'); // Assurez-vous d'avoir configuré Nodemailer
 
 exports.register = async (req, res) => {
-    const { username, password, email } = req.body;
+    console.log("Données reçues:", req.body);
 
-    if (!username || !password || !email) {
-        return res.status(400).json({ message: 'Please provide username, email, and password' });
+    const { username, password, email, firstName, lastName, age, gender } = req.body;
+
+    console.log("username:", username);
+    console.log("password:", password);
+    console.log("email:", email);
+    console.log("firstName:", firstName);
+    console.log("lastName:", lastName);
+    console.log("age:", age);
+    console.log("gender:", gender);
+
+    if (!username || !password || !email || !firstName || !lastName || !age || !gender) {
+        return res.status(400).json({ message: 'Please provide all required fields' });
     }
 
     try {
@@ -20,24 +30,21 @@ exports.register = async (req, res) => {
         if (userByEmail) {
             return res.status(400).json({ message: 'Email already exists' });
         }
+        
+        // Vérifiez ici que les données sont correctement passées
+        console.log({ username, password, email, firstName, lastName, age, gender });
 
-        const user = await userModel.createUser(username, password, email);
+        const user = await userModel.createUser(username, password, email, firstName, lastName, age, gender);
         const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
 
-        // Envoyer un email de vérification (exemple)
-        const url = `http://localhost:${process.env.PORT}/auth/verify/${token}`;
-        transporter.sendMail({
-            to: email,
-            subject: 'Verify your email',
-            text: `Please verify your email by clicking the link: ${url}`,
-        });
-
-        res.status(201).json({ token, user });
+        res.status(201).json({ token });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server error' });
+        console.error('Registration error:', error);
+        res.status(500).json({ message: 'An error occurred during registration' });
     }
 };
+
+
 
 exports.login = async (req, res) => {
     const { email, password } = req.body;

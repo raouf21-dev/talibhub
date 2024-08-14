@@ -1,4 +1,3 @@
-// routes/session.js
 const express = require('express');
 const router = express.Router();
 const authenticateToken = require('../middleware/authenticateToken');
@@ -11,3 +10,4 @@ router.post('/save', authenticateToken, sessionController.saveSession);
 router.get('/load', authenticateToken, sessionController.loadSessions);
 
 module.exports = router;
+

@@ -7,7 +7,6 @@ CREATE TABLE users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     first_name VARCHAR(50),
     last_name VARCHAR(50),
-    pseudo VARCHAR(50) UNIQUE,
     age INT,
     gender VARCHAR(10)
 );
@@ -26,10 +25,14 @@ CREATE TABLE tasks (
 
 CREATE TABLE sessions (
     id SERIAL PRIMARY KEY,
-    type VARCHAR(255) NOT NULL,
-    duration INT NOT NULL,
-    user_id INT REFERENCES users(id) ON DELETE CASCADE
+    task_id INT REFERENCES tasks(id),
+    previous_session_id INT REFERENCES sessions(id),
+    user_id INT REFERENCES users(id),
+    total_work_time INT,
+    stopwatch_time INT,
+    counter_value INT
 );
+
 
 CREATE TABLE counters (
     id SERIAL PRIMARY KEY,

@@ -20,6 +20,7 @@ app.use(cors({
 
 // Configurer les middlewares
 app.use(bodyParser.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Importer les routes
 const authRoutes = require('./routes/auth');

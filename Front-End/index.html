@@ -72,7 +72,7 @@
                             </ul>
                         </li>                          
                     </ul>
-                    <div id="user-pseudo"></div>  
+                    <div id="user-username"></div>  
                 </div>
             </div>
         </div>
@@ -90,7 +90,7 @@
                     <h2>S'inscrire</h2>
                     <input type="text" placeholder="Nom" id="lastName" required />
                     <input type="text" placeholder="Prénom" id="firstName" required />
-                    <input type="text" placeholder="Pseudo" id="pseudo" required />
+                    <input type="text" placeholder="Pseudo" id="username" required />
                     <input type="number" placeholder="Âge" id="age" required />
                     <label for="gender">Sexe:</label>
                     <select id="gender" required>
@@ -161,6 +161,14 @@
                 <option value="">Sélectionnez une tâche</option>
                 <!-- Les options seront ajoutées ici dynamiquement -->
             </select>
+            
+            <!-- Ajout de la section de gestion des sessions -->
+            <div id="session-info">
+                <p>Session précédente : <span id="previous-session-id">0</span></p>
+                <p>Session actuelle : <span id="current-session-id">0</span></p>
+                <button onclick="startNewSession()">Nouvelle Session</button>
+            </div>
+            
             <div class="timers-container">
                 <div class="timer">
                     <div id="focus-timer">
@@ -170,8 +178,7 @@
                         <button id="start_stop" onclick="toggleTimer()">Démarrer</button>
                         <button id="stop" onclick="stopTimer()">Arrêter</button>
                         <button id="reset" onclick="resetTimer()">Réinitialiser</button>
-                        <button id="save_timer" onclick="saveTimerData()">Enregistrer</button>
-                        <button onclick="updateTimerSettings()">Modifier Durée</button>
+                        <!-- Retrait des boutons individuels d'enregistrement -->
                     </div>                   
                 </div>
                 <div class="timer">
@@ -180,7 +187,7 @@
                     <button id="stopwatch-start" onclick="startStopwatch()">Démarrer</button>
                     <button id="stopwatch-stop" onclick="stopStopwatch()">Arrêter</button>
                     <button id="stopwatch-reset" onclick="resetStopwatch()">Réinitialiser</button>
-                    <button id="save_stopwatch" onclick="saveStopwatchData()">Enregistrer</button>
+                    <!-- Retrait des boutons individuels d'enregistrement -->
                 </div>
             </div>
             <div id="counter" class="counter-container">
@@ -195,8 +202,7 @@
                     <button onclick="incrementCounter(5)">+5</button>
                     <button onclick="incrementCounter(10)">+10</button>
                 </div>
-                <button onclick="saveCounter()">Enregistrer</button>
-                <button onclick="resetCounter()">Réinitialiser</button>
+                <!-- Retrait des boutons individuels d'enregistrement -->
             </div>
             <div class="manual-time-entry">
                 <h3>Ajouter manuellement le temps d'étude</h3>
@@ -206,8 +212,10 @@
                     <label for="manual-minutes">Minutes:</label>
                     <input type="number" id="manual-minutes" min="0" max="59" placeholder="0" />
                 </div>
-                <button onclick="addManualTime()">Enregistrer le temps</button>
+                <!-- Retrait des boutons individuels d'enregistrement -->
             </div>
+            <!-- Nouveau bouton global d'enregistrement -->
+            <button onclick="saveSessionData()">Enregistrer la Session</button>
             <button onclick="navigateTo('talibtimer')">Retour à l'accueil</button>
         </section>
     </div>
@@ -256,12 +264,12 @@
         <button onclick="navigateTo('talibtimer')">Retour à l'accueil</button>
     </div>
 
-    <div id="profile" class="page">
+    <div id="profile" class="page active">
         <section>
             <h2>Informations Personnelles</h2>
             <form id="profileForm">
-                <label for="pseudo">Pseudo:</label>
-                <input type="text" id="pseudo" name="pseudo" placeholder="Pseudo" required />
+                <label for="username">Pseudo:</label>
+                <input type="text" id="username" name="pseudo" placeholder="username" required />
                 <label for="last-name">Nom:</label>
                 <input type="text" id="last-name" name="last-name" placeholder="Nom" required />
                 <label for="first-name">Prénom:</label>

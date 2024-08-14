@@ -1,9 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
-    loadTasks();
-    loadTimerStateFromCache(); // Charger l'état du timer à partir du cache local
     initializeCalendar();
     updateCharts();
-    loadCounter();
 
     const activePageId = document.querySelector('.page.active').id;
     const navHeader = document.getElementById('nav');
@@ -12,20 +9,8 @@ document.addEventListener('DOMContentLoaded', function() {
     } else {
         navHeader.style.display = 'block';
     }
-
     document.getElementById('signupForm')?.addEventListener('submit', handleSignup);
     document.getElementById('loginForm')?.addEventListener('submit', handleLogin);
-
-    if (document.getElementById('statistics')?.classList.contains('active')) {
-        loadProfile();
-        initializeCharts();
-    }
-    if (document.getElementById('profile')?.classList.contains('active')) {
-        loadProfile();
-    }
-    if (document.getElementById('notifications')?.classList.contains('active')) {
-        loadNotifications();
-    }
 
     document.getElementById('showPasswordToggle')?.addEventListener('click', togglePasswordVisibility);
     document.getElementById('passwordChangeForm')?.addEventListener('submit', handleChangePassword);
@@ -47,7 +32,34 @@ function navigateTo(pageId) {
     } else {
         navHeader.style.display = 'block';
     }
+
+    switch(pageId) {
+        case 'profile':
+            loadProfile();
+            break;
+        case 'statistics':
+            initializeCharts();
+            updateCharts();
+            break;
+        case 'todoLists':
+            loadTasks();
+            break;
+        case 'apprentissage':
+            loadTasks();
+            loadTimerStateFromCache();
+            loadCounter();
+            break;
+        case 'notifications':
+            loadNotifications();
+            break;
+        case 'salatSurahSelector':
+            initializeApp();
+            break;
+        default:
+            break;
+    }
 }
+
 
 // DropDown menu
 $("#hamburger").click(function(event) {
@@ -99,7 +111,7 @@ async function handleSignup(event) {
 
     const lastName = document.getElementById('lastName').value;
     const firstName = document.getElementById('firstName').value;
-    const username = document.getElementById('pseudo').value;
+    const username = document.getElementById('username').value;
     const age = document.getElementById('age').value;
     const gender = document.getElementById('gender').value;
     const email = document.getElementById('email').value;
@@ -110,6 +122,16 @@ async function handleSignup(event) {
         alert('Tous les champs doivent être remplis.');
         return;
     }
+
+    console.log({
+        lastName,
+        firstName,
+        username,
+        age,
+        gender,
+        email,
+        password
+    });
 
     const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
     if (!passwordRegex.test(password)) {
@@ -192,7 +214,7 @@ async function handleLogin(event) {
 
         const data = await response.json();
         localStorage.setItem('token', data.token);
-        localStorage.setItem('pseudo', data.user.username);
+        localStorage.setItem('username', data.user.username);
 
         alert('Connexion réussie');
         navigateTo('iconSelection');
@@ -206,13 +228,12 @@ async function handleLogin(event) {
 
 function getSelectedTaskDetails() {
     const taskSelect = document.getElementById('task-select');
-    const selectedTaskId = taskSelect.value;
-    const selectedTaskName = taskSelect.options[taskSelect.selectedIndex]?.text || '';
-    
-    return {
-        id: selectedTaskId,
-        name: selectedTaskName
+    const selectedTask = {
+        id: taskSelect.value,
+        name: taskSelect.options[taskSelect.selectedIndex].text
     };
+    console.log('getSelectedTaskDetails:', selectedTask); // Ajoutez cette ligne
+    return selectedTask;
 }
 
 
@@ -324,17 +345,20 @@ async function renameTask(button, taskId) {
     }
 }
 
+//-------------------Timer--------------------
 let isRunning = false;
 let isWorkSession = true;
 let workDuration = 25 * 60;
 let breakDuration = 5 * 60;
 let currentTime = workDuration;
 let timer;
-let stopwatchInterval;
+let stopwatchInterval = null;
 let stopwatchTime = 0;
 let totalWorkTime = 0;
 const sessions = [];
 let selectedTaskId = '';
+let currentSessionId = 0;
+let previousSessionId = 0;
 
 function updateTaskTitle() {
     const taskSelect = document.getElementById('task-select');
@@ -342,6 +366,16 @@ function updateTaskTitle() {
     const selectedTask = taskSelect.options[taskSelect.selectedIndex].text;
     selectedTaskTitle.textContent = selectedTask !== "" ? selectedTask : "Sélectionnez une tâche";
     selectedTaskId = taskSelect.value;
+}
+
+function startNewSession() {
+    previousSessionId = currentSessionId;
+    currentSessionId = 0; // Le back-end générera un ID unique
+    document.getElementById('previous-session-id').textContent = previousSessionId;
+    document.getElementById('current-session-id').textContent = '[ID généré automatiquement]';
+    totalWorkTime = 0;
+    stopwatchTime = 0;
+    console.log('New session started.');
 }
 
 async function loadTimerState() {
@@ -377,53 +411,6 @@ async function loadTimerState() {
     }
 }
 
-async function saveTimerState() {
-    const selectedTask = getSelectedTaskDetails();
-
-    if (!selectedTask.id) {
-        alert('Veuillez sélectionner une tâche avant de sauvegarder l\'état du timer.');
-        return;
-    }
-
-    const state = {
-        isRunning,
-        isWorkSession,
-        workDuration,
-        breakDuration,
-        currentTime,
-        taskId: selectedTask.id,
-        taskName: selectedTask.name
-    };
-
-    try {
-        await fetch('http://localhost:3000/timer/saveState', {
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            },
-            body: JSON.stringify(state)
-        });
-    } catch (error) {
-        console.error('Error saving timer state:', error);
-    }
-}
-
-async function saveSession(session) {
-    try {
-        await fetch('http://localhost:3000/timer/session', {
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            },
-            body: JSON.stringify(session)
-        });
-    } catch (error) {
-        console.error('Error saving session:', error);
-    }
-}
-
 function updateTimer() {
     if (currentTime > 0) {
         currentTime--;
@@ -431,26 +418,61 @@ function updateTimer() {
     } else {
         clearInterval(timer);
         if (isWorkSession) {
-            totalWorkTime += workDuration;
-            const workSession = { type: 'work', duration: workDuration };
-            sessions.push(workSession);
-            saveSessionToCache(workSession);
+            totalWorkTime += workDuration; // Ajout au totalWorkTime
+            console.log('Total Work Time incremented:', totalWorkTime);
             isWorkSession = false;
             currentTime = breakDuration;
             document.getElementById('timer-label').textContent = 'Pause';
             updateBreakTimeDisplay();
             timer = setInterval(updateTimer, 1000);
         } else {
-            const breakSession = { type: 'break', duration: breakDuration };
-            sessions.push(breakSession);
-            saveSessionToCache(breakSession);
+            isWorkSession = true;
+            currentTime = workDuration;
             document.getElementById('timer-label').textContent = 'Travail';
             document.getElementById('start_stop').textContent = 'Démarrer';
-            currentTime = workDuration;
         }
     }
-    saveTimerStateToCache();
 }
+
+function saveSessionData() {
+    if (!selectedTaskId) {
+        alert("Veuillez sélectionner une tâche avant d'enregistrer.");
+        return;
+    }
+
+    const sessionData = {
+        sessionId: currentSessionId,
+        previousSessionId: previousSessionId || null,
+        taskId: selectedTaskId,
+        totalWorkTime: totalWorkTime,
+        stopwatchTime: stopwatchTime,
+        counterValue: Counter.value
+    };
+
+    fetch('http://localhost:3000/session/save', {
+        method: 'POST',
+        headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify(sessionData)
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Erreur lors de l\'enregistrement des données de la session.');
+        }
+        return response.json();
+    })
+    .then(data => {
+        alert('Données de la session sauvegardées avec succès.');
+        console.log('Session data saved:', sessionData);
+    })
+    .catch(error => {
+        console.error('Error saving session data:', error);
+        alert('Erreur lors de la sauvegarde des données.');
+    });
+}
+
 
 function saveTimerStateToCache() {
     const state = { isRunning, isWorkSession, workDuration, breakDuration, currentTime, timestamp: new Date().getTime() };
@@ -461,18 +483,26 @@ function saveSessionToCache(session) {
     let cachedSessions = JSON.parse(localStorage.getItem('sessions')) || [];
     cachedSessions.push({ ...session, timestamp: new Date().getTime() });
     localStorage.setItem('sessions', JSON.stringify(cachedSessions));
+    console.log('Session added to cache:', session); // Vérifiez cette ligne
+    console.log('All cached sessions:', cachedSessions); // Vérifiez cette ligne
 }
 
 function loadTimerStateFromCache() {
     const savedState = JSON.parse(localStorage.getItem('timerState'));
     if (savedState) {
         const now = new Date().getTime();
-        if (now - savedState.timestamp < 6 * 3600 * 1000) {
+        if (now - savedState.timestamp < 6 * 3600 * 1000) {  // 6 heures de validité
             isRunning = savedState.isRunning;
             isWorkSession = savedState.isWorkSession;
             workDuration = savedState.workDuration;
             breakDuration = savedState.breakDuration;
             currentTime = savedState.currentTime;
+
+            // Ne plus charger les identifiants de session ici
+            previousSessionId = savedState.previousSessionId || 0;
+            currentSessionId = 0; // Le back-end gérera cet identifiant lors de la prochaine session
+
+            stopwatchTime = 0; // Réinitialiser le chronomètre
             updateTimerDisplay();
             updateBreakTimeDisplay();
         } else {
@@ -480,18 +510,6 @@ function loadTimerStateFromCache() {
         }
     }
 }
-
-document.getElementById('save_timer').addEventListener('click', function() {
-    const state = JSON.parse(localStorage.getItem('timerState'));
-    const sessions = JSON.parse(localStorage.getItem('sessions')) || [];
-
-    if (state && sessions.length > 0 && selectedTaskId) {
-        state.taskId = selectedTaskId;
-        saveDataToServer(state, sessions);
-    } else {
-        alert("Aucune donnée à enregistrer ou aucune tâche sélectionnée.");
-    }
-});
 
 async function saveDataToServer(state, sessions) {
     const selectedTask = getSelectedTaskDetails();
@@ -551,16 +569,8 @@ function toggleTimer() {
         return;
     }
 
-    console.log("stopwatchInterval:", stopwatchInterval);
-    console.log("stopwatchTime:", stopwatchTime);
-
-    if (stopwatchInterval !== null) {  // Vérifier si le chronomètre est toujours actif
-        alert("Veuillez arrêter le Chronomètre avant de démarrer le Pomodoro Timer.");
-        return;
-    }
-
-    if (stopwatchTime > 0) {
-        alert("Le chronomètre doit être à 0 avant de démarrer le Pomodoro Timer.");
+    if (stopwatchTime > 0 && stopwatchInterval !== null) {
+        alert("Veuillez arrêter et réinitialiser le chronomètre avant de démarrer le Pomodoro Timer.");
         return;
     }
 
@@ -572,8 +582,9 @@ function toggleTimer() {
         document.getElementById('start_stop').textContent = 'Pause';
     }
     isRunning = !isRunning;
-    saveTimerState();  // Sauvegarde avec les détails de la tâche
 }
+
+
 function resetTimer() {
     clearInterval(timer);
     isRunning = false;
@@ -643,14 +654,17 @@ function addCompletedTask(taskId, duration, type) {
 
 function saveTimerData() {
     const selectedTask = getSelectedTaskDetails();
+    console.log('Selected Task:', selectedTask); // Ajoutez cette ligne
 
     if (selectedTask.id && totalWorkTime > 0) {
+        console.log('Total Work Time:', totalWorkTime); // Ajoutez cette ligne
         addCompletedTask(selectedTask.id, totalWorkTime, 'duration');
         alert('Données du Pomodoro Timer enregistrées pour la tâche : ' + selectedTask.name);
         totalWorkTime = 0;
         updateCharts();
     } else {
         alert('Veuillez sélectionner une tâche pour enregistrer les données.');
+        console.log('No task selected or totalWorkTime is 0'); // Ajoutez cette ligne
     }
 }
 
@@ -783,12 +797,22 @@ async function loadProfile() {
         }
 
         const user = await response.json();
-        document.getElementById('pseudo').value = escapeHTML(user.username || '');
+        console.log('Données du profil:', user);
+
+        // Vérifications
+        console.log('Username field:', document.getElementById('username')); 
+        console.log('Setting value for username:', user.username);
+        document.getElementById('username').value = escapeHTML(user.username || '');
+
         document.getElementById('last-name').value = escapeHTML(user.last_name || '');
         document.getElementById('first-name').value = escapeHTML(user.first_name || '');
         document.getElementById('age').value = escapeHTML(user.age || '');
         document.getElementById('gender').value = user.gender || '';
         document.getElementById('email').value = escapeHTML(user.email || '');
+
+        // Vérification finale dans le DOM
+        console.log('Username value in DOM:', document.getElementById('username').value);
+
     } catch (error) {
         console.error('Erreur:', error);
         alert('Erreur lors de la récupération des informations de profil');
@@ -798,7 +822,7 @@ async function loadProfile() {
 async function updateProfile(event) {
     event.preventDefault();
 
-    const pseudo = document.getElementById('pseudo').value;
+    const username = document.getElementById('username').value;
     const lastName = document.getElementById('last-name').value;
     const firstName = document.getElementById('first-name').value;
     const age = document.getElementById('age').value;
@@ -814,7 +838,7 @@ async function updateProfile(event) {
                 'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify({
-                pseudo, lastName, firstName, age, gender, email
+                username, lastName, firstName, age, gender, email
             })
         });
 

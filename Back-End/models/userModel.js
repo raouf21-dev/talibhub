@@ -11,17 +11,23 @@ const getUserByEmail = async (email) => {
     return result.rows[0];
 };
 
-const createUser = async (username, password, email) => {
+const createUser = async (username, password, email, firstName, lastName, age, gender) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     const result = await pool.query(
-        'INSERT INTO users (username, password, email) VALUES ($1, $2, $3) RETURNING *',
-        [username, hashedPassword, email]
+        `INSERT INTO users (username, password, email, first_name, last_name, age, gender)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)
+         RETURNING *`,
+        [username, hashedPassword, email, firstName, lastName, age, gender]
     );
     return result.rows[0];
 };
 
+
 const getUserById = async (id) => {
-    const result = await pool.query('SELECT username, last_name, first_name, age, gender, email FROM users WHERE id = $1', [id]);
+    const result = await pool.query(
+        'SELECT username, first_name, last_name, age, gender, email FROM users WHERE id = $1', 
+        [id]
+    );
     return result.rows[0];
 };
 
@@ -32,6 +38,7 @@ const updateUserPassword = async (id, newPassword) => {
 module.exports = {
     getUserByUsername,
     getUserByEmail,
+    getUserByUsername,
     createUser,
     getUserById,
     updateUserPassword,
