@@ -1,50 +1,94 @@
 // controllers/sessionController.js
-const Session = require('../models/sessionModel');
-const Joi = require('joi');
+const sessionModel = require('../models/sessionModel');
 
-const sessionSchema = Joi.object({
-    taskId: Joi.number().integer().required(),
-    previousSessionId: Joi.number().integer().allow(null),
-    totalWorkTime: Joi.number().integer().min(0).required(),
-    stopwatchTime: Joi.number().integer().min(0).required(),
-    counterValue: Joi.number().integer().min(0).required()
-});
+exports.getAllSessions = async (req, res) => {
+    try {
+        const sessions = await sessionModel.getSessionsByUserId(req.user.id);
+        res.json(sessions);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+};
 
 exports.saveSession = async (req, res) => {
-    const { error } = sessionSchema.validate(req.body);
-
-    if (error) {
-        return res.status(400).json({ error: error.details[0].message });
-    }
-
-    const { taskId, previousSessionId, totalWorkTime, stopwatchTime, counterValue } = req.body;
+    const { id, taskId, previousSessionId, totalWorkTime, stopwatchTime, counterValue } = req.body;
     const userId = req.user.id;
 
     try {
-        await pool.query(
-            `INSERT INTO sessions (task_id, previous_session_id, user_id, total_work_time, stopwatch_time, counter_value) 
-            VALUES ($1, $2, $3, $4, $5, $6)`,
-            [taskId, previousSessionId, userId, totalWorkTime, stopwatchTime, counterValue]
+        const session = await sessionModel.createSession(
+            id,
+            taskId,
+            previousSessionId || null,
+            userId,
+            totalWorkTime,
+            stopwatchTime,
+            counterValue
         );
-        res.json({ message: 'Session saved successfully' });
+        res.status(201).json({ message: 'Session saved successfully', sessionId: session.id });
     } catch (err) {
-        console.error('Error saving session:', err);
-        res.status(500).json({ error: 'Erreur lors de la sauvegarde de la session' });
+        console.error('Error saving session:', err.message, err.stack);
+        res.status(500).send('Server error');
     }
 };
 
-exports.loadSessions = async (req, res) => {
+exports.getSessionById = async (req, res) => {
+    const sessionId = parseInt(req.params.id, 10);
+    const userId = req.user.id;
+
+    if (isNaN(sessionId)) {
+        return res.status(400).json({ message: 'Invalid session ID' });
+    }
+
     try {
-        const { userId } = req.user; // Assurez-vous que l'utilisateur est authentifié
-        const result = await pool.query(
-            `SELECT * FROM sessions WHERE user_id = $1 ORDER BY created_at DESC`,
-            [userId]
-        );
-        res.json(result.rows);
+        const session = await sessionModel.getSessionById(sessionId, userId);
+        if (!session) {
+            return res.status(404).json({ message: 'Session not found' });
+        }
+        res.json(session);
     } catch (err) {
-        console.error('Error loading sessions:', err);
-        res.status(500).json({ error: 'Erreur lors du chargement des sessions' });
+        console.error('Error retrieving session:', err.message);
+        res.status(500).json({ message: 'Server error', error: err.message });
     }
 };
+
+exports.getLastSession = async (req, res) => {
+    try {
+        const lastSession = await sessionModel.getLastSessionByUserId(req.user.id);
+        if (!lastSession) {
+            return res.status(404).json({ message: 'No previous session found' });
+        }
+        res.json(lastSession);
+    } catch (err) {
+        console.error('Error retrieving last session:', err.message);
+        res.status(500).json({ message: 'Server error', error: err.message });
+    }
+};
+
+exports.getLastSessionForTask = async (req, res) => {
+    const taskId = parseInt(req.params.taskId, 10);
+    const userId = req.user.id;
+
+    console.log('Recherche de la dernière session - UserId:', userId, 'TaskId:', taskId);
+
+    if (isNaN(taskId)) {
+        return res.status(400).json({ message: 'Invalid Task ID' });
+    }
+
+    try {
+        const lastSession = await sessionModel.getLastSessionByTaskId(userId, taskId);
+        console.log('Dernière session trouvée:', lastSession);
+
+        if (!lastSession) {
+            console.log('Aucune session trouvée pour cette tâche');
+            return res.status(404).json({ message: 'No previous session found for this task' });
+        }
+        res.json(lastSession);
+    } catch (err) {
+        console.error('Error retrieving last session for task:', err.message);
+        res.status(500).json({ message: 'Server error', error: err.message });
+    }
+};
+
 
 

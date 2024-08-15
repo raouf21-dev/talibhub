@@ -93,9 +93,21 @@ exports.getProfile = async (req, res) => {
         const user = await userModel.getUserById(userId);
         if (!user) return res.status(404).json({ message: 'User not found' });
 
-        res.status(200).json(user);
+        // Mapper les noms de colonnes de la base de données aux noms de propriétés JavaScript
+        const userProfile = {
+            id: user.id,
+            username: user.username,
+            email: user.email,
+            firstName: user.first_name,
+            lastName: user.last_name,
+            age: user.age,
+            gender: user.gender
+        };
+
+        console.log('User profile being sent:', userProfile);  // Log pour le débogage
+        res.status(200).json(userProfile);
     } catch (error) {
-        console.error(error);
+        console.error('Error in getProfile:', error);
         res.status(500).json({ message: 'Server error' });
     }
 };

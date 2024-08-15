@@ -15,15 +15,22 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('showPasswordToggle')?.addEventListener('click', togglePasswordVisibility);
     document.getElementById('passwordChangeForm')?.addEventListener('submit', handleChangePassword);
     document.getElementById('showNewPasswordToggle')?.addEventListener('click', toggleNewPasswordVisibility);
+    document.getElementById('profileForm')?.addEventListener('submit', updateProfile);
 
-    document.getElementById('task-select').addEventListener('change', updateCounterTaskTitle);
+    document.getElementById('task-select').addEventListener('change', updateTaskTitle);
     
-});
+
+    const taskSelect = document.getElementById('task-select');
+    taskSelect.addEventListener('change', updateTaskTitle);
+    });
 
 function navigateTo(pageId) {
     const pages = document.querySelectorAll('.page');
     pages.forEach(page => {
         page.classList.toggle('active', page.id === pageId);
+        if (pageId === 'profile') {
+            loadProfile();
+        }
     });
 
     const navHeader = document.getElementById('nav');
@@ -35,7 +42,6 @@ function navigateTo(pageId) {
 
     switch(pageId) {
         case 'profile':
-            loadProfile();
             break;
         case 'statistics':
             initializeCharts();
@@ -46,8 +52,10 @@ function navigateTo(pageId) {
             break;
         case 'apprentissage':
             loadTasks();
-            loadTimerStateFromCache();
+            loadSessionFromCache();
             loadCounter();
+            updateTaskTitle();
+            enableControls();
             break;
         case 'notifications':
             loadNotifications();
@@ -100,9 +108,15 @@ function logout() {
 }
 
 function escapeHTML(str) {
-    var div = document.createElement('div');
-    div.appendChild(document.createTextNode(str));
-    return div.innerHTML;
+    return str.replace(/[&<>'"]/g, 
+        tag => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            "'": '&#39;',
+            '"': '&quot;'
+        }[tag] || tag)
+    );
 }
 
 // Fonction d'inscription
@@ -253,14 +267,17 @@ async function loadTasks() {
         }
 
         const tasks = await response.json();
-        const taskList = document.getElementById('task-list');
         const taskSelect = document.getElementById('task-select');
+        const taskList = document.getElementById('task-list');
 
+        // Mise à jour du DOM pour afficher les tâches
         taskList.innerHTML = '';
         taskSelect.innerHTML = '<option value="">Sélectionnez une tâche</option>';
         tasks.forEach(task => {
             let li = document.createElement('li');
-            li.innerHTML = `<span class="task-name">${escapeHTML(task.name)}</span> <button onclick="removeTask(this, ${task.id})">Supprimer</button> <button onclick="renameTask(this, ${task.id})">Renommer</button>`;
+            li.innerHTML = `<span class="task-name">${escapeHTML(task.name)}</span> 
+                            <button onclick="removeTask(this, ${task.id})">Supprimer</button> 
+                            <button onclick="renameTask(this, ${task.id})">Renommer</button>`;
             taskList.appendChild(li);
 
             let option = document.createElement('option');
@@ -268,10 +285,14 @@ async function loadTasks() {
             option.textContent = task.name;
             taskSelect.appendChild(option);
         });
+
+        // Sauvegarde des tâches localement
+        localStorage.setItem('tasks', JSON.stringify(tasks));
     } catch (error) {
         console.error('Error loading tasks:', error);
     }
 }
+
 
 async function addNewTask() {
     const taskName = document.getElementById('new-task').value.trim();
@@ -292,6 +313,7 @@ async function addNewTask() {
             return;
         }
 
+        // Recharger les tâches après ajout
         loadTasks();
         document.getElementById('new-task').value = '';
     } catch (error) {
@@ -314,8 +336,12 @@ async function removeTask(button, taskId) {
             return;
         }
 
+        // Suppression de l'élément de la liste
         const taskItem = button.closest('li');
         taskItem.remove();
+
+        // Recharger les tâches après suppression
+        loadTasks();
     } catch (error) {
         console.error('Error deleting task:', error);
     }
@@ -323,7 +349,7 @@ async function removeTask(button, taskId) {
 
 async function renameTask(button, taskId) {
     const newName = prompt("Entrez le nouveau nom de la tâche:");
-    if (!newName) return;
+    if (!newName || newName.trim() === "") return;
 
     try {
         const response = await fetch(`http://localhost:3000/tasks/updateTask/${taskId}`, {
@@ -332,13 +358,14 @@ async function renameTask(button, taskId) {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
             },
-            body: JSON.stringify({ name: newName })
+            body: JSON.stringify({ name: newName.trim() })
         });
 
         if (!response.ok) {
             throw new Error(`Error renaming task: ${response.status} ${response.statusText}`);
         }
 
+        // Recharger les tâches après renommage
         loadTasks();
     } catch (error) {
         console.error('Error renaming task:', error);
@@ -355,32 +382,173 @@ let timer;
 let stopwatchInterval = null;
 let stopwatchTime = 0;
 let totalWorkTime = 0;
-const sessions = [];
 let selectedTaskId = '';
 let currentSessionId = 0;
 let previousSessionId = 0;
+let manualTimeInSeconds = 0;
+const Counter = { taskId: '', value: 0 };
+let currentTaskId = null;
+isSessionActive = false;
 
-function updateTaskTitle() {
+// Fonction pour mettre à jour le titre de la tâche sélectionnée
+
+
+async function updateTaskTitle() {
     const taskSelect = document.getElementById('task-select');
     const selectedTaskTitle = document.getElementById('counter-task-title');
     const selectedTask = taskSelect.options[taskSelect.selectedIndex].text;
-    selectedTaskTitle.textContent = selectedTask !== "" ? selectedTask : "Sélectionnez une tâche";
     selectedTaskId = taskSelect.value;
-}
 
-function startNewSession() {
-    previousSessionId = currentSessionId;
-    currentSessionId = 0; // Le back-end générera un ID unique
-    document.getElementById('previous-session-id').textContent = previousSessionId;
-    document.getElementById('current-session-id').textContent = '[ID généré automatiquement]';
-    totalWorkTime = 0;
-    stopwatchTime = 0;
-    console.log('New session started.');
-}
+    console.log('Tâche sélectionnée:', selectedTask, 'ID:', selectedTaskId);
 
-async function loadTimerState() {
+    if (!selectedTaskId || selectedTaskId === "") {
+        selectedTaskTitle.textContent = "Sélectionnez une tâche";
+        document.getElementById('previous-session-id').textContent = "Sélectionnez une tâche";
+        document.getElementById('current-session-id').textContent = "Veuillez démarrer une nouvelle session";
+        document.getElementById('counter-value').textContent = "0";
+        isSessionActive = false;
+        enableControls();
+        return;
+    }
+
+    selectedTaskTitle.textContent = selectedTask;
+
     try {
-        const response = await fetch('http://localhost:3000/timer/loadState', {
+        console.log('Récupération de la dernière session pour la tâche:', selectedTaskId);
+        const response = await fetch(`http://localhost:3000/session/last/${selectedTaskId}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+
+        console.log('Statut de la réponse:', response.status);
+
+        if (!response.ok) {
+            if (response.status === 404) {
+                console.log('Aucune session précédente trouvée pour cette tâche.');
+                document.getElementById('previous-session-id').textContent = '0';
+                document.getElementById('current-session-id').textContent = 'Veuillez démarrer une nouvelle session';
+                document.getElementById('counter-value').textContent = '0';
+                previousSessionId = 0;
+                isSessionActive = false;
+                enableControls();
+                return;
+            }
+            throw new Error(`Erreur ${response.status}: ${await response.text()}`);
+        }
+
+        const lastSession = await response.json();
+        console.log('Dernière session reçue:', lastSession);
+
+        previousSessionId = lastSession.previous_session_id || 0;
+        Counter.value = lastSession.counter_value;
+        totalWorkTime = lastSession.total_work_time;
+        stopwatchTime = lastSession.stopwatch_time;
+
+        console.log('ID de la session précédente:', previousSessionId);
+        document.getElementById('previous-session-id').textContent = previousSessionId;
+        document.getElementById('counter-value').textContent = Counter.value;
+        document.getElementById('current-session-id').textContent = 'Veuillez démarrer une nouvelle session';
+
+        isSessionActive = false;
+        enableControls();
+    } catch (error) {
+        console.error('Erreur:', error);
+        alert('Erreur lors du chargement de la dernière session.');
+        isSessionActive = false;
+        enableControls();
+    }
+}
+
+
+
+
+
+
+// Fonction pour démarrer une nouvelle session
+
+async function startNewSession() {
+    if (!selectedTaskId) {
+        alert("Veuillez sélectionner une tâche avant de créer une nouvelle session.");
+        return;
+    }
+
+    try {
+        const newSessionId = parseInt(previousSessionId) + 1;
+        const response = await fetch('http://localhost:3000/session/save', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify({
+                id: newSessionId,
+                taskId: selectedTaskId,
+                previousSessionId: previousSessionId,
+                totalWorkTime: 0,
+                stopwatchTime: 0,
+                counterValue: 0
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error('Erreur lors de la création de la nouvelle session');
+        }
+
+        const data = await response.json();
+        currentSessionId = data.sessionId;
+
+        totalWorkTime = 0;
+        stopwatchTime = 0;
+        Counter.value = 0;
+
+        document.getElementById('previous-session-id').textContent = previousSessionId;
+        document.getElementById('current-session-id').textContent = currentSessionId;
+        document.getElementById('counter-value').textContent = Counter.value;
+
+        isSessionActive = true;
+        enableControls();
+
+        console.log('Nouvelle session démarrée avec ID:', currentSessionId);
+    } catch (error) {
+        console.error('Erreur:', error);
+        alert('Erreur lors de la création de la nouvelle session');
+    }
+}
+
+function enableControls() {
+    const startStopButton = document.getElementById('start_stop');
+    const stopwatchStartButton = document.getElementById('stopwatch-start');
+    const counterButtons = document.querySelectorAll('#counter-buttons button');
+
+    startStopButton.disabled = !isSessionActive;
+    stopwatchStartButton.disabled = !isSessionActive;
+    counterButtons.forEach(button => button.disabled = !isSessionActive);
+}
+
+
+function startTimer() {
+    if (!isSessionActive) {
+        alert("Veuillez démarrer une nouvelle session avant d'utiliser le timer.");
+        return;
+    }
+    if (!isRunning) {
+        timer = setInterval(updateTimer, 1000);
+        isRunning = true;
+        document.getElementById('start-timer').textContent = 'Pause';
+    } else {
+        clearInterval(timer);
+        isRunning = false;
+        document.getElementById('start-timer').textContent = 'Reprendre';
+    }
+}
+
+
+async function updateLastSessionInfo() {
+    try {
+        const response = await fetch(`http://localhost:3000/session/${previousSessionId}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -389,28 +557,64 @@ async function loadTimerState() {
         });
 
         if (!response.ok) {
-            throw new Error('Failed to load timer state: ' + response.statusText);
+            throw new Error(`Erreur ${response.status}: ${await response.text()}`);
         }
 
-        const savedState = await response.json();
-        if (savedState) {
-            isRunning = savedState.isRunning;
-            isWorkSession = savedState.isWorkSession;
-            workDuration = savedState.workDuration;
-            breakDuration = savedState.breakDuration;
-            currentTime = savedState.currentTime;
-            updateTimerDisplay();
-            updateBreakTimeDisplay();
-            if (isRunning) {
-                timer = setInterval(updateTimer, 1000);
-                document.getElementById('start_stop').textContent = 'Pause';
-            }
-        }
+        const lastSession = await response.json();
+        console.log('Session précédente mise à jour:', lastSession);
+
+        // Mettre à jour l'affichage avec les informations de la session précédente
+        document.getElementById('previous-session-id').textContent = lastSession.id;
+        // Ajouter d'autres mises à jour d'affichage si nécessaire
     } catch (error) {
-        console.error('Error loading timer state:', error);
+        console.error('Erreur lors de la mise à jour des informations de la session précédente:', error);
     }
 }
 
+
+
+// Sauvegarder l'état actuel des outils dans le cache local
+function saveSessionToCache() {
+    const sessionData = {
+        sessionId: currentSessionId,
+        previousSessionId: previousSessionId,
+        taskId: selectedTaskId,
+        totalWorkTime: totalWorkTime,
+        stopwatchTime: stopwatchTime,
+        counterValue: Counter.value,
+        manualTimeInSeconds: manualTimeInSeconds
+    };
+    localStorage.setItem('currentSessionData', JSON.stringify(sessionData));
+}
+// Charger les données de session du cache local
+async function loadSessionFromCache() {
+    const savedSession = JSON.parse(localStorage.getItem('currentSessionData'));
+    if (savedSession) {
+        currentSessionId = savedSession.sessionId;
+        previousSessionId = savedSession.previousSessionId;
+        selectedTaskId = savedSession.taskId;
+        totalWorkTime = savedSession.totalWorkTime;
+        stopwatchTime = savedSession.stopwatchTime;
+        Counter.value = savedSession.counterValue;
+        manualTimeInSeconds = savedSession.manualTimeInSeconds || 0;
+
+        document.getElementById('previous-session-id').textContent = previousSessionId;
+        document.getElementById('current-session-id').textContent = currentSessionId;
+        document.getElementById('counter-value').textContent = Counter.value;
+
+        updateTimerDisplay();
+        updateBreakTimeDisplay();
+        isSessionActive = true;
+    } else {
+        // Si pas de données dans le cache, on pourrait charger depuis le serveur
+        // mais pour l'instant, on va juste initialiser une nouvelle session
+        await startNewSession();
+        isSessionActive = false;
+    }
+    enableControls();
+}
+
+// Mettre à jour l'affichage du Timer
 function updateTimer() {
     if (currentTime > 0) {
         currentTime--;
@@ -418,8 +622,7 @@ function updateTimer() {
     } else {
         clearInterval(timer);
         if (isWorkSession) {
-            totalWorkTime += workDuration; // Ajout au totalWorkTime
-            console.log('Total Work Time incremented:', totalWorkTime);
+            totalWorkTime += workDuration;
             isWorkSession = false;
             currentTime = breakDuration;
             document.getElementById('timer-label').textContent = 'Pause';
@@ -434,142 +637,32 @@ function updateTimer() {
     }
 }
 
-function saveSessionData() {
-    if (!selectedTaskId) {
-        alert("Veuillez sélectionner une tâche avant d'enregistrer.");
-        return;
-    }
-
-    const sessionData = {
-        sessionId: currentSessionId,
-        previousSessionId: previousSessionId || null,
-        taskId: selectedTaskId,
-        totalWorkTime: totalWorkTime,
-        stopwatchTime: stopwatchTime,
-        counterValue: Counter.value
-    };
-
-    fetch('http://localhost:3000/session/save', {
-        method: 'POST',
-        headers: { 
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify(sessionData)
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Erreur lors de l\'enregistrement des données de la session.');
-        }
-        return response.json();
-    })
-    .then(data => {
-        alert('Données de la session sauvegardées avec succès.');
-        console.log('Session data saved:', sessionData);
-    })
-    .catch(error => {
-        console.error('Error saving session data:', error);
-        alert('Erreur lors de la sauvegarde des données.');
-    });
-}
-
-
-function saveTimerStateToCache() {
-    const state = { isRunning, isWorkSession, workDuration, breakDuration, currentTime, timestamp: new Date().getTime() };
-    localStorage.setItem('timerState', JSON.stringify(state));
-}
-
-function saveSessionToCache(session) {
-    let cachedSessions = JSON.parse(localStorage.getItem('sessions')) || [];
-    cachedSessions.push({ ...session, timestamp: new Date().getTime() });
-    localStorage.setItem('sessions', JSON.stringify(cachedSessions));
-    console.log('Session added to cache:', session); // Vérifiez cette ligne
-    console.log('All cached sessions:', cachedSessions); // Vérifiez cette ligne
-}
-
-function loadTimerStateFromCache() {
-    const savedState = JSON.parse(localStorage.getItem('timerState'));
-    if (savedState) {
-        const now = new Date().getTime();
-        if (now - savedState.timestamp < 6 * 3600 * 1000) {  // 6 heures de validité
-            isRunning = savedState.isRunning;
-            isWorkSession = savedState.isWorkSession;
-            workDuration = savedState.workDuration;
-            breakDuration = savedState.breakDuration;
-            currentTime = savedState.currentTime;
-
-            // Ne plus charger les identifiants de session ici
-            previousSessionId = savedState.previousSessionId || 0;
-            currentSessionId = 0; // Le back-end gérera cet identifiant lors de la prochaine session
-
-            stopwatchTime = 0; // Réinitialiser le chronomètre
-            updateTimerDisplay();
-            updateBreakTimeDisplay();
-        } else {
-            localStorage.removeItem('timerState');
-        }
-    }
-}
-
-async function saveDataToServer(state, sessions) {
-    const selectedTask = getSelectedTaskDetails();
-
-    if (!selectedTask.id) {
-        alert('Veuillez sélectionner une tâche avant d\'enregistrer.');
-        return;
-    }
-
-    try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-            alert('Votre session a expiré, veuillez vous reconnecter.');
-            navigateTo('login');
-            return;
-        }
-
-        state.taskId = selectedTask.id;
-
-        await fetch('http://localhost:3000/timer/saveState', {
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({ state, sessions })
-        });
-
-        localStorage.removeItem('timerState');
-        localStorage.removeItem('sessions');
-        alert('Données sauvegardées avec succès.');
-    } catch (error) {
-        console.error('Error saving data to server:', error);
-        alert('Erreur lors de la sauvegarde des données.');
-    }
-}
-
-
-
+// Mettre à jour l'affichage du temps de pause
 function updateBreakTimeDisplay() {
     const breakMinutes = Math.floor(breakDuration / 60);
     const breakSeconds = breakDuration % 60;
     document.getElementById('break-time-left').textContent = `Pause: ${breakMinutes}:${breakSeconds < 10 ? '0' : ''}${breakSeconds}`;
 }
 
+// Mettre à jour l'affichage du temps de travail
 function updateTimerDisplay() {
     const minutes = Math.floor(currentTime / 60);
     const seconds = currentTime % 60;
     document.getElementById('time-left').textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
 }
 
+// Gestion du démarrage et de la pause du Timer
 function toggleTimer() {
-    const selectedTask = getSelectedTaskDetails();
-
-    if (!selectedTask.id) {
+    if (!isSessionActive) {
+        alert("Veuillez démarrer une nouvelle session avant d'utiliser le timer.");
+        return;
+    }
+    if (!selectedTaskId) {
         alert("Veuillez sélectionner une tâche avant de démarrer le Pomodoro Timer.");
         return;
     }
 
-    if (stopwatchTime > 0 && stopwatchInterval !== null) {
+    if (stopwatchInterval !== null) {
         alert("Veuillez arrêter et réinitialiser le chronomètre avant de démarrer le Pomodoro Timer.");
         return;
     }
@@ -584,7 +677,7 @@ function toggleTimer() {
     isRunning = !isRunning;
 }
 
-
+// Réinitialisation du Timer
 function resetTimer() {
     clearInterval(timer);
     isRunning = false;
@@ -592,47 +685,53 @@ function resetTimer() {
     currentTime = workDuration;
     updateTimerDisplay();
     document.getElementById('start_stop').textContent = 'Démarrer';
-    document.getElementById('stopwatch-start').disabled = false;
-    document.getElementById('stopwatch-stop').disabled = true;
-    saveTimerState();
+    saveSessionToCache(); // Sauvegarder l'état après réinitialisation
 }
 
+// Arrêter le Timer
 function stopTimer() {
     clearInterval(timer);
     isRunning = false;
     document.getElementById('start_stop').textContent = 'Démarrer';
-    saveTimerState();
+    saveSessionToCache(); // Sauvegarder l'état après arrêt
 }
 
+// Démarrer le chronomètre
 function startStopwatch() {
-    if (isRunning) {
-        alert("Veuillez arrêter le Pomodoro Timer avant de démarrer le Chronomètre.");
+    if (!isSessionActive) {
+        alert("Veuillez démarrer une nouvelle session avant d'utiliser le chronomètre.");
         return;
     }
-    clearInterval(stopwatchInterval);
-    stopwatchInterval = setInterval(() => {
-        stopwatchTime++;
-        document.getElementById('stopwatch-time').textContent = formatTime(stopwatchTime);
-    }, 1000);
-    document.getElementById('stopwatch-start').disabled = true;
-    document.getElementById('stopwatch-stop').disabled = false;
+    if (!stopwatchInterval) {
+        stopwatchInterval = setInterval(updateStopwatch, 1000);
+        document.getElementById('stopwatch-start').textContent = 'Pause';
+    } else {
+        clearInterval(stopwatchInterval);
+        stopwatchInterval = null;
+        document.getElementById('stopwatch-start').textContent = 'Reprendre';
+    }
 }
 
+// Arrêter le chronomètre
 function stopStopwatch() {
     clearInterval(stopwatchInterval);
     document.getElementById('stopwatch-start').disabled = false;
     document.getElementById('stopwatch-stop').disabled = true;
+    saveSessionToCache(); // Sauvegarder l'état du chronomètre après arrêt
 }
 
+// Réinitialiser le chronomètre
 function resetStopwatch() {
-    clearInterval(stopwatchInterval); // Arrêter l'intervalle
-    stopwatchInterval = null; // Réinitialiser l'intervalle
+    clearInterval(stopwatchInterval);
+    stopwatchInterval = null;
     stopwatchTime = 0;
     document.getElementById('stopwatch-time').textContent = formatTime(stopwatchTime);
     document.getElementById('stopwatch-start').disabled = false;
     document.getElementById('stopwatch-stop').disabled = true;
+    saveSessionToCache(); // Sauvegarder l'état après réinitialisation
 }
 
+// Formater le temps pour l'affichage
 function formatTime(timeInSeconds) {
     const hours = Math.floor(timeInSeconds / 3600);
     const minutes = Math.floor((timeInSeconds % 3600) / 60);
@@ -640,131 +739,53 @@ function formatTime(timeInSeconds) {
     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 }
 
-function addCompletedTask(taskId, duration, type) {
-    const completedTasks = JSON.parse(localStorage.getItem('completedTasks')) || [];
-    const newTask = {
-        taskId: taskId,
-        duration: duration,
-        type: type,
-        date: new Date().toISOString()
-    };
-    completedTasks.push(newTask);
-    localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
-}
-
-function saveTimerData() {
-    const selectedTask = getSelectedTaskDetails();
-    console.log('Selected Task:', selectedTask); // Ajoutez cette ligne
-
-    if (selectedTask.id && totalWorkTime > 0) {
-        console.log('Total Work Time:', totalWorkTime); // Ajoutez cette ligne
-        addCompletedTask(selectedTask.id, totalWorkTime, 'duration');
-        alert('Données du Pomodoro Timer enregistrées pour la tâche : ' + selectedTask.name);
-        totalWorkTime = 0;
-        updateCharts();
+// Gérer le compteur
+function loadCounter() {
+    const savedCounter = JSON.parse(localStorage.getItem('currentSessionData'));
+    if (savedCounter && savedCounter.counterValue !== undefined) {
+        Counter.value = savedCounter.counterValue;
+        document.getElementById('counter-value').textContent = Counter.value;
     } else {
-        alert('Veuillez sélectionner une tâche pour enregistrer les données.');
-        console.log('No task selected or totalWorkTime is 0'); // Ajoutez cette ligne
+        Counter.value = 0;
+        document.getElementById('counter-value').textContent = Counter.value;
     }
 }
 
-function saveStopwatchData() {
-    const selectedTask = document.getElementById('task-select').value;
-    if (selectedTask && stopwatchTime > 0) {
-        addCompletedTask(selectedTask, stopwatchTime, 'duration');
-        alert('Données du chronomètre enregistrées.');
-        updateCharts();
-    } else {
-        alert('Veuillez sélectionner une tâche et vous assurer que le temps est supérieur à 0 pour enregistrer les données.');
+function incrementCounter(value) {
+    if (!isSessionActive) {
+        alert("Veuillez démarrer une nouvelle session avant d'utiliser le compteur.");
+        return;
     }
-}
-
-const Counter = { taskId: '', value: 0 };
-
-function updateCounterTaskTitle() {
-    const selectedTask = getSelectedTaskDetails();
-    const selectedTaskTitle = document.getElementById('counter-task-title');
-    selectedTaskTitle.textContent = selectedTask.name !== "" ? selectedTask.name : "Sélectionnez une tâche";
-    Counter.taskId = selectedTask.id;
-}
-
-
-function incrementCounter(amount) {
-    Counter.value += amount;
+    Counter.value += value;
     document.getElementById('counter-value').textContent = Counter.value;
 }
 
 function decrementCounter(amount) {
-    Counter.value -= amount;
-    if (Counter.value < 0) Counter.value = 0;
+    Counter.value = Math.max(0, Counter.value - amount);
     document.getElementById('counter-value').textContent = Counter.value;
 }
 
-async function saveCounter() {
-    const selectedTask = getSelectedTaskDetails();
-
-    if (!selectedTask.id) {
-        alert('Veuillez sélectionner une tâche avant d\'enregistrer.');
-        return;
-    }
-
-    try {
-        const response = await fetch('http://localhost:3000/counter', {
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            },
-            body: JSON.stringify({ value: Counter.value, taskId: selectedTask.id }) // Utilisation de l'ID de la tâche sélectionnée
-        });
-
-        if (!response.ok) {
-            throw new Error('Erreur lors de la sauvegarde des données du compteur');
-        }
-
-        alert('Données du compteur sauvegardées avec succès.');
-    } catch (error) {
-        console.error('Error saving counter value:', error);
-        alert('Erreur lors de la sauvegarde des données du compteur.');
-    }
-}
-
-async function loadCounter() {
-    try {
-        const response = await fetch('http://localhost:3000/counter');
-        const data = await response.json();
-        Counter.value = data.value;
-        document.getElementById('counter-value').textContent = Counter.value;
-    } catch (error) {
-        console.error('Error loading counter value:', error);
-    }
-}
-
+// Réinitialiser le compteur
 function resetCounter() {
     Counter.value = 0;
     document.getElementById('counter-value').textContent = Counter.value;
+    saveSessionToCache(); // Sauvegarder l'état après réinitialisation
 }
 
+// Fonction pour ajouter manuellement du temps d'étude
 function addManualTime() {
     const hours = parseInt(document.getElementById('manual-hours').value) || 0;
     const minutes = parseInt(document.getElementById('manual-minutes').value) || 0;
-    const selectedTask = document.getElementById('task-select').value;
-
-    if (!selectedTask) {
-        alert('Veuillez sélectionner une tâche pour enregistrer le temps.');
-        return;
-    }
 
     if (hours < 0 || minutes < 0 || minutes >= 60) {
         alert('Veuillez entrer un temps valide.');
         return;
     }
 
-    const totalMinutes = hours * 60 + minutes;
-    if (totalMinutes > 0) {
-        addCompletedTask(selectedTask, totalMinutes, 'duration');
+    manualTimeInSeconds = (hours * 60 * 60) + (minutes * 60);
+
+    if (manualTimeInSeconds > 0) {
         alert('Temps d\'étude ajouté manuellement.');
-        updateCharts();
     } else {
         alert('Veuillez entrer un temps supérieur à 0.');
     }
@@ -772,6 +793,56 @@ function addManualTime() {
     document.getElementById('manual-hours').value = '';
     document.getElementById('manual-minutes').value = '';
 }
+
+// Enregistrer les données de session au serveur
+async function saveSessionData() {
+    if (!selectedTaskId) {
+        alert("Veuillez sélectionner une tâche avant d'enregistrer.");
+        return;
+    }
+
+    const totalWorkTimeWithManual = totalWorkTime + manualTimeInSeconds;
+    const stopwatchTimeWithManual = stopwatchTime + manualTimeInSeconds;
+
+    try {
+        const response = await fetch('http://localhost:3000/session/save', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify({
+                sessionId: currentSessionId,
+                taskId: selectedTaskId,
+                totalWorkTime: totalWorkTimeWithManual,
+                stopwatchTime: stopwatchTimeWithManual,
+                counterValue: Counter.value
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error('Erreur lors de l\'enregistrement des données de la session');
+        }
+
+        const data = await response.json();
+        alert('Données de la session sauvegardées avec succès.');
+        console.log('Session data saved:', data);
+
+        // Réinitialiser les valeurs après l'enregistrement
+        manualTimeInSeconds = 0;
+        document.getElementById('manual-hours').value = '';
+        document.getElementById('manual-minutes').value = '';
+
+    } catch (error) {
+        console.error('Error saving session data:', error);
+        alert('Erreur lors de la sauvegarde des données de la session');
+    }
+}
+
+
+// Charger l'état initial depuis le cache local
+loadSessionFromCache();
+saveSessionToCache()
 
 //--------------------Profil--------------------
 
@@ -793,29 +864,39 @@ async function loadProfile() {
         });
 
         if (!response.ok) {
-            throw new Error('Erreur lors de la récupération des informations de profil');
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
 
         const user = await response.json();
-        console.log('Données du profil:', user);
+        console.log('Données du profil complètes:', user);
 
-        // Vérifications
-        console.log('Username field:', document.getElementById('username')); 
-        console.log('Setting value for username:', user.username);
-        document.getElementById('username').value = escapeHTML(user.username || '');
+        const setAndLogValue = (id, value) => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.value = value || '';
+                console.log(`${id} set to:`, value);
+            } else {
+                console.error(`Element with id '${id}' not found`);
+            }
+        };
 
-        document.getElementById('last-name').value = escapeHTML(user.last_name || '');
-        document.getElementById('first-name').value = escapeHTML(user.first_name || '');
-        document.getElementById('age').value = escapeHTML(user.age || '');
-        document.getElementById('gender').value = user.gender || '';
-        document.getElementById('email').value = escapeHTML(user.email || '');
+        setAndLogValue('username', user.username);
+        setAndLogValue('last-name', user.last_name);
+        setAndLogValue('first-name', user.first_name);
+        setAndLogValue('age', user.age);
+        setAndLogValue('gender', user.gender);
+        setAndLogValue('email', user.email);
 
-        // Vérification finale dans le DOM
-        console.log('Username value in DOM:', document.getElementById('username').value);
+        // Vérification finale
+        console.log('Final form values:');
+        ['username', 'last-name', 'first-name', 'age', 'gender', 'email'].forEach(id => {
+            const element = document.getElementById(id);
+            console.log(`${id}:`, element ? element.value : 'Element not found');
+        });
 
     } catch (error) {
-        console.error('Erreur:', error);
-        alert('Erreur lors de la récupération des informations de profil');
+        console.error('Erreur lors du chargement du profil:', error);
+        alert('Erreur lors de la récupération des informations de profil: ' + error.message);
     }
 }
 
@@ -1121,7 +1202,7 @@ function updateChart(chart, data) {
 
 document.addEventListener('DOMContentLoaded', function() {
     loadTasks();
-    loadTimerStateFromCache(); 
+    loadSessionFromCache(); 
     if (document.getElementById('statistics').classList.contains('active')) {
         loadProfile();
     }
