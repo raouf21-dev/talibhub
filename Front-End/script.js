@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     initializeCalendar();
-    updateCharts();
+    /*updateCharts();*/
 
     const activePageId = document.querySelector('.page.active').id;
     const navHeader = document.getElementById('nav');
@@ -9,28 +9,25 @@ document.addEventListener('DOMContentLoaded', function() {
     } else {
         navHeader.style.display = 'block';
     }
+
+    // Appeler la fonction d'initialisation des écouteurs d'événements
+    initializeEventListeners();
+});
+
+function initializeEventListeners() {
     document.getElementById('signupForm')?.addEventListener('submit', handleSignup);
     document.getElementById('loginForm')?.addEventListener('submit', handleLogin);
-
     document.getElementById('showPasswordToggle')?.addEventListener('click', togglePasswordVisibility);
     document.getElementById('passwordChangeForm')?.addEventListener('submit', handleChangePassword);
     document.getElementById('showNewPasswordToggle')?.addEventListener('click', toggleNewPasswordVisibility);
     document.getElementById('profileForm')?.addEventListener('submit', updateProfile);
-
-    document.getElementById('task-select').addEventListener('change', updateTaskTitle);
-    
-
-    const taskSelect = document.getElementById('task-select');
-    taskSelect.addEventListener('change', updateTaskTitle);
-    });
+    document.getElementById('task-select').addEventListener('change', () => updateTaskTitle());
+}
 
 function navigateTo(pageId) {
     const pages = document.querySelectorAll('.page');
     pages.forEach(page => {
         page.classList.toggle('active', page.id === pageId);
-        if (pageId === 'profile') {
-            loadProfile();
-        }
     });
 
     const navHeader = document.getElementById('nav');
@@ -42,10 +39,11 @@ function navigateTo(pageId) {
 
     switch(pageId) {
         case 'profile':
+            loadProfile();
             break;
         case 'statistics':
             initializeCharts();
-            updateCharts();
+            //updateCharts();
             break;
         case 'todoLists':
             loadTasks();
@@ -66,6 +64,9 @@ function navigateTo(pageId) {
         default:
             break;
     }
+
+    // Réinitialiser les écouteurs d'événements après le changement de page
+    initializeEventListeners();
 }
 
 
@@ -97,7 +98,7 @@ function initializeCalendar() {
         selectable: true,
         selectHelper: true,
         select: function(start, end) {
-            updateCharts();
+          //  updateCharts();
         }
     });
 }
@@ -373,6 +374,7 @@ async function renameTask(button, taskId) {
 }
 
 //-------------------Timer--------------------
+// Variables globales
 let isRunning = false;
 let isWorkSession = true;
 let workDuration = 25 * 60;
@@ -380,32 +382,38 @@ let breakDuration = 5 * 60;
 let currentTime = workDuration;
 let timer;
 let stopwatchInterval = null;
+let timerTime = 0;
 let stopwatchTime = 0;
-let totalWorkTime = 0;
-let selectedTaskId = '';
-let currentSessionId = 0;
-let previousSessionId = 0;
 let manualTimeInSeconds = 0;
-const Counter = { taskId: '', value: 0 };
-let currentTaskId = null;
-isSessionActive = false;
+let selectedTaskId = '';
+let isSessionActive = false;
+const Counter = { value: 0 };
+
+// Fonction pour activer/désactiver les contrôles
+function enableControls() {
+    const controls = document.querySelectorAll('.session-control');
+    controls.forEach(control => {
+        control.disabled = !isSessionActive;
+    });
+}
 
 // Fonction pour mettre à jour le titre de la tâche sélectionnée
-
-
-async function updateTaskTitle() {
+async function updateTaskTitle(forceRefresh = false) {
+    console.log('updateTaskTitle called');
     const taskSelect = document.getElementById('task-select');
     const selectedTaskTitle = document.getElementById('counter-task-title');
     const selectedTask = taskSelect.options[taskSelect.selectedIndex].text;
     selectedTaskId = taskSelect.value;
 
-    console.log('Tâche sélectionnée:', selectedTask, 'ID:', selectedTaskId);
+    console.log('Selected task:', selectedTask, 'Task ID:', selectedTaskId);
 
     if (!selectedTaskId || selectedTaskId === "") {
+        console.log('No task selected');
         selectedTaskTitle.textContent = "Sélectionnez une tâche";
-        document.getElementById('previous-session-id').textContent = "Sélectionnez une tâche";
         document.getElementById('current-session-id').textContent = "Veuillez démarrer une nouvelle session";
+        document.getElementById('previous-sessions-count').textContent = "0";
         document.getElementById('counter-value').textContent = "0";
+        document.getElementById('total-work-time').textContent = "00:00:00";
         isSessionActive = false;
         enableControls();
         return;
@@ -414,57 +422,62 @@ async function updateTaskTitle() {
     selectedTaskTitle.textContent = selectedTask;
 
     try {
-        console.log('Récupération de la dernière session pour la tâche:', selectedTaskId);
+        console.log('Fetching last session for task:', selectedTaskId);
         const response = await fetch(`http://localhost:3000/session/last/${selectedTaskId}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
+            },
+            cache: forceRefresh ? 'no-cache' : 'default'
         });
 
-        console.log('Statut de la réponse:', response.status);
+        console.log('Response status:', response.status);
 
         if (!response.ok) {
-            if (response.status === 404) {
-                console.log('Aucune session précédente trouvée pour cette tâche.');
-                document.getElementById('previous-session-id').textContent = '0';
-                document.getElementById('current-session-id').textContent = 'Veuillez démarrer une nouvelle session';
-                document.getElementById('counter-value').textContent = '0';
-                previousSessionId = 0;
-                isSessionActive = false;
-                enableControls();
-                return;
-            }
             throw new Error(`Erreur ${response.status}: ${await response.text()}`);
         }
 
-        const lastSession = await response.json();
-        console.log('Dernière session reçue:', lastSession);
+        const data = await response.json();
+        console.log('Received data:', data);
 
-        previousSessionId = lastSession.previous_session_id || 0;
-        Counter.value = lastSession.counter_value;
-        totalWorkTime = lastSession.total_work_time;
-        stopwatchTime = lastSession.stopwatch_time;
+        if (data.message === 'No previous session found for this task') {
+            console.log('No previous session found');
+            Counter.value = 0;
+            timerTime = 0;
+            stopwatchTime = 0;
+            manualTimeInSeconds = 0;
+            document.getElementById('current-session-id').textContent = "Pas d'ancienne session";
+            document.getElementById('previous-sessions-count').textContent = "0";
+        } else {
+            console.log('Previous session found');
+            Counter.value = data.lastSession.counter_value || 0;
+            timerTime = data.lastSession.timer_time || 0;
+            stopwatchTime = data.lastSession.stopwatch_time || 0;
+            document.getElementById('current-session-id').textContent = 'Dernière session trouvée';
+            document.getElementById('previous-sessions-count').textContent = 
+                data.sessionCount !== undefined ? data.sessionCount.toString() : "N/A";
+        }
 
-        console.log('ID de la session précédente:', previousSessionId);
-        document.getElementById('previous-session-id').textContent = previousSessionId;
         document.getElementById('counter-value').textContent = Counter.value;
-        document.getElementById('current-session-id').textContent = 'Veuillez démarrer une nouvelle session';
+        
+        // Afficher le temps total
+        const totalWorkTime = calculateTotalWorkTime();
+        document.getElementById('total-work-time').textContent = formatTime(totalWorkTime);
 
         isSessionActive = false;
+        document.getElementById('start-new-session').disabled = false;
         enableControls();
+
     } catch (error) {
-        console.error('Erreur:', error);
+        console.error('Erreur lors du chargement de la dernière session:', error);
         alert('Erreur lors du chargement de la dernière session.');
+        document.getElementById('current-session-id').textContent = "Erreur de chargement";
+        document.getElementById('previous-sessions-count').textContent = "N/A";
         isSessionActive = false;
         enableControls();
     }
 }
-
-
-
-
 
 
 // Fonction pour démarrer une nouvelle session
@@ -475,76 +488,37 @@ async function startNewSession() {
         return;
     }
 
-    try {
-        const newSessionId = parseInt(previousSessionId) + 1;
-        const response = await fetch('http://localhost:3000/session/save', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            },
-            body: JSON.stringify({
-                id: newSessionId,
-                taskId: selectedTaskId,
-                previousSessionId: previousSessionId,
-                totalWorkTime: 0,
-                stopwatchTime: 0,
-                counterValue: 0
-            })
-        });
+    if (isSessionActive) {
+        alert("Une session est déjà en cours. Veuillez l'enregistrer avant d'en commencer une nouvelle.");
+        return;
+    }
 
-        if (!response.ok) {
-            throw new Error('Erreur lors de la création de la nouvelle session');
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            throw new Error('No authentication token found');
         }
 
-        const data = await response.json();
-        currentSessionId = data.sessionId;
+        await updateTaskTitle(true);
 
-        totalWorkTime = 0;
+        document.getElementById('current-session-id').textContent = 'Nouvelle Session en cours';
+
+        timerTime = 0;
         stopwatchTime = 0;
+        manualTimeInSeconds = 0;
         Counter.value = 0;
-
-        document.getElementById('previous-session-id').textContent = previousSessionId;
-        document.getElementById('current-session-id').textContent = currentSessionId;
         document.getElementById('counter-value').textContent = Counter.value;
+        document.getElementById('total-work-time').textContent = '00:00:00';
 
         isSessionActive = true;
         enableControls();
+        document.getElementById('start-new-session').disabled = true;
 
-        console.log('Nouvelle session démarrée avec ID:', currentSessionId);
     } catch (error) {
-        console.error('Erreur:', error);
-        alert('Erreur lors de la création de la nouvelle session');
+        console.error('Erreur détaillée:', error);
+        alert('Erreur lors de l\'initialisation de la nouvelle session: ' + error.message);
     }
 }
-
-function enableControls() {
-    const startStopButton = document.getElementById('start_stop');
-    const stopwatchStartButton = document.getElementById('stopwatch-start');
-    const counterButtons = document.querySelectorAll('#counter-buttons button');
-
-    startStopButton.disabled = !isSessionActive;
-    stopwatchStartButton.disabled = !isSessionActive;
-    counterButtons.forEach(button => button.disabled = !isSessionActive);
-}
-
-
-function startTimer() {
-    if (!isSessionActive) {
-        alert("Veuillez démarrer une nouvelle session avant d'utiliser le timer.");
-        return;
-    }
-    if (!isRunning) {
-        timer = setInterval(updateTimer, 1000);
-        isRunning = true;
-        document.getElementById('start-timer').textContent = 'Pause';
-    } else {
-        clearInterval(timer);
-        isRunning = false;
-        document.getElementById('start-timer').textContent = 'Reprendre';
-    }
-}
-
 
 async function updateLastSessionInfo() {
     try {
@@ -577,7 +551,7 @@ async function updateLastSessionInfo() {
 function saveSessionToCache() {
     const sessionData = {
         sessionId: currentSessionId,
-        previousSessionId: previousSessionId,
+        taskLastSessionId: taskLastSessionId,
         taskId: selectedTaskId,
         totalWorkTime: totalWorkTime,
         stopwatchTime: stopwatchTime,
@@ -591,50 +565,120 @@ async function loadSessionFromCache() {
     const savedSession = JSON.parse(localStorage.getItem('currentSessionData'));
     if (savedSession) {
         currentSessionId = savedSession.sessionId;
-        previousSessionId = savedSession.previousSessionId;
+        taskLastSessionId = savedSession.taskLastSessionId;
         selectedTaskId = savedSession.taskId;
         totalWorkTime = savedSession.totalWorkTime;
         stopwatchTime = savedSession.stopwatchTime;
         Counter.value = savedSession.counterValue;
         manualTimeInSeconds = savedSession.manualTimeInSeconds || 0;
 
-        document.getElementById('previous-session-id').textContent = previousSessionId;
-        document.getElementById('current-session-id').textContent = currentSessionId;
-        document.getElementById('counter-value').textContent = Counter.value;
+        updateDOMIfExists('task-last-session-id', taskLastSessionId !== null ? taskLastSessionId : '0');
+        updateDOMIfExists('current-session-id', currentSessionId);
+        updateDOMIfExists('counter-value', Counter.value);
 
         updateTimerDisplay();
         updateBreakTimeDisplay();
         isSessionActive = true;
     } else {
-        // Si pas de données dans le cache, on pourrait charger depuis le serveur
-        // mais pour l'instant, on va juste initialiser une nouvelle session
-        await startNewSession();
         isSessionActive = false;
     }
     enableControls();
+}
+
+// Enregistrer les données de session au serveur
+async function saveSessionData() {
+    if (!selectedTaskId || !isSessionActive) {
+        alert("Aucune session active à enregistrer.");
+        return;
+    }
+
+    const totalWorkTime = calculateTotalWorkTime();
+
+    try {
+        const saveResponse = await fetch('http://localhost:3000/session/save', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify({
+                taskId: selectedTaskId,
+                totalWorkTime: totalWorkTime,
+                stopwatchTime: stopwatchTime,
+                timerTime: timerTime,
+                counterValue: Counter.value
+            })
+        });
+
+        if (!saveResponse.ok) {
+            throw new Error('Erreur lors de l\'enregistrement des données de la session');
+        }
+
+        const saveData = await saveResponse.json();
+        alert('Données de la session sauvegardées avec succès.');
+        console.log('Session data saved:', saveData);
+
+        // Mettre à jour l'affichage avec les nouvelles informations de session
+        await updateTaskTitle(true); // Forcer le rafraîchissement des données
+
+        // Réinitialiser les valeurs après l'enregistrement
+        timerTime = 0;
+        stopwatchTime = 0;
+        manualTimeInSeconds = 0;
+        Counter.value = 0;
+        
+        document.getElementById('counter-value').textContent = Counter.value;
+        document.getElementById('current-session-id').textContent = 'Session terminée';
+        document.getElementById('total-work-time').textContent = '00:00:00';
+
+        isSessionActive = false;
+        document.getElementById('start-new-session').disabled = false;
+
+        // Réinitialiser les timers si nécessaire
+        clearInterval(timer);
+        clearInterval(stopwatchInterval);
+        isRunning = false;
+        document.getElementById('start_stop').textContent = 'Démarrer';
+        document.getElementById('stopwatch-start').textContent = 'Démarrer';
+        updateTimerDisplay();
+        document.getElementById('stopwatch-time').textContent = '00:00:00';
+
+    } catch (error) {
+        console.error('Error saving session data:', error);
+        alert('Erreur lors de la sauvegarde des données de la session: ' + error.message);
+    }
+}
+
+function updateDOMIfExists(id, value) {
+    const element = document.getElementById(id);
+    if (element) {
+        element.textContent = value;
+    }
 }
 
 // Mettre à jour l'affichage du Timer
 function updateTimer() {
     if (currentTime > 0) {
         currentTime--;
+        timerTime++;
         updateTimerDisplay();
     } else {
         clearInterval(timer);
         if (isWorkSession) {
-            totalWorkTime += workDuration;
             isWorkSession = false;
             currentTime = breakDuration;
             document.getElementById('timer-label').textContent = 'Pause';
-            updateBreakTimeDisplay();
-            timer = setInterval(updateTimer, 1000);
         } else {
             isWorkSession = true;
             currentTime = workDuration;
             document.getElementById('timer-label').textContent = 'Travail';
-            document.getElementById('start_stop').textContent = 'Démarrer';
         }
+        updateTimerDisplay();
+        document.getElementById('start_stop').textContent = 'Démarrer';
+        isRunning = false;
     }
+    // Mettre à jour l'affichage du temps total
+    document.getElementById('total-work-time').textContent = formatTime(calculateTotalWorkTime());
 }
 
 // Mettre à jour l'affichage du temps de pause
@@ -644,14 +688,14 @@ function updateBreakTimeDisplay() {
     document.getElementById('break-time-left').textContent = `Pause: ${breakMinutes}:${breakSeconds < 10 ? '0' : ''}${breakSeconds}`;
 }
 
-// Mettre à jour l'affichage du temps de travail
+// Fonction pour mettre à jour l'affichage du timer
 function updateTimerDisplay() {
     const minutes = Math.floor(currentTime / 60);
     const seconds = currentTime % 60;
     document.getElementById('time-left').textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
 }
 
-// Gestion du démarrage et de la pause du Timer
+// Fonction pour démarrer/pauser le timer
 function toggleTimer() {
     if (!isSessionActive) {
         alert("Veuillez démarrer une nouvelle session avant d'utiliser le timer.");
@@ -661,7 +705,6 @@ function toggleTimer() {
         alert("Veuillez sélectionner une tâche avant de démarrer le Pomodoro Timer.");
         return;
     }
-
     if (stopwatchInterval !== null) {
         alert("Veuillez arrêter et réinitialiser le chronomètre avant de démarrer le Pomodoro Timer.");
         return;
@@ -677,26 +720,31 @@ function toggleTimer() {
     isRunning = !isRunning;
 }
 
-// Réinitialisation du Timer
+// Fonction pour calculer le temps total de travail
+function calculateTotalWorkTime() {
+    return timerTime + stopwatchTime + manualTimeInSeconds;
+}
+
+// Fonction pour arrêter le timer
+function stopTimer() {
+    clearInterval(timer);
+    isRunning = false;
+    document.getElementById('start_stop').textContent = 'Démarrer';
+}
+
+// Fonction pour réinitialiser le timer
 function resetTimer() {
     clearInterval(timer);
     isRunning = false;
     isWorkSession = true;
     currentTime = workDuration;
+    timerTime = 0;
     updateTimerDisplay();
     document.getElementById('start_stop').textContent = 'Démarrer';
-    saveSessionToCache(); // Sauvegarder l'état après réinitialisation
+    document.getElementById('total-work-time').textContent = formatTime(calculateTotalWorkTime());
 }
 
-// Arrêter le Timer
-function stopTimer() {
-    clearInterval(timer);
-    isRunning = false;
-    document.getElementById('start_stop').textContent = 'Démarrer';
-    saveSessionToCache(); // Sauvegarder l'état après arrêt
-}
-
-// Démarrer le chronomètre
+// Fonction pour démarrer/pauser le chronomètre
 function startStopwatch() {
     if (!isSessionActive) {
         alert("Veuillez démarrer une nouvelle session avant d'utiliser le chronomètre.");
@@ -712,23 +760,28 @@ function startStopwatch() {
     }
 }
 
-// Arrêter le chronomètre
-function stopStopwatch() {
-    clearInterval(stopwatchInterval);
-    document.getElementById('stopwatch-start').disabled = false;
-    document.getElementById('stopwatch-stop').disabled = true;
-    saveSessionToCache(); // Sauvegarder l'état du chronomètre après arrêt
+// Fonction pour mettre à jour le chronomètre
+function updateStopwatch() {
+    stopwatchTime++;
+    document.getElementById('stopwatch-time').textContent = formatTime(stopwatchTime);
+    document.getElementById('total-work-time').textContent = formatTime(calculateTotalWorkTime());
 }
 
-// Réinitialiser le chronomètre
+// Fonction pour arrêter le chronomètre
+function stopStopwatch() {
+    clearInterval(stopwatchInterval);
+    stopwatchInterval = null;
+    document.getElementById('stopwatch-start').textContent = 'Démarrer';
+}
+
+// Fonction pour réinitialiser le chronomètre
 function resetStopwatch() {
     clearInterval(stopwatchInterval);
     stopwatchInterval = null;
     stopwatchTime = 0;
-    document.getElementById('stopwatch-time').textContent = formatTime(stopwatchTime);
-    document.getElementById('stopwatch-start').disabled = false;
-    document.getElementById('stopwatch-stop').disabled = true;
-    saveSessionToCache(); // Sauvegarder l'état après réinitialisation
+    document.getElementById('stopwatch-time').textContent = '00:00:00';
+    document.getElementById('stopwatch-start').textContent = 'Démarrer';
+    document.getElementById('total-work-time').textContent = formatTime(calculateTotalWorkTime());
 }
 
 // Formater le temps pour l'affichage
@@ -751,6 +804,7 @@ function loadCounter() {
     }
 }
 
+// Fonction pour incrémenter le compteur
 function incrementCounter(value) {
     if (!isSessionActive) {
         alert("Veuillez démarrer une nouvelle session avant d'utiliser le compteur.");
@@ -760,16 +814,16 @@ function incrementCounter(value) {
     document.getElementById('counter-value').textContent = Counter.value;
 }
 
+// Fonction pour décrémenter le compteur
 function decrementCounter(amount) {
     Counter.value = Math.max(0, Counter.value - amount);
     document.getElementById('counter-value').textContent = Counter.value;
 }
 
-// Réinitialiser le compteur
+// Fonction pour réinitialiser le compteur
 function resetCounter() {
     Counter.value = 0;
     document.getElementById('counter-value').textContent = Counter.value;
-    saveSessionToCache(); // Sauvegarder l'état après réinitialisation
 }
 
 // Fonction pour ajouter manuellement du temps d'étude
@@ -782,62 +836,25 @@ function addManualTime() {
         return;
     }
 
-    manualTimeInSeconds = (hours * 60 * 60) + (minutes * 60);
+    manualTimeInSeconds += (hours * 3600) + (minutes * 60);
 
-    if (manualTimeInSeconds > 0) {
-        alert('Temps d\'étude ajouté manuellement.');
-    } else {
-        alert('Veuillez entrer un temps supérieur à 0.');
-    }
+    alert('Temps d\'étude ajouté manuellement.');
 
     document.getElementById('manual-hours').value = '';
     document.getElementById('manual-minutes').value = '';
+
+    // Mettre à jour l'affichage du temps total
+    document.getElementById('total-work-time').textContent = formatTime(calculateTotalWorkTime());
 }
 
-// Enregistrer les données de session au serveur
-async function saveSessionData() {
-    if (!selectedTaskId) {
-        alert("Veuillez sélectionner une tâche avant d'enregistrer.");
-        return;
-    }
 
-    const totalWorkTimeWithManual = totalWorkTime + manualTimeInSeconds;
-    const stopwatchTimeWithManual = stopwatchTime + manualTimeInSeconds;
+// Initialisation
+document.addEventListener('DOMContentLoaded', function() {
+    updateTaskTitle();
+    updateTimerDisplay();
+    enableControls();
+});
 
-    try {
-        const response = await fetch('http://localhost:3000/session/save', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            },
-            body: JSON.stringify({
-                sessionId: currentSessionId,
-                taskId: selectedTaskId,
-                totalWorkTime: totalWorkTimeWithManual,
-                stopwatchTime: stopwatchTimeWithManual,
-                counterValue: Counter.value
-            })
-        });
-
-        if (!response.ok) {
-            throw new Error('Erreur lors de l\'enregistrement des données de la session');
-        }
-
-        const data = await response.json();
-        alert('Données de la session sauvegardées avec succès.');
-        console.log('Session data saved:', data);
-
-        // Réinitialiser les valeurs après l'enregistrement
-        manualTimeInSeconds = 0;
-        document.getElementById('manual-hours').value = '';
-        document.getElementById('manual-minutes').value = '';
-
-    } catch (error) {
-        console.error('Error saving session data:', error);
-        alert('Erreur lors de la sauvegarde des données de la session');
-    }
-}
 
 
 // Charger l'état initial depuis le cache local
@@ -873,6 +890,7 @@ async function loadProfile() {
         const setAndLogValue = (id, value) => {
             const element = document.getElementById(id);
             if (element) {
+                console.log(id, element)            
                 element.value = value || '';
                 console.log(`${id} set to:`, value);
             } else {
@@ -880,12 +898,12 @@ async function loadProfile() {
             }
         };
 
-        setAndLogValue('username', user.username);
-        setAndLogValue('last-name', user.last_name);
-        setAndLogValue('first-name', user.first_name);
-        setAndLogValue('age', user.age);
-        setAndLogValue('gender', user.gender);
-        setAndLogValue('email', user.email);
+        setAndLogValue('usernameprofil', user.username);
+        setAndLogValue('last-nameprofil', user.lastName);
+        setAndLogValue('first-nameprofil', user.firstName);
+        setAndLogValue('ageprofil', user.age);
+        setAndLogValue('genderprofil', user.gender);
+        setAndLogValue('emailprofil', user.email);
 
         // Vérification finale
         console.log('Final form values:');
@@ -904,8 +922,8 @@ async function updateProfile(event) {
     event.preventDefault();
 
     const username = document.getElementById('username').value;
-    const lastName = document.getElementById('last-name').value;
-    const firstName = document.getElementById('first-name').value;
+    const lastName = document.getElementById('lastName').value;
+    const firstName = document.getElementById('firstName').value;
     const age = document.getElementById('age').value;
     const gender = document.getElementById('gender').value;
     const email = document.getElementById('email').value;
@@ -1017,14 +1035,14 @@ function initializeCharts() {
             datasets: [
                 {
                     label: 'Temps de Travail (minutes)',
-                    data: [],
+                    data: [15],
                     backgroundColor: 'rgba(255, 99, 132, 0.2)',
                     borderColor: 'rgba(255, 99, 132, 1)',
                     borderWidth: 1
                 },
                 {
                     label: 'Nombre de Comptages',
-                    data: [],
+                    data: [20],
                     backgroundColor: 'rgba(75, 192, 192, 0.2)',
                     borderColor: 'rgba(75, 192, 192, 1)',
                     borderWidth: 1
@@ -1153,7 +1171,7 @@ const { dailyChart, weeklyChart, monthlyChart, yearlyChart } = initializeCharts(
 
 
 
-function updateCharts() {
+/*function updateCharts() {
     const completedTasks = JSON.parse(localStorage.getItem('completedTasks')) || [];
 
     const chartData = completedTasks.reduce((acc, task) => {
@@ -1199,17 +1217,7 @@ function updateChart(chart, data) {
     chart.data.datasets[1].data = units;
     chart.update();
 }
-
-document.addEventListener('DOMContentLoaded', function() {
-    loadTasks();
-    loadSessionFromCache(); 
-    if (document.getElementById('statistics').classList.contains('active')) {
-        loadProfile();
-    }
-
-    initializeCalendar();
-    updateCharts();
-});
+*/
 
 function getWeekNumber(d) {
     const date = new Date(d.getTime());

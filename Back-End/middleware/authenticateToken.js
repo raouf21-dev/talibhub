@@ -6,11 +6,10 @@ dotenv.config();
 function authenticateToken(req, res, next) {
     // Log de l'en-tête Authorization complet
     const authHeader = req.headers['authorization'];
-    console.log('Authorization Header:', authHeader);
 
     // Extraction et log du token
     const token = authHeader && authHeader.split(' ')[1];
-    console.log('Extracted Token:', token);
+
 
     // Vérification si le token est null
     if (token == null) {
@@ -26,7 +25,7 @@ function authenticateToken(req, res, next) {
         }
 
         // Log des informations utilisateur décryptées
-        console.log('Decoded User from Token:', user);
+
 
         // Attacher les informations utilisateur à l'objet req
         req.user = user;

@@ -12,23 +12,25 @@ exports.getAllSessions = async (req, res) => {
 };
 
 exports.saveSession = async (req, res) => {
-    const { id, taskId, previousSessionId, totalWorkTime, stopwatchTime, counterValue } = req.body;
+    const { taskId, totalWorkTime, stopwatchTime, timerTime, counterValue } = req.body;
     const userId = req.user.id;
 
     try {
-        const session = await sessionModel.createSession(
-            id,
+        const newSession = await sessionModel.createSession(
             taskId,
-            previousSessionId || null,
             userId,
             totalWorkTime,
             stopwatchTime,
+            timerTime,
             counterValue
         );
-        res.status(201).json({ message: 'Session saved successfully', sessionId: session.id });
+        res.status(201).json({ 
+            message: 'Session saved successfully', 
+            newSessionId: newSession.id
+        });
     } catch (err) {
-        console.error('Error saving session:', err.message, err.stack);
-        res.status(500).send('Server error');
+        console.error('Error in saveSession:', err);
+        res.status(500).json({ message: 'Server error', error: err.message });
     }
 };
 
@@ -69,26 +71,54 @@ exports.getLastSessionForTask = async (req, res) => {
     const taskId = parseInt(req.params.taskId, 10);
     const userId = req.user.id;
 
-    console.log('Recherche de la dernière session - UserId:', userId, 'TaskId:', taskId);
-
-    if (isNaN(taskId)) {
-        return res.status(400).json({ message: 'Invalid Task ID' });
-    }
+    console.log(`Getting last session for user ${userId} and task ${taskId}`);
 
     try {
         const lastSession = await sessionModel.getLastSessionByTaskId(userId, taskId);
-        console.log('Dernière session trouvée:', lastSession);
+        const sessionCount = await sessionModel.getSessionCountByTaskId(userId, taskId);
+
+        console.log('Last session found:', lastSession);
+        console.log('Session count:', sessionCount);
 
         if (!lastSession) {
-            console.log('Aucune session trouvée pour cette tâche');
-            return res.status(404).json({ message: 'No previous session found for this task' });
+            console.log('No previous session found for this task');
+            return res.status(200).json({
+                message: 'No previous session found for this task',
+                lastSession: {
+                    counter_value: 0,
+                    total_work_time: 0,
+                    stopwatch_time: 0,
+                    timer_time: 0
+                },
+                sessionCount: 0
+            });
         }
-        res.json(lastSession);
+
+        // Ajoutez ces logs juste avant d'envoyer la réponse
+        console.log('Sending response:', {
+            message: 'Last session found',
+            lastSession: {
+                counter_value: lastSession.counter_value,
+                total_work_time: lastSession.total_work_time,
+                stopwatch_time: lastSession.stopwatch_time,
+                timer_time: lastSession.timer_time
+            },
+            sessionCount: sessionCount
+        });
+
+        res.json({
+            message: 'Last session found',
+            lastSession: {
+                counter_value: lastSession.counter_value,
+                total_work_time: lastSession.total_work_time,
+                stopwatch_time: lastSession.stopwatch_time,
+                timer_time: lastSession.timer_time
+            },
+            sessionCount: sessionCount
+        });
     } catch (err) {
         console.error('Error retrieving last session for task:', err.message);
         res.status(500).json({ message: 'Server error', error: err.message });
     }
 };
-
-
 
