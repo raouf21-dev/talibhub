@@ -23,13 +23,15 @@ app.use(cors({
 app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true }));
 
+
 // Importer les routes
-const authRoutes = require('./routes/auth');
-const tasksRoutes = require('./routes/tasks');
-const timerRoutes = require('./routes/timer');
-const counterRoutes = require('./routes/counter');
-const sessionRoutes = require('./routes/session');
-const sourateRoutes = require('./routes/sourates');
+const authRoutes = require('./routes/authRoutes');
+const tasksRoutes = require('./routes/tasksRoutes');
+const timerRoutes = require('./routes/timerRoutes');
+const counterRoutes = require('./routes/counterRoutes');
+const sessionRoutes = require('./routes/sessionRoutes');
+const sourateRoutes = require('./routes/souratesRoutes');
+const statisticsRoutes = require('./routes/statisticsRoutes')
 
 // Utiliser les routes
 app.use('/auth', authRoutes);
@@ -38,6 +40,8 @@ app.use('/timer', timerRoutes);
 app.use('/counter', counterRoutes);
 app.use('/session', sessionRoutes);
 app.use('/sourates', sourateRoutes);
+app.use('/statistics', statisticsRoutes);
+
 
 
 // Gérer les erreurs 404

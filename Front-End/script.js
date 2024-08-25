@@ -1,73 +1,71 @@
-document.addEventListener('DOMContentLoaded', function() {
-    initializeCalendar();
-    /*updateCharts();*/
-
+// Fonction principale d'initialisation de l'application
+function initializeApp() {
     const activePageId = document.querySelector('.page.active').id;
-    const navHeader = document.getElementById('nav');
-    if (activePageId === 'welcome' || activePageId === 'signup') {
-        navHeader.style.display = 'none';
-    } else {
-        navHeader.style.display = 'block';
-    }
-
-    // Appeler la fonction d'initialisation des écouteurs d'événements
+    updateNavVisibility(activePageId);
     initializeEventListeners();
-});
-
-function initializeEventListeners() {
-    document.getElementById('signupForm')?.addEventListener('submit', handleSignup);
-    document.getElementById('loginForm')?.addEventListener('submit', handleLogin);
-    document.getElementById('showPasswordToggle')?.addEventListener('click', togglePasswordVisibility);
-    document.getElementById('passwordChangeForm')?.addEventListener('submit', handleChangePassword);
-    document.getElementById('showNewPasswordToggle')?.addEventListener('click', toggleNewPasswordVisibility);
-    document.getElementById('profileForm')?.addEventListener('submit', updateProfile);
-    document.getElementById('task-select').addEventListener('change', () => updateTaskTitle());
+    loadInitialPage(activePageId);
 }
 
-function navigateTo(pageId) {
-    const pages = document.querySelectorAll('.page');
-    pages.forEach(page => {
-        page.classList.toggle('active', page.id === pageId);
-    });
-
+// Gestion de la visibilité de la navigation
+function updateNavVisibility(pageId) {
     const navHeader = document.getElementById('nav');
-    if (pageId === 'welcome' || pageId === 'signup') {
-        navHeader.style.display = 'none';
-    } else {
-        navHeader.style.display = 'block';
-    }
+    navHeader.style.display = (pageId === 'welcome' || pageId === 'signup') ? 'none' : 'block';
+}
 
-    switch(pageId) {
-        case 'profile':
-            loadProfile();
-            break;
-        case 'statistics':
-            initializeCharts();
-            //updateCharts();
-            break;
-        case 'todoLists':
-            loadTasks();
-            break;
-        case 'apprentissage':
+// Initialisation des écouteurs d'événements
+function initializeEventListeners() {
+    const eventListeners = {
+        'signupForm': { event: 'submit', handler: handleSignup },
+        'loginForm': { event: 'submit', handler: handleLogin },
+        'showPasswordToggle': { event: 'click', handler: togglePasswordVisibility },
+        'passwordChangeForm': { event: 'submit', handler: handleChangePassword },
+        'showNewPasswordToggle': { event: 'click', handler: toggleNewPasswordVisibility },
+        'profileForm': { event: 'submit', handler: updateProfile },
+    };
+
+    Object.entries(eventListeners).forEach(([id, { event, handler }]) => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.addEventListener(event, handler);
+        }
+    });
+}
+
+// Chargement initial de la page
+function loadInitialPage(pageId) {
+    const pageLoaders = {
+        'profile': loadProfile,
+        'statistics': () => { initializeCharts(); updateCharts(); },
+        'todoLists': loadTasks,
+        'apprentissage': () => {
             loadTasks();
             loadSessionFromCache();
             loadCounter();
             updateTaskTitle();
             enableControls();
-            break;
-        case 'notifications':
-            loadNotifications();
-            break;
-        case 'salatSurahSelector':
-            initializeApp();
-            break;
-        default:
-            break;
-    }
+        },
+        'notifications': loadNotifications,
+        'salatSurahSelector': initializeApp
+    };
 
-    // Réinitialiser les écouteurs d'événements après le changement de page
-    initializeEventListeners();
+    const loader = pageLoaders[pageId];
+    if (loader) {
+        loader();
+    }
 }
+
+// Fonction de navigation
+function navigateTo(pageId) {
+    document.querySelectorAll('.page').forEach(page => {
+        page.classList.toggle('active', page.id === pageId);
+    });
+
+    updateNavVisibility(pageId);
+    loadInitialPage(pageId);
+}
+
+// Initialisation de l'application au chargement du DOM
+document.addEventListener('DOMContentLoaded', initializeApp);
 
 
 // DropDown menu
@@ -388,6 +386,12 @@ let manualTimeInSeconds = 0;
 let selectedTaskId = '';
 let isSessionActive = false;
 const Counter = { value: 0 };
+let currentSessionId = null;
+let taskLastSessionId = null;
+let totalWorkTime = null;
+
+
+
 
 // Fonction pour activer/désactiver les contrôles
 function enableControls() {
@@ -1022,202 +1026,179 @@ async function handleChangePassword(event) {
 
 //--------------------Charts--------------------
 
+// Variable globale pour stocker les instances de graphiques
+let chartInstances = {}; 
+
+async function fetchStatistics(period) {
+    try {
+        const response = await fetch(`http://localhost:3000/statistics/${period}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error(`Erreur HTTP pour ${period}:`, response.status, errorText);
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        console.log(`Données reçues pour ${period}:`, data);
+        return data;
+    } catch (error) {
+        console.error(`Erreur lors de la récupération des statistiques ${period}:`, error);
+        return [];
+    }
+}
+
+function checkAuthOnLoad() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        console.log('No token found, redirecting to login');
+        window.location.href = '/login.html'; // Assurez-vous que ce chemin est correct
+        return false;
+    }
+    return true;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (checkAuthOnLoad()) {
+        initializeCharts();
+        updateCharts();
+    }
+});
+
 function initializeCharts() {
-    const ctxDaily = document.getElementById('dailyChart').getContext('2d');
-    const ctxWeekly = document.getElementById('weeklyChart').getContext('2d');
-    const ctxMonthly = document.getElementById('monthlyChart').getContext('2d');
-    const ctxYearly = document.getElementById('yearlyChart').getContext('2d');
-
-    const dailyChart = new Chart(ctxDaily, {
-        type: 'bar',
-        data: {
-            labels: [],
-            datasets: [
-                {
-                    label: 'Temps de Travail (minutes)',
-                    data: [15],
-                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                    borderColor: 'rgba(255, 99, 132, 1)',
-                    borderWidth: 1
-                },
-                {
-                    label: 'Nombre de Comptages',
-                    data: [20],
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    borderWidth: 1
-                }
-            ]
-        },
-        options: {
-            scales: {
-                x: {
-                    stacked: true
-                },
-                y: {
-                    stacked: true,
-                    beginAtZero: true
-                }
-            }
+    const periods = ['daily', 'weekly', 'monthly', 'yearly'];
+    
+    periods.forEach(period => {
+        const ctx = document.getElementById(`${period}Chart`).getContext('2d');
+        
+        // Détruire le graphique existant s'il existe
+        if (chartInstances[period]) {
+            chartInstances[period].destroy();
         }
-    });
-
-    const weeklyChart = new Chart(ctxWeekly, {
-        type: 'bar',
-        data: {
-            labels: [],
-            datasets: [
-                {
-                    label: 'Temps de Travail (minutes)',
-                    data: [],
-                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                    borderColor: 'rgba(255, 99, 132, 1)',
-                    borderWidth: 1
+        
+        chartInstances[period] = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: [],
+                datasets: [
+                    {
+                        label: 'Temps de Travail (minutes)',
+                        data: [],
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Nombre de Comptages',
+                        data: [],
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                scales: {
+                    x: {
+                        stacked: true
+                    },
+                    y: {
+                        stacked: true,
+                        beginAtZero: true
+                    }
                 },
-                {
-                    label: 'Nombre de Comptages',
-                    data: [],
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    borderWidth: 1
-                }
-            ]
-        },
-        options: {
-            scales: {
-                x: {
-                    stacked: true
+                plugins: {
+                    title: {
+                        display: true,
+                        text: `Statistiques ${period.charAt(0).toUpperCase() + period.slice(1)}s`
+                    }
                 },
-                y: {
-                    stacked: true,
-                    beginAtZero: true
-                }
+                responsive: true,
+                maintainAspectRatio: false
             }
-        }
+        });
     });
-
-    const monthlyChart = new Chart(ctxMonthly, {
-        type: 'bar',
-        data: {
-            labels: [],
-            datasets: [
-                {
-                    label: 'Temps de Travail (minutes)',
-                    data: [],
-                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                    borderColor: 'rgba(255, 99, 132, 1)',
-                    borderWidth: 1
-                },
-                {
-                    label: 'Nombre de Comptages',
-                    data: [],
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    borderWidth: 1
-                }
-            ]
-        },
-        options: {
-            scales: {
-                x: {
-                    stacked: true
-                },
-                y: {
-                    stacked: true,
-                    beginAtZero: true
-                }
-            }
-        }
-    });
-
-    const yearlyChart = new Chart(ctxYearly, {
-        type: 'bar',
-        data: {
-            labels: [],
-            datasets: [
-                {
-                    label: 'Temps de Travail (minutes)',
-                    data: [],
-                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                    borderColor: 'rgba(255, 99, 132, 1)',
-                    borderWidth: 1
-                },
-                {
-                    label: 'Nombre de Comptages',
-                    data: [],
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    borderWidth: 1
-                }
-            ]
-        },
-        options: {
-            scales: {
-                x: {
-                    stacked: true
-                },
-                y: {
-                    stacked: true,
-                    beginAtZero: true
-                }
-            }
-        }
-    });
-
-    return { dailyChart, weeklyChart, monthlyChart, yearlyChart };
 }
 
-const { dailyChart, weeklyChart, monthlyChart, yearlyChart } = initializeCharts();
+async function updateCharts() {
+    const periods = ['daily', 'weekly', 'monthly', 'yearly'];
 
-
-
-/*function updateCharts() {
-    const completedTasks = JSON.parse(localStorage.getItem('completedTasks')) || [];
-
-    const chartData = completedTasks.reduce((acc, task) => {
-        const taskDate = new Date(task.date);
-        const day = taskDate.toISOString().split('T')[0];
-        const week = `${taskDate.getFullYear()}-W${getWeekNumber(taskDate)}`;
-        const month = `${taskDate.getFullYear()}-${(taskDate.getMonth() + 1).toString().padStart(2, '0')}`;
-        const year = taskDate.getFullYear().toString();
-
-        if (!acc.daily[day]) acc.daily[day] = { units: 0, duration: 0 };
-        if (!acc.weekly[week]) acc.weekly[week] = { units: 0, duration: 0 };
-        if (!acc.monthly[month]) acc.monthly[month] = { units: 0, duration: 0 };
-        if (!acc.yearly[year]) acc.yearly[year] = { units: 0, duration: 0 };
-
-        acc.daily[day].units += task.duration;
-        acc.daily[day].duration += task.duration / 60;
-
-        acc.weekly[week].units += task.duration;
-        acc.weekly[week].duration += task.duration / 60;
-
-        acc.monthly[month].units += task.duration;
-        acc.monthly[month].duration += task.duration / 60;
-
-        acc.yearly[year].units += task.duration;
-        acc.yearly[year].duration += task.duration / 60;
-
-        return acc;
-    }, { daily: {}, weekly: {}, monthly: {}, yearly: {} });
-
-    updateChart(dailyChart, chartData.daily);
-    updateChart(weeklyChart, chartData.weekly);
-    updateChart(monthlyChart, chartData.monthly);
-    updateChart(yearlyChart, chartData.yearly);
+    for (const period of periods) {
+        try {
+            const stats = await fetchStatistics(period);
+            if (stats.length === 0) {
+                console.log(`No data available for ${period} statistics`);
+                // Optionally, update the chart to show "No data available"
+                continue;
+            }
+            updateChart(chartInstances[period], stats, period);
+        } catch (error) {
+            console.error(`Error updating ${period} chart:`, error);
+            // Optionally, update the chart to show an error message
+        }
+    }
 }
 
-function updateChart(chart, data) {
-    const labels = Object.keys(data);
-    const durations = labels.map(label => data[label].duration);
-    const units = labels.map(label => data[label].units);
+function updateChart(chart, data, period) {
+    if (!chart) {
+        console.error(`Chart for ${period} not found`);
+        return;
+    }
+
+    console.log(`Données reçues pour ${period}:`, data);
+
+    if (!Array.isArray(data) || data.length === 0) {
+        console.log(`Aucune donnée disponible pour ${period}`);
+        chart.data.labels = [];
+        chart.data.datasets.forEach((dataset) => {
+            dataset.data = [];
+        });
+        chart.update();
+        return;
+    }
+
+    const labels = data.map(item => {
+        if (!item.date) {
+            console.error('Date manquante pour l\'élément:', item);
+            return 'Date invalide';
+        }
+        const formattedDate = formatDate(item.date, period);
+        console.log(`Date originale: ${item.date}, Formattée: ${formattedDate}`);
+        return formattedDate;
+    });
+    const totalTime = data.map(item => Math.round(Number(item.total_time) / 60)); // Convertir en minutes
+    const totalCount = data.map(item => Number(item.total_count));
 
     chart.data.labels = labels;
-    chart.data.datasets[0].data = durations;
-    chart.data.datasets[1].data = units;
+    chart.data.datasets[0].data = totalTime;
+    chart.data.datasets[1].data = totalCount;
     chart.update();
 }
-*/
+
+function formatDate(dateString, period) {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) {
+        console.error('Date invalide:', dateString);
+        return 'Date invalide';
+    }
+
+    switch (period) {
+        case 'daily':
+            return date.toLocaleDateString('fr-FR', { year: 'numeric', month: 'short', day: 'numeric' });
+        case 'weekly':
+            return `Semaine du ${date.toLocaleDateString('fr-FR', { year: 'numeric', month: 'short', day: 'numeric' })}`;
+        case 'monthly':
+            return date.toLocaleDateString('fr-FR', { year: 'numeric', month: 'long' });
+        case 'yearly':
+            return date.getFullYear().toString();
+        default:
+            return date.toLocaleDateString('fr-FR');
+    }
+}
 
 function getWeekNumber(d) {
     const date = new Date(d.getTime());
