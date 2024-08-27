@@ -3,6 +3,15 @@ function initializeApp() {
     const activePageId = document.querySelector('.page.active').id;
     updateNavVisibility(activePageId);
     initializeEventListeners();
+    
+    if (checkAuthOnLoad()) {
+        // L'utilisateur est authentifié, chargez le contenu approprié
+        navigateTo('iconSelection'); // ou toute autre page d'accueil appropriée
+    } else {
+        // L'utilisateur n'est pas authentifié, la redirection sera gérée par checkAuthOnLoad
+        return;
+    }
+    
     loadInitialPage(activePageId);
 }
 
@@ -1055,8 +1064,9 @@ async function fetchStatistics(period) {
 function checkAuthOnLoad() {
     const token = localStorage.getItem('token');
     if (!token) {
-        console.log('No token found, redirecting to login');
-        window.location.href = '/login.html'; // Assurez-vous que ce chemin est correct
+        console.log('No token found, redirecting to signup/login page');
+        // Au lieu de rediriger vers une page séparée, nous allons afficher la page de connexion
+        navigateTo('welcome');
         return false;
     }
     return true;

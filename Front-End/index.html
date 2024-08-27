@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>TalibTimer</title>
     <meta name="TalibTimer" content="TalibTimer aide les utilisateurs à améliorer leur productivité grâce à la technique Pomodoro, offrant des minuteurs personnalisables, des statistiques détaillées, des rappels et des listes de tâches pour une gestion optimale du temps." />
+    <link rel="icon" href="/Logo/Original Logo Kili-Isere-resize.png" type="image/x-icon">
     <link rel="stylesheet" href="styles.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -309,19 +310,40 @@
 
     <div id="salatSurahSelector" class="page">
         <section>
+            <h2>Statistiques de récitation</h2>
             <div id="knownSouratesCount">Sourates connues : 0</div>
-            <h2>Sélectionnez les sourates que vous connaissez</h2>
+            <div id="recitationCyclesCount">Cycles de récitation complets : 0</div>
+            <div id="recitationProgress">Progrès : 0 / 0 sourates récitées</div>
+        </section>
+    
+        <section>
+            <h2>Sélection des sourates connues</h2>
             <div id="sourateList">
                 <!-- La liste des sourates sera générée ici dynamiquement -->
             </div>
-            <button onclick="saveKnownSourates()">Sauvegarder</button>
+            <button onclick="saveKnownSourates()">Sauvegarder les sourates connues</button>
+        </section>
+    
+        <section>
+            <h2>Sélection pour Salat</h2>
             <button onclick="selectRandomSourates()">Sélectionner des sourates pour Salat</button>
             <div>
-                <h3>1er raka: <span id="firstRaka"></span></h3>
-                <h3>2nd raka: <span id="secondRaka"></span></h3>
+                <h3>1ère raka: <span id="firstRaka"></span></h3>
+                <h3>2ème raka: <span id="secondRaka"></span></h3>
+            </div>
+        </section>
+    
+        <section>
+            <h2>Historique des récitations</h2>
+            <button onclick="toggleRecitationHistory()">Afficher/Masquer l'historique</button>
+            <div id="recitationHistoryContainer" style="display: none;">
+                <select id="recitationHistory" size="10" style="width: 100%;">
+                    <!-- L'historique sera généré ici dynamiquement -->
+                </select>
             </div>
         </section>
     </div>
+
     <div id="douaTime" class="page">
         <section>
         <h1>Calculate Last Third of the Night</h1>
