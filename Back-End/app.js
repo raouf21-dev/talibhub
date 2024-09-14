@@ -2,6 +2,8 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const dotenv = require('dotenv');
 const cors = require('cors');
+const cron = require('node-cron');
+const { scrapePrayerTimes } = require('./controllers/mosqueTimesController');
 
 
 // Charger les variables d'environnement
@@ -32,6 +34,7 @@ const counterRoutes = require('./routes/counterRoutes');
 const sessionRoutes = require('./routes/sessionRoutes');
 const sourateRoutes = require('./routes/souratesRoutes');
 const statisticsRoutes = require('./routes/statisticsRoutes')
+const mosqueTimesRoutes = require('./routes/mosqueTimesRoutes');
 
 // Utiliser les routes
 app.use('/auth', authRoutes);
@@ -41,6 +44,7 @@ app.use('/counter', counterRoutes);
 app.use('/session', sessionRoutes);
 app.use('/sourates', sourateRoutes);
 app.use('/statistics', statisticsRoutes);
+app.use('/mosque-times', mosqueTimesRoutes);
 
 
 
@@ -61,3 +65,13 @@ app.listen(PORT, () => {
 });
 
 module.exports = app;
+
+// Exécute le scraping tous les jours à minuit
+cron.schedule('0 0 * * *', async () => {
+  try {
+    await scrapePrayerTimes();
+    console.log('Automatic scraping completed successfully');
+  } catch (error) {
+    console.error('Error during automatic scraping:', error);
+  }
+});

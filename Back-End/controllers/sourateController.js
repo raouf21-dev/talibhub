@@ -1,108 +1,111 @@
-const Sourate = require('../models/sourateModel');
+const sourateModel = require('../models/sourateModel');
 
 const getAllSourates = async (req, res) => {
     try {
-        const sourates = await Sourate.getAllSourates();
+        const sourates = await sourateModel.getAllSourates();
         res.json(sourates);
-    } catch (err) {
-        console.error('Erreur:', err);
-        res.status(500).json({ error: 'Erreur de serveur' });
+    } catch (error) {
+        console.error('Erreur dans getAllSourates:', error);
+        res.status(500).json({ error: 'Erreur serveur' });
     }
 };
 
 const getKnownSourates = async (req, res) => {
     try {
         const userId = req.user.id;
-        const sourates = await Sourate.getKnownSourates(userId);
-        res.json(sourates);
-    } catch (err) {
-        res.status(500).json({ error: 'Erreur de serveur' });
+        const knownSourates = await sourateModel.getKnownSourates(userId);
+        res.json(knownSourates);
+    } catch (error) {
+        console.error('Erreur dans getKnownSourates:', error);
+        res.status(500).json({ error: 'Erreur serveur' });
     }
 };
 
-const saveKnownSourates = async (req, res) => {
+const updateKnownSourates = async (req, res) => {
     try {
         const userId = req.user.id;
         const { sourates } = req.body;
-        await Sourate.saveKnownSourates(userId, sourates);
-        res.json({ message: 'Sourates connues sauvegardées avec succès' });
-    } catch (err) {
-        console.error('Error in saveKnownSourates:', err);
-        res.status(500).json({ error: 'Erreur de serveur' });
+        await sourateModel.saveKnownSourates(userId, sourates);
+        res.json({ message: 'Sourates connues mises à jour avec succès' });
+    } catch (error) {
+        console.error('Erreur dans updateKnownSourates:', error);
+        res.status(500).json({ error: 'Erreur serveur' });
     }
 };
 
-
-const selectRandomSourates = async (req, res) => {
+const recordRecitation = async (req, res) => {
     try {
         const userId = req.user.id;
         const { firstSourate, secondSourate } = req.body;
-        
-        if (!firstSourate || !secondSourate || firstSourate === secondSourate) {
-            return res.status(400).json({ error: 'Sélection de sourates invalide' });
-        }
-        
-        const cycleCompleted = await Sourate.updateRecitationCount(userId, firstSourate, secondSourate);
-        const stats = await Sourate.getRecitationStats(userId);
-        
-        res.json({ 
-            message: 'Sélection enregistrée', 
+
+        // Mettre à jour les compteurs de récitation
+        await sourateModel.incrementRecitationCount(userId, firstSourate);
+        await sourateModel.incrementRecitationCount(userId, secondSourate);
+
+        // Vérifier si un cycle est complété
+        const cycleCompleted = await sourateModel.checkCycleCompletion(userId);
+
+        // Obtenir les statistiques mises à jour
+        const stats = await sourateModel.getRecitationStats(userId);
+
+        res.json({
+            message: 'Récitation enregistrée avec succès',
             cycleCompleted,
-            recitedAtLeastOnce: stats.recited_at_least_once,
-            totalKnown: stats.total_known
+            stats
         });
-    } catch (err) {
-        console.error('Erreur dans selectRandomSourates:', err);
-        res.status(500).json({ error: 'Erreur de serveur' });
+    } catch (error) {
+        console.error('Erreur dans recordRecitation:', error);
+        res.status(500).json({ error: 'Erreur serveur' });
     }
 };
 
+const getRecitationStats = async (req, res) => {
+    try {
+        console.log('Début de getRecitationStats');
+        const userId = req.user.id;
+        console.log('UserId:', userId);
+        const stats = await sourateModel.getRecitationStats(userId);
+        console.log('Stats récupérées:', stats);
+        res.json(stats);
+    } catch (error) {
+        console.error('Erreur détaillée dans getRecitationStats:', error);
+        res.status(500).json({ error: 'Erreur serveur', details: error.message });
+    }
+};
 const getRecitationHistory = async (req, res) => {
     try {
         const userId = req.user.id;
-        const history = await Sourate.getRecitationHistory(userId);
+        const history = await sourateModel.getRecitationHistory(userId);
         res.json(history);
-    } catch (err) {
-        console.error('Erreur dans getRecitationHistory:', err);
-        res.status(500).json({ error: 'Erreur de serveur' });
+    } catch (error) {
+        console.error('Erreur dans getRecitationHistory:', error);
+        res.status(500).json({ error: 'Erreur serveur' });
     }
 };
 
 const getRecitationInfo = async (req, res) => {
     try {
         const userId = req.user.id;
-        const cycles = await Sourate.getRecitationCycles(userId);
-        const progress = await Sourate.getRecitationProgress(userId);
+        const stats = await sourateModel.getRecitationStats(userId);
         res.json({ 
-            cycles, 
+            cycles: stats.complete_cycles, 
             progress: {
-                totalKnown: progress.total_known,
-                recitedAtLeastOnce: progress.recited_at_least_once
+                totalKnown: stats.total_known,
+                recitedAtLeastOnce: stats.recited_at_least_once
             }
         });
-    } catch (err) {
-        console.error('Erreur dans getRecitationInfo:', err);
-        res.status(500).json({ error: 'Erreur de serveur' });
-    }
-};
-
-const getRecitationStats = async (req, res) => {
-    try {
-        const userId = req.user.id;
-        const stats = await Sourate.getRecitationStats(userId);
-        res.json(stats);
-    } catch (err) {
-        console.error('Erreur dans getRecitationStats:', err);
-        res.status(500).json({ error: 'Erreur de serveur' });
+    } catch (error) {
+        console.error('Erreur dans getRecitationInfo:', error);
+        res.status(500).json({ error: 'Erreur serveur' });
     }
 };
 
 module.exports = {
     getAllSourates,
     getKnownSourates,
-    saveKnownSourates,
-    selectRandomSourates,
+    updateKnownSourates,
+    recordRecitation,
+    getRecitationStats,
     getRecitationHistory,
-    getRecitationInfo,
-    getRecitationStats
+    getRecitationInfo
 };

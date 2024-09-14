@@ -11,12 +11,6 @@ CREATE TABLE users (
     gender VARCHAR(10)
 );
 
-CREATE TABLE sourates (
-    number INT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    arabic VARCHAR(255) NOT NULL
-);
-
 CREATE TABLE tasks (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -73,11 +67,43 @@ CREATE TABLE completed_tasks (
 
 --------------Sourates----------------
 
+-- Table des sourates (existante)
+CREATE TABLE sourates (
+    number INT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    arabic VARCHAR(255) NOT NULL
+);
+
 CREATE TABLE known_sourates (
     user_id INT REFERENCES users(id) ON DELETE CASCADE,
     sourate_number INT REFERENCES sourates(number) ON DELETE CASCADE,
     PRIMARY KEY (user_id, sourate_number)
 );
+
+-- Table pour suivre les récitations individuelles
+CREATE TABLE sourate_recitations (
+    id SERIAL PRIMARY KEY,
+    user_id INT REFERENCES users(id) ON DELETE CASCADE,
+    sourate_number INT,
+    recitation_date TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    cycle_id INT
+);
+
+-- Table pour suivre les cycles de récitation
+CREATE TABLE recitation_cycles (
+    id SERIAL PRIMARY KEY,
+    user_id INT REFERENCES users(id) ON DELETE CASCADE,
+    start_date TIMESTAMP WITH TIME ZONE,
+    end_date TIMESTAMP WITH TIME ZONE,
+    is_complete BOOLEAN DEFAULT FALSE
+);
+
+-- Indices pour améliorer les performances
+CREATE INDEX idx_sourate_recitations_user_id ON sourate_recitations(user_id);
+CREATE INDEX idx_sourate_recitations_cycle_id ON sourate_recitations(cycle_id);
+CREATE INDEX idx_recitation_cycles_user_id ON recitation_cycles(user_id);
+
+
 
 -- Optionally, populate the table with initial data
 INSERT INTO sourates (number, name, arabic) VALUES
@@ -202,3 +228,41 @@ CREATE TABLE known_sourates (
     sourate_number INT REFERENCES sourates(number) ON DELETE CASCADE,
     PRIMARY KEY (user_id, sourate_number)
 );
+
+//--------MosqueTimes------------//
+
+-- Extension pour les fonctions géospatiales
+CREATE EXTENSION IF NOT EXISTS cube;
+CREATE EXTENSION IF NOT EXISTS earthdistance;
+
+-- Table des mosquées
+CREATE TABLE mosques (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    address VARCHAR(255) NOT NULL,
+    latitude DECIMAL(10, 8) NOT NULL,
+    longitude DECIMAL(11, 8) NOT NULL
+);
+
+-- Index spatial pour la recherche géographique rapide
+CREATE INDEX idx_mosques_location ON mosques USING gist (ll_to_earth(latitude, longitude));
+
+-- Table des horaires de prière
+CREATE TABLE prayer_times (
+    id SERIAL PRIMARY KEY,
+    mosque_id INTEGER REFERENCES mosques(id),
+    date DATE NOT NULL,
+    fajr TIME NOT NULL,
+    dhuhr TIME NOT NULL,
+    asr TIME NOT NULL,
+    maghrib TIME NOT NULL,
+    isha TIME NOT NULL,
+    jumuah1 TIME,
+    jumuah2 TIME,
+    jumuah3 TIME,
+    tarawih TIME
+);
+
+-- Index pour améliorer les performances des requêtes sur prayer_times
+CREATE INDEX idx_prayer_times_mosque_date ON prayer_times (mosque_id, date);
+

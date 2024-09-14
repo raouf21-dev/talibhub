@@ -1,25 +1,25 @@
 
 
-function getLocation() {
+function getDuaLocation() {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(position => {
             const latitude = position.coords.latitude;
             const longitude = position.coords.longitude;
-            fetchPrayerTimes(latitude, longitude);
-        }, showError);
+            fetchDuaPrayerTimes(latitude, longitude);
+        }, showDuaError);
     } else {
         alert('Geolocation is not supported by this browser.');
     }
 }
 
-function useCity() {
-    const city = document.getElementById('city').value;
-    let method = document.getElementById('method').value;
+function useDuaCity() {
+    const city = document.getElementById('duaCityInput').value;
+    let method = document.getElementById('duaMethodSelect').value;
     let customParams = "";
 
     if (method === "24") { // Custom method
-        const fajrAngle = document.getElementById('fajr-angle').value;
-        const ishaAngle = document.getElementById('isha-angle').value;
+        const fajrAngle = document.getElementById('duaFajrAngleInput').value;
+        const ishaAngle = document.getElementById('duaIshaAngleInput').value;
         if (fajrAngle && ishaAngle) {
             customParams = `&fajrAngle=${fajrAngle}&ishaAngle=${ishaAngle}`;
         } else {
@@ -34,9 +34,9 @@ function useCity() {
             .then(data => {
                 if (data.data) {
                     const { Fajr, Maghrib } = data.data.timings;
-                    document.getElementById('manual-fajr').value = Fajr.slice(0, 5);
-                    document.getElementById('manual-maghrib').value = Maghrib.slice(0, 5);
-                    calculateLastThird(Fajr, Maghrib, 'auto');
+                    document.getElementById('duaManualFajrInput').value = Fajr.slice(0, 5);
+                    document.getElementById('duaManualMaghribInput').value = Maghrib.slice(0, 5);
+                    calculateDuaLastThird(Fajr, Maghrib, 'auto');
                 } else {
                     alert('City not found or no data available.');
                 }
@@ -47,12 +47,11 @@ function useCity() {
     }
 }
 
-
-function fetchPrayerTimes(latitude, longitude) {
-    let method = document.getElementById('method').value;
+function fetchDuaPrayerTimes(latitude, longitude) {
+    let method = document.getElementById('duaMethodSelect').value;
     if (method === "24") {
-        const fajrAngle = document.getElementById('fajr-angle').value;
-        const ishaAngle = document.getElementById('isha-angle').value;
+        const fajrAngle = document.getElementById('duaFajrAngleInput').value;
+        const ishaAngle = document.getElementById('duaIshaAngleInput').value;
         if (fajrAngle && ishaAngle) {
             method = `&fajrAngle=${fajrAngle}&ishaAngle=${ishaAngle}`;
         } else {
@@ -65,20 +64,20 @@ function fetchPrayerTimes(latitude, longitude) {
         .then(response => response.json())
         .then(data => {
             const { Fajr, Maghrib } = data.data.timings;
-            document.getElementById('manual-fajr').value = Fajr.slice(0, 5);
-            document.getElementById('manual-maghrib').value = Maghrib.slice(0, 5);
-            calculateLastThird(Fajr, Maghrib, 'auto');
+            document.getElementById('duaManualFajrInput').value = Fajr.slice(0, 5);
+            document.getElementById('duaManualMaghribInput').value = Maghrib.slice(0, 5);
+            calculateDuaLastThird(Fajr, Maghrib, 'auto');
         })
         .catch(error => console.error('Error fetching prayer times:', error));
 }
 
-function manualCalculate() {
-    const fajr = document.getElementById('manual-fajr').value + ":00";
-    const maghrib = document.getElementById('manual-maghrib').value + ":00";
-    calculateLastThird(fajr, maghrib, 'manual');
+function calculateDuaManually() {
+    const fajr = document.getElementById('duaManualFajrInput').value + ":00";
+    const maghrib = document.getElementById('duaManualMaghribInput').value + ":00";
+    calculateDuaLastThird(fajr, maghrib, 'manual');
 }
 
-function calculateLastThird(Fajr, Maghrib, type) {
+function calculateDuaLastThird(Fajr, Maghrib, type) {
     const [fajrHour, fajrMinute] = Fajr.split(':').map(Number);
     const [maghribHour, maghribMinute] = Maghrib.split(':').map(Number);
 
@@ -86,26 +85,26 @@ function calculateLastThird(Fajr, Maghrib, type) {
     fajrDate.setHours(fajrHour, fajrMinute, 0);
 
     const maghribDate = new Date();
-    maghribDate.setHours(maghribHour, maghribMinute, 0);
+    maghribDate.setHours(maghribHour, maghribHour, 0);
 
     const nightDuration = (fajrDate - maghribDate + 24 * 60 * 60 * 1000) % (24 * 60 * 60 * 1000);
     const thirdOfNight = nightDuration / 3;
     const lastThirdStart = new Date(maghribDate.getTime() + 2 * thirdOfNight);
 
     if (type === 'auto') {
-        document.getElementById('fajr-time').innerText = `Fajr: ${Fajr}`;
-        document.getElementById('maghrib-time').innerText = `Maghrib: ${Maghrib}`;
-        document.getElementById('last-third').innerText = `Last third of the night starts at: ${lastThirdStart.toTimeString().slice(0, 5)}`;
+        document.getElementById('duaAutoFajrTime').innerText = `Fajr: ${Fajr}`;
+        document.getElementById('duaAutoMaghribTime').innerText = `Maghrib: ${Maghrib}`;
+        document.getElementById('duaAutoLastThird').innerText = `Last third of the night starts at: ${lastThirdStart.toTimeString().slice(0, 5)}`;
     } else if (type === 'manual') {
-        document.getElementById('manual-fajr-time').innerText = `Fajr: ${Fajr}`;
-        document.getElementById('manual-maghrib-time').innerText = `Maghrib: ${Maghrib}`;
-        document.getElementById('manual-last-third').innerText = `Last third of the night starts at: ${lastThirdStart.toTimeString().slice(0, 5)}`;
+        document.getElementById('duaManualFajrTime').innerText = `Fajr: ${Fajr}`;
+        document.getElementById('duaManualMaghribTime').innerText = `Maghrib: ${Maghrib}`;
+        document.getElementById('duaManualLastThird').innerText = `Last third of the night starts at: ${lastThirdStart.toTimeString().slice(0, 5)}`;
     }
 }
 
-function toggleCustomMethodInput() {
-    const method = document.getElementById('method').value;
-    const customMethodDiv = document.getElementById('custom-method');
+function toggleDuaCustomMethodInput() {
+    const method = document.getElementById('duaMethodSelect').value;
+    const customMethodDiv = document.getElementById('duaCustomMethod');
     if (method === "24") {
         customMethodDiv.style.display = "block";
     } else {
@@ -113,7 +112,7 @@ function toggleCustomMethodInput() {
     }
 }
 
-function showError(error) {
+function showDuaError(error) {
     switch(error.code) {
         case error.PERMISSION_DENIED:
             alert('User denied the request for Geolocation.');

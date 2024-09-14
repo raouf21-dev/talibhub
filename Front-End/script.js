@@ -1,43 +1,101 @@
 // Fonction principale d'initialisation de l'application
 function initializeApp() {
-    const activePageId = document.querySelector('.page.active').id;
+    console.log('Initializing app');  // Ajoutez ce log
+    const activePageId = document.querySelector('.page').id;
+    console.log('Active page:', activePageId);  // Ajoutez ce log
     updateNavVisibility(activePageId);
     initializeEventListeners();
+    initializeTabToggle();
     
-    if (checkAuthOnLoad()) {
-        // L'utilisateur est authentifié, chargez le contenu approprié
-        navigateTo('iconSelection'); // ou toute autre page d'accueil appropriée
+    if (activePageId === 'welcomepage') {
+        console.log('Initializing auth forms');  // Ajoutez ce log
+        initializeAuthForms();
     } else {
-        // L'utilisateur n'est pas authentifié, la redirection sera gérée par checkAuthOnLoad
-        return;
+        if (checkAuthOnLoad()) {
+            console.log('User authenticated, loading initial page');  // Ajoutez ce log
+            loadInitialPage(activePageId);
+        } else {
+            console.log('User not authenticated, navigating to welcome page');  // Ajoutez ce log
+            navigateTo('welcomepage');
+        }
     }
-    
-    loadInitialPage(activePageId);
+}
+
+function checkAuthOnLoad() {
+    const token = localStorage.getItem('token');
+    return !!token;
 }
 
 // Gestion de la visibilité de la navigation
 function updateNavVisibility(pageId) {
     const navHeader = document.getElementById('nav');
-    navHeader.style.display = (pageId === 'welcome' || pageId === 'signup') ? 'none' : 'block';
+    navHeader.style.display = (pageId === 'welcomepage') ? 'none' : 'block';
+}
+
+function initializeContactForm() {
+    const form = document.getElementById('contactform');
+    if (!form) return;
+
+    const interestButtons = document.querySelectorAll('.contactform-interest-button');
+    const interests = new Set();
+
+    interestButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const interest = this.dataset.interest;
+            this.classList.toggle('active');
+            if (interests.has(interest)) {
+                interests.delete(interest);
+            } else {
+                interests.add(interest);
+            }
+        });
+    });
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = {
+            interests: Array.from(interests),
+            name: document.getElementById('contactform-name').value,
+            email: document.getElementById('contactform-email').value,
+            message: document.getElementById('contactform-message').value
+        };
+        console.log('Form submitted:', formData);
+        interests.clear();
+        interestButtons.forEach(button => button.classList.remove('active'));
+        form.reset();
+    });
 }
 
 // Initialisation des écouteurs d'événements
 function initializeEventListeners() {
     const eventListeners = {
-        'signupForm': { event: 'submit', handler: handleSignup },
-        'loginForm': { event: 'submit', handler: handleLogin },
-        'showPasswordToggle': { event: 'click', handler: togglePasswordVisibility },
-        'passwordChangeForm': { event: 'submit', handler: handleChangePassword },
+        'welcomepage-signupForm': { event: 'submit', handler: handleSignup },
+        'welcomepage-signinForm': { event: 'submit', handler: handleSignin },
+        /*'showPasswordToggle': { event: 'click', handler: togglePasswordVisibility },*/
         'showNewPasswordToggle': { event: 'click', handler: toggleNewPasswordVisibility },
         'profileForm': { event: 'submit', handler: updateProfile },
+        
     };
 
     Object.entries(eventListeners).forEach(([id, { event, handler }]) => {
         const element = document.getElementById(id);
         if (element) {
             element.addEventListener(event, handler);
+            console.log(`Event listener added to ${id}`);  // Ajoutez ce log pour le débogage
+        } else {
+            console.log(`Element not found: ${id}`);  // Ajoutez ce log pour le débogage
         }
     });
+
+    initializeContactForm();
+
+    const getStartedBtn = document.getElementById('welcomepage-getStartedBtn');
+    if (getStartedBtn) {
+        getStartedBtn.addEventListener('click', showAuthForms);
+        console.log('Get Started button listener added');  // Ajoutez ce log
+    } else {
+        console.log('Get Started button not found');  // Ajoutez ce log
+    }
 }
 
 // Chargement initial de la page
@@ -66,8 +124,12 @@ function loadInitialPage(pageId) {
 // Fonction de navigation
 function navigateTo(pageId) {
     document.querySelectorAll('.page').forEach(page => {
-        page.classList.toggle('active', page.id === pageId);
+        page.style.display = 'none';
+        page.classList.remove('active');
     });
+    const activePage = document.getElementById(pageId);
+    activePage.style.display = 'block';
+    activePage.classList.add('active');
 
     updateNavVisibility(pageId);
     loadInitialPage(pageId);
@@ -76,28 +138,46 @@ function navigateTo(pageId) {
 // Initialisation de l'application au chargement du DOM
 document.addEventListener('DOMContentLoaded', initializeApp);
 
+// Drop Sidebar menu
+document.addEventListener('DOMContentLoaded', function() {
+    const sidebar = document.getElementById('sidebar');
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    const sidebarCloseBtn = document.getElementById('sidebarCloseBtn');
+    const overlay = document.getElementById('sidebarOverlay');
+    const navLinks = document.querySelectorAll('.nav-list a');
+    const body = document.body;
 
-// DropDown menu
-$("#hamburger").click(function(event) {
-    event.preventDefault();
-    $("#nav").addClass("showNav");
-    var winHeight = $(window).outerHeight();
-    $('#menuWrapper').css('height',winHeight + 'px');
-});
-
-$("#close").click(function(event) {
-    event.preventDefault();
-    $("#nav").removeClass("showNav");
-    $('#menuWrapper').css('height','auto');
-});
-
-$('#menuWrapper ul li').hover(function () {
-    var el = $(this).children('ul');
-    if (el.hasClass('hov')) {
-        el.removeClass('hov');
-    } else {
-        el.addClass('hov');
+    function openSidebar() {
+        sidebar.classList.add('active');
+        overlay.classList.add('active');
+        body.classList.add('menu-open');
+        setTimeout(() => {
+            overlay.style.opacity = '1';
+        }, 10);
     }
+
+    function closeSidebar() {
+        sidebar.classList.remove('active');
+        body.classList.remove('menu-open');
+        overlay.style.opacity = '0';
+        setTimeout(() => {
+            overlay.classList.remove('active');
+        }, 300);
+    }
+
+    hamburgerBtn.addEventListener('click', openSidebar);
+    sidebarCloseBtn.addEventListener('click', closeSidebar);
+    overlay.addEventListener('click', closeSidebar);
+
+    navLinks.forEach(link => {
+        link.addEventListener('click', closeSidebar);
+    });
+
+    window.addEventListener('resize', function() {
+        if (window.innerWidth > 1024) {
+            closeSidebar();
+        }
+    });
 });
 
 function initializeCalendar() {
@@ -105,14 +185,14 @@ function initializeCalendar() {
         selectable: true,
         selectHelper: true,
         select: function(start, end) {
-          //  updateCharts();
+            // updateCharts();
         }
     });
 }
 
 function logout() {
     localStorage.removeItem('token');
-    navigateTo('welcome');
+    navigateTo('signup');
 }
 
 function escapeHTML(str) {
@@ -131,33 +211,17 @@ function escapeHTML(str) {
 async function handleSignup(event) {
     event.preventDefault();
 
-    const lastName = document.getElementById('lastName').value;
-    const firstName = document.getElementById('firstName').value;
-    const username = document.getElementById('username').value;
-    const age = document.getElementById('age').value;
-    const gender = document.getElementById('gender').value;
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-    const confirmPassword = document.getElementById('confirmPassword').value;
+    const username = document.getElementById('welcomepage-username').value;
+    const firstName = document.getElementById('welcomepage-firstName').value;
+    const lastName = document.getElementById('welcomepage-lastName').value;
+    const age = document.getElementById('welcomepage-age').value;
+    const gender = document.getElementById('welcomepage-gender').value;
+    const email = document.getElementById('welcomepage-email').value;
+    const password = document.getElementById('welcomepage-password').value;
+    const confirmPassword = document.getElementById('welcomepage-confirmPassword').value;
 
-    if (!lastName || !firstName || !username || !age || !gender || !email || !password || !confirmPassword) {
+    if (!username || !firstName || !lastName || !age || !gender || !email || !password || !confirmPassword) {
         alert('Tous les champs doivent être remplis.');
-        return;
-    }
-
-    console.log({
-        lastName,
-        firstName,
-        username,
-        age,
-        gender,
-        email,
-        password
-    });
-
-    const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    if (!passwordRegex.test(password)) {
-        alert('Le mot de passe doit contenir au moins 8 caractères, une lettre majuscule, un chiffre et un caractère spécial.');
         return;
     }
 
@@ -173,9 +237,9 @@ async function handleSignup(event) {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                lastName,
-                firstName,
                 username,
+                firstName,
+                lastName,
                 age,
                 gender,
                 email,
@@ -184,42 +248,24 @@ async function handleSignup(event) {
         });
 
         if (!response.ok) {
-            let errorData = {};
-            try {
-                errorData = await response.json();
-            } catch (parseError) {
-                console.error('Failed to parse error response:', parseError);
-            }
-            throw new Error(`Erreur HTTP: ${response.status} - ${errorData.message || 'Erreur inconnue'}`);
+            throw new Error('Erreur lors de l\'inscription');
         }
 
         const data = await response.json();
         localStorage.setItem('token', data.token);
         alert('Inscription réussie');
-        navigateTo('iconSelection');
+        navigateTo('dashboard');
     } catch (error) {
         console.error('Erreur:', error);
         alert('Erreur lors de l\'inscription : ' + error.message);
     }
 }
 
-function togglePasswordVisibility() {
-    const passwordField = document.getElementById('password');
-    const confirmPasswordField = document.getElementById('confirmPassword');
-    if (passwordField.type === 'password') {
-        passwordField.type = 'text';
-        confirmPasswordField.type = 'text';
-    } else {
-        passwordField.type = 'password';
-        confirmPasswordField.type = 'password';
-    }
-}
-
-async function handleLogin(event) {
+async function handleSignin(event) {
     event.preventDefault();
-
-    const email = document.querySelector('#loginForm input[placeholder="Adresse e-mail"]').value;
-    const password = document.querySelector('#loginForm input[placeholder="Mot de passe"]').value;
+    console.log('Signin form submitted');  // Ajoutez ce log
+    const email = document.getElementById('welcomepage-signin-email').value;
+    const password = document.getElementById('welcomepage-signin-password').value;
 
     try {
         const response = await fetch('http://localhost:3000/auth/login', {
@@ -236,15 +282,110 @@ async function handleLogin(event) {
 
         const data = await response.json();
         localStorage.setItem('token', data.token);
-        localStorage.setItem('username', data.user.username);
-
-        alert('Connexion réussie');
-        navigateTo('iconSelection');
+        console.log('Connexion réussie, redirection vers le tableau de bord');  // Ajoutez ce log
+        alert('Connexion réussie! Redirection vers le tableau de bord...');
+        setTimeout(() => navigateTo('dashboard'), 1000);  // Délai d'une seconde avant la redirection
     } catch (error) {
         console.error('Erreur:', error);
-        alert('Erreur lors de la connexion');
+        alert('Erreur lors de la connexion : ' + error.message);
     }
 }
+
+function switchTab(tabId) {
+    console.log('Switching to tab:', tabId);
+    const tabs = document.querySelectorAll('.welcomepage-tab-btn');
+    const contents = document.querySelectorAll('.welcomepage-tab-content');
+    
+    tabs.forEach(tab => {
+        tab.classList.toggle('active', tab.getAttribute('data-tab') === tabId);
+    });
+
+    contents.forEach(content => {
+        const isActive = content.id === `welcomepage-${tabId}Tab`;
+        content.classList.toggle('active', isActive);
+        content.style.display = isActive ? 'block' : 'none';
+    });
+}
+
+function initializeTabToggle() {
+    const tabBtns = document.querySelectorAll('.welcomepage-tab-btn');
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const tabId = this.getAttribute('data-tab');
+            switchTab(tabId);
+        });
+    });
+}
+
+function initializeAuthForms() {
+    const authForms = document.getElementById('welcomepage-auth-forms');
+    if (authForms) {
+        initializeTabToggle();
+    }
+}
+
+function showAuthForms() {
+    console.log('showAuthForms called');  // Ajoutez ce log
+    const authForms = document.getElementById('welcomepage-auth-forms');
+    const welcomeHero = document.getElementById('welcomepage-hero');
+    const getStartedBtn = document.getElementById('welcomepage-getStartedBtn');
+    const signinForm = document.getElementById('welcomepage-signinForm');
+    if (signinForm) {
+        signinForm.addEventListener('submit', function(event) {
+            console.log('Signin form submitted directly');
+            handleSignin(event);
+        });
+    }
+    
+    if (welcomeHero && authForms && getStartedBtn) {
+        getStartedBtn.style.display = 'none';
+        welcomeHero.style.display = 'none';  // Cache le hero au lieu de le laisser visible
+        authForms.classList.remove('hidden');
+        authForms.style.display = 'block';
+        document.body.style.overflow = 'auto';
+        
+        setTimeout(() => {
+            authForms.classList.add('visible');
+        }, 10);
+        
+        // Assurez-vous que l'onglet de connexion est actif par défaut
+        switchTab('signin');
+    }
+}
+
+function checkToken() {
+    const token = localStorage.getItem('token');
+    console.log('Token found:', !!token);
+    if (token) {
+        console.log('Token:', token.substring(0, 20) + '...');  // Affiche les 20 premiers caractères du token
+    }
+}
+
+function togglePasswordVisibility() {
+    const passwordFields = document.querySelectorAll('input[type="password"]');
+    passwordFields.forEach(field => {
+        if (field.type === "password") {
+            field.type = "text";
+        } else {
+            field.type = "password";
+        }
+    });
+}
+
+function toggleNewPasswordVisibility() {
+    const newPasswordField = document.getElementById('new-password');
+    const confirmNewPasswordField = document.getElementById('confirm-new-password');
+    if (newPasswordField && confirmNewPasswordField) {
+        if (newPasswordField.type === "password") {
+            newPasswordField.type = "text";
+            confirmNewPasswordField.type = "text";
+        } else {
+            newPasswordField.type = "password";
+            confirmNewPasswordField.type = "password";
+        }
+    }
+}
+
 
 //--------------------Tasks--------------------
 
@@ -256,6 +397,43 @@ function getSelectedTaskDetails() {
     };
     console.log('getSelectedTaskDetails:', selectedTask); // Ajoutez cette ligne
     return selectedTask;
+}
+
+
+function getSelectedTaskDetails() {
+    const taskSelect = document.getElementById('task-select');
+    const selectedTask = {
+        id: taskSelect.value,
+        name: taskSelect.options[taskSelect.selectedIndex].text
+    };
+    console.log('getSelectedTaskDetails:', selectedTask); // Ajoutez cette ligne
+    return selectedTask;
+}
+
+async function toggleTask(taskId) {
+    try {
+        const taskElement = document.querySelector(`#todo-task-${taskId}`).closest('.todo-item');
+        const isCompleted = taskElement.classList.toggle('completed');
+
+        const response = await fetch(`http://localhost:3000/tasks/updateTask/${taskId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify({ completed: isCompleted })
+        });
+
+        if (!response.ok) {
+            throw new Error(`Error updating task: ${response.status} ${response.statusText}`);
+        }
+
+        // Pas besoin de recharger toutes les tâches, l'apparence est déjà mise à jour
+    } catch (error) {
+        console.error('Error toggling task:', error);
+        // En cas d'erreur, on recharge quand même les tâches pour s'assurer de la cohérence
+        loadTasks();
+    }
 }
 
 
@@ -275,24 +453,49 @@ async function loadTasks() {
         }
 
         const tasks = await response.json();
+        const taskList = document.getElementById('todo-task-list');
         const taskSelect = document.getElementById('task-select');
-        const taskList = document.getElementById('task-list');
 
-        // Mise à jour du DOM pour afficher les tâches
+        // Mise à jour du DOM pour afficher les tâches dans la liste
         taskList.innerHTML = '';
-        taskSelect.innerHTML = '<option value="">Sélectionnez une tâche</option>';
         tasks.forEach(task => {
             let li = document.createElement('li');
-            li.innerHTML = `<span class="task-name">${escapeHTML(task.name)}</span> 
-                            <button onclick="removeTask(this, ${task.id})">Supprimer</button> 
-                            <button onclick="renameTask(this, ${task.id})">Renommer</button>`;
+            li.className = `todo-item ${task.completed ? 'completed' : ''}`;
+            li.innerHTML = `
+                <div>
+                    <input type="checkbox" id="todo-task-${task.id}" class="todo-checkbox" ${task.completed ? 'checked' : ''}>
+                    <label for="todo-task-${task.id}">${escapeHTML(task.name)}</label>
+                </div>
+                <div>
+                    <button class="todo-rename-btn" onclick="renameTask(${task.id})">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                        <span class="sr-only">Renommer</span>
+                    </button>
+                    <button class="todo-delete-btn" onclick="removeTask(${task.id})">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                        <span class="sr-only">Supprimer</span>
+                    </button>
+                </div>
+            `;
             taskList.appendChild(li);
 
-            let option = document.createElement('option');
-            option.value = task.id;
-            option.textContent = task.name;
-            taskSelect.appendChild(option);
+            const checkbox = li.querySelector(`#todo-task-${task.id}`);
+            checkbox.addEventListener('change', () => toggleTask(task.id));
         });
+
+        // Mise à jour du sélecteur de tâches
+        if (taskSelect) {
+            // Vider les options existantes
+            taskSelect.innerHTML = '<option value="">Sélectionnez une tâche</option>';
+
+            // Ajouter les nouvelles options
+            tasks.forEach(task => {
+                const option = document.createElement('option');
+                option.value = task.id;
+                option.textContent = task.name;
+                taskSelect.appendChild(option);
+            });
+        }
 
         // Sauvegarde des tâches localement
         localStorage.setItem('tasks', JSON.stringify(tasks));
@@ -303,7 +506,7 @@ async function loadTasks() {
 
 
 async function addNewTask() {
-    const taskName = document.getElementById('new-task').value.trim();
+    const taskName = document.getElementById('todo-new-task').value.trim();
     if (taskName === '') return;
 
     try {
@@ -329,7 +532,7 @@ async function addNewTask() {
     }
 }
 
-async function removeTask(button, taskId) {
+async function removeTask(taskId) {
     try {
         const response = await fetch(`http://localhost:3000/tasks/deleteTask/${taskId}`, {
             method: 'DELETE',
@@ -344,10 +547,6 @@ async function removeTask(button, taskId) {
             return;
         }
 
-        // Suppression de l'élément de la liste
-        const taskItem = button.closest('li');
-        taskItem.remove();
-
         // Recharger les tâches après suppression
         loadTasks();
     } catch (error) {
@@ -355,7 +554,7 @@ async function removeTask(button, taskId) {
     }
 }
 
-async function renameTask(button, taskId) {
+async function renameTask(taskId) {
     const newName = prompt("Entrez le nouveau nom de la tâche:");
     if (!newName || newName.trim() === "") return;
 
@@ -397,10 +596,7 @@ let isSessionActive = false;
 const Counter = { value: 0 };
 let currentSessionId = null;
 let taskLastSessionId = null;
-let totalWorkTime = null;
-
-
-
+let totalWorkTime = 0;
 
 // Fonction pour activer/désactiver les contrôles
 function enableControls() {
@@ -475,7 +671,7 @@ async function updateTaskTitle(forceRefresh = false) {
         document.getElementById('counter-value').textContent = Counter.value;
         
         // Afficher le temps total
-        const totalWorkTime = calculateTotalWorkTime();
+        totalWorkTime = calculateTotalWorkTime();
         document.getElementById('total-work-time').textContent = formatTime(totalWorkTime);
 
         isSessionActive = false;
@@ -492,9 +688,7 @@ async function updateTaskTitle(forceRefresh = false) {
     }
 }
 
-
 // Fonction pour démarrer une nouvelle session
-
 async function startNewSession() {
     if (!selectedTaskId) {
         alert("Veuillez sélectionner une tâche avant de créer une nouvelle session.");
@@ -533,33 +727,6 @@ async function startNewSession() {
     }
 }
 
-async function updateLastSessionInfo() {
-    try {
-        const response = await fetch(`http://localhost:3000/session/${previousSessionId}`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error(`Erreur ${response.status}: ${await response.text()}`);
-        }
-
-        const lastSession = await response.json();
-        console.log('Session précédente mise à jour:', lastSession);
-
-        // Mettre à jour l'affichage avec les informations de la session précédente
-        document.getElementById('previous-session-id').textContent = lastSession.id;
-        // Ajouter d'autres mises à jour d'affichage si nécessaire
-    } catch (error) {
-        console.error('Erreur lors de la mise à jour des informations de la session précédente:', error);
-    }
-}
-
-
-
 // Sauvegarder l'état actuel des outils dans le cache local
 function saveSessionToCache() {
     const sessionData = {
@@ -573,6 +740,7 @@ function saveSessionToCache() {
     };
     localStorage.setItem('currentSessionData', JSON.stringify(sessionData));
 }
+
 // Charger les données de session du cache local
 async function loadSessionFromCache() {
     const savedSession = JSON.parse(localStorage.getItem('currentSessionData'));
@@ -590,7 +758,6 @@ async function loadSessionFromCache() {
         updateDOMIfExists('counter-value', Counter.value);
 
         updateTimerDisplay();
-        updateBreakTimeDisplay();
         isSessionActive = true;
     } else {
         isSessionActive = false;
@@ -694,13 +861,6 @@ function updateTimer() {
     document.getElementById('total-work-time').textContent = formatTime(calculateTotalWorkTime());
 }
 
-// Mettre à jour l'affichage du temps de pause
-function updateBreakTimeDisplay() {
-    const breakMinutes = Math.floor(breakDuration / 60);
-    const breakSeconds = breakDuration % 60;
-    document.getElementById('break-time-left').textContent = `Pause: ${breakMinutes}:${breakSeconds < 10 ? '0' : ''}${breakSeconds}`;
-}
-
 // Fonction pour mettre à jour l'affichage du timer
 function updateTimerDisplay() {
     const minutes = Math.floor(currentTime / 60);
@@ -738,13 +898,6 @@ function calculateTotalWorkTime() {
     return timerTime + stopwatchTime + manualTimeInSeconds;
 }
 
-// Fonction pour arrêter le timer
-function stopTimer() {
-    clearInterval(timer);
-    isRunning = false;
-    document.getElementById('start_stop').textContent = 'Démarrer';
-}
-
 // Fonction pour réinitialiser le timer
 function resetTimer() {
     clearInterval(timer);
@@ -758,7 +911,7 @@ function resetTimer() {
 }
 
 // Fonction pour démarrer/pauser le chronomètre
-function startStopwatch() {
+function toggleStopwatch() {
     if (!isSessionActive) {
         alert("Veuillez démarrer une nouvelle session avant d'utiliser le chronomètre.");
         return;
@@ -778,13 +931,6 @@ function updateStopwatch() {
     stopwatchTime++;
     document.getElementById('stopwatch-time').textContent = formatTime(stopwatchTime);
     document.getElementById('total-work-time').textContent = formatTime(calculateTotalWorkTime());
-}
-
-// Fonction pour arrêter le chronomètre
-function stopStopwatch() {
-    clearInterval(stopwatchInterval);
-    stopwatchInterval = null;
-    document.getElementById('stopwatch-start').textContent = 'Démarrer';
 }
 
 // Fonction pour réinitialiser le chronomètre
@@ -839,8 +985,22 @@ function resetCounter() {
     document.getElementById('counter-value').textContent = Counter.value;
 }
 
+function changeCounter(value) {
+    if (!isSessionActive) {
+        alert("Veuillez démarrer une nouvelle session avant d'utiliser le compteur.");
+        return;
+    }
+    Counter.value = Math.max(0, Counter.value + value);
+    document.getElementById('counter-value').textContent = Counter.value;
+}
+
 // Fonction pour ajouter manuellement du temps d'étude
 function addManualTime() {
+    if (!isSessionActive) {
+        alert("Veuillez démarrer une nouvelle session avant d'ajouter du temps manuellement.");
+        return;
+    }
+
     const hours = parseInt(document.getElementById('manual-hours').value) || 0;
     const minutes = parseInt(document.getElementById('manual-minutes').value) || 0;
 
@@ -851,22 +1011,68 @@ function addManualTime() {
 
     manualTimeInSeconds += (hours * 3600) + (minutes * 60);
 
-    alert('Temps d\'étude ajouté manuellement.');
-
     document.getElementById('manual-hours').value = '';
     document.getElementById('manual-minutes').value = '';
 
     // Mettre à jour l'affichage du temps total
     document.getElementById('total-work-time').textContent = formatTime(calculateTotalWorkTime());
+
+    alert('Temps d\'étude ajouté manuellement.');
 }
 
 
 // Initialisation
 document.addEventListener('DOMContentLoaded', function() {
+    checkToken();
     updateTaskTitle();
     updateTimerDisplay();
     enableControls();
+            document.getElementById('todo-add-task').addEventListener('click', addNewTask);
+            document.getElementById('todo-task-list').addEventListener('click', (e) => {
+                if (e.target.classList.contains('todo-delete-btn')) {
+                    removeTask(e.target.dataset.taskId);
+                } else if (e.target.classList.contains('todo-rename-btn')) {
+                    renameTask(e.target.dataset.taskId);
+                }
+            });
+        
+    let notifications = loadNotifications();
+    if (notifications.length === 0) {
+        notifications = [
+            { id: 1, type: 'info', message: 'Votre abonnement sera bientôt renouvelé', date: '2024-09-01', read: false },
+            { id: 2, type: 'warning', message: 'Votre espace de stockage est presque plein', date: '2024-08-30', read: false },
+            { id: 3, type: 'success', message: 'Votre profil a été mis à jour', date: '2024-08-29', read: true },
+            { id: 4, type: 'info', message: 'Nouvelle fonctionnalité disponible : Mode sombre', date: '2024-08-28', read: false },
+            { id: 5, type: 'warning', message: 'Alerte de sécurité : Tentative de connexion inhabituelle', date: '2024-08-27', read: true }
+        ];
+        saveNotifications(notifications);
+    }
+
+    const notificationsList = document.getElementById('notifications-list');
+    if (notificationsList) {
+        notificationsList.addEventListener('click', function(e) {
+            const notificationItem = e.target.closest('.notification-item');
+            if (!notificationItem) return;
+
+            const notifId = parseInt(notificationItem.dataset.id);
+            if (e.target.classList.contains('notification-read-btn')) {
+                const notif = notifications.find(n => n.id === notifId);
+                if (notif) {
+                    notif.read = true;
+                    saveNotifications(notifications);
+                    renderNotifications();
+                }
+            } else if (e.target.closest('.notification-delete-btn')) {
+                notifications = notifications.filter(n => n.id !== notifId);
+                saveNotifications(notifications);
+                renderNotifications();
+            }
+        });
+    }
+
+    renderNotifications();
 });
+
 
 
 
@@ -903,7 +1109,6 @@ async function loadProfile() {
         const setAndLogValue = (id, value) => {
             const element = document.getElementById(id);
             if (element) {
-                console.log(id, element)            
                 element.value = value || '';
                 console.log(`${id} set to:`, value);
             } else {
@@ -920,7 +1125,7 @@ async function loadProfile() {
 
         // Vérification finale
         console.log('Final form values:');
-        ['username', 'last-name', 'first-name', 'age', 'gender', 'email'].forEach(id => {
+        ['usernameprofil', 'last-nameprofil', 'first-nameprofil', 'ageprofil', 'genderprofil', 'emailprofil'].forEach(id => {
             const element = document.getElementById(id);
             console.log(`${id}:`, element ? element.value : 'Element not found');
         });
@@ -934,12 +1139,12 @@ async function loadProfile() {
 async function updateProfile(event) {
     event.preventDefault();
 
-    const username = document.getElementById('username').value;
-    const lastName = document.getElementById('lastName').value;
-    const firstName = document.getElementById('firstName').value;
-    const age = document.getElementById('age').value;
-    const gender = document.getElementById('gender').value;
-    const email = document.getElementById('email').value;
+    const username = document.getElementById('usernameprofil').value;
+    const lastName = document.getElementById('last-nameprofil').value;
+    const firstName = document.getElementById('first-nameprofil').value;
+    const age = document.getElementById('ageprofil').value;
+    const gender = document.getElementById('genderprofil').value;
+    const email = document.getElementById('emailprofil').value;
 
     try {
         const token = localStorage.getItem('token');
@@ -1066,7 +1271,7 @@ function checkAuthOnLoad() {
     if (!token) {
         console.log('No token found, redirecting to signup/login page');
         // Au lieu de rediriger vers une page séparée, nous allons afficher la page de connexion
-        navigateTo('welcome');
+        navigateTo('welcomepage');
         return false;
     }
     return true;
@@ -1114,17 +1319,51 @@ function initializeCharts() {
             options: {
                 scales: {
                     x: {
-                        stacked: true
+                        stacked: true,
+                        ticks: {
+                            font: {
+                                size: 24, // Augmentez cette valeur pour des dates plus grandes
+                                weight: 'bold'
+                            },
+
+                        }
                     },
                     y: {
                         stacked: true,
-                        beginAtZero: true
+                        beginAtZero: true,
+                        ticks: {
+                            font: {
+                                size: 14,
+                                weight: 'bold'
+                            }
+                        }
                     }
                 },
                 plugins: {
+                    legend: {
+                        labels: {
+                            font: {
+                                size: 16,
+                                weight: 'bold'
+                            }
+                        }
+                    },
                     title: {
                         display: true,
-                        text: `Statistiques ${period.charAt(0).toUpperCase() + period.slice(1)}s`
+                        font: {
+                            size: 20,
+                            weight: 'bold'
+                        }
+                    },
+                    tooltip: {
+                        titleFont: {
+                            size: 16,
+                            weight: 'bold'
+                        },
+                        bodyFont: {
+                            size: 14,
+                            weight: 'bold'
+                        }
                     }
                 },
                 responsive: true,
@@ -1132,6 +1371,29 @@ function initializeCharts() {
             }
         });
     });
+
+        // Ajouter un gestionnaire d'événement de redimensionnement
+        window.addEventListener('resize', resizeAllCharts);
+    
+        // Appeler resizeAllCharts une fois pour définir la taille initiale
+        resizeAllCharts();
+}
+
+function resizeAllCharts() {
+    Object.values(chartInstances).forEach(chart => {
+        resizeChart(chart);
+    });
+
+    function resizeChart(chart) {
+        const wrapper = chart.canvas.parentNode;
+        const padding = 40; // 20px de chaque côté
+        const wrapperWidth = wrapper.clientWidth - padding;
+        const wrapperHeight = wrapper.clientHeight - padding;
+        
+        chart.canvas.width = wrapperWidth;
+        chart.canvas.height = wrapperHeight;
+        chart.resize();
+    }
 }
 
 async function updateCharts() {
@@ -1168,6 +1430,27 @@ function updateChart(chart, data, period) {
             dataset.data = [];
         });
         chart.update();
+        resizeChart(chart); 
+
+
+        const labels = data.map(item => formatDate(item.date, period));
+
+        chart.data.labels = labels;
+        chart.options.plugins.tooltip = {
+            callbacks: {
+                label: function(context) {
+                    let label = context.dataset.label || '';
+                    if (label) {
+                        label += ': ';
+                    }
+                    if (context.parsed.y !== null) {
+                        label += context.parsed.y;
+                    }
+                    return `<strong>${label}</strong>`;
+                }
+            }
+        };
+        chart.update();
         return;
     }
 
@@ -1196,18 +1479,25 @@ function formatDate(dateString, period) {
         return 'Date invalide';
     }
 
+    let formattedDate;
     switch (period) {
         case 'daily':
-            return date.toLocaleDateString('fr-FR', { year: 'numeric', month: 'short', day: 'numeric' });
+            formattedDate = date.toLocaleDateString('fr-FR', { year: 'numeric', month: 'short', day: 'numeric' });
+            break;
         case 'weekly':
-            return `Semaine du ${date.toLocaleDateString('fr-FR', { year: 'numeric', month: 'short', day: 'numeric' })}`;
+            formattedDate = `Semaine du ${date.toLocaleDateString('fr-FR', { year: 'numeric', month: 'short', day: 'numeric' })}`;
+            break;
         case 'monthly':
-            return date.toLocaleDateString('fr-FR', { year: 'numeric', month: 'long' });
+            formattedDate = date.toLocaleDateString('fr-FR', { year: 'numeric', month: 'long' });
+            break;
         case 'yearly':
-            return date.getFullYear().toString();
+            formattedDate = date.getFullYear().toString();
+            break;
         default:
-            return date.toLocaleDateString('fr-FR');
+            formattedDate = date.toLocaleDateString('fr-FR');
     }
+
+    return `${formattedDate}`;
 }
 
 function getWeekNumber(d) {
@@ -1221,6 +1511,8 @@ function getWeekNumber(d) {
 
 
 
+
+
 //--------------------Notifications--------------------
 
 function saveNotifications(notifications) {
@@ -1228,32 +1520,58 @@ function saveNotifications(notifications) {
 }
 
 function loadNotifications() {
-    const notifications = JSON.parse(localStorage.getItem('notifications')) || [];
-    const messageList = document.getElementById('message-list');
-    messageList.innerHTML = '';
-    notifications.forEach(notification => {
-        let message = document.createElement('div');
-        message.classList.add('message');
-        message.innerHTML = `<div class="message-content">${escapeHTML(notification.content)}</div><div class="message-time">${new Date(notification.time).toLocaleString()}</div>`;
-        messageList.appendChild(message);
-    });
+    return JSON.parse(localStorage.getItem('notifications')) || [];
 }
 
-function addNotification(content) {
-    const notifications = JSON.parse(localStorage.getItem('notifications')) || [];
+function addNotification(content, type = 'info') {
+    const notifications = loadNotifications();
     const newNotification = {
-        content: content,
-        time: new Date().toISOString()
+        id: Date.now(),
+        type: type,
+        message: content,
+        date: new Date().toISOString().split('T')[0],
+        read: false
     };
     notifications.push(newNotification);
     saveNotifications(notifications);
-    loadNotifications();
+    renderNotifications();
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    if (document.getElementById('notifications').classList.contains('active')) {
-        loadNotifications();
-    }
-});
+// Ajoutez ces nouvelles fonctions :
+function renderNotifications() {
+    const notifications = loadNotifications();
+    const notificationsList = document.getElementById('notifications-list');
+    const notificationTemplate = document.getElementById('notification-template');
 
-addNotification("Bienvenue sur TalibTimer! Voici votre première notification.");
+    if (!notificationsList || !notificationTemplate) {
+        console.error('Elements de notification non trouvés');
+        return;
+    }
+
+    notificationsList.innerHTML = '';
+    notifications.forEach(notif => {
+        const notificationItem = notificationTemplate.content.cloneNode(true);
+        const li = notificationItem.querySelector('li');
+        li.dataset.id = notif.id;
+        li.classList.toggle('read', notif.read);
+        li.querySelector('.notification-message').textContent = notif.message;
+        li.querySelector('.notification-date').textContent = notif.date;
+        li.querySelector('.notification-icon').innerHTML = getIcon(notif.type);
+        if (notif.read) {
+            li.querySelector('.notification-read-btn').style.display = 'none';
+        }
+        notificationsList.appendChild(notificationItem);
+    });
+    if (typeof feather !== 'undefined') {
+        feather.replace();
+    }
+}
+
+function getIcon(type) {
+    switch(type) {
+        case 'info': return '<i data-feather="info" class="text-blue-500"></i>';
+        case 'warning': return '<i data-feather="alert-triangle" class="text-yellow-500"></i>';
+        case 'success': return '<i data-feather="check-circle" class="text-green-500"></i>';
+        default: return '<i data-feather="bell" class="text-blue-500"></i>';
+    }
+}
