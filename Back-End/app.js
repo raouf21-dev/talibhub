@@ -1,3 +1,5 @@
+// app.js
+
 const express = require('express');
 const bodyParser = require('body-parser');
 const dotenv = require('dotenv');
@@ -35,6 +37,8 @@ const sessionRoutes = require('./routes/sessionRoutes');
 const sourateRoutes = require('./routes/souratesRoutes');
 const statisticsRoutes = require('./routes/statisticsRoutes')
 const mosqueTimesRoutes = require('./routes/mosqueTimesRoutes');
+const surahMemorizationRoutes = require('./routes/surahMemorizationRoutes');
+
 
 // Utiliser les routes
 app.use('/auth', authRoutes);
@@ -45,6 +49,8 @@ app.use('/session', sessionRoutes);
 app.use('/sourates', sourateRoutes);
 app.use('/statistics', statisticsRoutes);
 app.use('/mosque-times', mosqueTimesRoutes);
+app.use('/surah-memorization', surahMemorizationRoutes);
+
 
 
 

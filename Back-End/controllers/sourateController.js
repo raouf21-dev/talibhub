@@ -1,3 +1,5 @@
+//sourateController.js
+
 const sourateModel = require('../models/sourateModel');
 
 const getAllSourates = async (req, res) => {
@@ -38,12 +40,7 @@ const recordRecitation = async (req, res) => {
         const userId = req.user.id;
         const { firstSourate, secondSourate } = req.body;
 
-        // Mettre à jour les compteurs de récitation
-        await sourateModel.incrementRecitationCount(userId, firstSourate);
-        await sourateModel.incrementRecitationCount(userId, secondSourate);
-
-        // Vérifier si un cycle est complété
-        const cycleCompleted = await sourateModel.checkCycleCompletion(userId);
+        const cycleCompleted = await sourateModel.recordRecitation(userId, firstSourate, secondSourate);
 
         // Obtenir les statistiques mises à jour
         const stats = await sourateModel.getRecitationStats(userId);
@@ -59,19 +56,18 @@ const recordRecitation = async (req, res) => {
     }
 };
 
+
 const getRecitationStats = async (req, res) => {
     try {
-        console.log('Début de getRecitationStats');
         const userId = req.user.id;
-        console.log('UserId:', userId);
         const stats = await sourateModel.getRecitationStats(userId);
-        console.log('Stats récupérées:', stats);
         res.json(stats);
     } catch (error) {
-        console.error('Erreur détaillée dans getRecitationStats:', error);
-        res.status(500).json({ error: 'Erreur serveur', details: error.message });
+        console.error('Erreur dans getRecitationStats:', error);
+        res.status(500).json({ error: 'Erreur serveur' });
     }
 };
+
 const getRecitationHistory = async (req, res) => {
     try {
         const userId = req.user.id;
@@ -100,6 +96,86 @@ const getRecitationInfo = async (req, res) => {
     }
 };
 
+const getNotRecitedSourates = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const notRecitedSourates = await sourateModel.getNotRecitedSourates(userId);
+        res.json(notRecitedSourates);
+    } catch (error) {
+        console.error('Erreur dans getNotRecitedSourates:', error);
+        res.status(500).json({ error: 'Erreur serveur' });
+    }
+};
+
+const startNewCycle = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        await sourateModel.startNewCycle(userId);
+        res.json({ message: 'Nouveau cycle démarré avec succès' });
+    } catch (error) {
+        console.error('Erreur dans startNewCycle:', error);
+        res.status(500).json({ error: 'Erreur serveur' });
+    }
+};
+
+const getSouratesByNumbers = async (req, res) => {
+    try {
+        const { sourateNumbers } = req.body;
+        const sourates = await sourateModel.getSouratesByNumbers(sourateNumbers);
+        res.json(sourates);
+    } catch (error) {
+        console.error('Erreur dans getSouratesByNumbers:', error);
+        res.status(500).json({ error: 'Erreur serveur' });
+    }
+};
+
+const getMemorizationStatus = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const status = await sourateModel.getMemorizationStatus(userId);
+        res.json(status);
+    } catch (error) {
+        console.error('Erreur dans getMemorizationStatus:', error);
+        res.status(500).json({ error: 'Erreur serveur' });
+    }
+};
+
+const updateMemorizationStatus = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const sourateNumber = parseInt(req.params.number);
+        const { memorizationLevel, lastRevisionDate } = req.body;
+        await sourateModel.updateMemorizationStatus(userId, sourateNumber, memorizationLevel, lastRevisionDate);
+        res.json({ message: 'Statut de mémorisation mis à jour avec succès' });
+    } catch (error) {
+        console.error('Erreur dans updateMemorizationStatus:', error);
+        res.status(500).json({ error: 'Erreur serveur' });
+    }
+};
+
+const getMemorizationHistory = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const history = await sourateModel.getMemorizationHistory(userId);
+        res.json(history);
+    } catch (error) {
+        console.error('Erreur dans getMemorizationHistory:', error);
+        res.status(500).json({ error: 'Erreur serveur' });
+    }
+};
+
+const clearMemorizationHistory = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        await sourateModel.clearMemorizationHistory(userId);
+        res.json({ message: 'Historique de mémorisation effacé avec succès' });
+    } catch (error) {
+        console.error('Erreur dans clearMemorizationHistory:', error);
+        res.status(500).json({ error: 'Erreur serveur' });
+    }
+};
+
+// N'oubliez pas d'exporter les nouvelles fonctions
 module.exports = {
     getAllSourates,
     getKnownSourates,
@@ -107,5 +183,12 @@ module.exports = {
     recordRecitation,
     getRecitationStats,
     getRecitationHistory,
-    getRecitationInfo
+    getRecitationInfo,
+    getNotRecitedSourates,
+    startNewCycle,
+    getSouratesByNumbers,
+    getMemorizationStatus,
+    updateMemorizationStatus,
+    getMemorizationHistory,
+    clearMemorizationHistory,
 };

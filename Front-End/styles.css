@@ -55,12 +55,6 @@ body {
 
 /* Styles pour la page d'inscription/connexion */
 
-#welcomepage {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-}
-
 .welcomepage-header {
   background-color: var(--secondary-color);
   color: white;
@@ -71,61 +65,111 @@ body {
 .welcomepage-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem;
-  flex-grow: 1;
+  padding: 2rem 1rem;
 }
 
-#welcomepage h2 {
-  color: var(--primary-color);
+.welcomepage-hero {
   text-align: center;
-  margin-bottom: 1rem;
+  margin-bottom: 4rem;
+}
+
+.welcomepage-hero h2 {
+  color: var(--primary-color);
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.welcomepage-hero p {
+  color: var(--secondary-color);
+  font-size: 1.2rem;
+  margin-bottom: 1.5rem;
 }
 
 .welcomepage-btn {
   background-color: var(--primary-color);
   color: white;
   border: none;
-  padding: 0.5rem 1rem;
-  cursor: pointer;
+  padding: 0.75rem 2rem;
   font-size: 1rem;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
 }
 
-.welcomepage-hero {
+.welcomepage-btn:hover {
+  background-color: var(--secondary-color);
+}
+
+.welcomepage-features,
+.welcomepage-vision,
+.welcomepage-why-choose,
+.welcomepage-commitment {
+  margin-bottom: 4rem;
+}
+
+.welcomepage-features h2,
+.welcomepage-vision h2,
+.welcomepage-why-choose h2,
+.welcomepage-commitment h2 {
+  color: var(--primary-color);
+  font-size: 2rem;
   text-align: center;
   margin-bottom: 2rem;
-  transition: opacity 0.3s ease-in-out;
 }
 
-.welcomepage-hero.hidden {
-  opacity: 0;
-  pointer-events: none;
+.welcomepage-features-grid,
+.welcomepage-why-choose-grid {
+  display: grid;
+  gap: 2rem;
 }
 
-.welcomepage-hero p {
+.welcomepage-features-grid {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.welcomepage-why-choose-grid {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.welcomepage-feature-card,
+.welcomepage-why-choose-card {
+  background-color: var(--card-background);
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.welcomepage-feature-card h3,
+.welcomepage-why-choose-card h3 {
+  color: var(--primary-color);
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+}
+
+.welcomepage-feature-card p,
+.welcomepage-why-choose-card p {
+  color: var(--secondary-color);
+  margin-bottom: 0;
+}
+
+.welcomepage-vision p,
+.welcomepage-commitment p,
+.welcomepage-commitment li {
+  color: var(--text-color);
   margin-bottom: 1rem;
 }
 
-.welcomepage-features-grid, .welcomepage-why-choose-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1rem;
-  margin-top: 1rem;
-}
-
-.welcomepage-feature-card, .welcomepage-why-choose-card {
-  background-color: var(--card-background);
-  border: 1px solid var(--border-color);
-  padding: 1rem;
-  border-radius: 5px;
-}
-
-.welcomepage-vision, .welcomepage-commitment {
-  margin-top: 2rem;
-}
-
 .welcomepage-commitment ul {
-  list-style-position: inside;
-  margin-top: 1rem;
+  list-style-type: none;
+  padding-left: 1rem;
+}
+
+.welcomepage-commitment li:before {
+  content: "•";
+  color: var(--primary-color);
+  display: inline-block;
+  width: 1em;
+  margin-left: -1em;
 }
 
 .welcomepage-footer {
@@ -133,29 +177,19 @@ body {
   color: white;
   text-align: center;
   padding: 1rem;
+}
+
+/* Styles pour la page d'inscription/connexion */
+.welcomepage-auth-forms {
   margin-top: 2rem;
 }
 
-/*welcomepage Form*/
-
-.welcomepage-auth-forms {
-  max-width: 400px;
-  margin: 2rem auto;
+.welcomepage-card {
   background-color: var(--card-background);
-  padding: 20px;
   border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  opacity: 0;
-  transition: opacity 0.3s ease-in-out;
-  position: static;  /* ou relative, mais pas fixed ou absolute */
-    height: auto;
-    overflow: visible;
+  padding: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
-
-.welcomepage-auth-forms.visible {
-  opacity: 1;
-}
-
 
 .welcomepage-tabs {
   display: flex;
@@ -180,23 +214,27 @@ body {
 
 .welcomepage-tab-content {
   display: none;
-  opacity: 0;
-  transition: opacity 0.3s ease-in-out;
 }
 
 .welcomepage-tab-content.active {
   display: block;
-  opacity: 1;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .welcomepage-form-group {
-  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
 }
 
 .welcomepage-form-group label {
-  display: block;
   margin-bottom: 0.5rem;
-  color: var(--text-color);
+  font-weight: 600;
 }
 
 .welcomepage-form-group input,
@@ -208,25 +246,30 @@ body {
   font-size: 1rem;
 }
 
-.welcomepage-btn {
-  width: 100%;
-  padding: 0.75rem;
-  border: none;
-  border-radius: 4px;
-  background-color: var(--primary-color);
-  color: white;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
+@media (max-width: 768px) {
+  .welcomepage-features-grid,
+  .welcomepage-why-choose-grid,
+  .form-grid {
+      grid-template-columns: 1fr;
+  }
 
-.welcomepage-btn:hover {
-  background-color: var(--secondary-color);
+  .welcomepage-hero h2 {
+      font-size: 2rem;
+  }
+
+  .welcomepage-features h2,
+  .welcomepage-vision h2,
+  .welcomepage-why-choose h2,
+  .welcomepage-commitment h2 {
+      font-size: 1.75rem;
+  }
 }
 
 .hidden {
   display: none;
 }
+
+
 
 /* Barre de navigation latérale */
 
@@ -2044,6 +2087,8 @@ button[type="submit"]:hover {
 .surahmemorization-level-good { background-color: #3b82f6; }
 .surahmemorization-level-moderate { background-color: #eab308; }
 .surahmemorization-level-weak { background-color: #ef4444; }
+.surahmemorization-level-na { background-color: #9ca3af; }
+
 
 .surahmemorization-summary, .surahmemorization-actions {
   display: flex;

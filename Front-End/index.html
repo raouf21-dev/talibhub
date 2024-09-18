@@ -25,25 +25,25 @@
             <nav>
                 <ul class="nav-list">
                     <li>
-                        <a href="#" data-destination="home" onclick="navigateTo('dashboard')">Home</a>
+                        <a href="#" class="nav-link" data-destination="dashboard">Home</a>
                     </li>
                     <li>
-                        <a href="#" data-destination="talibtimer">TalibTimer</a>
+                        <a href="#" class="nav-link" data-destination="talibtimer">TalibTimer</a>
                         <ul class="subnav">
-                            <li><a href="#"  onclick="navigateTo('apprentissage')">Apprentissage</a></li>
-                            <li><a href="#"  onclick="navigateTo('todoLists')">Listes de Tâches</a></li>
-                            <li><a href="#"  onclick="navigateTo('statistics')">Statistiques</a></li>
+                            <li><a href="#" class="nav-link" data-destination="apprentissage">Apprentissage</a></li>
+                            <li><a href="#" class="nav-link" data-destination="todoLists">Listes de Tâches</a></li>
+                            <li><a href="#" class="nav-link" data-destination="statistics">Statistiques</a></li>
                         </ul>
                     </li>
-                    <li><a href="#" onclick="navigateTo('salatSurahSelector')">SurahSelector</a></li>
-                    <li><a href="#" onclick="navigateTo('duaTimeCalculator')">Doua Time</a></li>
-                    <li><a href="#" onclick="navigateTo('surahmemorization')">Surah Memorization</a></li>
-                    <li><a href="#" onclick="navigateTo('mosquetime')">Salat Mosque Time</a></li>
-                    <li><a href="#" onclick="navigateTo('notifications')">Notifications</a></li>
-                    <li><a href="#" onclick="navigateTo('profile')">Profil</a></li>
-                    <li><a href="#" onclick="navigateTo('aboutus')">À propos</a></li>
-                    <li><a href="#" onclick="navigateTo('price')">Abonnement</a></li>
-                    <li><a href="#" onclick="navigateTo('contactform')">Contact</a></li>
+                    <li><a href="#" class="nav-link" data-destination="salatSurahSelector">SurahSelector</a></li>
+                    <li><a href="#" class="nav-link" data-destination="duaTimeCalculator">Doua Time</a></li>
+                    <li><a href="#" class="nav-link" data-destination="surahmemorization">Surah Memorization</a></li>
+                    <li><a href="#" class="nav-link" data-destination="mosquetime">Salat Mosque Time</a></li>
+                    <li><a href="#" class="nav-link" data-destination="notifications">Notifications</a></li>
+                    <li><a href="#" class="nav-link" data-destination="profile">Profil</a></li>
+                    <li><a href="#" class="nav-link" data-destination="aboutus">À propos</a></li>
+                    <li><a href="#" class="nav-link" data-destination="price">Abonnement</a></li>
+                    <li><a href="#" class="nav-link" data-destination="contactform">Contact</a></li>
                 </ul>
             </nav>
         </aside>
@@ -67,63 +67,69 @@
                         <button class="welcomepage-tab-btn" data-tab="signup">Inscription</button>
                         <button class="welcomepage-tab-btn active" data-tab="signin">Connexion</button>
                     </div>
-                    <div class="welcomepage-tab-content " id="welcomepage-signupTab">
+                    <div class="welcomepage-tab-content active" id="welcomepage-signupTab">
                         <form id="welcomepage-signupForm">
                             <h3>Inscription</h3>
-                            <div class="welcomepage-form-group">
-                                <label for="welcomepage-username">Pseudo</label>
-                                <input type="text" id="welcomepage-username" required>
-                            </div>
-                            <div class="welcomepage-form-group">
-                                <label for="welcomepage-firstName">Prénom</label>
-                                <input type="text" id="welcomepage-firstName" required>
-                            </div>
-                            <div class="welcomepage-form-group">
-                                <label for="welcomepage-lastName">Nom</label>
-                                <input type="text" id="welcomepage-lastName" required>
-                            </div>
-                            <div class="welcomepage-form-group">
-                                <label for="welcomepage-age">Âge</label>
-                                <input type="number" id="welcomepage-age" required>
-                            </div>
-                            <div class="welcomepage-form-group">
-                                <label for="welcomepage-gender">Sexe</label>
-                                <select id="welcomepage-gender" required>
-                                    <option value="">Sélectionner</option>
-                                    <option value="male">Masculin</option>
-                                    <option value="female">Féminin</option>
-                                </select>
-                            </div>
-                            <div class="welcomepage-form-group">
-                                <label for="welcomepage-email">Adresse e-mail</label>
-                                <input type="email" id="welcomepage-email" required>
-                            </div>
-                            <div class="welcomepage-form-group">
-                                <label for="welcomepage-password">Mot de passe</label>
-                                <input type="password" id="welcomepage-password" required>
-                            </div>
-                            <div class="welcomepage-form-group">
-                                <label for="welcomepage-confirmPassword">Confirmer le mot de passe</label>
-                                <input type="password" id="welcomepage-confirmPassword" required>
+                            <div class="form-grid">
+                                <div class="welcomepage-form-group">
+                                    <label for="welcomepage-username">Pseudo</label>
+                                    <input type="text" id="welcomepage-username" required>
+                                </div>
+                                <div class="welcomepage-form-group">
+                                    <label for="welcomepage-firstName">Prénom</label>
+                                    <input type="text" id="welcomepage-firstName" required>
+                                </div>
+                                <div class="welcomepage-form-group">
+                                    <label for="welcomepage-lastName">Nom</label>
+                                    <input type="text" id="welcomepage-lastName" required>
+                                </div>
+                                <div class="welcomepage-form-group">
+                                    <label for="welcomepage-age">Âge</label>
+                                    <input type="number" id="welcomepage-age" required>
+                                </div>
+                                <div class="welcomepage-form-group">
+                                    <label for="welcomepage-gender">Sexe</label>
+                                    <select id="welcomepage-gender" required>
+                                        <option value="">Sélectionner</option>
+                                        <option value="male">Masculin</option>
+                                        <option value="female">Féminin</option>
+                                    </select>
+                                </div>
+                                <div class="welcomepage-form-group">
+                                    <label for="welcomepage-email">Adresse e-mail</label>
+                                    <input type="email" id="welcomepage-email" required>
+                                </div>
+                                <div class="welcomepage-form-group">
+                                    <label for="welcomepage-password">Mot de passe</label>
+                                    <input type="password" id="welcomepage-password" required>
+                                </div>
+                                <div class="welcomepage-form-group">
+                                    <label for="welcomepage-confirmPassword">Confirmer le mot de passe</label>
+                                    <input type="password" id="welcomepage-confirmPassword" required>
+                                </div>
                             </div>
                             <button type="submit" class="welcomepage-btn welcomepage-btn-primary">Créer un compte</button>
                         </form>
                     </div>
-                    <div class="welcomepage-tab-content active" id="welcomepage-signinTab">
+                    <div class="welcomepage-tab-content" id="welcomepage-signinTab">
                         <form id="welcomepage-signinForm">
                             <h3>Connexion</h3>
-                            <div class="welcomepage-form-group">
-                                <label for="welcomepage-signin-email">Adresse e-mail</label>
-                                <input type="email" id="welcomepage-signin-email" required>
-                            </div>
-                            <div class="welcomepage-form-group">
-                                <label for="welcomepage-signin-password">Mot de passe</label>
-                                <input type="password" id="welcomepage-signin-password" required>
+                            <div class="form-grid">
+                                <div class="welcomepage-form-group">
+                                    <label for="welcomepage-signin-email">Adresse e-mail</label>
+                                    <input type="email" id="welcomepage-signin-email" required>
+                                </div>
+                                <div class="welcomepage-form-group">
+                                    <label for="welcomepage-signin-password">Mot de passe</label>
+                                    <input type="password" id="welcomepage-signin-password" required>
+                                </div>
                             </div>
                             <button type="submit" class="welcomepage-btn welcomepage-btn-primary">Se connecter</button>
                         </form>
                     </div>
                 </div>
+            </div>                  
+                    
             </div>
 
             <div id="welcomepage-features" class="welcomepage-features">
@@ -200,32 +206,45 @@
     </section>
     
     <section id="dashboard" class="page">
-            <main class="dashboard-main-content">
-                <button class="dashboard-menu-btn" id="dashboardMenuBtn"></button>
-                <h1>Bienvenue sur votre tableau de bord</h1>
-                <div class="dashboard-card-grid">
-                    <div class="dashboard-card" onclick="navigateTo('apprentissage')">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                        <h2>TalibTimer</h2>
-                    </div>
-                    <div class="dashboard-card" onclick="navigateTo('salatSurahSelector')">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
-                        <h2>SurahSelector</h2>
-                    </div>
-                    <div class="dashboard-card" onclick="navigateTo('duaTimeCalculator')">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
-                        <h2>Doua Time</h2>
-                    </div><div class="dashboard-card" onclick="navigateTo('surahmemorization')">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
-                        <h2>Surah Memorization</h2>
-                    </div></div><div class="dashboard-card" onclick="navigateTo('mosquetime')">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
-                        <h2>Salat Mosque Time</h2>
-                    </div>
+        <main class="dashboard-main-content">
+            <button class="dashboard-menu-btn" id="dashboardMenuBtn">☰</button>
+            <h1>Bienvenue sur votre tableau de bord</h1>
+            <div class="dashboard-card-grid">
+                <div class="dashboard-card" data-destination="apprentissage">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                    <h2>TalibTimer</h2>
                 </div>
+                <div class="dashboard-card" data-destination="salatSurahSelector">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                    </svg>
+                    <h2>SurahSelector</h2>
                 </div>
-            </main>
-        </section>
+                <div class="dashboard-card" data-destination="duaTimeCalculator">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <h2>Doua Time</h2>
+                </div>
+                <div class="dashboard-card" data-destination="surahmemorization">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <h2>Surah Memorization</h2>
+                </div>
+                <div class="dashboard-card" data-destination="mosquetime">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <h2>Salat Mosque Time</h2>
+                </div>
+            </div>
+        </main>
+    </section>
 
 
     <section id="talibtimer" class="page">
@@ -250,7 +269,7 @@
                             <p>Session précédente : <span id="previous-sessions-count">0</span></p>
                             <p>Session actuelle : <span id="current-session-id">0</span></p>
                         </div>
-                        <button id="start-new-session" onclick="startNewSession()">Nouvelle Session</button>
+                        <button id="start-new-session" data-action="start-new-session">Nouvelle Session</button>
                     </div>
                 </div>
             </div>
@@ -261,16 +280,16 @@
                 <div class="timer-content">
                     <h3 id="timer-label">Travail</h3>
                     <p id="time-left">25:00</p>
-                    <button id="start_stop" onclick="toggleTimer()">Démarrer</button>
-                    <button id="reset" onclick="resetTimer()">Réinitialiser</button>
+                    <button id="start_stop" data-action="toggle-timer">Démarrer</button>
+                    <button id="reset" data-action="reset-timer">Réinitialiser</button>
                 </div>
             </div>
             <div class="timer">
                 <h2>Chronomètre</h2>
                 <div class="timer-content">
                     <p id="stopwatch-time">00:00:00</p>
-                    <button id="stopwatch-start" onclick="toggleStopwatch()">Démarrer</button>
-                    <button id="stopwatch-reset" onclick="resetStopwatch()">Réinitialiser</button>
+                    <button id="stopwatch-start" data-action="toggle-stopwatch">Démarrer</button>
+                    <button id="stopwatch-reset" data-action="reset-stopwatch">Réinitialiser</button>
                 </div>
             </div>
             <div class="timer">
@@ -295,17 +314,17 @@
                     <h3 id="counter-task-title">Sélectionnez une tâche</h3>
                     <p id="counter-value">0</p>
                     <div id="counter-buttons">
-                        <button onclick="changeCounter(-1)">-1</button>
-                        <button onclick="changeCounter(1)">+1</button>
-                        <button onclick="changeCounter(3)">+3</button>
-                        <button onclick="changeCounter(5)">+5</button>
-                        <button onclick="changeCounter(10)">+10</button>
+                        <button data-action="change-counter" data-value="-1">-1</button>
+                        <button data-action="change-counter" data-value="1">+1</button>
+                        <button data-action="change-counter" data-value="3">+3</button>
+                        <button data-action="change-counter" data-value="5">+5</button>
+                        <button data-action="change-counter" data-value="10">+10</button>
                     </div>
                 </div>
             </div>
         </div>
         </div>
-        <button class="session-control" onclick="saveSessionData()">Enregistrer la Session</button>
+        <button class="session-control" data-action="save-session-data">Enregistrer la Session</button>
     </section>
 
     <section id="statistics" class="page">
@@ -394,6 +413,7 @@
                 <div class="surahmemorization-summary">
                     <button id="surahmemorization-toggle-all" class="surahmemorization-button">Select All</button>
                     <span id="surahmemorization-count" class="surahmemorization-count">0 surahs selected</span>
+                    <button id="surahmemorization-save" class="surahmemorization-button">Enregistrer</button>
                     <button id="surahmemorization-start" class="surahmemorization-button" disabled>Start Revision</button>
                 </div>
             </div>
@@ -623,7 +643,7 @@
             <div class="surahselector-card">
                 <h2>Historique des récitations</h2>
                 <div>
-                    <button onclick="toggleRecitationHistory()">Afficher/Masquer l'historique</button>
+                    <button data-action="toggle-recitation-history">Afficher/Masquer l'historique</button>
                     <div id="recitationHistoryContainer" style="display: none;">
                         <div id="recitationHistory">
                             <!-- L'historique sera généré ici dynamiquement -->
@@ -640,14 +660,14 @@
                     <div id="sourateList">
                         <!-- La liste des sourates sera générée ici dynamiquement -->
                     </div>
-                    <button onclick="saveKnownSourates()">Sauvegarder les sourates connues</button>
+                    <button data-action="save-known-sourates">Sauvegarder les sourates connues</button>
                 </div>
             </div>
             
             <div class="surahselector-card">
                 <h2>Sélection pour Salat</h2>
                 <div>
-                    <button onclick="selectRandomSourates()">Sélectionner des sourates pour Salat</button>
+                    <button data-action="select-random-sourates">Sélectionner des sourates pour Salat</button>
                     <div>
                         <p>1ère raka: <span id="firstRaka"></span></p>
                         <p>2ème raka: <span id="secondRaka"></span></p>
@@ -663,10 +683,10 @@
             <div class="dua-calculator-card">
                 <h1 class="dua-calculator-title">Calculate Last Third of the Night for Dua</h1>
                 <div class="dua-calculator-content">
-                    <button id="duaLocationBtn" class="dua-btn" onclick="getDuaLocation()">Use My Location</button>
+                    <button id="duaLocationBtn" class="dua-btn" data-action="get-dua-location">Use My Location</button>
                     <label for="duaCityInput" class="dua-input-label">Or enter a city:</label>
                     <input type="text" id="duaCityInput" class="dua-input-field" placeholder="Enter city">
-                    <button id="duaCitySubmitBtn" class="dua-btn" onclick="useDuaCity()">Submit</button>
+                    <button id="duaCitySubmitBtn" class="dua-btn" data-action="use-dua-city">Submit</button>
                     <label for="duaMethodSelect" class="dua-input-label">Calculation Method:</label>
                     <select id="duaMethodSelect" class="dua-select-field" onchange="toggleDuaCustomMethodInput()">
                         <option value="3">Muslim World League</option>
@@ -720,7 +740,7 @@
                     <input type="time" id="duaManualFajrInput" class="dua-input-field">
                     <label for="duaManualMaghribInput" class="dua-input-label">Maghrib Time (HH:MM):</label>
                     <input type="time" id="duaManualMaghribInput" class="dua-input-field">
-                    <button id="duaManualCalcBtn" class="dua-btn" onclick="calculateDuaManually()">Calculate Manually</button>
+                    <button id="duaManualCalcBtn" class="dua-btn" data-action="calculate-dua-manually">Calculate Manually</button>
                 </div>
             </div>
             <div class="dua-calculator-card">
@@ -966,10 +986,17 @@
         </div>
     </section>
 
-    <script src="script.js"></script>
-    <script src="script2.js"></script>
-    <script src="script3.js"></script> 
-    <script src="script4.js"></script>
-    <script src="script5.js"></script>
+    <script type="module" src="main.js"></script>
+    <script type="module" src="auth.js"></script>
+    <script type="module" src="navigation.js"></script>
+    <script type="module" src="profile.js"></script>
+    <script type="module" src="tasks.js"></script>
+    <script type="module" src="timer.js"></script>
+    <script type="module" src="surahSelector.js"></script>
+    <script type="module" src="duaTimeCalculator.js"></script>
+    <script type="module" src="mosqueTime.js"></script>
+    <script type="module" src="surahMemorization.js"></script>
+    <script type="module" src="notifications.js"></script>
+    <script type="module" src="utils.js"></script>
 </body>
 </html>
