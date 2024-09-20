@@ -10,5 +10,6 @@ router.post('/surahs/:number', authenticateToken, surahMemorizationController.up
 router.get('/history', authenticateToken, surahMemorizationController.getHistory);
 router.delete('/history', authenticateToken, surahMemorizationController.clearHistory);
 router.post('/known', authenticateToken, surahMemorizationController.saveKnownSurahs);
+router.get('/known', authenticateToken, surahMemorizationController.getKnownSurahs);
 
 module.exports = router;

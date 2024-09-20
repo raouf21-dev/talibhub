@@ -390,34 +390,50 @@
     </section>
 
     <section id="surahmemorization" class="page">
+        <!-- surahMemorization.html -->
+    
         <div id="quran-app-container">
-            <nav class="quran-app-nav">
-                <button id="quran-app-nav-select" class="quran-app-nav-button">Select Surahs</button>
-                <button id="quran-app-nav-revise" class="quran-app-nav-button">Revise</button>
-                <button id="quran-app-nav-history" class="quran-app-nav-button">History</button>
-            </nav>
-
-            <div id="surahmemorization-select" class="quran-app-section">
-                <h1 class="surahmemorization-title">Select Surahs for Revision</h1>
-                <div class="surahmemorization-search-filter">
-                    <input type="text" id="surahmemorization-search" class="surahmemorization-input" placeholder="Search surahs...">
-                    <select id="surahmemorization-filter" class="surahmemorization-select">
-                        <option value="">Filter</option>
-                        <option value="memorization">Memorization Level</option>
-                        <option value="revision">Revision Status</option>
-                        <option value="alphabetical">Alphabetical</option>
-                        <option value="numerical">Numerical</option>
-                    </select>
-                </div>
-                <div id="surahmemorization-list" class="surahmemorization-list"></div>
-                <div class="surahmemorization-summary">
-                    <button id="surahmemorization-toggle-all" class="surahmemorization-button">Select All</button>
-                    <span id="surahmemorization-count" class="surahmemorization-count">0 surahs selected</span>
-                    <button id="surahmemorization-save" class="surahmemorization-button">Enregistrer</button>
-                    <button id="surahmemorization-start" class="surahmemorization-button" disabled>Start Revision</button>
-                </div>
+            <!-- Navigation -->
+            <div class="quran-app-nav">
+                <button id="quran-app-nav-button-select" class="quran-app-nav-button" data-target="select">Select Surah</button>
+                <button id="quran-app-nav-button-revise" class="quran-app-nav-button" data-target="revise">Revise</button>
+                <button id="quran-app-nav-button-history" class="quran-app-nav-button" data-target="history">History</button>        
             </div>
-
+          
+            <!-- Section Select Surahs -->
+            <div id="surahmemorization-select" class="quran-app-section">
+              <h2 class="surahmemorization-title">Select Surahs for Revision</h2>
+          
+              <!-- Search and Filter -->
+              <div class="surahmemorization-search-filter">
+                <input type="text" id="surahmemorization-search" class="surahmemorization-input" placeholder="Search Surahs">
+                <select id="surahmemorization-filter" class="surahmemorization-select">
+                  <option value="default">Default</option>
+                  <option value="memorization">By Memorization Level</option>
+                  <option value="alphabetical">Alphabetical Order</option>
+                  <option value="numerical">Numerical Order</option>
+                </select>
+              </div>
+          
+              <!-- Liste des Sourates avec Boîte de Défilement -->
+              <div id="surahmemorization-list-container">
+                <div id="surahmemorization-list">
+                  <!-- Les éléments de la liste seront injectés ici par JavaScript -->
+                </div>
+              </div>
+          
+              <!-- Actions -->
+              <div class="surahmemorization-summary">
+                <button id="surahmemorization-toggle-all" class="surahmemorization-button">Select All</button>
+                <span id="surahmemorization-count" class="surahmemorization-count">0 surahs selected</span>
+                <!-- Bouton Enregistrer -->
+                <button id="surahmemorization-save" class="surahmemorization-button">Enregistrer</button>
+                <!-- Bouton Start Revision -->
+                <button id="surahmemorization-start" class="surahmemorization-button" disabled>Start Revision</button>
+              </div>
+            </div>
+          </div>  
+        
             <div id="surahmemorization-revise" class="quran-app-section" style="display:none;">
                 <h1 id="surahmemorization-current-title" class="surahmemorization-title">Al-Fatihah</h1>
                 <p id="surahmemorization-progress">Surah 1 of 5</p>
@@ -428,11 +444,14 @@
                 <button id="surahmemorization-toggle-text">
                     <span class="icon">👁</span> Show Text
                 </button>
+                <!-- Suppression des boutons de navigation -->
+                <!-- 
                 <div class="surahmemorization-navigation">
                     <button id="surahmemorization-prev">← Previous</button>
                     <button id="surahmemorization-skip">Skip</button>
                     <button id="surahmemorization-next">Next →</button>
                 </div>
+                -->
                 <h2 style="text-align: center; margin-top: 20px;">How do you rate your memorization of this surah?</h2>
                 <div id="surahmemorization-evaluation">
                     <button class="surahmemorization-eval-btn" data-level="Strong">Strong</button>
@@ -441,7 +460,7 @@
                     <button class="surahmemorization-eval-btn" data-level="Weak">Weak</button>
                 </div>
             </div>
-
+    
             <div id="surahmemorization-history" class="quran-app-section" style="display:none;">
                 <h1 class="surahmemorization-title">Revision History</h1>
                 <div id="surahmemorization-charts" class="surahmemorization-charts">
@@ -476,6 +495,7 @@
             </div>
         </div>
     </section>
+    
 
     <section id="mosquetime" class="page">
     <div class="mosquetime-card">

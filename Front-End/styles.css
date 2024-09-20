@@ -2024,7 +2024,12 @@ button[type="submit"]:hover {
   overflow: hidden;
 }
 
+#surahmemorization-list-container {
+  max-height: 400px; /* Ajustez la hauteur selon vos besoins */
+  overflow-y: auto;
+}
 .quran-app-nav {
+  position: sticky;
   background-color: #6096ba;
   padding: 10px;
   display: flex;
