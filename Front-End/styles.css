@@ -492,6 +492,10 @@ body {
 
 /*TalibTimer*/
 
+#talibtimer{
+  margin-left: 260px;
+};
+
 #apprentissage {
   display: flex;
   font-family: Arial, sans-serif;
@@ -624,8 +628,12 @@ body {
 }
 
 @media (max-width: 1024px) {
+
+  #talibtimer{
+    margin-left: 0px;
+  };
   #apprentissage {
-    margin: 0;
+    margin-left: 0;
   }
 
   .timers-container{
@@ -2289,7 +2297,7 @@ button[type="submit"]:hover {
 }
 
 .mosquetime-header {
-  background-color: #5b9bd5;
+  background-color: var(--secondary-color);
   color: white;
   padding: 20px;
 }
@@ -2310,7 +2318,7 @@ button[type="submit"]:hover {
   margin-bottom: 20px;
 }
 .mosquetime-button {
-  background-color: #2f5597;
+  background-color:  var(--secondary-color);
   color: white;
   border: none;
   padding: 10px 15px;
@@ -2344,7 +2352,7 @@ button[type="submit"]:hover {
   cursor: pointer;
 }
 .mosquetime-tab.active {
-  background-color: #5b9bd5;
+  background-color:  var(--secondary-color);
   color: white;
 }
 .mosquetime-mosque-select {
