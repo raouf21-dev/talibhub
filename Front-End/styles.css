@@ -2286,6 +2286,38 @@ button[type="submit"]:hover {
   margin-left: 250px;
 }
 
+.mosquetime-select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  appearance: none; /* Pour personnaliser l'apparence du select */
+  background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="5"><path fill="%23333" d="M0 0l5 5 5-5z"/></svg>'); /* Icône flèche */
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 10px 5px;
+}
+
+.mosquetime-select:focus {
+  outline: none;
+  border-color: var(--secondary-color);
+  box-shadow: 0 0 5px rgba(30, 58, 106, 0.5);
+}
+
+.mosquetime-button {
+  background-color: var(--secondary-color);
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.mosquetime-button:hover {
+  background-color: #1e3a6a;
+}
+
+
 .mosquetime-card {
   max-width: 800px;
   background-color: white;

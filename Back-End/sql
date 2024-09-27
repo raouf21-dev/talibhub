@@ -231,26 +231,31 @@ CREATE TABLE known_sourates (
 
 //--------MosqueTimes------------//
 
--- Extension pour les fonctions géospatiales
-CREATE EXTENSION IF NOT EXISTS cube;
-CREATE EXTENSION IF NOT EXISTS earthdistance;
-
 -- Table des mosquées
 CREATE TABLE mosques (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     address VARCHAR(255) NOT NULL,
+    city VARCHAR(100) NOT NULL, -- Nouvelle colonne pour la ville
     latitude DECIMAL(10, 8) NOT NULL,
     longitude DECIMAL(11, 8) NOT NULL
 );
 
+
+-- Extensions pour les fonctions géospatiales
+CREATE EXTENSION IF NOT EXISTS cube;
+CREATE EXTENSION IF NOT EXISTS earthdistance;
+
 -- Index spatial pour la recherche géographique rapide
 CREATE INDEX idx_mosques_location ON mosques USING gist (ll_to_earth(latitude, longitude));
+
+-- Index sur la colonne city pour accélérer les recherches par ville
+CREATE INDEX idx_mosques_city ON mosques (city);
 
 -- Table des horaires de prière
 CREATE TABLE prayer_times (
     id SERIAL PRIMARY KEY,
-    mosque_id INTEGER REFERENCES mosques(id),
+    mosque_id INTEGER REFERENCES mosques(id) ON DELETE CASCADE,
     date DATE NOT NULL,
     fajr TIME NOT NULL,
     dhuhr TIME NOT NULL,
@@ -260,7 +265,8 @@ CREATE TABLE prayer_times (
     jumuah1 TIME,
     jumuah2 TIME,
     jumuah3 TIME,
-    tarawih TIME
+    tarawih TIME,
+    UNIQUE (mosque_id, date) -- Assure l'unicité des horaires par mosquée et date
 );
 
 -- Index pour améliorer les performances des requêtes sur prayer_times

@@ -1,3 +1,5 @@
+// mosqueTimesModel.js
+
 const pool = require('../config/db');
 
 const savePrayerTimes = async (mosqueId, date, times) => {
@@ -81,12 +83,40 @@ const insertPrayerTimes = async (mosqueId, date, times) => {
   await pool.query(query, values);
 };
 
+const searchCities = async (query) => {
+  const sqlQuery = `
+    SELECT DISTINCT city
+    FROM mosques
+    WHERE city ILIKE $1
+    ORDER BY city ASC
+    LIMIT 10
+  `;
+  const values = [`%${query}%`];
+  const result = await pool.query(sqlQuery, values);
+  return result.rows.map(row => row.city);
+};
+
+// Fonction pour récupérer les mosquées par ville
+const getMosquesByCity = async (city) => {
+  const sqlQuery = `
+    SELECT *
+    FROM mosques
+    WHERE city ILIKE $1
+    ORDER BY name ASC
+  `;
+  const values = [city];
+  const result = await pool.query(sqlQuery, values);
+  return result.rows;
+};
+
 module.exports = {
   savePrayerTimes,
   getPrayerTimes,
   getAllMosques,
   searchMosques,
   addMosque,
-  insertPrayerTimes
+  insertPrayerTimes,
+  searchCities,
+  getMosquesByCity
 };
 

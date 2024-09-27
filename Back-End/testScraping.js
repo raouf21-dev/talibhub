@@ -1,3 +1,5 @@
+//aishaMosqueWalsall.js
+
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 
@@ -6,71 +8,96 @@ puppeteer.use(StealthPlugin());
 const scrapeAishaMosque = async () => {
   let browser;
   try {
-    browser = await puppeteer.launch({ headless: false });
+    browser = await puppeteer.launch({ headless: false, args: ['--no-sandbox'] });
     const page = await browser.newPage();
 
-    await page.setUserAgent('Mozilla/5.0 ...');
+    await page.setUserAgent(
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36'
+    );
 
     console.log('Navigating to the main page...');
     await page.goto('https://www.aishamosque.org/', { waitUntil: 'networkidle2' });
     console.log('Main page loaded successfully');
 
-    // Attendre l'iframe
+    // Attendre que l'iframe spécifique soit chargé
     await page.waitForSelector('iframe', { timeout: 30000 });
     const frameHandle = await page.$('iframe');
     const frame = await frameHandle.contentFrame();
 
-    // Attendre un élément spécifique à l'intérieur de l'iframe pour s'assurer que le contenu est chargé
-    await frame.waitForSelector('.mbx-widget-timetable-nav-date .mbx-widget-timetable-nav-miladi', { timeout: 30000 });
+    if (!frame) {
+      throw new Error("Unable to access iframe content (possibly due to cross-origin restrictions).");
+    }
 
-    // Extraire les données de l'iframe
+    // Attendre que la date et les horaires soient chargés
+    await frame.waitForSelector('.mbx-widget-timetable-nav-date', { timeout: 15000 });
+    await frame.waitForSelector('.styles__Item-sc-1h272ay-1', { timeout: 15000 });
+
     const data = await frame.evaluate(() => {
-      const dateElement = document.querySelector('.mbx-widget-timetable-nav-date .mbx-widget-timetable-nav-miladi');
+      const dateElement = document.querySelector('.mbx-widget-timetable-nav-date');
       const dateText = dateElement ? dateElement.textContent.trim() : null;
 
-      const formatTime = (hourElement, minuteElement, ampmElement) => {
-        if (!hourElement || !ampmElement) return null;
-        const hourText = hourElement.textContent.trim();
-        const minuteText = minuteElement ? minuteElement.textContent.trim() : '00';
-        const ampmText = ampmElement.textContent.trim();
+      const times = {};
 
-        let hours = parseInt(hourText);
-        let minutes = parseInt(minuteText);
-        if (ampmText.toLowerCase() === 'pm' && hours < 12) hours += 12;
-        if (ampmText.toLowerCase() === 'am' && hours === 12) hours = 0;
-        return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-      };
+      const prayerItems = document.querySelectorAll('.styles__Item-sc-1h272ay-1');
 
-      const getPrayerTime = (prayerName) => {
-        const item = Array.from(document.querySelectorAll('.title')).find(el => el.textContent.trim().toLowerCase() === prayerName);
-        if (item) {
-          const parent = item.closest('.styles_Item-sc-1h272ay-1');
-          const hourElement = parent.querySelector('.time.mono');
-          const minuteElement = hourElement.nextElementSibling;
-          const ampmElement = parent.querySelector('.ampm');
-          return formatTime(hourElement, minuteElement, ampmElement);
+      prayerItems.forEach((item) => {
+        const titleElement = item.querySelector('.title');
+        const timeElement = item.querySelector('.time.mono');
+
+        if (titleElement && timeElement) {
+          let prayerName = titleElement.textContent.trim().toLowerCase();
+
+          // Normalisation des noms de prières
+          if (prayerName === 'dhuhr') prayerName = 'zuhr';
+          if (prayerName === 'jummah' || prayerName === "jumu'ah") prayerName = 'jumuah';
+
+          const allowedPrayers = ['fajr', 'zuhr', 'asr', 'maghrib', 'isha'];
+
+          if (allowedPrayers.includes(prayerName)) {
+            // Extraction directe du texte complet du temps
+            let timeText = timeElement.textContent.trim();
+
+            // Remplacer les séparateurs par un deux-points si nécessaire
+            timeText = timeText.replace('•', ':');
+
+            // Utiliser une expression régulière pour formater le temps
+            // Exemple : '615AM' => '6:15 AM' ou '6:15'
+            const regex = /^(\d{1,2})(\d{2})(AM|PM)?$/i;
+            const match = timeText.match(regex);
+
+            if (match) {
+              const hours = parseInt(match[1], 10);
+              const minutes = match[2];
+              const ampm = match[3] ? ` ${match[3].toUpperCase()}` : '';
+
+              // Format souhaité : '6:15 AM' ou '6:15'
+              const formattedTime = `${hours}:${minutes}${ampm}`;
+
+              // Si vous souhaitez omettre AM/PM, utilisez :
+              // const formattedTime = `${hours}:${minutes}`;
+
+              times[prayerName] = formattedTime;
+            } else {
+              // Si le format ne correspond pas, utiliser le texte brut après remplacement
+              times[prayerName] = timeText;
+            }
+          }
         }
-        return null;
-      };
-
-      const times = {
-        fajr: getPrayerTime('fajr'),
-        dhuhr: getPrayerTime('dhuhr'),
-        asr: getPrayerTime('asr'),
-        maghrib: getPrayerTime('maghrib'),
-        isha: getPrayerTime('isha'),
-        jumuah1: getPrayerTime("jumu'ah")
-      };
+      });
 
       return { dateText, times };
     });
 
+    if (!data) {
+      throw new Error("Data could not be extracted.");
+    }
+
     console.log('Date:', data.dateText);
-    console.log('Prayer Times:', data.times);
+    console.log('Prayer times:', data.times);
 
     return data;
   } catch (error) {
-    console.error('Error scraping Aisha Mosque:', error);
+    console.error('Error during scraping:', error);
   } finally {
     if (browser) {
       await browser.close();
@@ -78,5 +105,6 @@ const scrapeAishaMosque = async () => {
   }
 };
 
-// Exporter la fonction sans l'appeler immédiatement
+scrapeAishaMosque();
+
 module.exports = scrapeAishaMosque;

@@ -1,5 +1,7 @@
 // utils.js
 
+import { init as initializeMosqueTime } from './mosqueTime.js';
+
 // Fonction pour naviguer entre les pages
 function navigateTo(pageId) {
     console.log('Navigating to:', pageId);
@@ -31,7 +33,7 @@ function updateNavVisibility(pageId) {
 
 // Vérification de l'authentification au chargement
 function checkAuthOnLoad() {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('token'); // Utiliser 'token' comme clé
     return !!token;
 }
 
@@ -63,7 +65,6 @@ function initializeTabToggle() {
     });
 }
 
-
 // Fonction pour charger la page initiale en fonction de l'ID
 function loadInitialPage(pageId) {
     const pageLoaders = {
@@ -76,6 +77,7 @@ function loadInitialPage(pageId) {
         'dashboard': () => {
             console.log('Dashboard loaded');
         },
+        'mosquetime': () => initializeMosqueTime(), // Assurez-vous que cela est correct
         // Ajoutez d'autres pages ici si nécessaire
     };
 

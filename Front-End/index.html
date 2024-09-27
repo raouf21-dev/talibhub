@@ -498,19 +498,32 @@
     
 
     <section id="mosquetime" class="page">
+        <div id="mosquetime-error" class="mosquetime-error" style="display:none;"></div>
     <div class="mosquetime-card">
         <header class="mosquetime-header">
             <h1 class="mosquetime-title">Congregational Prayer Times at the Mosque</h1>
             <p class="mosquetime-subtitle">Find the times for congregational prayers at mosques near you</p>
         </header>
         <div class="mosquetime-content">
+            <!-- Front-End HTML -->
+
             <div class="mosquetime-location-search">
                 <button id="mosquetime-use-location" class="mosquetime-button">
-                    <i class="fas fa-map-marker-alt"></i> Use my current location
+                    <i class="fas fa-map-marker-alt"></i> Utiliser ma localisation
                 </button>
-                <input id="mosquetime-location-input" type="text" class="mosquetime-input" placeholder="Enter city or postal code">
-                <button id="mosquetime-search" class="mosquetime-button">Search</button>
+                <div class="mosquetime-city-search-container">
+                    <select id="mosquetime-location-select" class="mosquetime-select">
+                        <option value="">Sélectionnez une ville</option>
+                        <!-- Les options seront peuplées dynamiquement via JavaScript -->
+                    </select>
+                </div>
+                <button id="mosquetime-search" class="mosquetime-button">Rechercher</button>
+                <div id="mosquetime-loading" style="display: none;">
+                    Chargement des horaires de prière, veuillez patienter...
+                </div>                
             </div>
+            
+
 
             <div class="mosquetime-date-display">
                 <h2 id="mosquetime-city-date">New York City, September 8, 2024</h2>

@@ -26,6 +26,7 @@
     "postgres": "^3.4.4",
     "puppeteer": "^23.3.0",
     "puppeteer-extra": "^3.3.6",
-    "puppeteer-extra-plugin-stealth": "^2.11.2"
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
+    "tesseract.js": "^5.1.1"
   }
 }
