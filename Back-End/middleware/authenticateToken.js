@@ -1,16 +1,9 @@
-//authenticateToken.js
-
-const jwt = require('jsonwebtoken');
-const dotenv = require('dotenv');
-
-dotenv.config();
-
 function authenticateToken(req, res, next) {
     const authHeader = req.headers['authorization'];
-    console.log('Authorization Header:', authHeader); // Log the full header
+    console.log('Authorization Header:', authHeader);
 
     const token = authHeader && authHeader.split(' ')[1];
-    console.log('Extracted Token:', token); // Log the extracted token
+    console.log('Extracted Token:', token);
 
     if (token == null) {
         console.log('No token provided, sending 401');
@@ -23,10 +16,8 @@ function authenticateToken(req, res, next) {
             return res.sendStatus(403); // Forbidden
         }
 
+        console.log('Token is valid. User:', user);
         req.user = user;
         next();
     });
 }
-
-
-module.exports = authenticateToken;
