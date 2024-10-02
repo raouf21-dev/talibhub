@@ -156,6 +156,60 @@ const getMosquesByCity = async (req, res) => {
   }
 };
 
+const scrapePrayerTimesForCity = async (city) => {
+  try {
+    // Récupérer la liste des mosquées dans la ville
+    const mosques = await mosqueTimesModel.getMosquesByCity(city);
+    for (const mosque of mosques) {
+      const mosqueId = mosque.id;
+      const scraper = scrapers[mosqueId];
+      console.log(`Scraping mosque ID ${mosqueId}`);
+      if (!scraper) {
+        console.error(`Aucun scraper trouvé pour la mosquée ID ${mosqueId}`);
+        continue; // Passer à la mosquée suivante si aucun scraper n'est trouvé
+      }
+      try {
+        const data = await scraper();
+        if (data && data.times) {
+          const date = data.dateText || new Date().toISOString().split('T')[0];
+          await mosqueTimesModel.savePrayerTimes(mosqueId, date, data.times);
+          console.log(`Horaires de prière pour la mosquée ID ${mosqueId} enregistrés avec succès`);
+        } else {
+          console.warn(`Aucun horaire trouvé pour la mosquée ID ${mosqueId}`);
+        }
+      } catch (error) {
+        console.error(`Erreur lors du scraping de la mosquée ID ${mosqueId}:`, error);
+      }
+    }
+    console.log(`Scraping terminé avec succès pour la ville ${city}`);
+  } catch (error) {
+    console.error(`Erreur lors du scraping pour la ville ${city}:`, error);
+    throw error;
+  }
+};
+
+const scrapeByCity = async (req, res) => {
+  let city; // Déclarer city en dehors du bloc try
+  try {
+    city = req.params.city;
+    if (!city) {
+      return res.status(400).json({ message: "Le paramètre 'ville' est requis" });
+    }
+    console.log(`Début du scraping pour la ville ${city}...`);
+    await scrapePrayerTimesForCity(city);
+    console.log(`Scraping pour la ville ${city} terminé avec succès`);
+    res.json({ message: `Scraping terminé avec succès pour la ville ${city}` });
+  } catch (error) {
+    console.error(`Erreur lors du scraping pour la ville ${city}:`, error);
+    res.status(500).json({
+      message: "Erreur lors du scraping",
+      error: error.message,
+      stack: error.stack,
+    });
+  }
+};
+
+
 module.exports = {
   scrapePrayerTimes,
   manualScrape,
@@ -165,4 +219,6 @@ module.exports = {
   addMosque,
   searchCities,
   getMosquesByCity,
+  scrapeByCity,
+  scrapePrayerTimesForCity
 };

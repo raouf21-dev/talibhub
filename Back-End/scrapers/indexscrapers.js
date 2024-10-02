@@ -13,3 +13,4 @@ const scrapers = {
   // Ajoutez d'autres scrapers avec leurs IDs correspondants
 };
 
+module.exports = { scrapers };

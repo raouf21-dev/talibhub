@@ -26,6 +26,8 @@ app.use(cors({
 // Configurer les middlewares
 app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true }));
+app.options('*', cors()); // Gérer les requêtes OPTIONS pour toutes les routes
+
 
 
 // Importer les routes

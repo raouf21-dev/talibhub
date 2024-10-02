@@ -6,7 +6,17 @@ let selectedCity = ''; // Variable pour stocker la ville sélectionnée
 
 export async function init() {
     console.log('Initializing mosqueTime module');
-    //await triggerScraping(); // Déclencher le scraping lors de l'initialisation
+
+    // Initialiser le date picker à la date du jour
+    const datePicker = document.getElementById('mosquetime-date-picker');
+    if (datePicker) {
+        const today = new Date().toISOString().split('T')[0];
+        datePicker.value = today;
+    }
+
+    // Mettre à jour l'affichage de la date
+    updateDateDisplay();
+
     setupEventListeners();
     await loadCities(); // Charger les villes après le scraping
 }
@@ -116,13 +126,13 @@ async function updateSingleMosqueTimes() {
     const select = document.getElementById('mosquetime-mosque-select');
     const tbody = document.getElementById('mosquetime-single-mosque-times');
     const date = document.getElementById('mosquetime-date-picker').value || new Date().toISOString().split('T')[0];
-    
+
     try {
-        const token = localStorage.getItem('token'); // Utiliser 'token' comme clé
+        const token = localStorage.getItem('token');
         console.log('Fetching prayer times for mosqueId:', select.value, 'with token:', token);
         const response = await fetch(`http://localhost:3000/mosque-times/${select.value}/${date}`, {
             headers: {
-                'Authorization': `Bearer ${token}` // Inclure le token
+                'Authorization': `Bearer ${token}`
             }
         });
         console.log('Prayer Times Response Status:', response.status);
@@ -131,7 +141,7 @@ async function updateSingleMosqueTimes() {
         }
         const times = await response.json();
         console.log('Prayer Times:', times);
-        
+
         tbody.innerHTML = '';
         for (const [prayer, time] of Object.entries(times)) {
             if (prayer !== 'id' && prayer !== 'mosque_id' && prayer !== 'date' && time) {
@@ -142,7 +152,7 @@ async function updateSingleMosqueTimes() {
         }
     } catch (error) {
         console.error('Erreur lors de la récupération des horaires de prière:', error);
-        displayError('Impossible de récupérer les horaires de prière. Veuillez réessayer plus tard.');
+        displayError('Aucun horaire de prière disponible pour cette date. Veuillez sélectionner une autre date.');
     }
 }
 
@@ -243,36 +253,67 @@ function setupEventListeners() {
     tabs.forEach(tab => {
         tab.addEventListener('click', () => switchTab(tab.dataset.tab));
     });
+
+    // Écouteur pour le changement de date
+    const datePicker = document.getElementById('mosquetime-date-picker');
+    if (datePicker) {
+        datePicker.addEventListener('change', async (event) => {
+            updateDateDisplay();
+            await updateSingleMosqueTimes();
+        });
+    }
 }
 
 async function handleCitySelection(city) {
     const activeTab = document.querySelector('.mosquetime-tab.active').dataset.tab;
-
-    if (activeTab === 'single') {
-        // Récupérer les mosquées dans la ville sélectionnée et remplir le sélecteur
-        try {
-            const mosques = await fetchMosquesByCity(city);
-            populateMosqueSelectByCity(mosques);
-            if (mosques.length > 0) {
-                document.getElementById('mosquetime-mosque-select').value = mosques[0].id;
-                await updateSingleMosqueTimes();
-            }
-        } catch (error) {
-            console.error('Erreur lors de la récupération des mosquées par ville:', error);
-            displayError('Impossible de récupérer les mosquées pour la ville sélectionnée. Veuillez réessayer plus tard.');
+  
+    // Déclencher le scraping pour la ville sélectionnée
+    try {
+      displayLoading(true); // Afficher un indicateur de chargement
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:3000/mosque-times/scrape/${encodeURIComponent(city)}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
         }
-    } else if (activeTab === 'all') {
-        // Récupérer et afficher toutes les mosquées dans la ville sélectionnée
-        try {
-            const mosques = await fetchMosquesByCity(city);
-            currentMosques = mosques;
-            updateAllMosques();
-        } catch (error) {
-            console.error('Erreur lors de la récupération des mosquées par ville:', error);
-            displayError('Impossible de récupérer les mosquées pour la ville sélectionnée. Veuillez réessayer plus tard.');
-        }
+      });
+      if (!response.ok) {
+        throw new Error(`Erreur lors du scraping: ${response.status} ${response.statusText}`);
+      }
+      const data = await response.json();
+      console.log('Scraping terminé:', data.message);
+    } catch (error) {
+      console.error('Erreur lors du déclenchement du scraping:', error);
+      displayError('Une erreur est survenue lors du scraping. Veuillez réessayer plus tard.');
+    } finally {
+      displayLoading(false); // Cacher l'indicateur de chargement
     }
-}
+  
+    // Récupérer les mosquées et mettre à jour l'affichage
+    if (activeTab === 'single') {
+      try {
+        const mosques = await fetchMosquesByCity(city);
+        populateMosqueSelectByCity(mosques);
+        if (mosques.length > 0) {
+          document.getElementById('mosquetime-mosque-select').value = mosques[0].id;
+          await updateSingleMosqueTimes();
+        }
+      } catch (error) {
+        console.error('Erreur lors de la récupération des mosquées par ville:', error);
+        displayError('Impossible de récupérer les mosquées pour la ville sélectionnée. Veuillez réessayer plus tard.');
+      }
+    } else if (activeTab === 'all') {
+      try {
+        const mosques = await fetchMosquesByCity(city);
+        currentMosques = mosques;
+        updateAllMosques();
+      } catch (error) {
+        console.error('Erreur lors de la récupération des mosquées par ville:', error);
+        displayError('Impossible de récupérer les mosquées pour la ville sélectionnée. Veuillez réessayer plus tard.');
+      }
+    }
+  }
+  
 
 async function handleUseCurrentLocation() {
     console.log('Utilisation de la localisation actuelle');
@@ -340,6 +381,26 @@ function displayError(message) {
         errorElement.textContent = message;
         errorElement.style.display = 'block';
     }
+}
+
+function updateDateDisplay() {
+    const datePicker = document.getElementById('mosquetime-date-picker');
+    const cityDateElement = document.getElementById('mosquetime-city-date');
+    const citySelect = document.getElementById('mosquetime-location-select');
+    const selectedCity = citySelect.options[citySelect.selectedIndex]?.textContent || 'Votre Ville';
+    const selectedDate = new Date(datePicker.value || new Date());
+    const dateString = selectedDate.toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' });
+    cityDateElement.textContent = `${selectedCity}, ${dateString}`;
+}
+
+
+// Appelez cette fonction lors du changement de date
+const datePicker = document.getElementById('mosquetime-date-picker');
+if (datePicker) {
+    datePicker.addEventListener('change', async (event) => {
+        updateDateDisplay();
+        await updateSingleMosqueTimes();
+    });
 }
 
 // Initialize the app
