@@ -10,7 +10,10 @@ router.get('/cities/search', authenticateToken, mosqueTimesController.searchCiti
 router.get('/cities/:city/mosques', authenticateToken, mosqueTimesController.getMosquesByCity);
 router.get('/search', authenticateToken, mosqueTimesController.searchMosques);
 router.post('/add', authenticateToken, mosqueTimesController.addMosque);
-router.post('/scrape/:city', authenticateToken, mosqueTimesController.scrapeByCity);
+router.get('/exists/:date', authenticateToken, mosqueTimesController.checkDataExists);
+router.post('/scrape-all', authenticateToken, mosqueTimesController.scrapeAllCities);
+
+//router.post('/scrape/:city', authenticateToken, mosqueTimesController.scrapeByCity);
 
 // Routes générales en dernier
 router.get('/:mosqueId/:date', authenticateToken, mosqueTimesController.getPrayerTimes);

@@ -109,6 +109,19 @@ const getMosquesByCity = async (city) => {
   return result.rows;
 };
 
+const checkDataExists = async (date) => {
+  try {
+    const query = 'SELECT COUNT(*) FROM prayer_times WHERE date = $1';
+    const values = [date];
+    const result = await pool.query(query, values);
+    const count = parseInt(result.rows[0].count, 10);
+    return count > 0;
+  } catch (error) {
+    console.error('Erreur lors de la vérification des données existantes :', error);
+    throw error;
+  }
+};
+
 module.exports = {
   savePrayerTimes,
   getPrayerTimes,
@@ -117,6 +130,7 @@ module.exports = {
   addMosque,
   insertPrayerTimes,
   searchCities,
-  getMosquesByCity
+  getMosquesByCity,
+  checkDataExists,
 };
 

@@ -1,7 +1,5 @@
 // utils.js
 
-import { init as initializeMosqueTime } from './mosqueTime.js';
-
 // Fonction pour naviguer entre les pages
 function navigateTo(pageId) {
     console.log('Navigating to:', pageId);
@@ -77,8 +75,7 @@ function loadInitialPage(pageId) {
         'dashboard': () => {
             console.log('Dashboard loaded');
         },
-        'mosquetime': () => initializeMosqueTime(), // Assurez-vous que cela est correct
-        // Ajoutez d'autres pages ici si nécessaire
+'mosquetime': () => import('./mosqueTime.js').then(module => module.initializeMosqueTime()),        // Ajoutez d'autres pages ici si nécessaire
     };
 
     const loader = pageLoaders[pageId];

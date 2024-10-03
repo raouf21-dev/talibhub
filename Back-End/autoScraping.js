@@ -1,4 +1,4 @@
-//------------Scraping----------------//
+// autoScraping.js
 
 const cron = require('node-cron');
 const MosqueTimesController = require('./controllers/mosqueTimesController');
