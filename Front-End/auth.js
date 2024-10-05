@@ -30,12 +30,11 @@ function initializeAuthForms() {
 function showAuthForms() {
     console.log('showAuthForms called');
     const authForms = document.getElementById('welcomepage-auth-forms');
-    const welcomeHero = document.getElementById('welcomepage-hero');
     const getStartedBtn = document.getElementById('welcomepage-getStartedBtn');
 
-    if (welcomeHero && authForms && getStartedBtn) {
+    if (authForms && getStartedBtn) {
         getStartedBtn.style.display = 'none';
-        welcomeHero.style.display = 'none';
+        // welcomeHero.style.display = 'none'; // Ne plus masquer le héros
         authForms.classList.remove('hidden');
         authForms.style.display = 'block';
         document.body.style.overflow = 'auto';
@@ -48,6 +47,7 @@ function showAuthForms() {
         switchTab('signin');
     }
 }
+
 
 // Fonction d'inscription
 async function handleSignup(event) {

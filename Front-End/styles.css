@@ -19,7 +19,7 @@ e7ecef Blanc
   --gray-color: #8b8c89;
 
   /* Fonts */
-  --main-font: Arial, sans-serif;
+  --main-font: 'Poppins', sans-serif;
 }
 
 * {
@@ -55,6 +55,7 @@ body {
 
 /* Styles pour la page d'inscription/connexion */
 
+
 .welcomepage-header {
   background-color: var(--secondary-color);
   color: white;
@@ -63,25 +64,36 @@ body {
 }
 
 .welcomepage-container {
-  max-width: 1200px;
+  width: 75vw;
   margin: 0 auto;
   padding: 2rem 1rem;
 }
 
+
+.welcomepage-hero p,
+.welcomepage-features p,
+.welcomepage-vision p,
+.welcomepage-why-choose p,
+.welcomepage-commitment p {
+  color: var(--primary-color);
+  font-size: 1.5rem;
+  margin-bottom: 2rem;
+}
+
 .welcomepage-hero {
   text-align: center;
-  margin-bottom: 4rem;
+  margin-bottom: 10rem;
 }
 
 .welcomepage-hero h2 {
   color: var(--primary-color);
-  font-size: 2.5rem;
+  font-size: 3rem;
   margin-bottom: 0.5rem;
 }
 
 .welcomepage-hero p {
   color: var(--secondary-color);
-  font-size: 1.2rem;
+  font-size: 2rem;
   margin-bottom: 1.5rem;
 }
 
@@ -89,10 +101,11 @@ body {
   background-color: var(--primary-color);
   color: white;
   border: none;
-  padding: 0.75rem 2rem;
-  font-size: 1rem;
+  margin-top: 50px;
+  padding: 1rem 2rem;
+  font-size: 1.65rem;
   cursor: pointer;
-  border-radius: 5px;
+  border-radius: 15px;
   transition: background-color 0.3s ease;
 }
 
@@ -104,17 +117,23 @@ body {
 .welcomepage-vision,
 .welcomepage-why-choose,
 .welcomepage-commitment {
-  margin-bottom: 4rem;
+  margin-bottom: 9rem;
 }
 
 .welcomepage-features h2,
-.welcomepage-vision h2,
-.welcomepage-why-choose h2,
-.welcomepage-commitment h2 {
+.welcomepage-why-choose h2 {
   color: var(--primary-color);
-  font-size: 2rem;
+  font-size: 2.5rem;
   text-align: center;
   margin-bottom: 2rem;
+}
+
+.welcomepage-vision h2,
+.welcomepage-commitment h2 {
+  color: var(--primary-color);
+  font-size: 2.5rem;
+  text-align: left;
+  margin-bottom: 0.5rem;
 }
 
 .welcomepage-features-grid,
@@ -141,15 +160,16 @@ body {
 
 .welcomepage-feature-card h3,
 .welcomepage-why-choose-card h3 {
-  color: var(--primary-color);
-  font-size: 1.2rem;
+  color: black;
+  font-size: 1.5rem;
   margin-bottom: 0.5rem;
 }
 
 .welcomepage-feature-card p,
 .welcomepage-why-choose-card p {
-  color: var(--secondary-color);
+  color: black;
   margin-bottom: 0;
+  font-size: 1.3rem;
 }
 
 .welcomepage-vision p,
@@ -157,6 +177,7 @@ body {
 .welcomepage-commitment li {
   color: var(--text-color);
   margin-bottom: 1rem;
+  font-size: 1.3rem;
 }
 
 .welcomepage-commitment ul {
@@ -177,13 +198,28 @@ body {
   color: white;
   text-align: center;
   padding: 1rem;
+  font-size: 1.5rem;
 }
 
 /* Styles pour la page d'inscription/connexion */
 .welcomepage-auth-forms {
-  margin-top: 2rem;
+  width: 100%;
+  margin: -5rem auto 5rem auto;
+  max-width: 50vw; /* Par exemple, pour limiter la largeur sur grands écrans */
+  animation: slideDown 0.30s ease-out;
+
 }
 
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
 .welcomepage-card {
   background-color: var(--card-background);
   border-radius: 8px;
@@ -309,10 +345,13 @@ body {
   list-style-type: none;
   padding: 0;
   margin: 0;
+  font-size: 1.1rem;
+  font-weight: bold;
 }
 
 .nav-list li {
   margin-bottom: 0.5rem;
+  
 }
 
 .nav-list a {
@@ -322,6 +361,7 @@ body {
   color: white;
   text-decoration: none;
   transition: background-color 0.2s;
+  
 }
 
 .nav-list a:hover {
@@ -332,6 +372,8 @@ body {
   list-style-type: none;
   margin-left: 1rem;
   padding: 0;
+  font-size: 1rem;
+  font-weight: 500;
 }
 
 /* Bouton hamburger */
@@ -420,7 +462,7 @@ body {
 }
 
 .dashboard-main-content h1 {
-  font-size: 2rem;
+  font-size: 2.5rem;
   font-weight: bold;
   margin-bottom: 2rem;
 }
@@ -441,16 +483,19 @@ body {
   transition: box-shadow 0.3s;
 }
 
+.dashboard-card img {
+  height: 200px
+};
+
+.dashboard-card h2 {
+  bottom: 100px;
+};
+
+
 .dashboard-card:hover {
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
-.dashboard-card svg {
-  width: 3rem;
-  height: 3rem;
-  color: #6096ba;
-  margin-bottom: 1rem;
-}
 
 .dashboard-card h2 {
   font-size: 1.25rem;
@@ -498,7 +543,6 @@ body {
 
 #apprentissage {
   display: flex;
-  font-family: Arial, sans-serif;
   background-color: var(--background-color);
   color: var(--primary-color);
   margin-left: 250px;
@@ -564,22 +608,40 @@ body {
   font-size: 1rem;
 }
 
-#apprentissage button {
-  width: 10vw;
+#apprentissage button img {
+  display: flex;
+  text-align: center;
+  background-color: white;
   padding: 0.5rem;
-
+  margin-left: auto;
+  margin-right: auto;
   margin-bottom: 0.5rem;
   border: none;
   border-radius: 0.25rem;
-  background-color: var(--primary-color);
-  color: white;
   cursor: pointer;
-  transition: background-color 0.3s;
+  font-size: 1rem;
+}
+
+#apprentissage button {
+  display: flex;
+  text-align: center;
+  background-color: white;
+  padding: 0.5rem;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 0.5rem;
+  border: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
   font-size: 1rem;
 }
 
 #apprentissage button:hover {
   background-color: var(--secondary-color);
+}
+
+#apprentissage button img {
+height: 100px;
 }
 
 #time-left, #stopwatch-time, #counter-value {
@@ -868,6 +930,7 @@ body {
 }
 
 /*Statistics*/
+/* Statistics */
 #statistics {
   font-family: Arial, sans-serif;
   background-color: var(--background-color);
@@ -901,10 +964,10 @@ body {
 }
 
 .chart-wrapper {
-  height: 50vh; /* Hauteur fixe au lieu de 50vh */
+  height: 50vh; /* Hauteur fixe */
   width: 100%;
   position: relative;
-  padding: 20px; /* Ajouter un padding pour l'espace interne */
+  padding: 20px;
   font-weight: normal;
 }
 
@@ -931,10 +994,10 @@ body {
 
 #statistics.page .charts-container .chart-wrapper canvas {
   width: 100% !important;
-  height: calc(100% - 40px) !important; /* Soustraire le padding du wrapper */
+  height: calc(100% - 40px) !important; /* Ajustement de la hauteur */
   position: absolute;
-  top: 40px; /* Aligner avec le padding du wrapper */
-  left: 20px; /* Aligner avec le padding du wrapper */
+  top: 40px; /* Alignement avec le padding du wrapper */
+  left: 20px; /* Alignement avec le padding du wrapper */
 }
 
 #statistics.page > div > button {
@@ -959,21 +1022,20 @@ body {
 }
 
 @media (max-width: 1024px) {
-
   #statistics {
     margin-left: auto;
     margin-right: auto;
     width: 90vw;
-    max-width: 1500px; /* Vous pouvez ajuster cette valeur selon vos besoins */
+    max-width: 1500px; /* Ajustez selon vos besoins */
   }
 }
 
 @media (max-width: 768px) {
   .chart-wrapper {
-      height: 250px; /* Réduire la hauteur sur les petits écrans */
+      height: 250px; /* Réduire la hauteur sur petits écrans */
   }
   
-  /* Ajuster la taille de la police pour les titres et les étiquettes sur les petits écrans */
+  /* Ajuster la taille de la police pour les titres et les étiquettes sur petits écrans */
   #statistics.page .charts-container .chart-wrapper canvas {
       font-size: 12px;
   }
@@ -984,6 +1046,17 @@ body {
       grid-template-columns: repeat(2, 1fr);
   }
 }
+
+/* Supprimez les préfixes obsolètes si présents */
+.some-class {
+  /* Avant */
+  /* -moz-transition: all 0.3s ease; */
+  /* -webkit-transition: all 0.3s ease; */
+  
+  /* Après */
+  transition: all 0.3s ease;
+}
+
 
 /*SurahSelector*/
 
@@ -1892,8 +1965,30 @@ button[type="submit"]:hover {
 
 /*AboutUs*/
 
+.aboutus-wrapper {
+  display: flex;
+  justify-content: center; /* Centre le contenu horizontalement */
+  padding-left: 250px; /* Ajoute un espace fixe à gauche de 250px */
+}
+
 #aboutus {
-  margin-left: 250px;
+  width: 70vw; /* Définit une largeur de 70% de la fenêtre */
+  max-width: 80vw; /* Vous pouvez ajuster cette valeur pour limiter la largeur */
+  margin-left: 0; /* Supprime toute marge à gauche */
+  margin-right: 0; /* Supprime toute marge à droite */
+}
+
+@media (max-width: 1024px) {
+  .aboutus-wrapper {
+    padding-left: 0; /* Supprime la marge gauche pour les petits écrans */
+  }
+
+  #aboutus {
+    margin-left: auto;
+    margin-right: auto;
+    width: 90vw;
+    max-width: 1500px; /* Ajuster selon vos besoins */
+  }
 }
 
 
@@ -1985,34 +2080,6 @@ button[type="submit"]:hover {
 .aboutus-button.active {
   background-color: var(--primary-color);
   color: var(--card-background);
-}
-
-.aboutus-accordion {
-  border: 1px solid var(--border-color);
-  border-radius: 0.25rem;
-}
-
-.aboutus-accordion-item {
-  border-bottom: 1px solid var(--border-color);
-}
-
-.aboutus-accordion-item:last-child {
-  border-bottom: none;
-}
-
-.aboutus-accordion-header {
-  padding: 1rem;
-  cursor: pointer;
-  font-weight: bold;
-}
-
-.aboutus-accordion-content {
-  padding: 1rem;
-  display: none;
-}
-
-.aboutus-accordion-item.active .aboutus-accordion-content {
-  display: block;
 }
 
 

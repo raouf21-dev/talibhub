@@ -44,24 +44,49 @@ const token = localStorage.getItem('token');
 
 // Fonction pour faire des requêtes API avec le token
 async function apiRequest(endpoint, method = 'GET', data = null) {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    console.error('Token absent, redirection vers la page de connexion.');
+    window.location.href = '/login'; // Rediriger vers la page de connexion
+    return;
+  }
+
   const headers = {
     'Content-Type': 'application/json',
     'Authorization': `Bearer ${token}`
   };
+  
   const options = {
     method,
     headers
   };
+  
   if (data) {
     options.body = JSON.stringify(data);
   }
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, options);
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`API error: ${response.status} - ${errorText}`);
+
+  try {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, options);
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`API error: ${response.status} - ${errorText}`);
+    }
+    return response.json();
+  } catch (error) {
+    console.error('Error during API request:', error);
+    if (error.message.includes('403')) {
+      alert('Accès refusé. Veuillez vérifier vos permissions.');
+      // Optionnel: Rediriger ou déconnecter l'utilisateur
+    } else if (error.message.includes('401')) {
+      alert('Non autorisé. Veuillez vous reconnecter.');
+      window.location.href = '/login'; // Rediriger vers la page de connexion
+    } else {
+      alert('Une erreur s\'est produite lors de la requête.');
+    }
+    throw error;
   }
-  return response.json();
 }
+
 
 // Fonction de mélange aléatoire (Fisher-Yates)
 function shuffleArray(array) {
