@@ -39,4 +39,4 @@ const testMosqueTimes = async () => {
   }
 };
 
-testMosqueTimes();
+//testMosqueTimes();

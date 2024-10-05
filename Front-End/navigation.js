@@ -54,8 +54,27 @@ function initializeNavigation() {
             closeSidebar();
         }
     });
+
+    // Ajouter les écouteurs d'événements pour les cartes du tableau de bord
+    setupDashboardCardClicks();
+}
+
+function setupDashboardCardClicks() {
+    const dashboardCards = document.querySelectorAll('.dashboard-card');
+    console.log(`Found ${dashboardCards.length} dashboard cards`);
+
+    dashboardCards.forEach(card => {
+        card.addEventListener('click', () => {
+            const destination = card.getAttribute('data-destination');
+            console.log(`Clicked on card with destination: ${destination}`);
+            if (destination) {
+                navigateTo(destination);
+            } else {
+                console.warn('Aucune destination trouvée pour cette carte.');
+            }
+        });
+    });
 }
 
 // Exportation des fonctions nécessaires
 export { initializeNavigation };
-

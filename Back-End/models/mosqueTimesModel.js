@@ -1,5 +1,3 @@
-// mosqueTimesModel.js
-
 const pool = require('../config/db');
 
 const savePrayerTimes = async (mosqueId, date, times) => {
@@ -20,12 +18,26 @@ const savePrayerTimes = async (mosqueId, date, times) => {
   `;
   
   const values = [
-    mosqueId, date, 
-    times.fajr, times.dhuhr, times.asr, times.maghrib, times.isha,
-    times.jumuah1, times.jumuah2, times.jumuah3, times.tarawih
+    mosqueId, 
+    date, 
+    times.fajr || null, 
+    times.dhuhr || null, 
+    times.asr || null, 
+    times.maghrib || null, 
+    times.isha || null,
+    times.jumuah1 || null, 
+    times.jumuah2 || null, 
+    times.jumuah3 || null, 
+    times.tarawih || null
   ];
 
-  await pool.query(query, values);
+  try {
+    await pool.query(query, values);
+    console.log(`Prayer times saved successfully for mosque ID ${mosqueId} on date ${date}`);
+  } catch (error) {
+    console.error(`Failed to save prayer times for mosque ID ${mosqueId} on date ${date}:`, error);
+    throw error;
+  }
 };
 
 const getPrayerTimes = async (mosqueId, date) => {
@@ -52,38 +64,17 @@ const searchMosques = async (lat, lon) => {
   return result.rows;
 };
 
-const addMosque = async (name, address, latitude, longitude) => {
+const addMosque = async (name, address, city, latitude, longitude) => {
   const query = `
-    INSERT INTO mosques (name, address, latitude, longitude)
-    VALUES ($1, $2, $3, $4)
+    INSERT INTO mosques (name, address, city, latitude, longitude)
+    VALUES ($1, $2, $3, $4, $5)
     RETURNING id
   `;
-  const result = await pool.query(query, [name, address, latitude, longitude]);
+  const result = await pool.query(query, [name, address, city, parseFloat(latitude), parseFloat(longitude)]);
   return result.rows[0].id;
 };
 
-const insertPrayerTimes = async (mosqueId, date, times) => {
-  const query = `
-    INSERT INTO prayer_times (mosque_id, date, fajr, dhuhr, asr, maghrib, isha, jumuah1, jumuah2, jumuah3, tarawih)
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-  `;
-  const values = [
-    mosqueId, 
-    date, 
-    times.fajr, 
-    times.dhuhr, 
-    times.asr, 
-    times.maghrib, 
-    times.isha,
-    times.jumuah1 || null,
-    times.jumuah2 || null,
-    times.jumuah3 || null,
-    times.tarawih || null
-  ];
-  await pool.query(query, values);
-};
-
-const searchCities = async (query) => {
+const searchCities = async (queryStr) => {
   const sqlQuery = `
     SELECT DISTINCT city
     FROM mosques
@@ -91,12 +82,11 @@ const searchCities = async (query) => {
     ORDER BY city ASC
     LIMIT 10
   `;
-  const values = [`%${query}%`];
+  const values = [`%${queryStr}%`];
   const result = await pool.query(sqlQuery, values);
   return result.rows.map(row => row.city);
 };
 
-// Fonction pour récupérer les mosquées par ville
 const getMosquesByCity = async (city) => {
   const sqlQuery = `
     SELECT *
@@ -122,15 +112,43 @@ const checkDataExists = async (date) => {
   }
 };
 
+const getAllCities = async () => {
+  try {
+    const query = 'SELECT DISTINCT city FROM mosques';
+    const result = await pool.query(query);
+    return result.rows.map(row => row.city);
+  } catch (error) {
+    console.error('Erreur lors de la récupération de toutes les villes :', error);
+    throw error;
+  }
+};
+
+const getPrayerTimesByMosqueAndDate = async (mosqueId, date) => {
+  try {
+    const query = 'SELECT * FROM prayer_times WHERE mosque_id = $1 AND date = $2';
+    const values = [mosqueId, date];
+    const result = await pool.query(query, values);
+
+    if (result.rows.length > 0) {
+      return result.rows[0];
+    } else {
+      return null;
+    }
+  } catch (error) {
+    console.error('Erreur lors de la récupération des horaires de prière:', error);
+    throw error;
+  }
+};
+
 module.exports = {
   savePrayerTimes,
   getPrayerTimes,
   getAllMosques,
   searchMosques,
   addMosque,
-  insertPrayerTimes,
   searchCities,
   getMosquesByCity,
   checkDataExists,
+  getAllCities,
+  getPrayerTimesByMosqueAndDate,
 };
-

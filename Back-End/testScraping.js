@@ -105,6 +105,6 @@ const scrapeAishaMosque = async () => {
   }
 };
 
-scrapeAishaMosque();
+//scrapeAishaMosque();
 
 module.exports = scrapeAishaMosque;

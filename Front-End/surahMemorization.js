@@ -552,5 +552,4 @@ function initSurahMemorization() {
   loadSurahs();
 }
 
-// Appeler la Fonction d'Initialisation lors du Chargement de la Page
-document.addEventListener('DOMContentLoaded', initSurahMemorization);
+export { initSurahMemorization };

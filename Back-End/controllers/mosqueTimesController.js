@@ -17,7 +17,21 @@ const scrapePrayerTimes = async () => {
         const data = await scraper();
         if (data && data.times) {
           const date = data.dateText || new Date().toISOString().split('T')[0]; // Utiliser la date extraite ou la date actuelle
-          await mosqueTimesModel.savePrayerTimes(mosqueId, date, data.times);
+          
+          // Assurez-vous que toutes les clés existent et sont définies à null si manquantes
+          const times = {
+            fajr: data.times.fajr || null,
+            dhuhr: data.times.dhuhr || null,
+            asr: data.times.asr || null,
+            maghrib: data.times.maghrib || null,
+            isha: data.times.isha || null,
+            jumuah1: data.times.jumuah1 || null,
+            jumuah2: data.times.jumuah2 || null,
+            jumuah3: data.times.jumuah3 || null,
+            tarawih: data.times.tarawih || null,
+          };
+
+          await mosqueTimesModel.savePrayerTimes(mosqueId, date, times);
           console.log(`Prayer times for mosque ID ${mosqueId} saved successfully`);
         } else {
           console.warn(`No times found for mosque ID ${mosqueId}`);
@@ -32,6 +46,7 @@ const scrapePrayerTimes = async () => {
     throw error;
   }
 };
+
 
 const manualScrape = async (req, res) => {
   try {
@@ -212,8 +227,6 @@ const scrapeByCity = async (req, res) => {
   }
 };
 
-// mosqueTimesController.js
-
 const scrapePrayerTimesForAllCities = async () => {
   try {
     // Récupérer toutes les villes disponibles
@@ -251,6 +264,66 @@ const scrapeAllCities = async (req, res) => {
   }
 };
 
+const getPrayerTimesByMosqueAndDate = async (req, res) => {
+  try {
+    const mosqueId = req.params.mosqueId;
+    const date = req.params.date;
+
+    const prayerTimes = await mosqueTimesModel.getPrayerTimesByMosqueAndDate(mosqueId, date);
+
+    if (prayerTimes) {
+      res.json(prayerTimes);
+    } else {
+      res.status(404).json({ message: "Horaires de prière non trouvés pour cette mosquée et cette date" });
+    }
+  } catch (error) {
+    console.error('Erreur lors de la récupération des horaires de prière:', error);
+    res.status(500).json({ message: 'Erreur du serveur' });
+  }
+};
+
+const getPrayerTimesForCityAndDate = async (req, res) => {
+  const { city, date } = req.params;
+
+  try {
+    // Récupérer toutes les mosquées de la ville
+    const mosques = await mosqueTimesModel.getMosquesByCity(city);
+
+    if (mosques.length === 0) {
+      return res.status(404).json({ message: "Aucune mosquée trouvée dans cette ville." });
+    }
+
+    // Vérifier si les horaires de prière existent pour toutes les mosquées pour la date spécifiée
+    const prayerTimesPromises = mosques.map(mosque =>
+      mosqueTimesModel.getPrayerTimes(mosque.id, date)
+    );
+
+    const prayerTimesResults = await Promise.all(prayerTimesPromises);
+
+    // Vérifier s'il manque des horaires de prière
+    const missingData = prayerTimesResults.some(times => !times);
+
+    if (missingData) {
+      console.log(`Aucune donnée complète trouvée pour la ville ${city} et la date ${date}. Déclenchement du scraping...`);
+      await scrapePrayerTimesForCity(city); // Déclencher le scraping pour la ville
+
+      // Re-fetch les horaires après le scraping
+      const updatedPrayerTimesPromises = mosques.map(mosque =>
+        mosqueTimesModel.getPrayerTimes(mosque.id, date)
+      );
+      const updatedPrayerTimesResults = await Promise.all(updatedPrayerTimesPromises);
+
+      return res.json({ prayerTimes: updatedPrayerTimesResults });
+    } else {
+      console.log(`Horaires de prière trouvés pour la ville ${city} et la date ${date}.`);
+      return res.json({ prayerTimes: prayerTimesResults });
+    }
+  } catch (error) {
+    console.error(`Erreur lors de la récupération des horaires de prière pour la ville ${city} et la date ${date} :`, error);
+    return res.status(500).json({ message: "Erreur du serveur", error: error.message });
+  }
+};
+
 module.exports = {
   scrapePrayerTimes,
   manualScrape,
@@ -265,4 +338,6 @@ module.exports = {
   scrapePrayerTimesForAllCities,
   checkDataExists,
   scrapeAllCities,
+  getPrayerTimesByMosqueAndDate,
+  getPrayerTimesForCityAndDate,
 };
