@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>TalibTimer</title>
     <meta
       name="TalibTimer"
-      content="TalibTimer aide les utilisateurs à améliorer leur productivité grâce à la technique Pomodoro, offrant des minuteurs personnalisables, des statistiques détaillées, des rappels et des listes de tâches pour une gestion optimale du temps."
+      content="TalibTimer helps users improve their productivity using the Pomodoro technique, offering customizable timers, detailed statistics, reminders, and task lists for optimal time management."
     />
     <link
       rel="icon"
@@ -14,7 +14,7 @@
       type="image/x-icon"
     />
 
-    <!-- Feuilles de style -->
+    <!-- Stylesheets -->
     <link rel="stylesheet" href="styles.css" />
 
     <!-- FullCalendar CSS via unpkg.com -->
@@ -23,9 +23,9 @@
       rel="stylesheet"
     />
 
-    <!-- Autres styles si nécessaire -->
+    <!-- Other styles if necessary -->
 
-    <!-- Scripts nécessaires -->
+    <!-- Required Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
@@ -55,29 +55,29 @@
               <ul class="subnav">
                 <li>
                   <a href="#" class="nav-link" data-destination="apprentissage"
-                    >Apprentissage</a
+                    >Learning</a
                   >
                 </li>
                 <li>
                   <a href="#" class="nav-link" data-destination="todoLists"
-                    >Listes de Tâches</a
+                    >Task Lists</a
                   >
                 </li>
                 <li>
                   <a href="#" class="nav-link" data-destination="statistics"
-                    >Statistiques</a
+                    >Statistics</a
                   >
                 </li>
               </ul>
             </li>
             <li>
               <a href="#" class="nav-link" data-destination="salatSurahSelector"
-                >SurahSelector</a
+                >Surah Selector</a
               >
             </li>
             <li>
               <a href="#" class="nav-link" data-destination="duaTimeCalculator"
-                >Doua Time</a
+                >Dua Time Calculator</a
               >
             </li>
             <li>
@@ -96,16 +96,18 @@
               >
             </li>
             <li>
-              <a href="#" class="nav-link" data-destination="profile">Profil</a>
+              <a href="#" class="nav-link" data-destination="profile"
+                >Profile</a
+              >
             </li>
             <li>
               <a href="#" class="nav-link" data-destination="aboutus"
-                >À propos</a
+                >About Us</a
               >
             </li>
             <li>
               <a href="#" class="nav-link" data-destination="price"
-                >Abonnement</a
+                >Subscription</a
               >
             </li>
             <li>
@@ -121,6 +123,15 @@
     <section id="welcomepage" class="page">
       <header class="welcomepage-header">
         <h1>TalibHub</h1>
+            <!-- Language Selector -->
+    <section class="language-selector">
+        <button class="lang-btn" data-lang="fr" title="Français">
+            🇫🇷
+        </button>
+        <button class="lang-btn" data-lang="en" title="English">
+            🇬🇧
+        </button>
+      </section>
       </header>
 
       <div class="welcomepage-container">
@@ -136,10 +147,10 @@
           <div class="welcomepage-card">
             <div class="welcomepage-tabs">
               <button class="welcomepage-tab-btn" data-tab="signup">
-                Inscription
+                Sign Up
               </button>
               <button class="welcomepage-tab-btn active" data-tab="signin">
-                Connexion
+                Sign In
               </button>
             </div>
             <div
@@ -147,43 +158,43 @@
               id="welcomepage-signupTab"
             >
               <form id="welcomepage-signupForm">
-                <h3>Inscription</h3>
+                <h3>Sign Up</h3>
                 <div class="form-grid">
                   <div class="welcomepage-form-group">
-                    <label for="welcomepage-username">Pseudo</label>
+                    <label for="welcomepage-username">Username</label>
                     <input type="text" id="welcomepage-username" required />
                   </div>
                   <div class="welcomepage-form-group">
-                    <label for="welcomepage-firstName">Prénom</label>
+                    <label for="welcomepage-firstName">First Name</label>
                     <input type="text" id="welcomepage-firstName" required />
                   </div>
                   <div class="welcomepage-form-group">
-                    <label for="welcomepage-lastName">Nom</label>
+                    <label for="welcomepage-lastName">Last Name</label>
                     <input type="text" id="welcomepage-lastName" required />
                   </div>
                   <div class="welcomepage-form-group">
-                    <label for="welcomepage-age">Âge</label>
+                    <label for="welcomepage-age">Age</label>
                     <input type="number" id="welcomepage-age" required />
                   </div>
                   <div class="welcomepage-form-group">
-                    <label for="welcomepage-gender">Sexe</label>
+                    <label for="welcomepage-gender">Gender</label>
                     <select id="welcomepage-gender" required>
-                      <option value="">Sélectionner</option>
-                      <option value="male">Masculin</option>
-                      <option value="female">Féminin</option>
+                      <option value="">Select</option>
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
                     </select>
                   </div>
                   <div class="welcomepage-form-group">
-                    <label for="welcomepage-email">Adresse e-mail</label>
+                    <label for="welcomepage-email">Email Address</label>
                     <input type="email" id="welcomepage-email" required />
                   </div>
                   <div class="welcomepage-form-group">
-                    <label for="welcomepage-password">Mot de passe</label>
+                    <label for="welcomepage-password">Password</label>
                     <input type="password" id="welcomepage-password" required />
                   </div>
                   <div class="welcomepage-form-group">
                     <label for="welcomepage-confirmPassword"
-                      >Confirmer le mot de passe</label
+                      >Confirm Password</label
                     >
                     <input
                       type="password"
@@ -196,16 +207,16 @@
                   type="submit"
                   class="welcomepage-btn welcomepage-btn-primary"
                 >
-                  Créer un compte
+                  Create Account
                 </button>
               </form>
             </div>
             <div class="welcomepage-tab-content" id="welcomepage-signinTab">
               <form id="welcomepage-signinForm">
-                <h3>Connexion</h3>
+                <h3>Sign In</h3>
                 <div class="form-grid">
                   <div class="welcomepage-form-group">
-                    <label for="welcomepage-signin-email">Adresse e-mail</label>
+                    <label for="welcomepage-signin-email">Email Address</label>
                     <input
                       type="email"
                       id="welcomepage-signin-email"
@@ -213,9 +224,7 @@
                     />
                   </div>
                   <div class="welcomepage-form-group">
-                    <label for="welcomepage-signin-password"
-                      >Mot de passe</label
-                    >
+                    <label for="welcomepage-signin-password">Password</label>
                     <input
                       type="password"
                       id="welcomepage-signin-password"
@@ -227,7 +236,7 @@
                   type="submit"
                   class="welcomepage-btn welcomepage-btn-primary"
                 >
-                  Se connecter
+                  Sign In
                 </button>
               </form>
             </div>
@@ -340,26 +349,41 @@
     <section id="dashboard" class="page">
       <main class="dashboard-main-content">
         <button class="dashboard-menu-btn" id="dashboardMenuBtn">☰</button>
-        <h1>Bienvenue sur votre tableau de bord</h1>
+        <h1>Welcome to Your Dashboard</h1>
         <div class="dashboard-card-grid">
           <div class="dashboard-card" data-destination="apprentissage">
-            <img src="./Icones/DashboardIcones/clock_icone.svg" alt="IconeClock">
+            <img
+              src="./Icones/DashboardIcones/clock_icone.svg"
+              alt="Clock Icon"
+            />
             <h2>TalibTimer</h2>
           </div>
           <div class="dashboard-card" data-destination="salatSurahSelector">
-            <img src="./Icones/DashboardIcones/carpet_icone.svg" alt="IconeCarpet">
+            <img
+              src="./Icones/DashboardIcones/carpet_icone.svg"
+              alt="Carpet Icon"
+            />
             <h2>SurahSelector</h2>
           </div>
           <div class="dashboard-card" data-destination="duaTimeCalculator">
-            <img src="./Icones/DashboardIcones/hands_prayer_iconOk.svg" alt="IconeDua">
-            <h2>Doua Time</h2>
+            <img
+              src="./Icones/DashboardIcones/hands_prayer_iconOk.svg"
+              alt="Dua Icon"
+            />
+            <h2>Dua Time</h2>
           </div>
           <div class="dashboard-card" data-destination="surahmemorization">
-            <img src="./Icones/DashboardIcones/brain_iconeI.svg" alt="IconeSurahMemorization">
+            <img
+              src="./Icones/DashboardIcones/brain_iconeI.svg"
+              alt="Surah Memorization Icon"
+            />
             <h2>Surah Memorization</h2>
           </div>
           <div class="dashboard-card" data-destination="mosquetime">
-            <img src="./Icones/DashboardIcones/mosque_icone.svg" alt="IconeMosque">
+            <img
+              src="./Icones/DashboardIcones/mosque_icone.svg"
+              alt="Mosque Icon"
+            />
             <h2>Salat Mosque Time</h2>
           </div>
         </div>
@@ -368,31 +392,31 @@
 
     <section id="talibtimer" class="page">
       <div>
-        <h2>Résumé des Statistiques</h2>
-        <p>Aperçu des sessions de travail récentes et des tâches accomplies.</p>
+        <h2>Statistics Summary</h2>
+        <p>Overview of recent work sessions and completed tasks.</p>
       </div>
     </section>
 
     <section id="apprentissage" class="page">
-      <h1>Apprentissage</h1>
+      <h1>Learning</h1>
       <div id="navheader">
         <div class="timers-container">
           <div class="timer">
-            <h2>Sélection de tâche et session</h2>
+            <h2>Task Selection and Session</h2>
             <div class="timer-content">
               <select id="task-select" onchange="updateTaskTitle()">
-                <option value="">Sélectionnez une tâche</option>
-                <!-- Les options seront chargées dynamiquement ici -->
+                <option value="">Select a task</option>
+                <!-- Options will be loaded dynamically here -->
               </select>
               <div id="session-info">
                 <p>
-                  Session précédente :
+                  Previous session:
                   <span id="previous-sessions-count">0</span>
                 </p>
-                <p>Session actuelle : <span id="current-session-id">0</span></p>
+                <p>Current session: <span id="current-session-id">0</span></p>
               </div>
               <button id="start-new-session" data-action="start-new-session">
-                Nouvelle Session
+                New Session
               </button>
             </div>
           </div>
@@ -400,35 +424,46 @@
       </div>
       <div class="timers-container">
         <div class="timer">
-          <h2>Minuteur de concentration</h2>
+          <h2>Focus Timer</h2>
           <div class="timer-content">
             <p id="time-left">25:00</p>
             <button id="start_stop" data-action="toggle-timer">
-                <img src="./Icones/ButtonsIcone/Start_icone.svg" alt="StartIcone">
+              <img
+                src="./Icones/ButtonsIcone/Start_icone.svg"
+                alt="Start Icon"
+              />
             </button>
             <button id="reset" data-action="reset-timer">
-                <img src="./Icones/ButtonsIcone/Restart_Icone.svg" alt="Restart_Icone">
+              <img
+                src="./Icones/ButtonsIcone/Restart_Icone.svg"
+                alt="Restart Icon"
+              />
             </button>
-            
           </div>
         </div>
         <div class="timer">
-          <h2>Chronomètre</h2>
+          <h2>Stopwatch</h2>
           <div class="timer-content">
             <p id="stopwatch-time">00:00:00</p>
             <button id="stopwatch-start" data-action="toggle-stopwatch">
-              <img src="./Icones/ButtonsIcone/Start_icone.svg" alt="StartIcone">
+              <img
+                src="./Icones/ButtonsIcone/Start_icone.svg"
+                alt="Start Icon"
+              />
             </button>
             <button id="stopwatch-reset" data-action="reset-stopwatch">
-              <img src="./Icones/ButtonsIcone/Restart_Icone.svg" alt="Restart_Icone">
+              <img
+                src="./Icones/ButtonsIcone/Restart_Icone.svg"
+                alt="Restart Icon"
+              />
             </button>
           </div>
         </div>
         <div class="timer">
-          <h2>Temps d'étude manuel</h2>
+          <h2>Manual Study Time</h2>
           <div class="timer-content">
             <div>
-              <label for="manual-hours">Heures:</label>
+              <label for="manual-hours">Hours:</label>
               <input type="number" id="manual-hours" min="0" placeholder="0" />
             </div>
             <div>
@@ -442,7 +477,7 @@
               />
             </div>
             <p>
-              Temps total de travail :
+              Total Work Time:
               <span id="total-work-time">00:00:00</span>
             </p>
           </div>
@@ -450,9 +485,9 @@
       </div>
       <div class="timers-container">
         <div class="timer">
-          <h2>Compteur</h2>
+          <h2>Counter</h2>
           <div class="timer-content">
-            <h3 id="counter-task-title">Sélectionnez une tâche</h3>
+            <h3 id="counter-task-title">Select a task</h3>
             <p id="counter-value">0</p>
             <div id="counter-buttons">
               <button data-action="change-counter" data-value="-1">-1</button>
@@ -465,17 +500,17 @@
         </div>
       </div>
       <button class="session-control" data-action="save-session-data">
-        Enregistrer la Session
-        <img src="./Icones/ButtonsIcone/Save_Icone.svg" alt="SaveIcone">
+        Save Session
+        <img src="./Icones/ButtonsIcone/Save_Icone.svg" alt="Save Icon" />
       </button>
     </section>
 
     <section id="statistics" class="page">
       <div>
-        <h2>Graphiques et Rapports</h2>
+        <h2>Charts and Reports</h2>
         <div id="calendar">
-          <!-- Calendrier FullCalendar sera rendu ici -->
-          <p>Calendrier ici</p>
+          <!-- FullCalendar will be rendered here -->
+          <p>Calendar here</p>
         </div>
         <div class="charts-container">
           <div class="chart-wrapper">
@@ -494,7 +529,7 @@
                 <line x1="12" y1="20" x2="12" y2="4"></line>
                 <line x1="6" y1="20" x2="6" y2="14"></line>
               </svg>
-              <span style="margin-left: 0.5rem">Graphique Journalier</span>
+              <span style="margin-left: 0.5rem">Daily Chart</span>
             </div>
             <canvas id="dailyChart"></canvas>
           </div>
@@ -514,7 +549,7 @@
                 <line x1="12" y1="20" x2="12" y2="4"></line>
                 <line x1="6" y1="20" x2="6" y2="14"></line>
               </svg>
-              <span style="margin-left: 0.5rem">Graphique Hebdomadaire</span>
+              <span style="margin-left: 0.5rem">Weekly Chart</span>
             </div>
             <canvas id="weeklyChart"></canvas>
           </div>
@@ -534,7 +569,7 @@
                 <line x1="12" y1="20" x2="12" y2="4"></line>
                 <line x1="6" y1="20" x2="6" y2="14"></line>
               </svg>
-              <span style="margin-left: 0.5rem">Graphique Mensuel</span>
+              <span style="margin-left: 0.5rem">Monthly Chart</span>
             </div>
             <canvas id="monthlyChart"></canvas>
           </div>
@@ -554,7 +589,7 @@
                 <line x1="12" y1="20" x2="12" y2="4"></line>
                 <line x1="6" y1="20" x2="6" y2="14"></line>
               </svg>
-              <span style="margin-left: 0.5rem">Graphique Annuel</span>
+              <span style="margin-left: 0.5rem">Yearly Chart</span>
             </div>
             <canvas id="yearlyChart"></canvas>
           </div>
@@ -586,7 +621,7 @@
               <line x1="3" y1="12" x2="3.01" y2="12"></line>
               <line x1="3" y1="18" x2="3.01" y2="18"></line>
             </svg>
-            Mes Tâches
+            My Tasks
           </h2>
         </div>
         <div class="todo-card-content">
@@ -595,7 +630,7 @@
               type="text"
               id="todo-new-task"
               class="todo-input"
-              placeholder="Ajouter une nouvelle tâche"
+              placeholder="Add a new task"
             />
             <button id="todo-add-task" class="todo-btn">
               <svg
@@ -612,7 +647,7 @@
                 <line x1="12" y1="5" x2="12" y2="19"></line>
                 <line x1="5" y1="12" x2="19" y2="12"></line>
               </svg>
-              <span class="sr-only">Ajouter une Tâche</span>
+              <span class="sr-only">Add a Task</span>
             </button>
           </div>
           <ul id="todo-task-list" class="todo-list"></ul>
@@ -672,10 +707,10 @@
             </select>
           </div>
 
-          <!-- Liste des Sourates avec Boîte de Défilement -->
+          <!-- List of Surahs with Scroll Box -->
           <div id="surahmemorization-list-container">
             <div id="surahmemorization-list">
-              <!-- Les éléments de la liste seront injectés ici par JavaScript -->
+              <!-- List items will be injected here by JavaScript -->
             </div>
           </div>
 
@@ -687,17 +722,17 @@
             >
               Select All
             </button>
-            <span id="surahmemorization-count" class="surahmemorization-count"
-              >0 surahs selected</span
-            >
-            <!-- Bouton Enregistrer -->
+            <span id="surahmemorization-count" class="surahmemorization-count">
+              0 surahs selected
+            </span>
+            <!-- Save Button -->
             <button
               id="surahmemorization-save"
               class="surahmemorization-button"
             >
-              Enregistrer
+              Save
             </button>
-            <!-- Bouton Start Revision -->
+            <!-- Start Revision Button -->
             <button
               id="surahmemorization-start"
               class="surahmemorization-button"
@@ -732,7 +767,7 @@
         <button id="surahmemorization-toggle-text">
           <span class="icon">👁</span> Show Text
         </button>
-        <!-- Suppression des boutons de navigation -->
+        <!-- Removal of navigation buttons -->
         <!-- 
                 <div class="surahmemorization-navigation">
                     <button id="surahmemorization-prev">← Previous</button>
@@ -830,19 +865,19 @@
 
           <div class="mosquetime-location-search">
             <button id="mosquetime-use-location" class="mosquetime-button">
-              <i class="fas fa-map-marker-alt"></i> Utiliser ma localisation
+              <i class="fas fa-map-marker-alt"></i> Use My Location
             </button>
             <div class="mosquetime-city-search-container">
               <select id="mosquetime-location-select" class="mosquetime-select">
-                <option value="">Sélectionnez une ville</option>
-                <!-- Les options seront peuplées dynamiquement via JavaScript -->
+                <option value="">Select a city</option>
+                <!-- Options will be populated dynamically via JavaScript -->
               </select>
             </div>
             <button id="mosquetime-search" class="mosquetime-button">
-              Rechercher
+              Search
             </button>
             <div id="mosquetime-loading" style="display: none">
-              Chargement des horaires de prière, veuillez patienter...
+              Loading prayer times, please wait...
             </div>
           </div>
 
@@ -926,12 +961,12 @@
           <div class="notifications-card-header">
             <h2 class="notifications-card-title">
               <i data-feather="bell" class="notifications-icon"></i>
-              Centre de Notifications
+              Notification Center
             </h2>
           </div>
           <div class="notifications-card-content">
             <ul id="notifications-list" class="notifications-list">
-              <!-- Les notifications seront insérées ici dynamiquement -->
+              <!-- Notifications will be dynamically inserted here -->
             </ul>
           </div>
         </div>
@@ -946,7 +981,7 @@
             </div>
           </div>
           <div class="notification-actions">
-            <button class="notification-read-btn">Marquer comme lu</button>
+            <button class="notification-read-btn">Mark as Read</button>
             <button class="notification-delete-btn">
               <i data-feather="x" class="notification-delete-icon"></i>
             </button>
@@ -958,9 +993,9 @@
     <section id="profile" class="page">
       <h1>Profile</h1>
       <div id="profileForm">
-        <h2>Informations Personnelles</h2>
+        <h2>Personal Information</h2>
         <form>
-          <label for="usernameprofil">Pseudo:</label>
+          <label for="usernameprofil">Username:</label>
           <input
             type="text"
             id="usernameprofil"
@@ -969,56 +1004,56 @@
             required
           />
 
-          <label for="last-nameprofil">Nom:</label>
+          <label for="last-nameprofil">Last Name:</label>
           <input
             type="text"
             id="last-nameprofil"
             name="last-name"
-            placeholder="Nom"
+            placeholder="Last Name"
             required
           />
 
-          <label for="first-nameprofil">Prénom:</label>
+          <label for="first-nameprofil">First Name:</label>
           <input
             type="text"
             id="first-nameprofil"
             name="first-name"
-            placeholder="Prénom"
+            placeholder="First Name"
             required
           />
 
-          <label for="ageprofil">Âge:</label>
+          <label for="ageprofil">Age:</label>
           <input
             type="number"
             id="ageprofil"
             name="age"
-            placeholder="Âge"
+            placeholder="Age"
             required
           />
 
-          <label for="genderprofil">Sexe:</label>
+          <label for="genderprofil">Gender:</label>
           <select id="genderprofil" name="gender" required>
-            <option value="">Sélectionnez le sexe</option>
-            <option value="male">Masculin</option>
-            <option value="female">Féminin</option>
+            <option value="">Select Gender</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
           </select>
 
-          <label for="emailprofil">Adresse e-mail:</label>
+          <label for="emailprofil">Email Address:</label>
           <input
             type="email"
             id="emailprofil"
             name="email"
-            placeholder="Adresse e-mail"
+            placeholder="Email Address"
             required
           />
 
-          <button type="submit">Mettre à jour</button>
+          <button type="submit">Update</button>
         </form>
       </div>
       <div id="passwordChangeForm">
-        <h2>Changer le mot de passe</h2>
+        <h2>Change Password</h2>
         <form>
-          <label for="current-password">Mot de passe actuel:</label>
+          <label for="current-password">Current Password:</label>
           <input
             type="password"
             id="current-password"
@@ -1026,7 +1061,7 @@
             required
           />
 
-          <label for="new-password">Nouveau mot de passe:</label>
+          <label for="new-password">New Password:</label>
           <input
             type="password"
             id="new-password"
@@ -1034,9 +1069,7 @@
             required
           />
 
-          <label for="confirm-new-password"
-            >Confirmer le nouveau mot de passe:</label
-          >
+          <label for="confirm-new-password">Confirm New Password:</label>
           <input
             type="password"
             id="confirm-new-password"
@@ -1045,11 +1078,10 @@
           />
 
           <label>
-            <input type="checkbox" id="showNewPasswordToggle" /> Afficher le mot
-            de passe
+            <input type="checkbox" id="showNewPasswordToggle" /> Show Password
           </label>
 
-          <button type="submit">Changer le mot de passe</button>
+          <button type="submit">Change Password</button>
         </form>
       </div>
     </section>
@@ -1058,25 +1090,23 @@
       <h1>Surah Selector</h1>
       <div class="surahselector-row">
         <div class="surahselector-card">
-          <h2>Statistiques de récitation</h2>
+          <h2>Recitation Statistics</h2>
           <div>
-            <div id="knownSouratesCount">Sourates connues : 0</div>
-            <div id="recitationCyclesCount">
-              Cycles de récitation complets : 0
-            </div>
-            <div id="recitationProgress">Progrès : 0 / 0 sourates récitées</div>
+            <div id="knownSouratesCount">Known Surahs: 0</div>
+            <div id="recitationCyclesCount">Completed Recitation Cycles: 0</div>
+            <div id="recitationProgress">Progress: 0 / 0 Surahs Recited</div>
           </div>
         </div>
 
         <div class="surahselector-card">
-          <h2>Historique des récitations</h2>
+          <h2>Recitation History</h2>
           <div>
             <button data-action="toggle-recitation-history">
-              Afficher/Masquer l'historique
+              Show/Hide History
             </button>
             <div id="recitationHistoryContainer" style="display: none">
               <div id="recitationHistory">
-                <!-- L'historique sera généré ici dynamiquement -->
+                <!-- History will be generated here dynamically -->
               </div>
             </div>
           </div>
@@ -1085,26 +1115,24 @@
 
       <div class="surahselector-row">
         <div class="surahselector-card">
-          <h2>Sélection des sourates connues</h2>
+          <h2>Select Known Surahs</h2>
           <div>
             <div id="sourateList">
-              <!-- La liste des sourates sera générée ici dynamiquement -->
+              <!-- The list of surahs will be generated here dynamically -->
             </div>
-            <button data-action="save-known-sourates">
-              Sauvegarder les sourates connues
-            </button>
+            <button data-action="save-known-sourates">Save Known Surahs</button>
           </div>
         </div>
 
         <div class="surahselector-card">
-          <h2>Sélection pour Salat</h2>
+          <h2>Select for Salat</h2>
           <div>
             <button data-action="select-random-sourates">
-              Sélectionner des sourates pour Salat
+              Select Surahs for Salat
             </button>
             <div>
-              <p>1ère raka: <span id="firstRaka"></span></p>
-              <p>2ème raka: <span id="secondRaka"></span></p>
+              <p>1st Raka: <span id="firstRaka"></span></p>
+              <p>2nd Raka: <span id="secondRaka"></span></p>
             </div>
           </div>
         </div>
@@ -1126,9 +1154,9 @@
             >
               Use My Location
             </button>
-            <label for="duaCityInput" class="dua-input-label"
-              >Or enter a city:</label
-            >
+            <label for="duaCityInput" class="dua-input-label">
+              Or enter a city:
+            </label>
             <input
               type="text"
               id="duaCityInput"
@@ -1142,9 +1170,9 @@
             >
               Submit
             </button>
-            <label for="duaMethodSelect" class="dua-input-label"
-              >Calculation Method:</label
-            >
+            <label for="duaMethodSelect" class="dua-input-label">
+              Calculation Method:
+            </label>
             <select
               id="duaMethodSelect"
               class="dua-select-field"
@@ -1165,8 +1193,10 @@
               <option value="11">
                 Majlis Ugama Islam Singapura, Singapore
               </option>
-              <option value="12">Union Organization islamic de France</option>
-              <option value="13">Diyanet İşleri Başkanliği, Turkey</option>
+              <option value="12">
+                Union of Islamic Organizations of France
+              </option>
+              <option value="13">Diyanet İşleri Başkanlığı, Turkey</option>
               <option value="18">
                 Spiritual Administration of Muslims of Russia
               </option>
@@ -1177,26 +1207,26 @@
               </option>
               <option value="16">Tunisia</option>
               <option value="20">Algeria</option>
-              <option value="21">Kementerian Agama Republik Indonesia</option>
-              <option value="22">Morocco</option>
-              <option value="23">
-                Comunidate Islamica de Lisboa (Portugal)
+              <option value="21">
+                Ministry of Religious Affairs of the Republic of Indonesia
               </option>
+              <option value="22">Morocco</option>
+              <option value="23">Islamic Community of Lisbon (Portugal)</option>
               <option value="24">Custom</option>
             </select>
             <div id="duaCustomMethod">
-              <label for="duaFajrAngleInput" class="dua-input-label"
-                >Fajr Angle:</label
-              >
+              <label for="duaFajrAngleInput" class="dua-input-label">
+                Fajr Angle:
+              </label>
               <input
                 type="number"
                 id="duaFajrAngleInput"
                 class="dua-input-field"
                 placeholder="e.g., 18"
               />
-              <label for="duaIshaAngleInput" class="dua-input-label"
-                >Isha Angle:</label
-              >
+              <label for="duaIshaAngleInput" class="dua-input-label">
+                Isha Angle:
+              </label>
               <input
                 type="number"
                 id="duaIshaAngleInput"
@@ -1221,17 +1251,17 @@
         <div class="dua-calculator-card">
           <h2 class="dua-calculator-title">Manual Adjustments</h2>
           <div class="dua-calculator-content">
-            <label for="duaManualFajrInput" class="dua-input-label"
-              >Fajr Time (HH:MM):</label
-            >
+            <label for="duaManualFajrInput" class="dua-input-label">
+              Fajr Time (HH:MM):
+            </label>
             <input
               type="time"
               id="duaManualFajrInput"
               class="dua-input-field"
             />
-            <label for="duaManualMaghribInput" class="dua-input-label"
-              >Maghrib Time (HH:MM):</label
-            >
+            <label for="duaManualMaghribInput" class="dua-input-label">
+              Maghrib Time (HH:MM):
+            </label>
             <input
               type="time"
               id="duaManualMaghribInput"
@@ -1260,382 +1290,404 @@
     </section>
 
     <section id="price" class="page">
-        <div class="price-container">
-          <h1 class="price-title">Choose Your Contribution</h1>
-          <div class="price-plans-container">
-            <div class="price-card" id="price-free">
-              <div class="price-card-header">
-                <h2 class="price-card-title">Free Plan</h2>
-                <p class="price-card-description">Access all features without cost</p>
-              </div>
-              <div class="price-card-content">
-                <p class="price-amount">
-                  $0<span class="price-period">/month</span>
-                </p>
-                <ul class="price-features-list">
-                  <li class="price-feature-item">
-                    <span class="price-check-icon">✓</span> Access to all platform features
-                  </li>
-                  <li class="price-feature-item">
-                    <span class="price-check-icon">✓</span> Voluntary participation
-                  </li>
-                  <li class="price-feature-item">
-                    <span class="price-check-icon">✓</span> Community support available
-                  </li>
-                  <li class="price-feature-item">
-                    <span class="price-check-icon">✓</span> No commitment required
-                  </li>
-                </ul>
-              </div>
-              <div class="price-card-footer">
-                <a href="#" class="price-button">Get Started</a>
-              </div>
+      <div class="price-container">
+        <h1 class="price-title">Choose Your Contribution</h1>
+        <div class="price-plans-container">
+          <div class="price-card" id="price-free">
+            <div class="price-card-header">
+              <h2 class="price-card-title">Free Plan</h2>
+              <p class="price-card-description">
+                Access all features without cost
+              </p>
             </div>
-            <div class="price-card" id="price-normal">
-              <div class="price-card-header">
-                <h2 class="price-card-title">Sustainer Plan</h2>
-                <p class="price-card-description">Contribute to cover operational costs and ensure the platform remains available for everyone.</p>
-              </div>
-              <div class="price-card-content">
-                <p class="price-amount">
-                  $3<span class="price-period">/month</span>
-                </p>
-                <ul class="price-features-list">
-                  <li class="price-feature-item">
-                    <span class="price-check-icon">✓</span> Access to all platform features
-                  </li>
-                  <li class="price-feature-item">
-                    <span class="price-check-icon">✓</span> Helps maintain platform sustainability by covering essential operational costs
-                  </li>
-                  <li class="price-feature-item">
-                    <span class="price-check-icon">✓</span> Support our mission to keep the platform free and accessible for all users
-                  </li>
-                  <li class="price-feature-item">
-                    <span class="price-check-icon">✓</span> Contribute to server and maintenance fees
-                  </li>
-                  <li class="price-feature-item">
-                    <span class="price-check-icon">✓</span> Receive updates on platform improvements
-                  </li>
-                </ul>
-              </div>
-              <div class="price-card-footer">
-                <a href="#" class="price-button">Contribute Now</a>
-              </div>
+            <div class="price-card-content">
+              <p class="price-amount">
+                $0<span class="price-period">/month</span>
+              </p>
+              <ul class="price-features-list">
+                <li class="price-feature-item">
+                  <span class="price-check-icon">✓</span> Access to all platform
+                  features
+                </li>
+                <li class="price-feature-item">
+                  <span class="price-check-icon">✓</span> Voluntary
+                  participation
+                </li>
+                <li class="price-feature-item">
+                  <span class="price-check-icon">✓</span> Community support
+                  available
+                </li>
+                <li class="price-feature-item">
+                  <span class="price-check-icon">✓</span> No commitment required
+                </li>
+              </ul>
             </div>
-            <div class="price-card" id="price-generous">
-              <div class="price-card-header">
-                <h2 class="price-card-title">Supporter Plan</h2>
-                <p class="price-card-description">Help us grow, improve, and innovate by contributing beyond operational costs.</p>
-              </div>
-              <div class="price-card-content">
-                <p class="price-amount">
-                  $8<span class="price-period">/month</span>
-                </p>
-                <ul class="price-features-list">
-                  <li class="price-feature-item">
-                    <span class="price-check-icon">✓</span> Access to all platform features
-                  </li>
-                  <li class="price-feature-item">
-                    <span class="price-check-icon">✓</span> Supports platform development and growth, allowing us to add new features and improve user experience
-                  </li>
-                  <li class="price-feature-item">
-                    <span class="price-check-icon">✓</span> Contribute to our vision of creating a vibrant, innovative platform that continuously evolves
-                  </li>
-                  <li class="price-feature-item">
-                    <span class="price-check-icon">✓</span> Your generosity helps fund new initiatives and ensures the long-term success of our community
-                  </li>
-                  <li class="price-feature-item">
-                    <span class="price-check-icon">✓</span> Priority access to new features and beta testing opportunities
-                  </li>
-                  <li class="price-feature-item">
-                    <span class="price-check-icon">✓</span> Recognition as a key supporter in our community
-                  </li>
-                  <li class="price-feature-item">
-                    <span class="price-check-icon">✓</span> Exclusive content and insights into future developments
-                  </li>
-                </ul>
-              </div>
-              <div class="price-card-footer">
-                <a href="#" class="price-button">Support Us</a>
-              </div>
+            <div class="price-card-footer">
+              <a href="#" class="price-button">Get Started</a>
             </div>
           </div>
-          <p class="price-footnote">
-            Thank you for considering supporting our platform. Your contributions help keep the platform open and continuously improve.
-          </p>
+          <div class="price-card" id="price-normal">
+            <div class="price-card-header">
+              <h2 class="price-card-title">Sustainer Plan</h2>
+              <p class="price-card-description">
+                Contribute to cover operational costs and ensure the platform
+                remains available for everyone.
+              </p>
+            </div>
+            <div class="price-card-content">
+              <p class="price-amount">
+                $3<span class="price-period">/month</span>
+              </p>
+              <ul class="price-features-list">
+                <li class="price-feature-item">
+                  <span class="price-check-icon">✓</span> Access to all platform
+                  features
+                </li>
+                <li class="price-feature-item">
+                  <span class="price-check-icon">✓</span> Helps maintain
+                  platform sustainability by covering essential operational
+                  costs
+                </li>
+                <li class="price-feature-item">
+                  <span class="price-check-icon">✓</span> Support our mission to
+                  keep the platform free and accessible for all users
+                </li>
+                <li class="price-feature-item">
+                  <span class="price-check-icon">✓</span> Contribute to server
+                  and maintenance fees
+                </li>
+                <li class="price-feature-item">
+                  <span class="price-check-icon">✓</span> Receive updates on
+                  platform improvements
+                </li>
+              </ul>
+            </div>
+            <div class="price-card-footer">
+              <a href="#" class="price-button">Contribute Now</a>
+            </div>
+          </div>
+          <div class="price-card" id="price-generous">
+            <div class="price-card-header">
+              <h2 class="price-card-title">Supporter Plan</h2>
+              <p class="price-card-description">
+                Help us grow, improve, and innovate by contributing beyond
+                operational costs.
+              </p>
+            </div>
+            <div class="price-card-content">
+              <p class="price-amount">
+                $8<span class="price-period">/month</span>
+              </p>
+              <ul class="price-features-list">
+                <li class="price-feature-item">
+                  <span class="price-check-icon">✓</span> Access to all platform
+                  features
+                </li>
+                <li class="price-feature-item">
+                  <span class="price-check-icon">✓</span> Supports platform
+                  development and growth, allowing us to add new features and
+                  improve user experience
+                </li>
+                <li class="price-feature-item">
+                  <span class="price-check-icon">✓</span> Contribute to our
+                  vision of creating a vibrant, innovative platform that
+                  continuously evolves
+                </li>
+                <li class="price-feature-item">
+                  <span class="price-check-icon">✓</span> Your generosity helps
+                  fund new initiatives and ensures the long-term success of our
+                  community
+                </li>
+                <li class="price-feature-item">
+                  <span class="price-check-icon">✓</span> Priority access to new
+                  features and beta testing opportunities
+                </li>
+                <li class="price-feature-item">
+                  <span class="price-check-icon">✓</span> Recognition as a key
+                  supporter in our community
+                </li>
+                <li class="price-feature-item">
+                  <span class="price-check-icon">✓</span> Exclusive content and
+                  insights into future developments
+                </li>
+              </ul>
+            </div>
+            <div class="price-card-footer">
+              <a href="#" class="price-button">Support Us</a>
+            </div>
+          </div>
         </div>
-      </section>
-      <section class="aboutus-wrapper">
-    <div id="aboutus" class="page">
-      <h1 class="aboutus-title">À propos de TalibHub</h1>
-
-      <div class="aboutus-card" id="aboutus-mission">
-        <div class="aboutus-card-header">
-          <h2 class="aboutus-card-title">📚 Notre Mission</h2>
-        </div>
-        <div class="aboutus-card-content">
-          <p>
-            Chez TalibHub, notre mission est de soutenir l'apprentissage et la
-            pratique de l'islam au quotidien. Nous offrons aux musulmans du
-            monde entier des outils modernes et efficaces pour approfondir leur
-            foi et améliorer leur pratique religieuse.
-          </p>
-        </div>
+        <p class="price-footnote">
+          Thank you for considering supporting our platform. Your contributions
+          help keep the platform open and continuously improve.
+        </p>
       </div>
+    </section>
 
-      <div class="aboutus-grid aboutus-grid-cols-2">
-        <div class="aboutus-card" id="aboutus-features">
+    <section class="aboutus-wrapper">
+      <div id="aboutus" class="page">
+        <h1 class="aboutus-title">About TalibHub</h1>
+
+        <div class="aboutus-card" id="aboutus-mission">
           <div class="aboutus-card-header">
-            <h2 class="aboutus-card-title">🛠️ Nos Fonctionnalités</h2>
+            <h2 class="aboutus-card-title">📚 Our Mission</h2>
           </div>
           <div class="aboutus-card-content">
-            <ul class="aboutus-list">
-              <li>
-                TalibTimer : Gestion du temps d'étude avec technique Pomodoro,
-                chronomètre et compteur
-              </li>
-              <li>
-                SurahSelector : Diversification des sourates pour la prière
-              </li>
-              <li>
-                Surah Memorization : Maintien de la mémorisation des sourates
-              </li>
-              <li>
-                Dua Time Calculator : Calcul du dernier tiers de la nuit pour
-                les invocations
-              </li>
-              <li>
-                Mosquetime : Horaires des prières en congrégation dans les
-                mosquées
-              </li>
-            </ul>
+            <p>
+              At TalibHub, our mission is to support the learning and practice
+              of Islam on a daily basis. We offer Muslims worldwide modern and
+              effective tools to deepen their faith and improve their religious
+              practice.
+            </p>
           </div>
         </div>
 
-        <div class="aboutus-card" id="aboutus-values">
+        <div class="aboutus-grid aboutus-grid-cols-2">
+          <div class="aboutus-card" id="aboutus-features">
+            <div class="aboutus-card-header">
+              <h2 class="aboutus-card-title">🛠️ Our Features</h2>
+            </div>
+            <div class="aboutus-card-content">
+              <ul class="aboutus-list">
+                <li>
+                  TalibTimer: Study time management with Pomodoro technique,
+                  stopwatch, and counter
+                </li>
+                <li>SurahSelector: Diversify your prayer surahs</li>
+                <li>Surah Memorization: Maintain surah memorization</li>
+                <li>
+                  Dua Time Calculator: Calculate the last third of the night for
+                  invocations
+                </li>
+                <li>Mosquetime: Congregational prayer times at mosques</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="aboutus-card" id="aboutus-values">
+            <div class="aboutus-card-header">
+              <h2 class="aboutus-card-title">❤️ Our Values</h2>
+            </div>
+            <div class="aboutus-card-content">
+              <ul class="aboutus-list">
+                <li>Commitment to Islamic principles</li>
+                <li>Innovation in religious education</li>
+                <li>Universal accessibility</li>
+                <li>Community development</li>
+                <li>Continuous improvement of our services</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="aboutus-card" id="aboutus-future">
           <div class="aboutus-card-header">
-            <h2 class="aboutus-card-title">❤️ Nos Valeurs</h2>
+            <h2 class="aboutus-card-title">🔮 Our Future</h2>
           </div>
           <div class="aboutus-card-content">
-            <ul class="aboutus-list">
-              <li>Engagement envers les principes islamiques</li>
-              <li>Innovation dans l'éducation religieuse</li>
-              <li>Accessibilité universelle</li>
-              <li>Développement communautaire</li>
-              <li>Amélioration continue de nos services</li>
-            </ul>
+            <p>
+              TalibHub is constantly evolving. In Sha Allah, we plan to enrich
+              our platform with many new innovative features to better serve our
+              user community.
+            </p>
+          </div>
+        </div>
+
+        <div class="aboutus-card" id="aboutus-commitment">
+          <div class="aboutus-card-header">
+            <h2 class="aboutus-card-title">🤝 Our Commitment</h2>
+          </div>
+          <div class="aboutus-card-content">
+            <p>
+              TalibHub is committed to providing a free and accessible platform
+              to everyone. Our unique model relies on the generosity of our
+              users, with subscriptions designed for altruists who wish to
+              contribute to the development and dissemination of the platform.
+            </p>
           </div>
         </div>
       </div>
-
-      <div class="aboutus-card" id="aboutus-future">
-        <div class="aboutus-card-header">
-          <h2 class="aboutus-card-title">🔮 Notre Avenir</h2>
-        </div>
-        <div class="aboutus-card-content">
-          <p>
-            TalibHub est en constante évolution. In Sha Allah, nous prévoyons
-            d'enrichir notre plateforme avec de nombreuses nouvelles
-            fonctionnalités innovantes pour mieux servir notre communauté
-            d'utilisateurs.
-          </p>
-        </div>
-      </div>
-
-      <div class="aboutus-card" id="aboutus-commitment">
-        <div class="aboutus-card-header">
-          <h2 class="aboutus-card-title">🤝 Notre Engagement</h2>
-        </div>
-        <div class="aboutus-card-content">
-          <p>
-            TalibHub s'engage à fournir une plateforme gratuite et accessible à
-            tous. Notre modèle unique repose sur la générosité de nos
-            utilisateurs, avec des abonnements conçus pour les altruistes qui
-            souhaitent contribuer au développement et à la propagation de la
-            plateforme.
-          </p>
-        </div>
-      </div>
-    </div>  
     </section>
 
     <section id="contactform" class="page">
-        <h1>Contactez-nous</h1>
-        <div class="contactform-wrapper">
-          <div class="contactform-container">
-            <div class="contactform-left-column">
-              <h2 class="contactform-title">
-                Discutons<br />de quelque chose de
-                <span class="contactform-highlight">génial</span><br />ensemble
-              </h2>
-              <div class="contactform-info">
-                <p class="contactform-info-item">
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  >
-                    <line x1="22" y1="2" x2="11" y2="13"></line>
-                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                  </svg>
-                  support@votre-sass.com
-                </p>
-                <p class="contactform-info-item">
-                  <input
-                    value="+123 456 789"
-                    readonly
-                    class="contactform-input contactform-phone"
-                    style="
-                      background-color: rgba(0, 71, 171, 0.2);
-                      border: 1px solid rgba(0, 71, 171, 0.3);
-                      color: white;
-                      padding: 0.5rem;
-                    "
-                  />
-                </p>
-                <p class="contactform-info-item">123 Rue des Startups, Bâtiment 456</p>
-              </div>
-              <div class="contactform-social-buttons">
-                <button class="contactform-social-button">
-                  <svg
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  >
-                    <path
-                      d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"
-                    ></path>
-                  </svg>
-                </button>
-                <button class="contactform-social-button">
-                  <svg
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  >
-                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-                    <path
-                      d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"
-                    ></path>
-                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-                  </svg>
-                </button>
-                <button class="contactform-social-button">
-                  <svg
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  >
-                    <path
-                      d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"
-                    ></path>
-                  </svg>
-                </button>
-              </div>
+      <h1>Contact Us</h1>
+      <div class="contactform-wrapper">
+        <div class="contactform-container">
+          <div class="contactform-left-column">
+            <h2 class="contactform-title">
+              Let's talk<br />about something
+              <span class="contactform-highlight">awesome</span><br />together
+            </h2>
+            <div class="contactform-info">
+              <p class="contactform-info-item">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <line x1="22" y1="2" x2="11" y2="13"></line>
+                  <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+                support@your-saas.com
+              </p>
+              <p class="contactform-info-item">
+                <input
+                  value="+123 456 789"
+                  readonly
+                  class="contactform-input contactform-phone"
+                  style="
+                    background-color: rgba(0, 71, 171, 0.2);
+                    border: 1px solid rgba(0, 71, 171, 0.3);
+                    color: white;
+                    padding: 0.5rem;
+                  "
+                />
+              </p>
+              <p class="contactform-info-item">
+                123 Startup Street, Building 456
+              </p>
             </div>
-            <div class="contactform-right-column">
-              <form class="contactform-form">
-                <div>
-                  <p>Je suis intéressé par...</p>
-                  <div class="contactform-interests">
-                    <button
-                      type="button"
-                      class="contactform-interest-button"
-                      data-interest="Suggestion"
-                    >
-                      Suggestion
-                    </button>
-                    <button
-                      type="button"
-                      class="contactform-interest-button"
-                      data-interest="Bug"
-                    >
-                      Bug
-                    </button>
-                    <button
-                      type="button"
-                      class="contactform-interest-button"
-                      data-interest="Partenariat"
-                    >
-                      Partenariat
-                    </button>
-                    <button
-                      type="button"
-                      class="contactform-interest-button"
-                      data-interest="Amélioration"
-                    >
-                      Amélioration
-                    </button>
-                    <button
-                      type="button"
-                      class="contactform-interest-button"
-                      data-interest="Autre"
-                    >
-                      Autre
-                    </button>
-                  </div>
-                </div>
-                <input
-                  type="text"
-                  id="contactform-name"
-                  class="contactform-input"
-                  placeholder="Votre nom"
-                  required
-                />
-                <input
-                  type="email"
-                  id="contactform-email"
-                  class="contactform-input"
-                  placeholder="Votre email"
-                  required
-                />
-                <textarea
-                  id="contactform-message"
-                  class="contactform-textarea"
-                  placeholder="Votre message"
-                  required
-                ></textarea>
-                <button type="submit" class="contactform-submit">
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  >
-                    <line x1="22" y1="2" x2="11" y2="13"></line>
-                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                  </svg>
-                  Envoyer le message
-                </button>
-              </form>
+            <div class="contactform-social-buttons">
+              <button class="contactform-social-button">
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"
+                  ></path>
+                </svg>
+              </button>
+              <button class="contactform-social-button">
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                  <path
+                    d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"
+                  ></path>
+                  <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                </svg>
+              </button>
+              <button class="contactform-social-button">
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"
+                  ></path>
+                </svg>
+              </button>
             </div>
           </div>
+          <div class="contactform-right-column">
+            <form class="contactform-form">
+              <div>
+                <p>I am interested in...</p>
+                <div class="contactform-interests">
+                  <button
+                    type="button"
+                    class="contactform-interest-button"
+                    data-interest="Suggestion"
+                  >
+                    Suggestion
+                  </button>
+                  <button
+                    type="button"
+                    class="contactform-interest-button"
+                    data-interest="Bug"
+                  >
+                    Bug
+                  </button>
+                  <button
+                    type="button"
+                    class="contactform-interest-button"
+                    data-interest="Partnership"
+                  >
+                    Partnership
+                  </button>
+                  <button
+                    type="button"
+                    class="contactform-interest-button"
+                    data-interest="Improvement"
+                  >
+                    Improvement
+                  </button>
+                  <button
+                    type="button"
+                    class="contactform-interest-button"
+                    data-interest="Other"
+                  >
+                    Other
+                  </button>
+                </div>
+              </div>
+              <input
+                type="text"
+                id="contactform-name"
+                class="contactform-input"
+                placeholder="Your name"
+                required
+              />
+              <input
+                type="email"
+                id="contactform-email"
+                class="contactform-input"
+                placeholder="Your email"
+                required
+              />
+              <textarea
+                id="contactform-message"
+                class="contactform-textarea"
+                placeholder="Your message"
+                required
+              ></textarea>
+              <button type="submit" class="contactform-submit">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <line x1="22" y1="2" x2="11" y2="13"></line>
+                  <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+                Send Message
+              </button>
+            </form>
+          </div>
         </div>
-      </section>
+      </div>
+    </section>
 
     <script type="module" src="main.js"></script>
     <script type="module" src="auth.js"></script>
@@ -1649,5 +1701,6 @@
     <script type="module" src="surahMemorization.js"></script>
     <script type="module" src="notifications.js"></script>
     <script type="module" src="utils.js"></script>
+    <script type="module" src="transLanguages.js"></script>
   </body>
 </html>
