@@ -410,16 +410,16 @@
         <div class="timer">
           <h2>Minuteur de concentration</h2>
           <div class="timer-content">
-            <p id="time-left">25:00</p>
+            <p id="time-left" class="time_displayed">25:00</p>
             <button id="start_stop" data-action="toggle-timer">
               <img
-                src="./Icones/ButtonsIcone/Start_icone.svg"
+                src="./Icones/ButtonsIcone/Start_icone.png"
                 alt="Icône Démarrer"
               />
             </button>
             <button id="reset" data-action="reset-timer">
               <img
-                src="./Icones/ButtonsIcone/Restart_Icone.svg"
+                src="./Icones/ButtonsIcone/Restart_icone.png"
                 alt="Icône Redémarrer"
               />
             </button>
@@ -428,16 +428,16 @@
         <div class="timer">
           <h2>Chronomètre</h2>
           <div class="timer-content">
-            <p id="stopwatch-time">00:00:00</p>
+            <p id="stopwatch-time" class="time_displayed">00:00:00</p>
             <button id="stopwatch-start" data-action="toggle-stopwatch">
               <img
-                src="./Icones/ButtonsIcone/Start_icone.svg"
+                src="./Icones/ButtonsIcone/Start_icone.png"
                 alt="Icône Démarrer"
               />
             </button>
             <button id="stopwatch-reset" data-action="reset-stopwatch">
               <img
-                src="./Icones/ButtonsIcone/Restart_Icone.svg"
+                src="./Icones/ButtonsIcone/Restart_icone.png"
                 alt="Icône Redémarrer"
               />
             </button>
@@ -445,21 +445,16 @@
         </div>
         <div class="timer">
           <h2>Temps d'étude manuel</h2>
-          <div class="timer-content">
+          <div id="manual-time-container">
             <div>
               <label for="manual-hours">Heures :</label>
               <input type="number" id="manual-hours" min="0" placeholder="0" />
             </div>
             <div>
               <label for="manual-minutes">Minutes :</label>
-              <input
-                type="number"
-                id="manual-minutes"
-                min="0"
-                max="59"
-                placeholder="0"
-              />
+              <input type="number" id="manual-minutes" min="0" max="59" placeholder="0" />
             </div>
+          </div>
             <p>
               Temps total de travail :
               <span id="total-work-time">00:00:00</span>
@@ -484,8 +479,7 @@
         </div>
       </div>
       <button class="session-control" data-action="save-session-data">
-        Enregistrer la Session
-        <img src="./Icones/ButtonsIcone/Save_Icone.svg" alt="Icône Enregistrer" />
+        <img src="./Icones/ButtonsIcone/Save_icone.png" alt="Icône Enregistrer" />
       </button>
     </section>
 
