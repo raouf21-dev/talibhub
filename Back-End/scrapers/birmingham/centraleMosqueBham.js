@@ -1,3 +1,5 @@
+// centraleMosqueBham.js
+
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 const { executablePath } = require('puppeteer');
@@ -179,7 +181,7 @@ const scrapeCentralMosque = async (verbose = false) => {
   }
 };
 
+
 module.exports = {
   scrapeCentralMosque
 };
-
