@@ -1,4 +1,4 @@
-// masjidAlfarouqWalsall.js
+// scrapeQubaIsmalicCenter.js
 
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
@@ -42,7 +42,7 @@ const randomDelay = (min, max) =>
   );
 
 // Fonction principale de scraping
-const scrapeMasjidAlFarouq = async () => {
+const scrapeQubaIsmalicCenter = async () => {
   let browser;
   try {
     console.log('Démarrage du scraping...');
@@ -91,7 +91,7 @@ const scrapeMasjidAlFarouq = async () => {
     while (retryCount < maxRetries) {
       try {
         console.log('Navigation vers la page principale...');
-        await page.goto('https://www.masjidalfarouq.org.uk/', {
+        await page.goto('https://mawaqit.net/en/quba-islamic-cultural-centre-birmingham-b7-4ny-united-kingdom/', {
           waitUntil: 'domcontentloaded', // Utiliser domcontentloaded pour accélérer
           timeout: 25000, // Timeout réduit
         });
@@ -99,12 +99,11 @@ const scrapeMasjidAlFarouq = async () => {
 
         // Simuler des mouvements de souris et des délais aléatoires
         // Minimiser les mouvements et les délais pour accélérer
-        // Vous pouvez supprimer ou réduire ces lignes si elles ne sont pas nécessaires
         await page.mouse.move(100, 100);
         await randomDelay(50, 150);
 
         // Attendre que l'élément principal soit chargé
-        await page.waitForSelector('div.my-5', { timeout: 15000 });
+        await page.waitForSelector('div.prayers', { timeout: 15000 });
 
         // Accéder au contenu de la page
         frame = page; // Si le contenu n'est pas dans une iframe, utiliser la page principale
@@ -120,11 +119,11 @@ const scrapeMasjidAlFarouq = async () => {
         */
 
         // Attendre que les éléments de prière soient chargés
-        await frame.waitForSelector('div.my-5', { timeout: 10000 });
+        await frame.waitForSelector('div.prayers', { timeout: 10000 });
 
         // Vérifier si les éléments attendus sont présents
         const hasContent = await frame.evaluate(() => {
-          return document.querySelectorAll('div.my-5 div.flex.flex-row.justify-around.items-center.flex-wrap.mt-2 div.flex.flex-col.items-center.max-w-xs.flex').length > 0;
+          return document.querySelectorAll('div.prayers > div').length > 0;
         });
 
         if (hasContent) {
@@ -139,8 +138,8 @@ const scrapeMasjidAlFarouq = async () => {
         if (retryCount === maxRetries) {
           // Sauvegarder le contenu de la page pour diagnostic
           const content = await page.content();
-          fs.writeFileSync('failed_page_masjidalfarouq.html', content);
-          console.log('Le contenu de la page a été sauvegardé dans failed_page_masjidalfarouq.html pour analyse.');
+          fs.writeFileSync('failed_page_qubaIslamicCenter.html', content);
+          console.log('Le contenu de la page a été sauvegardé dans failed_page_qubaIslamicCenter.html pour analyse.');
           throw error;
         }
         await randomDelay(3000, 5000); // Délais entre les tentatives
@@ -157,22 +156,20 @@ const scrapeMasjidAlFarouq = async () => {
     const dateText = ukTime.toISODate();
 
     const data = await frame.evaluate(
-      (isFriday, dateText) => {
+      (dateText) => {
         const times = {};
-        // Utiliser dateText passé depuis Node.js
 
-        const prayerElements = document.querySelectorAll(
-          'div.my-5 div.flex.flex-row.justify-around.items-center.flex-wrap.mt-2 div.flex.flex-col.items-center.max-w-xs.flex'
-        );
+        const prayerElements = document.querySelectorAll('div.prayers > div');
 
         prayerElements.forEach((prayerElement) => {
-          const nameElement = prayerElement.querySelector('h3.font-elMessiri.font-medium');
-          const timeElements = prayerElement.querySelectorAll('h4.p-0\\.5.sm\\:p-1.font-medium');
-          const timeElement = timeElements.length >= 2 ? timeElements[1] : null;
+          const nameElement = prayerElement.querySelector('div.name');
+          const timeElement = prayerElement.querySelector('div.time');
+          const waitElement = prayerElement.querySelector('div.wait > div');
 
           if (nameElement && timeElement) {
             let prayerName = nameElement.textContent.trim().toLowerCase();
-            const prayerTime = timeElement.textContent.trim();
+            let prayerTime = timeElement.textContent.trim();
+            let waitText = waitElement ? waitElement.textContent.trim() : '+0'; // Si waitElement est absent, supposer '+0'
 
             // Normalisation des noms de prières pour correspondre aux noms des colonnes de la base de données
             switch (prayerName) {
@@ -197,52 +194,28 @@ const scrapeMasjidAlFarouq = async () => {
             }
 
             if (prayerName) {
+              // Vérifier si waitText est un offset ou une heure spécifique
+              if (/^\+\d+$/.test(waitText)) {
+                // Offset en minutes
+                const offsetMinutes = parseInt(waitText.replace('+', ''), 10);
+                const [hours, minutes] = prayerTime.split(':').map(Number);
+                const date = new Date();
+                date.setHours(hours, minutes, 0, 0);
+                date.setMinutes(date.getMinutes() + offsetMinutes);
+                const adjustedHours = date.getHours().toString().padStart(2, '0');
+                const adjustedMinutes = date.getMinutes().toString().padStart(2, '0');
+                prayerTime = `${adjustedHours}:${adjustedMinutes}`;
+              } else if (/^\d{1,2}:\d{2}$/.test(waitText)) {
+                // Heure spécifique
+                prayerTime = waitText;
+              }
               times[prayerName] = prayerTime;
             }
           }
         });
 
-        if (isFriday) {
-          // Fonction pour normaliser le texte et gérer les différentes apostrophes
-          const normalizeText = (text) =>
-            text.replace(/[\u2019\u0027]/g, "'").trim().toLowerCase();
-
-          const h2Elements = document.querySelectorAll('h2');
-          let jumuahTimesSection = null;
-
-          for (let h2 of h2Elements) {
-            const text = normalizeText(h2.textContent);
-            if (text.includes("jumu'ah times")) {
-              jumuahTimesSection = h2;
-              break;
-            }
-          }
-
-          if (jumuahTimesSection) {
-            const jumuahDiv = jumuahTimesSection.parentElement; // Le div contenant le h2
-
-            const liElements = jumuahDiv.querySelectorAll('ul li');
-
-            liElements.forEach((liElement, index) => {
-              // Extraire l'heure du 'p' élément
-              const pElements = liElement.querySelectorAll('p');
-              pElements.forEach((pElement) => {
-                const textContent = pElement.textContent.trim();
-                const timeMatch = textContent.match(/(\d{1,2}:\d{2})/);
-                if (timeMatch) {
-                  const prayerTime = timeMatch[1];
-                  const prayerName = `jumuah${index + 1}`; // Correspond aux colonnes jumuah1, jumuah2, etc.
-                  times[prayerName] = prayerTime;
-                }
-              });
-            });
-          }
-        }
-
         return { dateText, times };
       },
-      // Passer isFriday si nécessaire
-      false, // Remplacer par la valeur réelle si isFriday est utilisé
       dateText
     );
 
@@ -265,4 +238,5 @@ const scrapeMasjidAlFarouq = async () => {
   }
 };
 
-module.exports = scrapeMasjidAlFarouq;
+
+module.exports = scrapeQubaIsmalicCenter;

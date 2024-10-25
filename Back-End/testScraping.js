@@ -3,13 +3,22 @@ const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 const { executablePath } = require('puppeteer');
 const { DateTime } = require('luxon');
 
-// Configuration StealthPlugin
-puppeteer.use(StealthPlugin());
+// Configuration StealthPlugin avec des options optimisées
+const stealth = StealthPlugin();
+
+// Vous pouvez désactiver certaines fonctionnalités du plugin si nécessaire
+// Par exemple, désactiver le plugin pour WebGL si ce n'est pas nécessaire
+stealth.enabledEvasions.delete('webgl.vendor');
+stealth.enabledEvasions.delete('webgl.renderer');
+
+puppeteer.use(stealth);
 
 const userAgents = [
-  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
-  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
-  'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/119.0'
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:115.0) Gecko/20100101 Firefox/115.0',
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.1 Safari/605.1.15',
+  'Mozilla/5.0 (iPhone; CPU iPhone OS 15_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.5 Mobile/15E148 Safari/604.1',
+  'Mozilla/5.0 (Linux; Android 12; SM-G991B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.74 Mobile Safari/537.36',
 ];
 
 const randomDelay = async (min, max) => {
@@ -28,25 +37,28 @@ const convertTo24Hour = (timeStr) => {
 
 const waitForCloudflare = async (page) => {
   try {
+    // Attendre que la page Cloudflare soit passée
     await page.waitForFunction(
       () => {
         return !document.querySelector('#challenge-running') &&
                !document.querySelector('#cf-spinner') &&
                !document.querySelector('.cf-browser-verification');
       },
-      { timeout: 30000 }
+      { timeout: 15000 }  // Réduit de 20000 à 15000 ms
     );
-    await randomDelay(2000, 4000);
+
+    // Attente supplémentaire pour s'assurer que la page est bien chargée
+    await randomDelay(1000, 1500);  // Réduit de 1000-2000 à 1000-1500 ms
   } catch (error) {
     console.log('Erreur lors de l\'attente Cloudflare:', error.message);
     throw new Error('Impossible de passer la protection Cloudflare');
   }
 };
 
-const scrapeCentralMosque = async (verbose = false) => {
+const scrapeCentralMosque = async () => {
   let browser;
   try {
-    if (verbose) console.log('Démarrage du scraping...');
+    console.log('Démarrage du scraping...');
     const randomUserAgent = userAgents[Math.floor(Math.random() * userAgents.length)];
 
     browser = await puppeteer.launch({
@@ -68,7 +80,8 @@ const scrapeCentralMosque = async (verbose = false) => {
 
     const page = await browser.newPage();
     
-    await page.setDefaultNavigationTimeout(120000);
+    // Configuration de la page
+    await page.setDefaultNavigationTimeout(45000);  // Réduit de 60000 à 45000 ms
     await page.setViewport({ width: 1920, height: 1080 });
     await page.setUserAgent(randomUserAgent);
     
@@ -93,48 +106,48 @@ const scrapeCentralMosque = async (verbose = false) => {
       window.navigator.chrome = { runtime: {} };
     });
 
-    if (verbose) console.log('Navigation vers Central Mosque...');
-    
+    console.log('Navigation vers Central Mosque...');
+
     let retryCount = 0;
-    const maxRetries = 3;
-    
+    const maxRetries = 2;  // Réduit de 3 à 2 tentatives
+
     while (retryCount < maxRetries) {
       try {
         const response = await page.goto('http://centralmosque.org.uk/', {
-          waitUntil: 'networkidle2',
-          timeout: 60000
+          waitUntil: 'domcontentloaded',  // Change de 'networkidle2' à 'domcontentloaded'
+          timeout: 25000  // Réduit de 30000 à 25000 ms
         });
 
         if (response.status() === 520 || response.status() === 403) {
-          if (verbose) console.log(`Statut de réponse ${response.status()}, tentative de contournement Cloudflare...`);
+          console.log(`Statut de réponse ${response.status()}, tentative de contournement Cloudflare...`);
           await waitForCloudflare(page);
         }
 
         const content = await page.content();
         if (content.includes('mptt-wrapper-container')) {
-          if (verbose) console.log('Page chargée avec succès');
+          console.log('Page chargée avec succès');
           break;
         } else {
           throw new Error('Contenu de la page non valide');
         }
       } catch (error) {
         retryCount++;
-        if (verbose) console.log(`Tentative ${retryCount}/${maxRetries} échouée:`, error.message);
+        console.log(`Tentative ${retryCount}/${maxRetries} échouée:`, error.message);
         if (retryCount === maxRetries) throw error;
-        await randomDelay(10000, 15000);
+        await randomDelay(3000, 5000);  // Réduit de 5000-8000 à 3000-5000 ms
       }
     }
 
-    if (verbose) console.log('Attente des éléments de prière...');
+    console.log('Attente des éléments de prière...');
     await page.waitForSelector('.mptt-wrapper-container', { 
-      timeout: 30000,
+      timeout: 15000,  // Réduit de 20000 à 15000 ms
       visible: true 
     });
 
     const ukTime = DateTime.now().setZone('Europe/London');
     const dateText = ukTime.toISODate();
 
-    if (verbose) console.log('Extraction des données...');
+    console.log('Extraction des données...');
     const data = await page.evaluate(() => {
       const prayers = {};
       const prayerElements = document.querySelectorAll('.prayer-time');
@@ -144,8 +157,13 @@ const scrapeCentralMosque = async (verbose = false) => {
         const jamaatElement = element.querySelector('.prayer-jamaat');
 
         if (titleElement && jamaatElement) {
-          const title = titleElement.textContent.trim().toLowerCase();
+          let title = titleElement.textContent.trim().toLowerCase();
           const jamaatTime = jamaatElement.textContent.trim();
+
+          // Renommer 'zuhr' en 'dhuhr'
+          if (title === 'zuhr') {
+            title = 'dhuhr';
+          }
 
           prayers[title] = jamaatTime;
         }
@@ -165,7 +183,7 @@ const scrapeCentralMosque = async (verbose = false) => {
       times: formattedTimes
     };
 
-    if (verbose) console.log('Données extraites avec succès:', result);
+    console.log('Données extraites avec succès:', result);
     return result;
 
   } catch (error) {
@@ -174,12 +192,9 @@ const scrapeCentralMosque = async (verbose = false) => {
   } finally {
     if (browser) {
       await browser.close();
-      if (verbose) console.log('Navigateur fermé');
+      console.log('Navigateur fermé');
     }
   }
 };
 
-module.exports = {
-  scrapeCentralMosque
-};
-
+module.exports = scrapeCentralMosque;
