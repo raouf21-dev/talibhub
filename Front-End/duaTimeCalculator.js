@@ -1,4 +1,5 @@
 // duaTimeCalculator.js
+import {adressIPP} from './utils.js'
 
 function initializeDuaTimeCalculator() {
     const duaTimeSection = document.getElementById('duaTimeCalculator');

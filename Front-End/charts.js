@@ -1,4 +1,6 @@
 // charts.js
+import {adressIPP} from './utils.js'
+
 
 // Variable globale pour stocker les instances de graphiques
 let chartInstances = {};
@@ -46,7 +48,7 @@ function formatDate(dateString, period) {
 // Fonction pour récupérer les statistiques
 async function fetchStatistics(period) {
     try {
-        const response = await fetch(`http://localhost:3000/statistics/${period}`, {
+        const response = await fetch(`${adressIPP}/statistics/${period}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',

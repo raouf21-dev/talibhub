@@ -1,4 +1,5 @@
 // surahMemorization.js
+import {adressIPP} from './utils.js'
 
 let surahs = [];
 let currentSurahIndex = 0;
@@ -37,7 +38,7 @@ const exportBtn = document.getElementById('surahmemorization-export');
 const clearHistoryBtn = document.getElementById('surahmemorization-clear');
 
 // Base URL de votre API backend
-const API_BASE_URL = 'http://localhost:3000'; // Remplacez par l'URL appropriée
+const API_BASE_URL = `${adressIPP}`; // Remplacez par l'URL appropriée
 
 // Récupérer le token d'authentification depuis le stockage local
 const token = localStorage.getItem('token');

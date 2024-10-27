@@ -1,4 +1,5 @@
 // mosqueTime.js
+import {adressIPP} from './utils.js'
 
 let currentMosques = [];
 let sortOrder = 'asc';
@@ -30,7 +31,7 @@ async function checkAndUpdateData() {
     const date = new Date().toISOString().split('T')[0];
 
     // Vérifier si les données existent pour la date actuelle
-    const response = await fetch(`http://localhost:3000/mosque-times/exists/${date}`, {
+    const response = await fetch(`${adressIPP}/mosque-times/exists/${date}`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -57,7 +58,7 @@ async function triggerScrapingForAllCities() {
     displayLoading(true); // Afficher un indicateur de chargement
     const token = localStorage.getItem('token');
     console.log('Déclenchement du scraping pour toutes les villes avec le token:', token);
-    const response = await fetch('http://localhost:3000/mosque-times/scrape-all', {
+    const response = await fetch(`${adressIPP}/mosque-times/scrape-all`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`
@@ -88,7 +89,7 @@ async function loadCities() {
   try {
     const token = localStorage.getItem('token'); // Utiliser 'token' comme clé
     console.log('Token:', token); // Vérifier le token
-    const response = await fetch(`http://localhost:3000/mosque-times/cities/search?query=`, {
+    const response = await fetch(`${adressIPP}/mosque-times/cities/search?query=`, {
       headers: {
         'Authorization': `Bearer ${token}` // Inclure le token
       }
@@ -122,7 +123,7 @@ async function fetchMosquesByCity(city) {
   try {
     const token = localStorage.getItem('token'); // Utiliser 'token' comme clé
     console.log('Fetching mosques for city:', city, 'with token:', token);
-    const response = await fetch(`http://localhost:3000/mosque-times/cities/${encodeURIComponent(city)}/mosques`, {
+    const response = await fetch(`${adressIPP}/mosque-times/cities/${encodeURIComponent(city)}/mosques`, {
       headers: {
         'Authorization': `Bearer ${token}` // Inclure le token
       }
@@ -160,7 +161,7 @@ async function updateSingleMosqueTimes() {
   try {
     const token = localStorage.getItem('token');
     console.log('Fetching prayer times for mosqueId:', select.value, 'with token:', token);
-    const response = await fetch(`http://localhost:3000/mosque-times/${select.value}/${date}`, {
+    const response = await fetch(`${adressIPP}/mosque-times/${select.value}/${date}`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -337,7 +338,7 @@ async function handleCitySelection(city) {
     const token = localStorage.getItem('token');
     
     // Récupérer les mosquées de la ville
-    const mosquesResponse = await fetch(`http://localhost:3000/mosque-times/cities/${encodeURIComponent(city)}/mosques`, {
+    const mosquesResponse = await fetch(`${adressIPP}/mosque-times/cities/${encodeURIComponent(city)}/mosques`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`
@@ -355,7 +356,7 @@ async function handleCitySelection(city) {
     }
     
     // Appeler le nouvel endpoint pour récupérer les horaires de prière
-    const prayerTimesResponse = await fetch(`http://localhost:3000/mosque-times/cities/${encodeURIComponent(city)}/date/${date}/prayer-times`, {
+    const prayerTimesResponse = await fetch(`${adressIPP}/mosque-times/cities/${encodeURIComponent(city)}/date/${date}/prayer-times`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`
@@ -409,7 +410,7 @@ async function fetchPrayerTimesForAllMosques() {
   for (let mosque of currentMosques) {
     try {
       console.log(`Fetching prayer times for mosque ID ${mosque.id} on date ${date}`);
-      const response = await fetch(`http://localhost:3000/mosque-times/${mosque.id}/${date}`, {
+      const response = await fetch(`${adressIPP}/mosque-times/${mosque.id}/${date}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
