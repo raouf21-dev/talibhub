@@ -1,5 +1,4 @@
 // surahSelector.js
-import {adressIPP} from './utils.js'
 import { navigateTo } from './utils.js';
 
 function initializeSurahSelector() {
@@ -58,7 +57,7 @@ let isHistoryVisible = false;
 
 async function loadAllSourates() {
     try {
-        const response = await fetch(`${adressIPP}/sourates`, {
+        const response = await fetch(`/api/sourates`, {
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
             }
@@ -80,7 +79,7 @@ async function loadAllSourates() {
 
 async function loadKnownSourates() {
     try {
-        const response = await fetch(`${adressIPP}/sourates/known`, {
+        const response = await fetch(`/api/sourates/known`, {
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
             }
@@ -109,7 +108,7 @@ async function saveKnownSourates() {
     ));
 
     try {
-        const response = await fetch(`${adressIPP}/sourates/known`, {
+        const response = await fetch(`/api/sourates/known`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -174,7 +173,7 @@ function updateKnownSouratesCount() {
 async function loadRecitationInfo() {
     try {
         console.log('Début du chargement des informations de récitation');
-        const response = await fetch(`${adressIPP}/sourates/recitations/stats`, {
+        const response = await fetch(`/api/sourates/recitations/stats`, {
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
             }
@@ -207,7 +206,7 @@ async function loadRecitationInfo() {
 async function selectRandomSourates() {
     try {
         // Récupérer les sourates connues
-        const response = await fetch(`${adressIPP}/sourates/known`, {
+        const response = await fetch(`/api/sourates/known`, {
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
             }
@@ -232,7 +231,7 @@ async function selectRandomSourates() {
         if (notRecitedSourates.length < 2) {
             // Récupérer toutes les sourates connues pour compléter la paire
             const allKnownSourateNumbers = knownSouratesData.map(s => s.sourate_number);
-            const responseAllSourates = await fetch(`${adressIPP}/sourates/by-numbers`, {
+            const responseAllSourates = await fetch(`/api/sourates/by-numbers`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -275,7 +274,7 @@ async function selectRandomSourates() {
         document.getElementById('secondRaka').textContent = `${secondSourate.number}. ${secondSourate.name}`;
 
         // Enregistrer la récitation
-        const selectResponse = await fetch(`${adressIPP}/sourates/recitations`, {
+        const selectResponse = await fetch(`/api/sourates/recitations`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -303,7 +302,7 @@ async function selectRandomSourates() {
 }
 
 async function getNotRecitedSourates() {
-    const notRecitedSouratesResponse = await fetch(`${adressIPP}/sourates/recitations/not-recited`, {
+    const notRecitedSouratesResponse = await fetch(`/api/sourates/recitations/not-recited`, {
         headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -337,7 +336,7 @@ function displayRecitationHistory(history) {
 
 async function getRecitationStats() {
     try {
-        const response = await fetch(`${adressIPP}/sourates/recitations/stats`, {
+        const response = await fetch(`/api/sourates/recitations/stats`, {
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
             }

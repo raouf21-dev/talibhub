@@ -109,6 +109,3 @@ export function updateDOMIfExists(id, value) {
 }
 
 
-export const adressIPP = 'http://localhost:4000'; // Utiliser '/api' comme préfixe pour les requêtes API
-
-

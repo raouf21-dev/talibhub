@@ -1,5 +1,4 @@
 // notifications.js
-import {adressIPP} from './utils.js'
 
 function initializeNotifications() {
     let notifications = loadNotifications();

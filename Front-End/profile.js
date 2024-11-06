@@ -1,5 +1,4 @@
 // profile.js
-import {adressIPP} from './utils.js'
 
 import { navigateTo } from './utils.js';
 
@@ -32,7 +31,7 @@ async function loadProfile() {
             return;
         }
 
-        const response = await fetch(`${adressIPP}/auth/profile`, {
+        const response = await fetch(`/api/auth/profile`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -83,7 +82,7 @@ async function updateProfile(event) {
 
     try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`${adressIPP}/auth/updateProfile`, {
+        const response = await fetch(`/api/auth/updateProfile`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -132,7 +131,7 @@ async function handleChangePassword(event) {
             return;
         }
 
-        const response = await fetch(`${adressIPP}/auth/changePassword`, {
+        const response = await fetch(`/api/auth/changePassword`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

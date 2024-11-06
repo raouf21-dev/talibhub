@@ -1,5 +1,5 @@
 // tasks.js
-import {adressIPP} from './utils.js'
+
 import { escapeHTML } from './utils.js';
 
 function initializeTasks() {
@@ -37,7 +37,7 @@ function initializeTasks() {
 // Fonction pour charger les tâches
 async function loadTasks() {
     try {
-        const response = await fetch(`${adressIPP}/tasks/getAllTasks`, {
+        const response = await fetch(`/api/tasks/getAllTasks`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -108,7 +108,7 @@ async function addNewTask() {
     if (taskName === '') return;
 
     try {
-        const response = await fetch(`${adressIPP}/tasks/addTask`, {
+        const response = await fetch(`/api/tasks/addTask`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -136,7 +136,7 @@ async function toggleTask(taskId) {
         const taskElement = document.querySelector(`#todo-task-${taskId}`).closest('.todo-item');
         const isCompleted = taskElement.classList.toggle('completed');
 
-        const response = await fetch(`${adressIPP}/tasks/updateTask/${taskId}`, {
+        const response = await fetch(`/api/tasks/updateTask/${taskId}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -160,7 +160,7 @@ async function toggleTask(taskId) {
 // Fonction pour supprimer une tâche
 async function removeTask(taskId) {
     try {
-        const response = await fetch(`${adressIPP}/tasks/deleteTask/${taskId}`, {
+        const response = await fetch(`/api/tasks/deleteTask/${taskId}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
@@ -186,7 +186,7 @@ async function renameTask(taskId) {
     if (!newName || newName.trim() === "") return;
 
     try {
-        const response = await fetch(`${adressIPP}/tasks/updateTask/${taskId}`, {
+        const response = await fetch(`/api/tasks/updateTask/${taskId}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
