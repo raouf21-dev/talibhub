@@ -1,5 +1,4 @@
 // auth.js
-import {adressIPP} from './utils.js'
 
 import { switchTab, initializeTabToggle, navigateTo } from './utils.js';
 
@@ -74,7 +73,7 @@ async function handleSignup(event) {
     }
 
     try {
-        const response = await fetch(`${adressIPP}/auth/register`, {
+        const response = await fetch(`/api/auth/register`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -113,7 +112,7 @@ async function handleSignin(event) {
     const password = document.getElementById('welcomepage-signin-password').value;
 
     try {
-        const response = await fetch(`${adressIPP}/auth/login`, {
+        const response = await fetch(`/api/auth/login`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

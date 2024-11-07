@@ -1,5 +1,4 @@
 // navigation.js
-import {adressIPP} from './utils.js'
 
 import { navigateTo } from './utils.js';
 

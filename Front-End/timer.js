@@ -1,5 +1,5 @@
 // timer.js
-import {adressIPP} from './utils.js'
+
 import { updateDOMIfExists } from './utils.js';
 import { loadTasks } from './tasks.js';
 
@@ -106,7 +106,7 @@ async function updateTaskTitle(forceRefresh = false) {
 
     try {
         console.log('Fetching last session for task:', selectedTaskId);
-        const response = await fetch(`${adressIPP}/session/last/${selectedTaskId}`, {
+        const response = await fetch(`/api/session/last/${selectedTaskId}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -249,7 +249,7 @@ async function saveSessionData() {
     const totalWorkTime = calculateTotalWorkTime();
 
     try {
-        const saveResponse = await fetch(`${adressIPP}/session/save`, {
+        const saveResponse = await fetch(`/api/session/save`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
