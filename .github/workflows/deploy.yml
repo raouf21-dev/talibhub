@@ -26,4 +26,4 @@ jobs:
 
       - name: Copy Files to Server
         run: |
-          rsync -avz --delete --exclude='.git' -e "ssh -p ${{ secrets.SSH_PORT }}" . ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:${{ secrets.SERVER_DIR }}
+          rsync -avz --delete --exclude='.git' -e "ssh -p ${{ secrets.SSH_PORT }}" . ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:${{ secrets.SERVER_DIR }} 
