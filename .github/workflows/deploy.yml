@@ -17,4 +17,4 @@ jobs:
         run: |
           rsync -avz --delete --exclude='.git' . root@45.133.178.159:/var/www/TalibHub
         env:
-          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }} 
