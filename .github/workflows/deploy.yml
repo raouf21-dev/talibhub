@@ -1,22 +1,29 @@
-# deploy.yml
-
 name: Deploy to Server
+
 on:
   push:
     branches:
       - main  # Déclencher l'action seulement pour la branche `main`
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3 
+
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.5.0
         with:
           ssh-private-key: ${{ secrets.SSH_KEY }}
+
+      - name: Add SSH known hosts
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_KNOWN_HOSTS }}" >> ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
       - name: Copy Files to Server
         run: |
-          rsync -avz --delete --exclude='.git' . root@45.133.178.159:/var/www/TalibHub
-        env:
-          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+          rsync -avz --delete --exclude='.git' -e "ssh -p ${{ secrets.SSH_PORT }}" . ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:${{ secrets.SERVER_DIR }}
