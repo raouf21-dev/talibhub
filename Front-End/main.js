@@ -1,73 +1,100 @@
 // main.js
 
-// Importation des modules
-import { initializeAuth } from './auth.js';
-import { initializeNavigation } from './navigation.js';
-import { initializeUtils, navigateTo, updateNavVisibility, checkAuthOnLoad } from './utils.js';
-import { initializeDashboard } from './dashboard.js';
-import { initializeSurahSelector } from './surahSelector.js';
-import { initializeMosqueTime } from './mosqueTime.js';
-import { initSurahMemorization } from './surahMemorization.js';
+import { initializeAuth } from "./auth.js";
+import { initializeNavigation } from "./navigation.js";
+import { initializeUtils, navigateTo, updateNavVisibility } from "./utils.js";
+import { initializeDashboard } from "./dashboard.js";
+import { initializeSurahSelector } from "./surahSelector.js";
+import { initializeMosqueTime } from "./mosqueTime.js";
+import { initSurahMemorization } from "./surahMemorization.js";
 
-// Fonction pour initialiser les modules nécessitant une authentification
-function initializeAuthenticatedModules(token) {
-    console.log('Initialisation des modules authentifiés avec le token:', token);
-    initializeDashboard();
-    initializeSurahSelector();
-    initializeMosqueTime(); // Ces fonctions récupèrent le token depuis localStorage
-    initSurahMemorization();
-    // Ajoutez d'autres modules authentifiés ici
-}
+// Fonction pour vérifier l'état de l'authentification
+async function checkAuthStatus() {
+  const token = localStorage.getItem("token");
+  if (!token) return null;
 
-// Fonction principale d'initialisation de l'application
-async function initializeApp() {
-    console.log('Initializing app');
-    const activePageId = document.querySelector('.page.active')?.id || 'welcomepage';
-    console.log('Active page:', activePageId);
+  try {
+    const response = await fetch("/api/auth/verify", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-    initializeUtils();
-    initializeNavigation(); // Initialiser la navigation en premier
-
-    updateNavVisibility(activePageId);
-
-    if (activePageId === 'welcomepage') {
-        console.log('Initializing auth forms');
-        navigateTo('welcomepage');
-        try {
-            const token = await initializeAuth(); // Assurez-vous que initializeAuth retourne une promesse résolue avec le token
-            if (token) {
-                console.log('Authentification réussie avec le token:', token);
-                localStorage.setItem('token', token);
-                initializeAuthenticatedModules(token);
-                navigateTo('dashboard'); // Naviguer vers une page sécurisée après connexion
-            }
-        } catch (error) {
-            console.error('Erreur lors de l\'authentification:', error);
-        }
-    } else {
-        const token = localStorage.getItem('token');
-        console.log('Token récupéré de localStorage:', token);
-        if (token) {
-            console.log('User authenticated, loading initial page');
-            navigateTo(activePageId);
-            initializeAuthenticatedModules(token);
-        } else {
-            console.log('User not authenticated, navigating to welcome page');
-            navigateTo('welcomepage');
-            try {
-                const newToken = await initializeAuth();
-                if (newToken) {
-                    console.log('Authentification réussie avec le token:', newToken);
-                    localStorage.setItem('token', newToken);
-                    initializeAuthenticatedModules(newToken);
-                    navigateTo('dashboard');
-                }
-            } catch (error) {
-                console.error('Erreur lors de l\'authentification:', error);
-            }
-        }
+    if (!response.ok) {
+      localStorage.removeItem("token");
+      return null;
     }
+
+    return token;
+  } catch (error) {
+    console.error("Erreur de vérification du token:", error);
+    localStorage.removeItem("token");
+    return null;
+  }
 }
 
-// Initialisation de l'application au chargement du DOM
-document.addEventListener('DOMContentLoaded', initializeApp);
+// Fonction pour initialiser les modules authentifiés
+function initializeAuthenticatedModules(token) {
+  if (!token) {
+    console.error(
+      "Tentative d'initialisation des modules authentifiés sans token"
+    );
+    return;
+  }
+
+  console.log("Initialisation des modules authentifiés");
+  initializeDashboard();
+  initializeSurahSelector();
+  initializeMosqueTime();
+  initSurahMemorization();
+}
+
+// Fonction principale d'initialisation
+async function initializeApp() {
+  console.log("Initialisation de l'application");
+
+  // Initialisation des modules de base
+  initializeUtils();
+  initializeNavigation();
+
+  const activePageId =
+    document.querySelector(".page.active")?.id || "welcomepage";
+  updateNavVisibility(activePageId);
+
+  // Vérification de l'authentification
+  const token = await checkAuthStatus();
+
+  if (token) {
+    console.log("Utilisateur authentifié");
+    initializeAuthenticatedModules(token);
+
+    // Si on est sur la page d'accueil, rediriger vers le dashboard
+    if (activePageId === "welcomepage") {
+      navigateTo("dashboard");
+    } else {
+      navigateTo(activePageId);
+    }
+  } else {
+    console.log("Utilisateur non authentifié");
+    navigateTo("welcomepage");
+
+    // Initialisation du formulaire d'authentification
+    await initializeAuth();
+  }
+
+  // Gestionnaire d'événements pour la déconnexion
+  window.addEventListener("logout", () => {
+    localStorage.removeItem("token");
+    navigateTo("welcomepage");
+  });
+}
+
+// Initialisation au chargement du DOM
+document.addEventListener("DOMContentLoaded", initializeApp);
+
+// Gestion des erreurs globales
+window.addEventListener("error", (event) => {
+  console.error("Erreur globale:", event.error);
+});
+
+export { initializeApp };

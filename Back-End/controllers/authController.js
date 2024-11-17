@@ -6,7 +6,7 @@ const transporter = require('../config/nodemailer'); // Assurez-vous d'avoir con
 exports.register = async (req, res) => {
     console.log("Données reçues:", req.body);
 
-    const { username, password, email, firstName, lastName, age, gender } = req.body;
+    const { username, password, email, firstName, lastName, age, gender, country } = req.body;
 
     console.log("username:", username);
     console.log("password:", password);
@@ -15,8 +15,10 @@ exports.register = async (req, res) => {
     console.log("lastName:", lastName);
     console.log("age:", age);
     console.log("gender:", gender);
+    console.log("country:", country);
 
-    if (!username || !password || !email || !firstName || !lastName || !age || !gender) {
+
+    if (!username || !password || !email || !firstName || !lastName || !age || !gender || !country) {
         return res.status(400).json({ message: 'Please provide all required fields' });
     }
 
@@ -32,9 +34,9 @@ exports.register = async (req, res) => {
         }
         
         // Vérifiez ici que les données sont correctement passées
-        console.log({ username, password, email, firstName, lastName, age, gender });
+        console.log({ username, password, email, firstName, lastName, age, gender, country });
 
-        const user = await userModel.createUser(username, password, email, firstName, lastName, age, gender);
+        const user = await userModel.createUser(username, password, email, firstName, lastName, age, gender, country);
         const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
 
         res.status(201).json({ token });

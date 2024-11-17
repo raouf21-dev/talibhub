@@ -11,16 +11,18 @@ const getUserByEmail = async (email) => {
     return result.rows[0];
 };
 
-const createUser = async (username, password, email, firstName, lastName, age, gender) => {
+const createUser = async (username, password, email, firstName, lastName, age, gender, country) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     const result = await pool.query(
-        `INSERT INTO users (username, password, email, first_name, last_name, age, gender)
-         VALUES ($1, $2, $3, $4, $5, $6, $7)
+        `INSERT INTO users (username, password, email, first_name, last_name, age, gender, country)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
          RETURNING *`,
-        [username, hashedPassword, email, firstName, lastName, age, gender]
+        [username, hashedPassword, email, firstName, lastName, age, gender, country]
     );
     return result.rows[0];
 };
+
+
 
 
 const getUserById = async (id) => {
