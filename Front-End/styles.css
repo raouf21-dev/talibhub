@@ -95,6 +95,41 @@ body {
   padding: 2rem 1rem;
 }
 
+.welcomepage-form-group {
+  position: relative; /* Assure le positionnement de la liste des pays */
+}
+
+#country-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  display: none;
+  z-index: 1000;
+}
+
+.country-item {
+  padding: 8px;
+  cursor: pointer;
+}
+
+.country-item:hover {
+  background-color: #f0f0f0;
+}
+
+#welcomepage-email:valid,
+#welcomepage-confirmEmail:valid {
+    border-color: green;
+}
+
+#welcomepage-email:invalid,
+#welcomepage-confirmEmail:invalid {
+    border-color: red;
+}
 
 .welcomepage-hero p,
 .welcomepage-features p,
@@ -233,7 +268,72 @@ body {
   margin: -5rem auto 5rem auto;
   max-width: 50vw; /* Par exemple, pour limiter la largeur sur grands écrans */
   animation: slideDown 0.30s ease-out;
+}
 
+/* Styles pour le CAPTCHA */
+.captcha-group {
+  grid-column: 1 / -1;
+  margin-bottom: 20px;
+}
+
+.captcha-container {
+  background-color: var(--card-background);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 15px;
+}
+
+.captcha-problem {
+  background-color: var(--background-color);
+  color: var(--text-color);
+  padding: 12px;
+  border-radius: 6px;
+  text-align: center;
+  font-size: 1.1em;
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+
+.captcha-input-wrapper {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.captcha-input-wrapper input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-size: 1em;
+}
+
+.captcha-refresh-btn {
+  background-color: var(--secondary-color);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.captcha-refresh-btn:hover {
+  background-color: var(--primary-color);
+}
+
+.captcha-message {
+  margin-top: 8px;
+  font-size: 0.9em;
+  min-height: 20px;
+}
+
+.captcha-message.error {
+  color: #dc3545;
+}
+
+.captcha-message.success {
+  color: #28a745;
 }
 
 @keyframes slideDown {

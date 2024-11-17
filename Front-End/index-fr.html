@@ -23,7 +23,7 @@
       rel="stylesheet"
     />
 
-        <!-- Balises alternate pour le SEO multilingue -->
+    <!-- Balises alternate pour le SEO multilingue -->
     <link
       rel="alternate"
       hreflang="fr"
@@ -58,48 +58,74 @@
         <nav>
           <ul class="nav-list">
             <li>
-              <a href="#" class="nav-link" data-destination="dashboard">Accueil</a>
+              <a href="#" class="nav-link" data-destination="dashboard"
+                >Accueil</a
+              >
             </li>
             <li>
-              <a href="#" class="nav-link" data-destination="talibtimer">TalibTimer</a>
+              <a href="#" class="nav-link" data-destination="talibtimer"
+                >TalibTimer</a
+              >
               <ul class="subnav">
                 <li>
-                  <a href="#" class="nav-link" data-destination="apprentissage">Apprentissage</a>
+                  <a href="#" class="nav-link" data-destination="apprentissage"
+                    >Apprentissage</a
+                  >
                 </li>
                 <li>
-                  <a href="#" class="nav-link" data-destination="todoLists">Listes de Tâches</a>
+                  <a href="#" class="nav-link" data-destination="todoLists"
+                    >Listes de Tâches</a
+                  >
                 </li>
                 <li>
-                  <a href="#" class="nav-link" data-destination="statistics">Statistiques</a>
+                  <a href="#" class="nav-link" data-destination="statistics"
+                    >Statistiques</a
+                  >
                 </li>
               </ul>
             </li>
             <li>
-              <a href="#" class="nav-link" data-destination="salatSurahSelector">Sélecteur de Sourate</a>
+              <a href="#" class="nav-link" data-destination="salatSurahSelector"
+                >Sélecteur de Sourate</a
+              >
             </li>
             <li>
-              <a href="#" class="nav-link" data-destination="duaTimeCalculator">Temps de Doua</a>
+              <a href="#" class="nav-link" data-destination="duaTimeCalculator"
+                >Temps de Doua</a
+              >
             </li>
             <li>
-              <a href="#" class="nav-link" data-destination="surahmemorization">Mémorisation des Sourates</a>
+              <a href="#" class="nav-link" data-destination="surahmemorization"
+                >Mémorisation des Sourates</a
+              >
             </li>
             <li>
-              <a href="#" class="nav-link" data-destination="mosquetime">Horaires de Prière à la Mosquée</a>
+              <a href="#" class="nav-link" data-destination="mosquetime"
+                >Horaires de Prière à la Mosquée</a
+              >
             </li>
             <li>
-              <a href="#" class="nav-link" data-destination="notifications">Notifications</a>
+              <a href="#" class="nav-link" data-destination="notifications"
+                >Notifications</a
+              >
             </li>
             <li>
               <a href="#" class="nav-link" data-destination="profile">Profil</a>
             </li>
             <li>
-              <a href="#" class="nav-link" data-destination="aboutus">À propos</a>
+              <a href="#" class="nav-link" data-destination="aboutus"
+                >À propos</a
+              >
             </li>
             <li>
-              <a href="#" class="nav-link" data-destination="price">Abonnement</a>
+              <a href="#" class="nav-link" data-destination="price"
+                >Abonnement</a
+              >
             </li>
             <li>
-              <a href="#" class="nav-link" data-destination="contactform">Contact</a>
+              <a href="#" class="nav-link" data-destination="contactform"
+                >Contact</a
+              >
             </li>
           </ul>
         </nav>
@@ -109,21 +135,20 @@
     <section id="welcomepage" class="page">
       <header class="welcomepage-header">
         <h1>TalibHub</h1>
-            <!-- Language Selector -->
-    <section class="language-selector">
-      <button class="lang-btn" data-lang="fr" title="Français">
-        🇫🇷
-    </button>
-    <button class="lang-btn" data-lang="en" title="English">
-        🇬🇧
-    </button>
-    </section>
+        <!-- Language Selector -->
+        <section class="language-selector">
+          <button class="lang-btn" data-lang="fr" title="Français">🇫🇷</button>
+          <button class="lang-btn" data-lang="en" title="English">🇬🇧</button>
+        </section>
       </header>
 
       <div class="welcomepage-container">
         <div id="welcomepage-hero" class="welcomepage-hero">
           <h2>Bienvenue sur TalibHub</h2>
-          <p>Votre plateforme innovante pour l'apprentissage et la pratique islamique</p>
+          <p>
+            Votre plateforme innovante pour l'apprentissage et la pratique
+            islamique
+          </p>
           <button id="welcomepage-getStartedBtn" class="welcomepage-btn">
             Commencer
           </button>
@@ -144,7 +169,32 @@
               id="welcomepage-signupTab"
             >
               <form id="welcomepage-signupForm">
-                <h3>Inscription</h3>
+                <!-- Champ honeypot caché -->
+                <div
+                  style="
+                    opacity: 0;
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    height: 0;
+                    width: 0;
+                    z-index: -1;
+                    pointer-events: none;
+                  "
+                >
+                  <input
+                    type="text"
+                    name="website"
+                    id="welcomepage-website"
+                    autocomplete="off"
+                    tabindex="-1"
+                    aria-hidden="true"
+                  />
+                </div>
+
+                <!-- Champ caché pour le timing -->
+                <input type="hidden" id="form-start-time" value="" />
+
                 <div class="form-grid">
                   <div class="welcomepage-form-group">
                     <label for="welcomepage-username">Pseudo</label>
@@ -171,20 +221,82 @@
                     </select>
                   </div>
                   <div class="welcomepage-form-group">
+                    <label for="welcomepage-country">Pays</label>
+                    <input
+                      type="text"
+                      id="welcomepage-country"
+                      required
+                      autocomplete="off"
+                    />
+                    <div
+                      id="country-list"
+                      role="listbox"
+                      aria-label="Liste des pays"
+                    >
+                      <!-- Les éléments de la liste des pays seront insérés ici dynamiquement -->
+                    </div>
+                  </div>
+                  <div class="welcomepage-form-group">
                     <label for="welcomepage-email">Adresse e-mail</label>
-                    <input type="email" id="welcomepage-email" required />
+                    <input
+                      type="email"
+                      id="welcomepage-email"
+                      name="email"
+                      required
+                      autocomplete="email"
+                    />
+                  </div>
+                  <div class="welcomepage-form-group">
+                    <label for="welcomepage-confirmEmail"
+                      >Confirmer l'adresse e-mail</label
+                    >
+                    <input
+                      type="email"
+                      id="welcomepage-confirmEmail"
+                      name="confirmEmail"
+                      required
+                      autocomplete="off"
+                    />
                   </div>
                   <div class="welcomepage-form-group">
                     <label for="welcomepage-password">Mot de passe</label>
                     <input type="password" id="welcomepage-password" required />
                   </div>
                   <div class="welcomepage-form-group">
-                    <label for="welcomepage-confirmPassword">Confirmer le mot de passe</label>
+                    <label for="welcomepage-confirmPassword"
+                      >Confirmer le mot de passe</label
+                    >
                     <input
                       type="password"
                       id="welcomepage-confirmPassword"
                       required
                     />
+                  </div>
+                  <div class="welcomepage-form-group captcha-group">
+                    <label for="welcomepage-captcha"
+                      >Vérification de sécurité</label
+                    >
+                    <div class="captcha-container">
+                      <div id="captchaProblem" class="captcha-problem"></div>
+                      <div class="captcha-input-wrapper">
+                        <input
+                          type="text"
+                          id="captchaAnswer"
+                          class="welcomepage-input"
+                          placeholder="Votre réponse"
+                          required
+                        />
+                        <button
+                          type="button"
+                          class="captcha-refresh-btn"
+                          aria-label="Rafraîchir le CAPTCHA"
+                        >
+                          ↻
+                        </button>
+                      </div>
+                      <input type="hidden" id="captchaId" />
+                      <div id="captchaMessage" class="captcha-message"></div>
+                    </div>
                   </div>
                 </div>
                 <button
@@ -208,7 +320,9 @@
                     />
                   </div>
                   <div class="welcomepage-form-group">
-                    <label for="welcomepage-signin-password">Mot de passe</label>
+                    <label for="welcomepage-signin-password"
+                      >Mot de passe</label
+                    >
                     <input
                       type="password"
                       id="welcomepage-signin-password"
@@ -247,7 +361,10 @@
             </div>
             <div class="welcomepage-feature-card">
               <h3>Horaires de Prière à la Mosquée</h3>
-              <p>Trouvez les horaires de prières en congrégation près de chez vous</p>
+              <p>
+                Trouvez les horaires de prières en congrégation près de chez
+                vous
+              </p>
             </div>
             <div class="welcomepage-feature-card">
               <h3>Fonctionnalités Futures</h3>
@@ -259,10 +376,10 @@
         <div id="welcomepage-vision" class="welcomepage-vision">
           <h2>Notre Vision</h2>
           <p>
-            Chez TalibHub, nous croyons que la technologie peut enrichir et faciliter
-            la pratique de l'islam. Notre plateforme combine des fonctionnalités pratiques avec
-            une interface intuitive pour créer une expérience unique et personnalisée
-            pour chaque utilisateur.
+            Chez TalibHub, nous croyons que la technologie peut enrichir et
+            faciliter la pratique de l'islam. Notre plateforme combine des
+            fonctionnalités pratiques avec une interface intuitive pour créer
+            une expérience unique et personnalisée pour chaque utilisateur.
           </p>
         </div>
 
@@ -272,29 +389,30 @@
             <div class="welcomepage-why-choose-card">
               <h3>Approche Pratique</h3>
               <p>
-                Nous nous concentrons sur l'application concrète des enseignements islamiques dans
-                la vie quotidienne.
+                Nous nous concentrons sur l'application concrète des
+                enseignements islamiques dans la vie quotidienne.
               </p>
             </div>
             <div class="welcomepage-why-choose-card">
               <h3>Personnalisation</h3>
               <p>
-                Notre plateforme s'adapte à votre mode de vie et à vos objectifs personnels dans
-                la pratique religieuse.
+                Notre plateforme s'adapte à votre mode de vie et à vos objectifs
+                personnels dans la pratique religieuse.
               </p>
             </div>
             <div class="welcomepage-why-choose-card">
               <h3>Communauté</h3>
               <p>
-                Rejoignez une communauté mondiale de musulmans et partagez vos expériences
-                et vos progrès.
+                Rejoignez une communauté mondiale de musulmans et partagez vos
+                expériences et vos progrès.
               </p>
             </div>
             <div class="welcomepage-why-choose-card">
               <h3>Accessibilité Universelle</h3>
               <p>
-                TalibHub est accessible sur tous les appareils avec un navigateur web,
-                sans avoir besoin d'installer une application spécifique.
+                TalibHub est accessible sur tous les appareils avec un
+                navigateur web, sans avoir besoin d'installer une application
+                spécifique.
               </p>
             </div>
           </div>
@@ -304,22 +422,24 @@
           <h2>Notre Engagement</h2>
           <p>
             Chez TalibHub, nous nous engageons à fournir une plateforme gratuite
-            accessible à tous. Notre modèle unique repose sur la générosité de nos
-            utilisateurs :
+            accessible à tous. Notre modèle unique repose sur la générosité de
+            nos utilisateurs :
           </p>
           <ul>
             <li>
-              Toutes les fonctionnalités sont gratuites : Nous croyons que l'accès à des outils de qualité pour
-              la pratique de l'islam devrait être universel.
+              Toutes les fonctionnalités sont gratuites : Nous croyons que
+              l'accès à des outils de qualité pour la pratique de l'islam
+              devrait être universel.
             </li>
             <li>
-              Abonnements pour les altruistes : Notre espace abonnés est conçu pour
-              ceux qui souhaitent contribuer à la diffusion et à l'utilisation de TalibHub comme
-              bien commun.
+              Abonnements pour les altruistes : Notre espace abonnés est conçu
+              pour ceux qui souhaitent contribuer à la diffusion et à
+              l'utilisation de TalibHub comme bien commun.
             </li>
             <li>
-              Développement communautaire : Nous encourageons la contribution et les retours de notre
-              communauté d'utilisateurs pour améliorer continuellement nos services.
+              Développement communautaire : Nous encourageons la contribution et
+              les retours de notre communauté d'utilisateurs pour améliorer
+              continuellement nos services.
             </li>
           </ul>
         </div>
@@ -452,9 +572,16 @@
             </div>
             <div>
               <label for="manual-minutes">Minutes :</label>
-              <input type="number" id="manual-minutes" min="0" max="59" placeholder="0" />
+              <input
+                type="number"
+                id="manual-minutes"
+                min="0"
+                max="59"
+                placeholder="0"
+              />
             </div>
           </div>
+          <div>
             <p>
               Temps total de travail :
               <span id="total-work-time">00:00:00</span>
@@ -479,7 +606,10 @@
         </div>
       </div>
       <button class="session-control" data-action="save-session-data">
-        <img src="./Icones/ButtonsIcone/Save_icone.png" alt="Icône Enregistrer" />
+        <img
+          src="./Icones/ButtonsIcone/Save_icone.png"
+          alt="Icône Enregistrer"
+        />
       </button>
     </section>
 
@@ -664,7 +794,9 @@
 
         <!-- Section Sélectionner les Sourates -->
         <div id="surahmemorization-select" class="quran-app-section">
-          <h2 class="surahmemorization-title">Sélectionner des Sourates pour Révision</h2>
+          <h2 class="surahmemorization-title">
+            Sélectionner des Sourates pour Révision
+          </h2>
 
           <!-- Recherche et Filtrage -->
           <div class="surahmemorization-search-filter">
@@ -835,7 +967,8 @@
             Horaires de Prière en Congrégation à la Mosquée
           </h1>
           <p class="mosquetime-subtitle">
-            Trouvez les horaires des prières en congrégation dans les mosquées près de chez vous
+            Trouvez les horaires des prières en congrégation dans les mosquées
+            près de chez vous
           </p>
         </header>
         <div class="mosquetime-content">
@@ -916,8 +1049,8 @@
           </div>
 
           <p class="mosquetime-disclaimer">
-            Ces horaires correspondent aux prières en congrégation à la mosquée et
-            peuvent différer des horaires de prières individuels.
+            Ces horaires correspondent aux prières en congrégation à la mosquée
+            et peuvent différer des horaires de prières individuels.
           </p>
 
           <div class="mosquetime-actions">
@@ -1047,7 +1180,9 @@
             required
           />
 
-          <label for="confirm-new-password">Confirmer le nouveau mot de passe :</label>
+          <label for="confirm-new-password"
+            >Confirmer le nouveau mot de passe :</label
+          >
           <input
             type="password"
             id="confirm-new-password"
@@ -1188,7 +1323,9 @@
               </option>
               <option value="16">Tunisie</option>
               <option value="20">Algérie</option>
-              <option value="21">Ministère des Affaires Religieuses de la République d'Indonésie</option>
+              <option value="21">
+                Ministère des Affaires Religieuses de la République d'Indonésie
+              </option>
               <option value="22">Maroc</option>
               <option value="23">
                 Communidade Islâmica de Lisboa (Portugal)
@@ -1287,16 +1424,20 @@
               </p>
               <ul class="price-features-list">
                 <li class="price-feature-item">
-                  <span class="price-check-icon">✓</span> Accès à toutes les fonctionnalités de la plateforme
+                  <span class="price-check-icon">✓</span> Accès à toutes les
+                  fonctionnalités de la plateforme
                 </li>
                 <li class="price-feature-item">
-                  <span class="price-check-icon">✓</span> Participation volontaire
+                  <span class="price-check-icon">✓</span> Participation
+                  volontaire
                 </li>
                 <li class="price-feature-item">
-                  <span class="price-check-icon">✓</span> Support communautaire disponible
+                  <span class="price-check-icon">✓</span> Support communautaire
+                  disponible
                 </li>
                 <li class="price-feature-item">
-                  <span class="price-check-icon">✓</span> Aucun engagement requis
+                  <span class="price-check-icon">✓</span> Aucun engagement
+                  requis
                 </li>
               </ul>
             </div>
@@ -1308,7 +1449,8 @@
             <div class="price-card-header">
               <h2 class="price-card-title">Plan Soutien</h2>
               <p class="price-card-description">
-                Contribuez à couvrir les coûts opérationnels et assurez la disponibilité de la plateforme pour tous.
+                Contribuez à couvrir les coûts opérationnels et assurez la
+                disponibilité de la plateforme pour tous.
               </p>
             </div>
             <div class="price-card-content">
@@ -1317,19 +1459,26 @@
               </p>
               <ul class="price-features-list">
                 <li class="price-feature-item">
-                  <span class="price-check-icon">✓</span> Accès à toutes les fonctionnalités de la plateforme
+                  <span class="price-check-icon">✓</span> Accès à toutes les
+                  fonctionnalités de la plateforme
                 </li>
                 <li class="price-feature-item">
-                  <span class="price-check-icon">✓</span> Aide à maintenir la durabilité de la plateforme en couvrant les coûts opérationnels essentiels
+                  <span class="price-check-icon">✓</span> Aide à maintenir la
+                  durabilité de la plateforme en couvrant les coûts
+                  opérationnels essentiels
                 </li>
                 <li class="price-feature-item">
-                  <span class="price-check-icon">✓</span> Soutenez notre mission de maintenir la plateforme gratuite et accessible à tous les utilisateurs
+                  <span class="price-check-icon">✓</span> Soutenez notre mission
+                  de maintenir la plateforme gratuite et accessible à tous les
+                  utilisateurs
                 </li>
                 <li class="price-feature-item">
-                  <span class="price-check-icon">✓</span> Contribuez aux frais de serveur et de maintenance
+                  <span class="price-check-icon">✓</span> Contribuez aux frais
+                  de serveur et de maintenance
                 </li>
                 <li class="price-feature-item">
-                  <span class="price-check-icon">✓</span> Recevez des mises à jour sur les améliorations de la plateforme
+                  <span class="price-check-icon">✓</span> Recevez des mises à
+                  jour sur les améliorations de la plateforme
                 </li>
               </ul>
             </div>
@@ -1341,7 +1490,8 @@
             <div class="price-card-header">
               <h2 class="price-card-title">Plan Supporteur</h2>
               <p class="price-card-description">
-                Aidez-nous à grandir, à nous améliorer et à innover en contribuant au-delà des coûts opérationnels.
+                Aidez-nous à grandir, à nous améliorer et à innover en
+                contribuant au-delà des coûts opérationnels.
               </p>
             </div>
             <div class="price-card-content">
@@ -1350,25 +1500,36 @@
               </p>
               <ul class="price-features-list">
                 <li class="price-feature-item">
-                  <span class="price-check-icon">✓</span> Accès à toutes les fonctionnalités de la plateforme
+                  <span class="price-check-icon">✓</span> Accès à toutes les
+                  fonctionnalités de la plateforme
                 </li>
                 <li class="price-feature-item">
-                  <span class="price-check-icon">✓</span> Soutient le développement et la croissance de la plateforme, nous permettant d'ajouter de nouvelles fonctionnalités et d'améliorer l'expérience utilisateur
+                  <span class="price-check-icon">✓</span> Soutient le
+                  développement et la croissance de la plateforme, nous
+                  permettant d'ajouter de nouvelles fonctionnalités et
+                  d'améliorer l'expérience utilisateur
                 </li>
                 <li class="price-feature-item">
-                  <span class="price-check-icon">✓</span> Contribuez à notre vision de créer une plateforme vibrante et innovante qui évolue continuellement
+                  <span class="price-check-icon">✓</span> Contribuez à notre
+                  vision de créer une plateforme vibrante et innovante qui
+                  évolue continuellement
                 </li>
                 <li class="price-feature-item">
-                  <span class="price-check-icon">✓</span> Votre générosité aide à financer de nouvelles initiatives et assure le succès à long terme de notre communauté
+                  <span class="price-check-icon">✓</span> Votre générosité aide
+                  à financer de nouvelles initiatives et assure le succès à long
+                  terme de notre communauté
                 </li>
                 <li class="price-feature-item">
-                  <span class="price-check-icon">✓</span> Accès prioritaire aux nouvelles fonctionnalités et aux opportunités de test bêta
+                  <span class="price-check-icon">✓</span> Accès prioritaire aux
+                  nouvelles fonctionnalités et aux opportunités de test bêta
                 </li>
                 <li class="price-feature-item">
-                  <span class="price-check-icon">✓</span> Reconnaissance en tant que supporteur clé dans notre communauté
+                  <span class="price-check-icon">✓</span> Reconnaissance en tant
+                  que supporteur clé dans notre communauté
                 </li>
                 <li class="price-feature-item">
-                  <span class="price-check-icon">✓</span> Contenu exclusif et aperçus des développements futurs
+                  <span class="price-check-icon">✓</span> Contenu exclusif et
+                  aperçus des développements futurs
                 </li>
               </ul>
             </div>
@@ -1378,7 +1539,9 @@
           </div>
         </div>
         <p class="price-footnote">
-          Merci de considérer le soutien de notre plateforme. Vos contributions aident à maintenir la plateforme ouverte et à l'améliorer continuellement.
+          Merci de considérer le soutien de notre plateforme. Vos contributions
+          aident à maintenir la plateforme ouverte et à l'améliorer
+          continuellement.
         </p>
       </div>
     </section>
@@ -1670,6 +1833,7 @@
     <script type="module" src="notifications.js"></script>
     <script type="module" src="utils.js"></script>
     <script type="module" src="transLanguages.js"></script>
+    <script type="module" src="bot-tracker.js"></script>
+    <script type="module" src="captcha.js"></script>
   </body>
 </html>
-

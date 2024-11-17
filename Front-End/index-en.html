@@ -61,45 +61,71 @@
               <a href="#" class="nav-link" data-destination="dashboard">Home</a>
             </li>
             <li>
-              <a href="#" class="nav-link" data-destination="talibtimer">TalibTimer</a>
+              <a href="#" class="nav-link" data-destination="talibtimer"
+                >TalibTimer</a
+              >
               <ul class="subnav">
                 <li>
-                  <a href="#" class="nav-link" data-destination="apprentissage">Learning</a>
+                  <a href="#" class="nav-link" data-destination="apprentissage"
+                    >Learning</a
+                  >
                 </li>
                 <li>
-                  <a href="#" class="nav-link" data-destination="todoLists">Task Lists</a>
+                  <a href="#" class="nav-link" data-destination="todoLists"
+                    >Task Lists</a
+                  >
                 </li>
                 <li>
-                  <a href="#" class="nav-link" data-destination="statistics">Statistics</a>
+                  <a href="#" class="nav-link" data-destination="statistics"
+                    >Statistics</a
+                  >
                 </li>
               </ul>
             </li>
             <li>
-              <a href="#" class="nav-link" data-destination="salatSurahSelector">Surah Selector</a>
+              <a href="#" class="nav-link" data-destination="salatSurahSelector"
+                >Surah Selector</a
+              >
             </li>
             <li>
-              <a href="#" class="nav-link" data-destination="duaTimeCalculator">Dua Time</a>
+              <a href="#" class="nav-link" data-destination="duaTimeCalculator"
+                >Dua Time</a
+              >
             </li>
             <li>
-              <a href="#" class="nav-link" data-destination="surahmemorization">Surah Memorization</a>
+              <a href="#" class="nav-link" data-destination="surahmemorization"
+                >Surah Memorization</a
+              >
             </li>
             <li>
-              <a href="#" class="nav-link" data-destination="mosquetime">Salat Mosque Time</a>
+              <a href="#" class="nav-link" data-destination="mosquetime"
+                >Salat Mosque Time</a
+              >
             </li>
             <li>
-              <a href="#" class="nav-link" data-destination="notifications">Notifications</a>
+              <a href="#" class="nav-link" data-destination="notifications"
+                >Notifications</a
+              >
             </li>
             <li>
-              <a href="#" class="nav-link" data-destination="profile">Profile</a>
+              <a href="#" class="nav-link" data-destination="profile"
+                >Profile</a
+              >
             </li>
             <li>
-              <a href="#" class="nav-link" data-destination="aboutus">About Us</a>
+              <a href="#" class="nav-link" data-destination="aboutus"
+                >About Us</a
+              >
             </li>
             <li>
-              <a href="#" class="nav-link" data-destination="price">Subscription</a>
+              <a href="#" class="nav-link" data-destination="price"
+                >Subscription</a
+              >
             </li>
             <li>
-              <a href="#" class="nav-link" data-destination="contactform">Contact</a>
+              <a href="#" class="nav-link" data-destination="contactform"
+                >Contact</a
+              >
             </li>
           </ul>
         </nav>
@@ -111,12 +137,8 @@
         <h1>TalibHub</h1>
         <!-- Language Selector -->
         <section class="language-selector">
-          <button class="lang-btn" data-lang="fr" title="Français">
-            🇫🇷
-          </button>
-          <button class="lang-btn" data-lang="en" title="English">
-            🇬🇧
-          </button>
+          <button class="lang-btn" data-lang="fr" title="Français">🇫🇷</button>
+          <button class="lang-btn" data-lang="en" title="English">🇬🇧</button>
         </section>
       </header>
 
@@ -145,6 +167,31 @@
             >
               <form id="welcomepage-signupForm">
                 <h3>Sign Up</h3>
+                <!-- Champ honeypot caché -->
+                <div
+                  style="
+                    opacity: 0;
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    height: 0;
+                    width: 0;
+                    z-index: -1;
+                    pointer-events: none;
+                  "
+                >
+                  <input
+                    type="text"
+                    name="website"
+                    id="welcomepage-website"
+                    autocomplete="off"
+                    tabindex="-1"
+                    aria-hidden="true"
+                  />
+                </div>
+
+                <!-- Champ caché pour le timing -->
+                <input type="hidden" id="form-start-time" value="" />
                 <div class="form-grid">
                   <div class="welcomepage-form-group">
                     <label for="welcomepage-username">Username</label>
@@ -171,20 +218,76 @@
                     </select>
                   </div>
                   <div class="welcomepage-form-group">
+                    <label for="welcomepage-country">Country</label>
+                    <input
+                      type="text"
+                      id="welcomepage-country"
+                      required
+                      autocomplete="off"
+                    />
+                    <div
+                      id="country-list"
+                      role="listbox"
+                      aria-label="Country List"
+                    >
+                      <!-- Country list items will be dynamically inserted here -->
+                    </div>
+                  </div>
+                  <div class="welcomepage-form-group">
                     <label for="welcomepage-email">Email Address</label>
                     <input type="email" id="welcomepage-email" required />
+                  </div>
+                  <div class="welcomepage-form-group">
+                    <label for="welcomepage-confirmEmail"
+                      >Confirm Email Address</label
+                    >
+                    <input
+                      type="email"
+                      id="welcomepage-confirmEmail"
+                      name="confirmEmail"
+                      required
+                      autocomplete="off"
+                    />
                   </div>
                   <div class="welcomepage-form-group">
                     <label for="welcomepage-password">Password</label>
                     <input type="password" id="welcomepage-password" required />
                   </div>
                   <div class="welcomepage-form-group">
-                    <label for="welcomepage-confirmPassword">Confirm Password</label>
+                    <label for="welcomepage-confirmPassword"
+                      >Confirm Password</label
+                    >
                     <input
                       type="password"
                       id="welcomepage-confirmPassword"
                       required
                     />
+                  </div>
+                  <div class="welcomepage-form-group captcha-group">
+                    <label for="welcomepage-captcha"
+                      >Security Verification</label
+                    >
+                    <div class="captcha-container">
+                      <div id="captchaProblem" class="captcha-problem"></div>
+                      <div class="captcha-input-wrapper">
+                        <input
+                          type="text"
+                          id="captchaAnswer"
+                          class="welcomepage-input"
+                          placeholder="Your answer"
+                          required
+                        />
+                        <button
+                          type="button"
+                          class="captcha-refresh-btn"
+                          aria-label="Refresh CAPTCHA"
+                        >
+                          ↻
+                        </button>
+                      </div>
+                      <input type="hidden" id="captchaId" />
+                      <div id="captchaMessage" class="captcha-message"></div>
+                    </div>
                   </div>
                 </div>
                 <button
@@ -394,8 +497,7 @@
               </select>
               <div id="session-info">
                 <p>
-                  Previous session:
-                  <span id="previous-sessions-count">0</span>
+                  Previous session: <span id="previous-sessions-count">0</span>
                 </p>
                 <p>Current session: <span id="current-session-id">0</span></p>
               </div>
@@ -461,10 +563,9 @@
               />
             </div>
           </div>
-          <p>
-            Total Work Time:
-            <span id="total-work-time">00:00:00</span>
-          </p>
+          <div>
+            <p>Total Work Time: <span id="total-work-time">00:00:00</span></p>
+          </div>
         </div>
       </div>
       <div class="timers-container">
@@ -1076,9 +1177,7 @@
           <h2>Recitation Statistics</h2>
           <div>
             <div id="knownSouratesCount">Known Surahs: 0</div>
-            <div id="recitationCyclesCount">
-              Complete Recitation Cycles: 0
-            </div>
+            <div id="recitationCyclesCount">Complete Recitation Cycles: 0</div>
             <div id="recitationProgress">Progress: 0 / 0 surahs recited</div>
           </div>
         </div>
@@ -1105,9 +1204,7 @@
             <div id="sourateList">
               <!-- The list of surahs will be dynamically generated here -->
             </div>
-            <button data-action="save-known-sourates">
-              Save Known Surahs
-            </button>
+            <button data-action="save-known-sourates">Save Known Surahs</button>
           </div>
         </div>
 
@@ -1689,5 +1786,7 @@
     <script type="module" src="notifications.js"></script>
     <script type="module" src="utils.js"></script>
     <script type="module" src="transLanguages.js"></script>
+    <script type="module" src="bot-tracker.js"></script>
+    <script type="module" src="captcha.js"></script>
   </body>
 </html>

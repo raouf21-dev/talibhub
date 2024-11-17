@@ -1,15 +1,35 @@
 // surahMemorizationRoutes.js
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const surahMemorizationController = require('../controllers/surahMemorizationControllers');
-const authenticateToken = require('../middleware/authenticateToken');
+const surahMemorizationController = require("../controllers/surahMemorizationControllers");
+const authenticateToken = require("../middlewares/authenticateToken");
 
 // Routes
-router.get('/surahs', authenticateToken, surahMemorizationController.getSurahs);
-router.post('/surahs/:number', authenticateToken, surahMemorizationController.updateSurah);
-router.get('/history', authenticateToken, surahMemorizationController.getHistory);
-router.delete('/history', authenticateToken, surahMemorizationController.clearHistory);
-router.post('/known', authenticateToken, surahMemorizationController.saveKnownSurahs);
-router.get('/known', authenticateToken, surahMemorizationController.getKnownSurahs);
+router.get("/surahs", authenticateToken, surahMemorizationController.getSurahs);
+router.post(
+  "/surahs/:number",
+  authenticateToken,
+  surahMemorizationController.updateSurah
+);
+router.get(
+  "/history",
+  authenticateToken,
+  surahMemorizationController.getHistory
+);
+router.delete(
+  "/history",
+  authenticateToken,
+  surahMemorizationController.clearHistory
+);
+router.post(
+  "/known",
+  authenticateToken,
+  surahMemorizationController.saveKnownSurahs
+);
+router.get(
+  "/known",
+  authenticateToken,
+  surahMemorizationController.getKnownSurahs
+);
 
 module.exports = router;
