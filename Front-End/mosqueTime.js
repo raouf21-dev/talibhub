@@ -197,61 +197,55 @@ function updateAllMosques() {
   const mainPrayers = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
   
   currentMosques.forEach(mosque => {
-      console.log(`Updating mosque: ${mosque.name}`);
-      const card = document.createElement('div');
-      card.className = 'mosquetime-mosque-card';
-      let prayerTimesHtml = '';
+    console.log(`Updating mosque: ${mosque.name}`, mosque);
+    const card = document.createElement('div');
+    card.className = 'mosquetime-mosque-card';
+    let prayerTimesHtml = '';
 
-      if (mosque.prayerTimes) {
-          // Ajouter les prières principales
-          mainPrayers.forEach(prayer => {
-              let time = 'Non disponible';
-              if (mosque.prayerTimes[prayer]) {
-                  // Si l'heure est une chaîne de caractères
-                  time = mosque.prayerTimes[prayer].substring(0, 5); // Extraire HH:MM
-              }
-              prayerTimesHtml += `
-                  <tr>
-                      <td>${prayer.charAt(0).toUpperCase() + prayer.slice(1)}</td>
-                      <td>${time}</td>
-                  </tr>
-              `;
-          });
-
-          // Ajouter les prières supplémentaires si disponibles
-          const additionalPrayers = ['jumuah1', 'jumuah2', 'jumuah3', 'tarawih'];
-          additionalPrayers.forEach(prayer => {
-              if (mosque.prayerTimes[prayer]) {
-                  let time = mosque.prayerTimes[prayer].substring(0, 5);
-                  prayerTimesHtml += `
-                      <tr>
-                          <td>${prayer.charAt(0).toUpperCase() + prayer.slice(1)}</td>
-                          <td>${time}</td>
-                      </tr>
-                  `;
-              }
-          });
-      } else {
-          // Si les horaires de prière ne sont pas disponibles
-          prayerTimesHtml = '<tr><td colspan="2">Horaires non disponibles</td></tr>';
-      }
-
-      card.innerHTML = `
-          <h3>${mosque.name}</h3>
-          <p>${mosque.address || ''}</p>
-          <table class="mosquetime-table">
-              <thead>
-                  <tr>
-                      <th>Prière</th>
-                      <th>Horaire de Congrégation</th>
-                  </tr>
-              </thead>
-              <tbody>
-                  ${prayerTimesHtml}
-              </tbody>
-          </table>
+    // Vérifier si prayerTimes existe et n'est pas null
+    const prayerTimes = mosque.prayerTimes || {};
+    
+    // Ajouter les prières principales
+    mainPrayers.forEach(prayer => {
+      const time = prayerTimes[prayer] ? prayerTimes[prayer].substring(0, 5) : 'Non disponible';
+      prayerTimesHtml += `
+        <tr>
+          <td>${prayer.charAt(0).toUpperCase() + prayer.slice(1)}</td>
+          <td>${time}</td>
+        </tr>
       `;
-      container.appendChild(card);
+    });
+
+    // Ajouter les prières supplémentaires si disponibles
+    const additionalPrayers = ['jumuah1', 'jumuah2', 'jumuah3', 'tarawih'];
+    additionalPrayers.forEach(prayer => {
+      if (prayerTimes[prayer]) {
+        const time = prayerTimes[prayer].substring(0, 5);
+        prayerTimesHtml += `
+          <tr>
+            <td>${prayer.charAt(0).toUpperCase() + prayer.slice(1)}</td>
+            <td>${time}</td>
+          </tr>
+        `;
+      }
+    });
+
+    card.innerHTML = `
+      <h3>${mosque.name}</h3>
+      <p>${mosque.address || ''}</p>
+      <table class="mosquetime-table">
+        <thead>
+          <tr>
+            <th>Prière</th>
+            <th>Horaire de Congrégation</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${prayerTimesHtml}
+        </tbody>
+      </table>
+    `;
+    container.appendChild(card);
   });
 }
 

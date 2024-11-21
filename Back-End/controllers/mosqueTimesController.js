@@ -293,31 +293,37 @@ const getPrayerTimesForCityAndDate = async (req, res) => {
       return res.status(404).json({ message: "Aucune mosquée trouvée dans cette ville." });
     }
 
-    // Vérifier si les horaires de prière existent pour toutes les mosquées pour la date spécifiée
+    // Récupérer les horaires de prière pour chaque mosquée
     const prayerTimesPromises = mosques.map(mosque =>
       mosqueTimesModel.getPrayerTimes(mosque.id, date)
     );
 
     const prayerTimesResults = await Promise.all(prayerTimesPromises);
 
-    // Vérifier s'il manque des horaires de prière
-    const missingData = prayerTimesResults.some(times => !times);
+    // Formater les données avant de les envoyer
+    const formattedPrayerTimes = prayerTimesResults.map(times => {
+      if (!times) return null;
+      
+      // Créer un objet avec toutes les propriétés, même si nulles
+      return {
+        mosque_id: times.mosque_id,
+        date: times.date,
+        fajr: times.fajr || null,
+        dhuhr: times.dhuhr || null,
+        asr: times.asr || null,
+        maghrib: times.maghrib || null,
+        isha: times.isha || null,
+        jumuah1: times.jumuah1 || null,
+        jumuah2: times.jumuah2 || null,
+        jumuah3: times.jumuah3 || null,
+        tarawih: times.tarawih || null
+      };
+    });
 
-    if (missingData) {
-      console.log(`Aucune donnée complète trouvée pour la ville ${city} et la date ${date}. Déclenchement du scraping...`);
-      await scrapePrayerTimesForCity(city); // Déclencher le scraping pour la ville
+    console.log('Formatted prayer times:', formattedPrayerTimes);
 
-      // Re-fetch les horaires après le scraping
-      const updatedPrayerTimesPromises = mosques.map(mosque =>
-        mosqueTimesModel.getPrayerTimes(mosque.id, date)
-      );
-      const updatedPrayerTimesResults = await Promise.all(updatedPrayerTimesPromises);
+    return res.json({ prayerTimes: formattedPrayerTimes.filter(pt => pt !== null) });
 
-      return res.json({ prayerTimes: updatedPrayerTimesResults });
-    } else {
-      console.log(`Horaires de prière trouvés pour la ville ${city} et la date ${date}.`);
-      return res.json({ prayerTimes: prayerTimesResults });
-    }
   } catch (error) {
     console.error(`Erreur lors de la récupération des horaires de prière pour la ville ${city} et la date ${date} :`, error);
     return res.status(500).json({ message: "Erreur du serveur", error: error.message });
