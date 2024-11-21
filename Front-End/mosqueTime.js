@@ -333,7 +333,7 @@ async function handleCitySelection(city) {
   const date = document.getElementById('mosquetime-date-picker').value || new Date().toISOString().split('T')[0];
   
   try {
-    displayLoading(true); // Afficher un indicateur de chargement
+    displayLoading(true);
     const token = localStorage.getItem('token');
     
     // Récupérer les mosquées de la ville
@@ -349,7 +349,8 @@ async function handleCitySelection(city) {
     }
     
     const mosques = await mosquesResponse.json();
-    
+    console.log('Mosquées reçues:', mosques); // Debug
+
     if (mosques.length === 0) {
       throw new Error('Aucune mosquée trouvée dans cette ville.');
     }
@@ -362,26 +363,41 @@ async function handleCitySelection(city) {
       }
     });
     
-    console.log('Prayer Times Fetch Response Status:', prayerTimesResponse.status);
+    console.log('Prayer Times Response Status:', prayerTimesResponse.status);
     
     if (!prayerTimesResponse.ok) {
-      if (prayerTimesResponse.status === 404) {
-        throw new Error('Aucune mosquée trouvée dans cette ville.');
-      }
-      throw new Error(`Erreur lors de la récupération des horaires de prière: ${prayerTimesResponse.status} ${prayerTimesResponse.statusText}`);
+      throw new Error(`Erreur lors de la récupération des horaires de prière: ${prayerTimesResponse.status}`);
     }
     
     const prayerTimesData = await prayerTimesResponse.json();
-    console.log('Prayer Times Data:', prayerTimesData.prayerTimes);
+    console.log('Prayer Times Data brut:', prayerTimesData); // Debug
     
-    // Associer les horaires de prière aux mosquées
+    if (!prayerTimesData || !prayerTimesData.prayerTimes) {
+      throw new Error('Format de données invalide pour les horaires de prière');
+    }
+
+    // Associer les horaires de prière aux mosquées avec vérification
     const updatedMosques = mosques.map(mosque => {
-      const prayerTime = prayerTimesData.prayerTimes.find(pt => pt.mosque_id === mosque.id) || null;
+      if (!mosque || !mosque.id) {
+        console.warn('Mosquée invalide:', mosque);
+        return mosque;
+      }
+      
+      const prayerTime = prayerTimesData.prayerTimes.find(pt => {
+        if (!pt) {
+          console.warn('Horaire de prière invalide trouvé');
+          return false;
+        }
+        return pt.mosque_id === mosque.id;
+      });
+
       return {
         ...mosque,
-        prayerTimes: prayerTime
+        prayerTimes: prayerTime || null
       };
     });
+    
+    console.log('Mosquées mises à jour:', updatedMosques); // Debug
     
     currentMosques = updatedMosques;
     
@@ -395,10 +411,11 @@ async function handleCitySelection(city) {
     updateAllMosques();
     
   } catch (error) {
-    console.error('Erreur lors de la sélection de la ville:', error);
-    displayError('Impossible de récupérer les horaires de prière. Veuillez réessayer plus tard.');
+    console.error('Erreur détaillée lors de la sélection de la ville:', error);
+    console.error('Stack trace:', error.stack);
+    displayError(error.message);
   } finally {
-    displayLoading(false); // Cacher l'indicateur de chargement
+    displayLoading(false);
   }
 }
 
