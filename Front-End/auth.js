@@ -161,7 +161,6 @@ async function handleSignin(event) {
 
         console.log('Status de la réponse:', response.status);
         const data = await response.json();
-        console.log('Données reçues:', data);
 
         if (!response.ok) {
             throw new Error(data.message || "Email ou mot de passe incorrect");
