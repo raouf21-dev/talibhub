@@ -16,4 +16,7 @@ router.get('/profile', authenticateToken, authController.getProfile);
 // Changer le mot de passe
 router.post('/changePassword', authenticateToken, authController.changePassword);
 
+
+router.post('/logout', authenticateToken, authController.logout);
+
 module.exports = router;

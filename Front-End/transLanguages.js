@@ -1,23 +1,29 @@
 // transLanguages.js
 
 document.addEventListener("DOMContentLoaded", () => {
-    const langButtons = document.querySelectorAll(".lang-btn");
+  const langButtons = document.querySelectorAll(".lang-btn");
 
-    langButtons.forEach((button) => {
+  langButtons.forEach((button) => {
       button.addEventListener("click", (e) => {
-        // Empêcher le comportement par défaut
-        e.preventDefault();
-
-        // Obtenir la langue sélectionnée
-        const selectedLang = button.getAttribute("data-lang");
-
-        // Enregistrer la préférence de langue
-        localStorage.setItem("userLang", selectedLang);
-
-        // Rediriger vers la page correspondante
-        window.location.href = `index-${selectedLang}.html`;
+          e.preventDefault();
+          const selectedLang = button.getAttribute("data-lang");
+          
+          // Mettre à jour la langue du document
+          document.documentElement.lang = selectedLang;
+          
+          // Déclencher un événement personnalisé pour le changement de langue
+          const event = new CustomEvent('languageChanged', {
+              detail: { language: selectedLang }
+          });
+          document.dispatchEvent(event);
+          
+          // Enregistrer la préférence
+          localStorage.setItem("userLang", selectedLang);
+          
+          // Rediriger si nécessaire
+          window.location.href = `index-${selectedLang}.html`;
       });
-    });
+  });
 
     // Vérifier si la préférence de langue est déjà enregistrée
     const userLangPreference = localStorage.getItem("userLang");

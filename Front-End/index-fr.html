@@ -127,6 +127,13 @@
                 >Contact</a
               >
             </li>
+            <li class="nav-list-divider"></li>
+            <!-- Pour séparer visuellement -->
+            <li>
+              <a href="#" class="nav-link logout-link" id="logoutBtn">
+                <i class="logout-icon"></i>Déconnexion
+              </a>
+            </li>
           </ul>
         </nav>
       </aside>
@@ -452,16 +459,15 @@
 
     <section id="dashboard" class="page">
       <main class="dashboard-main-content">
-        <button class="dashboard-menu-btn" id="dashboardMenuBtn">☰</button>
         <h1>Bienvenue sur votre tableau de bord</h1>
         <div class="dashboard-card-grid">
-          <div class="dashboard-card" data-destination="apprentissage">
+          <div class="dashboard-card" data-destination="mosquetime">
             <img
-              src="./Icones/DashboardIcones/clock_icone.svg"
-              alt="Icône Horloge"
+              src="./Icones/DashboardIcones/mosque_icone.svg"
+              alt="Icône Mosquée"
             />
-            <h2>TalibTimer</h2>
-          </div>
+            <h2>Horaires de Prière à la Mosquée</h2>
+          </div>          
           <div class="dashboard-card" data-destination="salatSurahSelector">
             <img
               src="./Icones/DashboardIcones/carpet_icone.svg"
@@ -469,6 +475,14 @@
             />
             <h2>Sélecteur de Sourate</h2>
           </div>
+          
+          <div class="dashboard-card" data-destination="surahmemorization">
+            <img
+              src="./Icones/DashboardIcones/brain_iconeI.svg"
+              alt="Icône Mémorisation des Sourates"
+            />
+            <h2>Mémorisation des Sourates</h2>
+          </div> 
           <div class="dashboard-card" data-destination="duaTimeCalculator">
             <img
               src="./Icones/DashboardIcones/hands_prayer_iconOk.svg"
@@ -476,20 +490,13 @@
             />
             <h2>Temps de Doua</h2>
           </div>
-          <div class="dashboard-card" data-destination="surahmemorization">
+          <div class="dashboard-card" data-destination="apprentissage">
             <img
-              src="./Icones/DashboardIcones/brain_iconeI.svg"
-              alt="Icône Mémorisation des Sourates"
+              src="./Icones/DashboardIcones/clock_icone.svg"
+              alt="Icône Horloge"
             />
-            <h2>Mémorisation des Sourates</h2>
-          </div>
-          <div class="dashboard-card" data-destination="mosquetime">
-            <img
-              src="./Icones/DashboardIcones/mosque_icone.svg"
-              alt="Icône Mosquée"
-            />
-            <h2>Horaires de Prière à la Mosquée</h2>
-          </div>
+            <h2>TalibTimer</h2>
+          </div>         
         </div>
       </main>
     </section>

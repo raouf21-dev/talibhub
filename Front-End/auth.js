@@ -3,6 +3,7 @@
 import { switchTab, initializeTabToggle, navigateTo } from "./utils.js";
 import { BotTracker } from "./bot-tracker.js";
 import CaptchaHandler from './captcha.js';
+import { apiClient, API_CONFIG } from './Config/apiConfig.js';
 
 const botTracker = new BotTracker();
 const captchaHandler = new CaptchaHandler();
@@ -87,48 +88,50 @@ function showAuthForms() {
 async function handleSignup(event) {
     event.preventDefault();
 
-    // Vérifier d'abord le CAPTCHA
-    const isCaptchaValid = await captchaHandler.verify();
-    if (!isCaptchaValid) {
-        return;
-    }
-
-    const metrics = botTracker.getMetrics();
-    const formData = {
-        username: document.getElementById("welcomepage-username").value.trim(),
-        firstName: document.getElementById("welcomepage-firstName").value.trim(),
-        lastName: document.getElementById("welcomepage-lastName").value.trim(),
-        age: document.getElementById("welcomepage-age").value.trim(),
-        gender: document.getElementById("welcomepage-gender").value.trim(),
-        country: document.getElementById("welcomepage-country").value.trim(),
-        email: document.getElementById("welcomepage-email").value.trim(),
-        confirmEmail: document.getElementById("welcomepage-confirmEmail").value.trim(),
-        password: document.getElementById("welcomepage-password").value,
-        confirmPassword: document.getElementById("welcomepage-confirmPassword").value,
-        metrics: metrics,
-    };
-
     try {
-        const response = await fetch("/api/auth/register", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(formData),
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || "Erreur lors de l'inscription");
+        // Vérifier d'abord le CAPTCHA
+        const isCaptchaValid = await captchaHandler.verify();
+        if (!isCaptchaValid) {
+            alert("Veuillez valider le captcha");
+            return;
         }
 
-        const data = await response.json();
-        localStorage.setItem("token", data.token);
+        const metrics = botTracker.getMetrics();
+        const formData = {
+            username: document.getElementById("welcomepage-username").value.trim(),
+            firstName: document.getElementById("welcomepage-firstName").value.trim(),
+            lastName: document.getElementById("welcomepage-lastName").value.trim(),
+            age: document.getElementById("welcomepage-age").value.trim(),
+            gender: document.getElementById("welcomepage-gender").value.trim(),
+            country: document.getElementById("welcomepage-country").value.trim(),
+            email: document.getElementById("welcomepage-email").value.trim(),
+            confirmEmail: document.getElementById("welcomepage-confirmEmail").value.trim(),
+            password: document.getElementById("welcomepage-password").value,
+            confirmPassword: document.getElementById("welcomepage-confirmPassword").value,
+            metrics: metrics,
+        };
+
+        // Validation des champs obligatoires
+        if (!formData.username || !formData.email || !formData.password) {
+            throw new Error("Veuillez remplir tous les champs obligatoires");
+        }
+
+        // Validation de la correspondance des emails
+        if (formData.email !== formData.confirmEmail) {
+            throw new Error("Les adresses email ne correspondent pas");
+        }
+
+        const response = await apiClient.post(
+            API_CONFIG.endpoints.auth.register,
+            formData
+        );
+
+        localStorage.setItem("token", response.token);
         alert("Inscription réussie!");
         navigateTo("dashboard");
     } catch (error) {
         console.error("Erreur:", error);
-        alert(error.message);
+        alert(error.message || "Une erreur est survenue lors de l'inscription");
     }
 
     botTracker.reset();
@@ -136,83 +139,77 @@ async function handleSignup(event) {
 
 async function handleSignin(event) {
     event.preventDefault();
-    console.log("Signin form submitted");
     const email = document.getElementById("welcomepage-signin-email").value;
     const password = document.getElementById("welcomepage-signin-password").value;
 
+    // Debug des données envoyées
+    const requestData = {
+        email: email,
+        password: password
+    };
+    console.log('Données envoyées:', requestData);
+
     try {
-        const response = await fetch(`/api/auth/login`, {
+        const response = await fetch(`${window.location.origin}/api/auth/login`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ email, password }),
+            body: JSON.stringify(requestData),
+            credentials: 'include'
         });
 
+        console.log('Status de la réponse:', response.status);
+        const data = await response.json();
+        console.log('Données reçues:', data);
+
         if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || "Email ou mot de passe incorrect");
+            throw new Error(data.message || "Email ou mot de passe incorrect");
         }
 
-        const data = await response.json();
         localStorage.setItem("token", data.token);
         console.log("Connexion réussie, redirection vers le tableau de bord");
-        alert("Connexion réussie! Redirection vers le tableau de bord...");
         setTimeout(() => navigateTo("dashboard"), 1000);
     } catch (error) {
-        console.error("Erreur:", error);
+        console.error("Erreur détaillée:", error);
         alert("Erreur lors de la connexion : " + error.message);
     }
 }
 
 function initializeCountryInput() {
-    const countryInput = document.getElementById("welcomepage-country");
-    const countryList = document.getElementById("country-list");
-    const languageButtons = document.querySelectorAll(".lang-btn");
-    let currentLanguage = "fr";
+    const countryInput = document.querySelector("#welcomepage-country");
+    const countryList = document.querySelector("#country-list");
+
+    if (!countryInput || !countryList) {
+        console.error("Les éléments de pays n'ont pas été trouvés");
+        return;
+    }
+
+    let currentLanguage = document.documentElement.lang || 'fr';
     let countries = [];
     let filteredCountries = [];
     const countryCache = {};
 
-    loadCountries(currentLanguage);
-
-    languageButtons.forEach((button) => {
-        button.addEventListener("click", (e) => {
-            e.preventDefault();
-            const selectedLanguage = button.getAttribute("data-lang");
-            if (currentLanguage !== selectedLanguage) {
-                currentLanguage = selectedLanguage;
-                loadCountries(currentLanguage);
-                countryInput.value = "";
-                countryList.style.display = "none";
-            }
-        });
-    });
-
     async function loadCountries(lang) {
-        if (countryCache[lang]) {
-            countries = countryCache[lang];
-            filteredCountries = countries;
-            displayCountries(filteredCountries);
-            return;
-        }
         try {
-            const response = await fetch(`api/data/countries_${lang}.json`);
-            if (!response.ok) {
-                throw new Error("Erreur lors du chargement des pays");
+            if (!countryCache[lang]) {
+                const response = await apiClient.get(`/data/countries_${lang}.json`);
+                countryCache[lang] = response;
             }
-            const data = await response.json();
-            countryCache[lang] = data;
-            countries = data;
-            filteredCountries = countries;
-            displayCountries(filteredCountries);
+            countries = countryCache[lang];
+            filteredCountries = [...countries];
+            displayCountries(countries);
         } catch (error) {
-            console.error(error);
+            console.error('Erreur de chargement des pays:', error);
+            countries = [];
+            filteredCountries = [];
+            displayCountries([]);
         }
     }
 
     function displayCountries(countriesList) {
         countryList.innerHTML = "";
+        
         if (countriesList.length === 0) {
             const noResult = document.createElement("div");
             noResult.textContent = currentLanguage === "fr" ? "Aucun pays trouvé" : "No country found";
@@ -220,63 +217,55 @@ function initializeCountryInput() {
             countryList.appendChild(noResult);
             return;
         }
+
         countriesList.forEach((country) => {
             const countryItem = document.createElement("div");
             countryItem.textContent = country.name;
             countryItem.classList.add("country-item");
             countryItem.setAttribute("data-code", country.code);
-            countryList.appendChild(countryItem);
-
+            countryItem.setAttribute("role", "option");
+            
             countryItem.addEventListener("click", () => {
                 countryInput.value = country.name;
                 countryList.style.display = "none";
             });
+
+            countryList.appendChild(countryItem);
         });
     }
 
-    function filterCountries(query) {
-        const lowerQuery = query.toLowerCase();
-        filteredCountries = countries.filter((country) =>
-            country.name.toLowerCase().includes(lowerQuery)
-        );
-        displayCountries(filteredCountries);
-    }
-
     countryInput.addEventListener("input", (e) => {
-        const query = e.target.value;
+        const query = e.target.value.toLowerCase();
         if (query.length > 0) {
-            filterCountries(query);
+            filteredCountries = countries.filter(country => 
+                country.name.toLowerCase().includes(query)
+            );
+            displayCountries(filteredCountries);
             countryList.style.display = "block";
         } else {
-            filteredCountries = countries;
-            displayCountries(filteredCountries);
             countryList.style.display = "none";
         }
     });
 
     countryInput.addEventListener("focus", () => {
-        if (filteredCountries.length > 0) {
+        if (countries.length > 0) {
+            displayCountries(countries);
             countryList.style.display = "block";
         }
     });
 
-    countryInput.addEventListener("blur", () => {
-        setTimeout(() => {
+    document.addEventListener("click", (e) => {
+        if (!countryInput.contains(e.target) && !countryList.contains(e.target)) {
             countryList.style.display = "none";
-        }, 200);
+        }
     });
-}
 
-async function generateBrowserFingerprint() {
-    const fingerprint = {
-        userAgent: navigator.userAgent,
-        language: navigator.language,
-        screenResolution: `${window.screen.width}x${window.screen.height}`,
-        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        timestamp: Date.now(),
-    };
+    document.addEventListener('languageChanged', (event) => {
+        currentLanguage = event.detail.language;
+        loadCountries(currentLanguage);
+    });
 
-    return btoa(JSON.stringify(fingerprint));
+    loadCountries(currentLanguage);
 }
 
 export { initializeAuth, handleSignup };

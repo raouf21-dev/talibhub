@@ -1,3 +1,5 @@
+//userModel.js
+
 const pool = require('../config/db');
 const bcrypt = require('bcrypt');
 
@@ -7,8 +9,24 @@ const getUserByUsername = async (username) => {
 };
 
 const getUserByEmail = async (email) => {
-    const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
-    return result.rows[0];
+    console.log('getUserByEmail appelé avec:', email);
+    
+    try {
+        // Log de la requête SQL
+        const query = {
+            text: 'SELECT * FROM users WHERE email = $1',
+            values: [email]
+        };
+        console.log('Requête SQL:', query);
+
+        const result = await pool.query(query);
+        console.log('Résultat requête:', result.rows);
+        
+        return result.rows[0];
+    } catch (error) {
+        console.error('Erreur dans getUserByEmail:', error);
+        throw error;
+    }
 };
 
 const createUser = async (username, password, email, firstName, lastName, age, gender, country) => {

@@ -7,6 +7,7 @@ import { initializeDashboard } from "./dashboard.js";
 import { initializeSurahSelector } from "./surahSelector.js";
 import { initializeMosqueTime } from "./mosqueTime.js";
 import { initSurahMemorization } from "./surahMemorization.js";
+import { langConfig } from './Config/apiConfig.js';
 
 // Fonction pour vérifier l'état de l'authentification
 async function checkAuthStatus() {
@@ -52,6 +53,10 @@ function initializeAuthenticatedModules(token) {
 // Fonction principale d'initialisation
 async function initializeApp() {
   console.log("Initialisation de l'application");
+
+  const userLang = navigator.language.split('-')[0];
+  const lang = langConfig.SUPPORTED_LANGS.includes(userLang) ? userLang : langConfig.DEFAULT_LANG;
+  document.documentElement.lang = lang;
 
   // Initialisation des modules de base
   initializeUtils();

@@ -1,23 +1,43 @@
 // utils.js
 
+function isAuthenticated() {
+    const token = localStorage.getItem('token');
+    return token && token !== 'undefined' && token !== 'null';
+}
+
 export function navigateTo(pageId) {
-    console.log('Navigating to:', pageId);
+    const publicPages = ['welcomepage'];
+    if (!isAuthenticated() && !publicPages.includes(pageId)) {
+        pageId = 'welcomepage';
+    }
 
     document.querySelectorAll('.page').forEach(page => {
         page.style.display = 'none';
         page.classList.remove('active');
     });
+    
     const activePage = document.getElementById(pageId);
     if (activePage) {
         activePage.style.display = 'block';
         activePage.classList.add('active');
-    } else {
-        console.warn(`La page avec l'ID "${pageId}" n'existe pas.`);
+        history.pushState({pageId}, '', `/${pageId}`);
     }
 
     updateNavVisibility(pageId);
     loadInitialPage(pageId);
 }
+
+// Gérer le chargement initial
+document.addEventListener('DOMContentLoaded', () => {
+    const path = window.location.pathname.substring(1);
+    const targetPage = path || 'welcomepage';
+    
+    if (!isAuthenticated() && !['welcomepage'].includes(targetPage)) {
+        navigateTo('welcomepage');
+    } else {
+        navigateTo(targetPage);
+    }
+});
 
 export function updateNavVisibility(pageId) {
     const navHeader = document.getElementById('nav');

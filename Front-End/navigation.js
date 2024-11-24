@@ -1,5 +1,3 @@
-// navigation.js
-
 import { navigateTo } from './utils.js';
 
 function initializeNavigation() {
@@ -9,6 +7,40 @@ function initializeNavigation() {
     const overlay = document.getElementById('sidebarOverlay');
     const navLinks = document.querySelectorAll('.nav-list a');
     const body = document.body;
+
+    // Fonction pour gérer la visibilité du bouton hamburger
+    function updateHamburgerVisibility() {
+        const welcomePage = document.getElementById('welcomepage');
+        const isWelcomePage = welcomePage && welcomePage.classList.contains('active');
+        const isNarrowScreen = window.innerWidth <= 1024;
+
+        // Le bouton est visible uniquement si on n'est PAS sur la page welcome ET que l'écran est étroit
+        if (!isWelcomePage && isNarrowScreen) {
+            hamburgerBtn.style.display = 'block';
+        } else {
+            hamburgerBtn.style.display = 'none';
+        }
+    }
+
+    // Observer les changements de page
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                updateHamburgerVisibility();
+            }
+        });
+    });
+
+    // Observer les changements de classe sur toutes les sections
+    document.querySelectorAll('.page').forEach(page => {
+        observer.observe(page, { attributes: true });
+    });
+
+    // Mettre à jour la visibilité lors du redimensionnement de la fenêtre
+    window.addEventListener('resize', updateHamburgerVisibility);
+
+    // Vérifier la visibilité initiale
+    updateHamburgerVisibility();
 
     function openSidebar() {
         sidebar.classList.add('active');
@@ -49,13 +81,14 @@ function initializeNavigation() {
         });
     });
 
+    // Fermer la sidebar sur les grands écrans
     window.addEventListener('resize', function () {
         if (window.innerWidth > 1024) {
             closeSidebar();
         }
+        updateHamburgerVisibility();
     });
 
-    // Ajouter les écouteurs d'événements pour les cartes du tableau de bord
     setupDashboardCardClicks();
 }
 
@@ -76,5 +109,23 @@ function setupDashboardCardClicks() {
     });
 }
 
-// Exportation des fonctions nécessaires
+document.getElementById('logoutBtn').addEventListener('click', async (e) => {
+    e.preventDefault();
+
+    try {
+        localStorage.removeItem('token');
+        window.location.href = '/';
+
+        await fetch('/api/auth/logout', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+
+    } catch (error) {
+        console.error('Erreur lors de la déconnexion:', error);
+    }
+});
+
 export { initializeNavigation };
