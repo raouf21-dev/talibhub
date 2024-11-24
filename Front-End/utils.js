@@ -16,8 +16,17 @@ function isAuthenticated() {
 
 export function navigateTo(pageId, addToHistory = true) {
     const publicPages = ['welcomepage'];
-    if (!isAuthenticated() && !publicPages.includes(pageId)) {
+    
+    // Récupérer le token et vérifier l'authentification
+    const isUserAuthenticated = isAuthenticated();
+    
+    // Si l'utilisateur n'est pas authentifié et essaie d'accéder à une page protégée
+    if (!isUserAuthenticated && !publicPages.includes(pageId)) {
         pageId = 'welcomepage';
+    }
+    // Si l'utilisateur est authentifié et qu'on essaie d'aller sur welcomepage, rediriger vers dashboard
+    else if (isUserAuthenticated && pageId === 'welcomepage') {
+        pageId = 'dashboard';
     }
 
     document.querySelectorAll('.page').forEach(page => {
@@ -37,6 +46,47 @@ export function navigateTo(pageId, addToHistory = true) {
     updateNavVisibility(pageId);
     loadInitialPage(pageId);
 }
+
+// Gérer le chargement initial
+document.addEventListener('DOMContentLoaded', () => {
+    // Récupérer le chemin actuel de l'URL
+    const path = window.location.pathname.substring(1);
+    const targetPage = path || 'welcomepage';
+    
+    // Vérifier l'authentification
+    const isUserAuthenticated = isAuthenticated();
+    
+    if (!isUserAuthenticated && targetPage !== 'welcomepage') {
+        // Si non authentifié et pas sur welcomepage, rediriger vers welcomepage
+        navigateTo('welcomepage');
+    } else if (isUserAuthenticated && targetPage === 'welcomepage') {
+        // Si authentifié et sur welcomepage, rediriger vers dashboard
+        navigateTo('dashboard');
+    } else {
+        // Sinon, aller vers la page cible
+        navigateTo(targetPage);
+    }
+});
+
+// Gérer le "popstate" (bouton retour/avant du navigateur)
+window.addEventListener('popstate', (event) => {
+    let targetPage;
+    if (event.state && event.state.pageId) {
+        targetPage = event.state.pageId;
+    } else {
+        targetPage = window.location.pathname.substring(1) || 'welcomepage';
+    }
+
+    // Vérifier l'authentification avant la navigation
+    const isUserAuthenticated = isAuthenticated();
+    if (!isUserAuthenticated && targetPage !== 'welcomepage') {
+        targetPage = 'welcomepage';
+    } else if (isUserAuthenticated && targetPage === 'welcomepage') {
+        targetPage = 'dashboard';
+    }
+
+    navigateTo(targetPage, false);
+});
 
 // Gérer le chargement initial
 document.addEventListener('DOMContentLoaded', () => {

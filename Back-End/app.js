@@ -75,6 +75,9 @@ const langConfig = {
 
 // Route catch-all pour le SPA avec gestion de la langue
 app.get('*', (req, res) => {
+    if (req.url.startsWith('/api')) {
+        return next();
+    }
     const userLang = req.acceptsLanguages(langConfig.SUPPORTED_LANGS) || langConfig.DEFAULT_LANG;
     res.sendFile(path.join(__dirname, `../Front-End/index-${userLang}.html`));
 });
