@@ -142,6 +142,12 @@ async function handleSignin(event) {
     const email = document.getElementById("welcomepage-signin-email").value;
     const password = document.getElementById("welcomepage-signin-password").value;
 
+    // Debug des données envoyées
+    const requestData = {
+        email: email,
+        password: password
+    };
+
 
     try {
         const response = await fetch(`${window.location.origin}/api/auth/login`, {
