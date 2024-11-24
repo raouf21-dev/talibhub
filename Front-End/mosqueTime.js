@@ -56,7 +56,6 @@ async function triggerScrapingForAllCities() {
   try {
     displayLoading(true); // Afficher un indicateur de chargement
     const token = localStorage.getItem('token');
-    console.log('Déclenchement du scraping pour toutes les villes avec le token:', token);
     const response = await fetch(`/api/mosque-times/scrape-all`, {
       method: 'POST',
       headers: {
@@ -87,7 +86,6 @@ function displayLoading(isLoading) {
 async function loadCities() {
   try {
     const token = localStorage.getItem('token'); // Utiliser 'token' comme clé
-    console.log('Token:', token); // Vérifier le token
     const response = await fetch(`/api/mosque-times/cities/search?query=`, {
       headers: {
         'Authorization': `Bearer ${token}` // Inclure le token
@@ -121,7 +119,6 @@ function populateCitySelect(cities) {
 async function fetchMosquesByCity(city) {
   try {
     const token = localStorage.getItem('token'); // Utiliser 'token' comme clé
-    console.log('Fetching mosques for city:', city, 'with token:', token);
     const response = await fetch(`/api/mosque-times/cities/${encodeURIComponent(city)}/mosques`, {
       headers: {
         'Authorization': `Bearer ${token}` // Inclure le token
@@ -159,7 +156,6 @@ async function updateSingleMosqueTimes() {
 
   try {
     const token = localStorage.getItem('token');
-    console.log('Fetching prayer times for mosqueId:', select.value, 'with token:', token);
     const response = await fetch(`/api/mosque-times/${select.value}/${date}`, {
       headers: {
         'Authorization': `Bearer ${token}`
@@ -189,7 +185,6 @@ async function updateSingleMosqueTimes() {
 }
 
 function updateAllMosques() {
-  console.log('updateAllMosques called');
   const container = document.getElementById('mosquetime-all-mosques-list');
   container.innerHTML = '';
   
@@ -197,7 +192,6 @@ function updateAllMosques() {
   const mainPrayers = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
   
   currentMosques.forEach(mosque => {
-    console.log(`Updating mosque: ${mosque.name}`, mosque);
     const card = document.createElement('div');
     card.className = 'mosquetime-mosque-card';
     let prayerTimesHtml = '';
@@ -226,7 +220,7 @@ function updateAllMosques() {
             <td>${prayer.charAt(0).toUpperCase() + prayer.slice(1)}</td>
             <td>${time}</td>
           </tr>
-        `;
+        `
       }
     });
 

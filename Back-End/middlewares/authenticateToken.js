@@ -7,7 +7,6 @@ function authenticateToken(req, res, next) {
     console.log('Authorization Header:', authHeader);
 
     const token = authHeader && authHeader.split(' ')[1];
-    console.log('Extracted Token:', token);
 
     if (token == null) {
         console.log('No token provided, sending 401');
