@@ -1,11 +1,20 @@
 // utils.js
 
+window.addEventListener('popstate', (event) => {
+    if (event.state && event.state.pageId) {
+        navigateTo(event.state.pageId, false); // false pour ne pas ajouter une nouvelle entrée dans l'historique
+    } else {
+        const path = window.location.pathname.substring(1) || 'welcomepage';
+        navigateTo(path, false);
+    }
+});
+
 function isAuthenticated() {
     const token = localStorage.getItem('token');
     return token && token !== 'undefined' && token !== 'null';
 }
 
-export function navigateTo(pageId) {
+export function navigateTo(pageId, addToHistory = true) {
     const publicPages = ['welcomepage'];
     if (!isAuthenticated() && !publicPages.includes(pageId)) {
         pageId = 'welcomepage';
@@ -20,7 +29,9 @@ export function navigateTo(pageId) {
     if (activePage) {
         activePage.style.display = 'block';
         activePage.classList.add('active');
-        history.pushState({pageId}, '', `/${pageId}`);
+        if (addToHistory) {
+            history.pushState({pageId}, '', `/${pageId}`);
+        }
     }
 
     updateNavVisibility(pageId);
