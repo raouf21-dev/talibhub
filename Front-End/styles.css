@@ -2744,3 +2744,13 @@ button[type="submit"]:hover {
     max-width: 1500px; /* Vous pouvez ajuster cette valeur selon vos besoins */
   }
 }
+
+@media (max-width: 428px) {
+  .mosquetime-header {
+    text-align: center;
+  }
+  .mosquetime-error{
+    flex-basis: 100%;
+    font-size: 12px;
+  }
+}

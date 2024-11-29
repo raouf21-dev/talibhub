@@ -450,35 +450,35 @@
               alt="Mosque Icon"
             />
             <h2>Salat Mosque Time</h2>
-          </div>          
+          </div>
           <div class="dashboard-card" data-destination="salatSurahSelector">
             <img
               src="./Icones/DashboardIcones/carpet_icone.svg"
               alt="Carpet Icon"
             />
             <h2>SurahSelector</h2>
-          </div>          
+          </div>
           <div class="dashboard-card" data-destination="surahmemorization">
             <img
               src="./Icones/DashboardIcones/brain_iconeI.svg"
               alt="Surah Memorization Icon"
             />
             <h2>Surah Memorization</h2>
-          </div> 
+          </div>
           <div class="dashboard-card" data-destination="duaTimeCalculator">
             <img
               src="./Icones/DashboardIcones/hands_prayer_iconOk.svg"
               alt="Dua Icon"
             />
             <h2>Dua Time</h2>
-          </div> 
+          </div>
           <div class="dashboard-card" data-destination="apprentissage">
             <img
               src="./Icones/DashboardIcones/clock_icone.svg"
               alt="Clock Icon"
             />
             <h2>TalibTimer</h2>
-          </div>        
+          </div>
         </div>
       </main>
     </section>
@@ -936,11 +936,6 @@
     </section>
 
     <section id="mosquetime" class="page">
-      <div
-        id="mosquetime-error"
-        class="mosquetime-error"
-        style="display: none"
-      ></div>
       <div class="mosquetime-card">
         <header class="mosquetime-header">
           <h1 class="mosquetime-title">
@@ -969,8 +964,12 @@
             <div id="mosquetime-loading" style="display: none">
               Loading prayer times, please wait...
             </div>
+            <div
+              id="mosquetime-error"
+              class="mosquetime-error"
+              style="display: none"
+            ></div>
           </div>
-
           <div class="mosquetime-date-display">
             <h2 id="mosquetime-city-date">New York City, September 8, 2024</h2>
             <input id="mosquetime-date-picker" type="date" value="" />
@@ -1794,5 +1793,7 @@
     <script type="module" src="transLanguages.js"></script>
     <script type="module" src="bot-tracker.js"></script>
     <script type="module" src="captcha.js"></script>
+    <script type="module" src="/Config/apiConfig.js"></script>
+
   </body>
 </html>

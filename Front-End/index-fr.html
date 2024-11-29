@@ -467,7 +467,7 @@
               alt="Icône Mosquée"
             />
             <h2>Horaires de Prière à la Mosquée</h2>
-          </div>          
+          </div>
           <div class="dashboard-card" data-destination="salatSurahSelector">
             <img
               src="./Icones/DashboardIcones/carpet_icone.svg"
@@ -475,14 +475,14 @@
             />
             <h2>Sélecteur de Sourate</h2>
           </div>
-          
+
           <div class="dashboard-card" data-destination="surahmemorization">
             <img
               src="./Icones/DashboardIcones/brain_iconeI.svg"
               alt="Icône Mémorisation des Sourates"
             />
             <h2>Mémorisation des Sourates</h2>
-          </div> 
+          </div>
           <div class="dashboard-card" data-destination="duaTimeCalculator">
             <img
               src="./Icones/DashboardIcones/hands_prayer_iconOk.svg"
@@ -496,7 +496,7 @@
               alt="Icône Horloge"
             />
             <h2>TalibTimer</h2>
-          </div>         
+          </div>
         </div>
       </main>
     </section>
@@ -963,11 +963,6 @@
     </section>
 
     <section id="mosquetime" class="page">
-      <div
-        id="mosquetime-error"
-        class="mosquetime-error"
-        style="display: none"
-      ></div>
       <div class="mosquetime-card">
         <header class="mosquetime-header">
           <h1 class="mosquetime-title">
@@ -998,6 +993,11 @@
               Chargement des horaires de prière, veuillez patienter...
             </div>
           </div>
+          <div
+            id="mosquetime-error"
+            class="mosquetime-error"
+            style="display: none"
+          ></div>
 
           <div class="mosquetime-date-display">
             <h2 id="mosquetime-city-date">New York City, 8 Septembre 2024</h2>
@@ -1842,5 +1842,7 @@
     <script type="module" src="transLanguages.js"></script>
     <script type="module" src="bot-tracker.js"></script>
     <script type="module" src="captcha.js"></script>
+    <script type="module" src="/Config/apiConfig.js"></script>
+
   </body>
 </html>
