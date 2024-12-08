@@ -1,5 +1,8 @@
 // utils.js
 
+import { authService } from './Services/authService.js';
+
+
 window.addEventListener('popstate', (event) => {
     if (event.state && event.state.pageId) {
         navigateTo(event.state.pageId, false); // false pour ne pas ajouter une nouvelle entrée dans l'historique
@@ -9,16 +12,23 @@ window.addEventListener('popstate', (event) => {
     }
 });
 
-function isAuthenticated() {
-    const token = localStorage.getItem('token');
-    return token && token !== 'undefined' && token !== 'null';
+export async function isAuthenticated() {
+    try {
+        // Vérifie à la fois les cookies et fait une vérification serveur
+        return await authService.checkAuth();
+    } catch (error) {
+        console.error('Erreur de vérification auth:', error);
+        return false;
+    }
 }
 
-export function navigateTo(pageId, addToHistory = true) {
+export async function navigateTo(pageId, addToHistory = true) {
     const publicPages = ['welcomepage'];
     
-    // Récupérer le token et vérifier l'authentification
-    const isUserAuthenticated = isAuthenticated();
+    // Vérifier l'authentification
+    const isUserAuthenticated = await isAuthenticated();
+    
+    console.log('État authentification:', isUserAuthenticated, 'Page demandée:', pageId);
     
     // Si l'utilisateur n'est pas authentifié et essaie d'accéder à une page protégée
     if (!isUserAuthenticated && !publicPages.includes(pageId)) {
@@ -29,32 +39,36 @@ export function navigateTo(pageId, addToHistory = true) {
         pageId = 'dashboard';
     }
 
+    // Masquer toutes les pages
     document.querySelectorAll('.page').forEach(page => {
         page.style.display = 'none';
         page.classList.remove('active');
     });
     
+    // Afficher la page cible
     const activePage = document.getElementById(pageId);
     if (activePage) {
         activePage.style.display = 'block';
         activePage.classList.add('active');
         if (addToHistory) {
-            history.pushState({pageId}, '', `/${pageId}`);
+            history.pushState({ pageId }, '', `/${pageId}`);
         }
     }
 
     updateNavVisibility(pageId);
-    loadInitialPage(pageId);
+    await loadInitialPage(pageId);
 }
 
-// Gérer le chargement initial
-document.addEventListener('DOMContentLoaded', () => {
+// Initialisation au chargement du DOM
+document.addEventListener("DOMContentLoaded", async () => {
     // Récupérer le chemin actuel de l'URL
     const path = window.location.pathname.substring(1);
     const targetPage = path || 'welcomepage';
     
     // Vérifier l'authentification
-    const isUserAuthenticated = isAuthenticated();
+    const isUserAuthenticated = await isAuthenticated();
+    
+    console.log('DOMContentLoaded - Auth:', isUserAuthenticated, 'Target:', targetPage);
     
     if (!isUserAuthenticated && targetPage !== 'welcomepage') {
         // Si non authentifié et pas sur welcomepage, rediriger vers welcomepage
@@ -69,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Gérer le "popstate" (bouton retour/avant du navigateur)
-window.addEventListener('popstate', (event) => {
+window.addEventListener('popstate', async (event) => {
     let targetPage;
     if (event.state && event.state.pageId) {
         targetPage = event.state.pageId;
@@ -78,7 +92,7 @@ window.addEventListener('popstate', (event) => {
     }
 
     // Vérifier l'authentification avant la navigation
-    const isUserAuthenticated = isAuthenticated();
+    const isUserAuthenticated = await isAuthenticated();
     if (!isUserAuthenticated && targetPage !== 'welcomepage') {
         targetPage = 'welcomepage';
     } else if (isUserAuthenticated && targetPage === 'welcomepage') {
@@ -108,31 +122,118 @@ export function updateNavVisibility(pageId) {
 }
 
 export function checkAuthOnLoad() {
-    const token = localStorage.getItem('token'); // Utiliser 'token' comme clé
+    const token = localStorage.getItem('token');
     console.log('Token récupéré depuis localStorage dans checkAuthOnLoad:', token);
     return !!token;
 }
 
 export function loadInitialPage(pageId) {
     const pageLoaders = {
-        'profile': () => import('./profile.js').then(module => module.initializeProfile()),
-        'statistics': () => { /* Initialiser les statistiques */ },
-        'todoLists': () => import('./tasks.js').then(module => module.initializeTasks()),
-        'apprentissage': () => import('./timer.js').then(module => module.initializeTimer()),
-        'notifications': () => import('./notifications.js').then(module => module.initializeNotifications()),
-        'contactform': () => { /* Initialiser le formulaire de contact */ },
-        'dashboard': () => {
-            console.log('Dashboard loaded');
+        'welcomepage': async () => {
+            console.log('Welcome page loaded');
+            try {
+                const authModule = await import('./auth.js');
+                authModule.initializeAuth();
+            } catch (error) {
+                console.error('Erreur lors du chargement de la page d\'accueil:', error);
+            }
         },
-        'mosquetime': () => import('./mosqueTime.js').then(module => module.initializeMosqueTime()),
-        'salatSurahSelector': () => import('./surahSelector.js').then(module => module.initializeSurahSelector()),
-        'surahmemorization': () => import('./surahMemorization.js').then(module => module.initSurahMemorization()),
-        'duaTimeCalculator': () => import('./duaTimeCalculator.js').then(module => module.initializeDuaTimeCalculator()), // Assurez-vous que ce module existe
+        'profile': async () => {
+            try {
+                const profileModule = await import('./profile.js');
+                await profileModule.initializeProfile();
+            } catch (error) {
+                console.error('Erreur lors du chargement du profil:', error);
+            }
+        },
+        'statistics': async () => {
+            try {
+                const statsModule = await import('./statistics.js');
+                await statsModule.initializeStatistics();
+            } catch (error) {
+                console.error('Erreur lors du chargement des statistiques:', error);
+            }
+        },
+        'todoLists': async () => {
+            try {
+                const tasksModule = await import('./tasks.js');
+                await tasksModule.initializeTasks();
+            } catch (error) {
+                console.error('Erreur lors du chargement des tâches:', error);
+            }
+        },
+        'apprentissage': async () => {
+            try {
+                const timerModule = await import('./timer.js');
+                await timerModule.initializeTimer();
+            } catch (error) {
+                console.error('Erreur lors du chargement du timer:', error);
+            }
+        },
+        'notifications': async () => {
+            try {
+                const notifModule = await import('./notifications.js');
+                await notifModule.initializeNotifications();
+            } catch (error) {
+                console.error('Erreur lors du chargement des notifications:', error);
+            }
+        },
+        'contactform': async () => {
+            try {
+                const contactModule = await import('./contact.js');
+                await contactModule.initializeContactForm();
+            } catch (error) {
+                console.error('Erreur lors du chargement du formulaire de contact:', error);
+            }
+        },
+        'dashboard': async () => {
+            try {
+                console.log('Dashboard loading...');
+                const dashboardModule = await import('./dashboard.js');
+                await dashboardModule.initializeDashboard();
+            } catch (error) {
+                console.error('Erreur lors du chargement du dashboard:', error);
+            }
+        },
+        'mosquetime': async () => {
+            try {
+                const mosqueModule = await import('./mosqueTime.js');
+                await mosqueModule.initializeMosqueTime();
+            } catch (error) {
+                console.error('Erreur lors du chargement des horaires de mosquée:', error);
+            }
+        },
+        'salatSurahSelector': async () => {
+            try {
+                const surahModule = await import('./surahSelector.js');
+                await surahModule.initializeSurahSelector();
+            } catch (error) {
+                console.error('Erreur lors du chargement du sélecteur de sourates:', error);
+            }
+        },
+        'surahmemorization': async () => {
+            try {
+                const memorizationModule = await import('./surahMemorization.js');
+                await memorizationModule.initSurahMemorization();
+            } catch (error) {
+                console.error('Erreur lors du chargement de la mémorisation:', error);
+            }
+        },
+        'duaTimeCalculator': async () => {
+            try {
+                const duaModule = await import('./duaTimeCalculator.js');
+                await duaModule.initializeDuaTimeCalculator();
+            } catch (error) {
+                console.error('Erreur lors du chargement du calculateur de dua:', error);
+            }
+        }
     };
 
     const loader = pageLoaders[pageId];
     if (loader) {
-        loader();
+        loader().catch(error => {
+            console.error(`Erreur lors du chargement de la page ${pageId}:`, error);
+        });
     } else {
         console.warn(`Aucun loader défini pour la page: ${pageId}`);
     }
@@ -188,5 +289,55 @@ export function updateDOMIfExists(id, value) {
         element.textContent = value;
     }
 }
+
+export async function initializeApp() {
+    console.log("Initialisation de l'application");
+
+    const userLang = navigator.language.split('-')[0];
+    const lang = langConfig.SUPPORTED_LANGS.includes(userLang) ? userLang : langConfig.DEFAULT_LANG;
+    document.documentElement.lang = lang;
+
+    initializeUtils();
+    initializeNavigation();
+
+    try {
+        // Vérifier l'authentification au chargement
+        const isAuthenticated = await authService.checkAuth();
+        
+        const currentPath = window.location.pathname.substring(1) || 'welcomepage';
+        
+        if (isAuthenticated) {
+            console.log("Utilisateur authentifié");
+            if (currentPath === 'welcomepage') {
+                navigateTo('dashboard');
+            } else {
+                navigateTo(currentPath);
+            }
+            initializeAuthenticatedModules();
+        } else {
+            console.log("Utilisateur non authentifié");
+            navigateTo('welcomepage');
+            await initializeAuth();
+        }
+    } catch (error) {
+        console.error('Erreur lors de l\'initialisation:', error);
+        navigateTo('welcomepage');
+    }
+
+    // Gestionnaire d'événements pour la déconnexion
+    window.addEventListener("logout", async () => {
+        try {
+            await authService.logout();
+            navigateTo("welcomepage");
+        } catch (error) {
+            console.error('Erreur lors de la déconnexion:', error);
+        }
+    });
+}
+
+// Gestion des erreurs globales
+window.addEventListener("error", (event) => {
+    console.error("Erreur globale:", event.error);
+});
 
 

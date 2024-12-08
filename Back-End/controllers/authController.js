@@ -1,22 +1,13 @@
+// controllers/authController.js
 const userModel = require('../models/userModel');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const transporter = require('../config/nodemailer'); // Assurez-vous d'avoir configuré Nodemailer
+const transporter = require('../config/nodemailer');
+const { cookieManager } = require('../middlewares/cookieManager');
 
 exports.register = async (req, res) => {
     console.log("Données reçues:", req.body);
-
     const { username, password, email, firstName, lastName, age, gender, country } = req.body;
-
-    console.log("username:", username);
-    console.log("password:", password);
-    console.log("email:", email);
-    console.log("firstName:", firstName);
-    console.log("lastName:", lastName);
-    console.log("age:", age);
-    console.log("gender:", gender);
-    console.log("country:", country);
-
 
     if (!username || !password || !email || !firstName || !lastName || !age || !gender || !country) {
         return res.status(400).json({ message: 'Please provide all required fields' });
@@ -32,12 +23,12 @@ exports.register = async (req, res) => {
         if (userByEmail) {
             return res.status(400).json({ message: 'Email already exists' });
         }
-        
-        // Vérifiez ici que les données sont correctement passées
-        console.log({ username, password, email, firstName, lastName, age, gender, country });
 
         const user = await userModel.createUser(username, password, email, firstName, lastName, age, gender, country);
         const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
+        
+        // Utiliser le cookieManager pour définir les cookies
+        cookieManager.setAuthCookies(res, token);
 
         res.status(201).json({ token });
     } catch (error) {
@@ -46,12 +37,8 @@ exports.register = async (req, res) => {
     }
 };
 
-
-
 exports.login = async (req, res) => {
     try {
-        console.log('Login attempt:', { email: req.body.email });
-        
         const { email, password } = req.body;
 
         if (!email || !password) {
@@ -83,8 +70,8 @@ exports.login = async (req, res) => {
             { expiresIn: '24h' }
         );
 
-        // Log successful login
-        console.log('Login successful for user:', user.email);
+        // Utiliser le cookieManager pour définir les cookies
+        cookieManager.setAuthCookies(res, token);
 
         res.status(200).json({
             success: true,
@@ -104,25 +91,99 @@ exports.login = async (req, res) => {
     }
 };
 
-exports.authenticateToken = (req, res, next) => {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
-    if (!token) return res.sendStatus(401);
-
-    jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-        if (err) return res.sendStatus(403);
-        req.user = user;
-        next();
-    });
+exports.logout = async (req, res) => {
+    try {
+        // Utiliser le cookieManager pour effacer les cookies
+        cookieManager.clearAuthCookies(res);
+        
+        res.status(200).json({
+            success: true,
+            message: 'Déconnexion réussie'
+        });
+    } catch (error) {
+        console.error('Erreur lors de la déconnexion:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erreur lors de la déconnexion'
+        });
+    }
 };
 
+exports.refreshToken = async (req, res) => {
+    try {
+        const oldToken = cookieManager.getAuthToken(req);
+        
+        if (!oldToken) {
+            return res.status(401).json({ message: 'Aucun token à rafraîchir' });
+        }
+
+        const decoded = jwt.verify(oldToken, process.env.JWT_SECRET);
+        const newToken = jwt.sign(
+            { id: decoded.id },
+            process.env.JWT_SECRET,
+            { expiresIn: '24h' }
+        );
+
+        cookieManager.setAuthCookies(res, newToken);
+
+        res.status(200).json({
+            success: true,
+            token: newToken
+        });
+    } catch (error) {
+        console.error('Erreur lors du rafraîchissement du token:', error);
+        res.status(401).json({
+            success: false,
+            message: 'Token invalide ou expiré'
+        });
+    }
+};
+
+exports.verify = async (req, res) => {
+    try {
+        const token = cookieManager.getAuthToken(req);
+        
+        if (!token) {
+            return res.status(401).json({
+                success: false,
+                message: 'Aucun token trouvé'
+            });
+        }
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const user = await userModel.getUserById(decoded.id);
+        
+        if (!user) {
+            return res.status(401).json({
+                success: false,
+                message: 'Utilisateur non trouvé'
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            user: {
+                id: user.id,
+                email: user.email,
+                username: user.username
+            }
+        });
+    } catch (error) {
+        console.error('Erreur de vérification du token:', error);
+        return res.status(401).json({
+            success: false,
+            message: 'Token invalide ou expiré'
+        });
+    }
+};
+
+// Les autres méthodes restent inchangées (getProfile, changePassword)
 exports.getProfile = async (req, res) => {
     try {
         const userId = req.user.id;
         const user = await userModel.getUserById(userId);
         if (!user) return res.status(404).json({ message: 'User not found' });
 
-        // Mapper les noms de colonnes de la base de données aux noms de propriétés JavaScript
         const userProfile = {
             id: user.id,
             username: user.username,
@@ -133,7 +194,7 @@ exports.getProfile = async (req, res) => {
             gender: user.gender
         };
 
-        console.log('User profile being sent:', userProfile);  // Log pour le débogage
+        console.log('User profile being sent:', userProfile);
         res.status(200).json(userProfile);
     } catch (error) {
         console.error('Error in getProfile:', error);
@@ -166,20 +227,12 @@ exports.changePassword = async (req, res) => {
     }
 };
 
-exports.logout = async (req, res) => {
-    try {
-        // Si vous utilisez des tokens blacklist, ajoutez le token actuel à la blacklist
-        // await blacklistToken(req.token);
-        
-        res.status(200).json({
-            success: true,
-            message: 'Déconnexion réussie'
-        });
-    } catch (error) {
-        console.error('Erreur lors de la déconnexion:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Erreur lors de la déconnexion'
-        });
-    }
+module.exports = {
+    login: exports.login,
+    register: exports.register,
+    refreshToken: exports.refreshToken,
+    logout: exports.logout,
+    getProfile: exports.getProfile,
+    changePassword: exports.changePassword,
+    verify: exports.verify
 };

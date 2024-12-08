@@ -19,7 +19,7 @@
 
     <!-- FullCalendar CSS via unpkg.com -->
     <link
-      href="https://unpkg.com/fullcalendar@6.1.15/index.global.min.css"
+      href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/main.min.css"
       rel="stylesheet"
     />
 
@@ -131,7 +131,7 @@
             <!-- Pour séparer visuellement -->
             <li>
               <a href="#" class="nav-link logout-link" id="logoutBtn">
-                <i class="logout-icon"></i>Déconnexion
+                <i class="logout-icon"></i>Logout 
               </a>
             </li>
           </ul>
@@ -497,7 +497,7 @@
           <div class="timer">
             <h2>Task Selection and Session</h2>
             <div class="timer-content">
-              <select id="task-select" onchange="updateTaskTitle()">
+              <select id="task-select">
                 <option value="">Select a task</option>
                 <!-- Options will be loaded dynamically here -->
               </select>
@@ -960,16 +960,16 @@
             </div>
             <button id="mosquetime-search" class="mosquetime-button">
               Search
-            </button>
-            <div id="mosquetime-loading" style="display: none">
-              Loading prayer times, please wait...
-            </div>
-            <div
-              id="mosquetime-error"
-              class="mosquetime-error"
-              style="display: none"
-            ></div>
+            </button>            
           </div>
+          <div id="mosquetime-loading" style="display: none">
+            Loading prayer times, please wait...
+          </div>
+          <div
+            id="mosquetime-error"
+            class="mosquetime-error"
+            style="display: none"
+          ></div>
           <div class="mosquetime-date-display">
             <h2 id="mosquetime-city-date">New York City, September 8, 2024</h2>
             <input id="mosquetime-date-picker" type="date" value="" />
@@ -1186,17 +1186,15 @@
             <div id="recitationProgress">Progress: 0 / 0 surahs recited</div>
           </div>
         </div>
-
         <div class="surahselector-card">
-          <h2>Recitation History</h2>
+          <h2>Selection for Salat</h2>
           <div>
-            <button data-action="toggle-recitation-history">
-              Show/Hide History
+            <button data-action="select-random-sourates">
+              Select Surahs for Salat
             </button>
-            <div id="recitationHistoryContainer" style="display: none">
-              <div id="recitationHistory">
-                <!-- History will be dynamically generated here -->
-              </div>
+            <div>
+              <p>1st raka: <span id="firstRaka"></span></p>
+              <p>2nd raka: <span id="secondRaka"></span></p>
             </div>
           </div>
         </div>
@@ -1212,16 +1210,16 @@
             <button data-action="save-known-sourates">Save Known Surahs</button>
           </div>
         </div>
-
         <div class="surahselector-card">
-          <h2>Selection for Salat</h2>
+          <h2>Recitation History</h2>
           <div>
-            <button data-action="select-random-sourates">
-              Select Surahs for Salat
+            <button data-action="toggle-recitation-history">
+              Show/Hide History
             </button>
-            <div>
-              <p>1st raka: <span id="firstRaka"></span></p>
-              <p>2nd raka: <span id="secondRaka"></span></p>
+            <div id="recitationHistoryContainer" style="display: none">
+              <div id="recitationHistory">
+                <!-- History will be dynamically generated here -->
+              </div>
             </div>
           </div>
         </div>
@@ -1265,7 +1263,6 @@
             <select
               id="duaMethodSelect"
               class="dua-select-field"
-              onchange="toggleDuaCustomMethodInput()"
             >
               <option value="3">Muslim World League</option>
               <option value="2">Islamic Society of North America</option>
@@ -1794,6 +1791,5 @@
     <script type="module" src="bot-tracker.js"></script>
     <script type="module" src="captcha.js"></script>
     <script type="module" src="/Config/apiConfig.js"></script>
-
   </body>
 </html>

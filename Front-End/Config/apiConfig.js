@@ -105,12 +105,16 @@ export const API_CONFIG = {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
         };
-
+    
         const token = localStorage.getItem('token');
+        // Ne pas ajouter le header Authorization si pas de token
         if (token) {
             defaultHeaders['Authorization'] = `Bearer ${token}`;
+        } else if (endpoint === API_CONFIG.endpoints.auth.verify) {
+            // Si c'est une vérification d'auth sans token, retourner directement false
+            return { success: false };
         }
-
+    
         try {
             const response = await fetch(url, {
                 ...options,
@@ -120,13 +124,13 @@ export const API_CONFIG = {
                 },
                 credentials: 'include',
             });
-
+    
             const data = await response.json();
-
+    
             if (!response.ok) {
                 throw new Error(data.message || 'Une erreur est survenue');
             }
-
+    
             return data;
         } catch (error) {
             console.error(`Erreur API (${endpoint}):`, error);

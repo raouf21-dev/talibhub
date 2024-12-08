@@ -19,7 +19,7 @@
 
     <!-- FullCalendar CSS via unpkg.com -->
     <link
-      href="https://unpkg.com/fullcalendar@6.1.15/index.global.min.css"
+      href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/main.min.css"
       rel="stylesheet"
     />
 
@@ -515,7 +515,7 @@
           <div class="timer">
             <h2>Sélection de tâche et session</h2>
             <div class="timer-content">
-              <select id="task-select" onchange="updateTaskTitle()">
+              <select id="task-select">
                 <option value="">Sélectionnez une tâche</option>
                 <!-- Les options seront chargées dynamiquement ici -->
               </select>
@@ -988,10 +988,10 @@
             </div>
             <button id="mosquetime-search" class="mosquetime-button">
               Rechercher
-            </button>
-            <div id="mosquetime-loading" style="display: none">
-              Chargement des horaires de prière, veuillez patienter...
-            </div>
+            </button>            
+          </div>
+          <div id="mosquetime-loading" style="display: none">
+            Chargement des horaires de prière, veuillez patienter...
           </div>
           <div
             id="mosquetime-error"
@@ -1220,20 +1220,19 @@
             <div id="recitationProgress">Progrès : 0 / 0 sourates récitées</div>
           </div>
         </div>
-
         <div class="surahselector-card">
-          <h2>Historique des récitations</h2>
+          <h2>Sélection pour Salat</h2>
           <div>
-            <button data-action="toggle-recitation-history">
-              Afficher/Masquer l'historique
+            <button data-action="select-random-sourates">
+              Sélectionner des sourates pour Salat
             </button>
-            <div id="recitationHistoryContainer" style="display: none">
-              <div id="recitationHistory">
-                <!-- L'historique sera généré ici dynamiquement -->
-              </div>
+            <div>
+              <p>1ère raka: <span id="firstRaka"></span></p>
+              <p>2ème raka: <span id="secondRaka"></span></p>
             </div>
           </div>
         </div>
+        
       </div>
 
       <div class="surahselector-row">
@@ -1250,17 +1249,19 @@
         </div>
 
         <div class="surahselector-card">
-          <h2>Sélection pour Salat</h2>
+          <h2>Historique des récitations</h2>
           <div>
-            <button data-action="select-random-sourates">
-              Sélectionner des sourates pour Salat
+            <button data-action="toggle-recitation-history">
+              Afficher/Masquer l'historique
             </button>
-            <div>
-              <p>1ère raka: <span id="firstRaka"></span></p>
-              <p>2ème raka: <span id="secondRaka"></span></p>
+            <div id="recitationHistoryContainer" style="display: none">
+              <div id="recitationHistory">
+                <!-- L'historique sera généré ici dynamiquement -->
+              </div>
             </div>
           </div>
         </div>
+        
       </div>
     </section>
 
@@ -1301,7 +1302,6 @@
             <select
               id="duaMethodSelect"
               class="dua-select-field"
-              onchange="toggleDuaCustomMethodInput()"
             >
               <option value="3">Muslim World League</option>
               <option value="2">Islamic Society of North America</option>

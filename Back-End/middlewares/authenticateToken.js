@@ -1,28 +1,26 @@
-// authenticateToken.js
+// middlewares/authenticateToken.js
 const jwt = require('jsonwebtoken');
 
-
-function authenticateToken(req, res, next) {
-    const authHeader = req.headers['authorization'];
-    console.log('Authorization Header:', authHeader);
-
-    const token = authHeader && authHeader.split(' ')[1];
-
-    if (token == null) {
-        console.log('No token provided, sending 401');
-        return res.sendStatus(401); // Unauthorized
+const authenticateToken = (req, res, next) => {
+    const token = req.cookies?.auth_token || req.headers.authorization?.split(' ')[1];
+    
+    if (!token) {
+        return res.status(401).json({ 
+            success: false,
+            message: 'Aucun token trouvé. Veuillez vous connecter.' 
+        });
     }
 
     jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
         if (err) {
-            console.error('JWT Verification Error:', err.message);
-            return res.sendStatus(403); // Forbidden
+            return res.status(403).json({ 
+                success: false,
+                message: 'Token invalide ou expiré. Veuillez vous reconnecter.' 
+            });
         }
-
-        console.log('Token is valid. User:', user);
         req.user = user;
         next();
     });
-}
+};
 
-module.exports = authenticateToken;
+module.exports = { authenticateToken }; 

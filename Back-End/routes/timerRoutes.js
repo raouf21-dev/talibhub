@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const authenticateToken = require("../middlewares/authenticateToken");
+const { authenticateToken } = require('../middlewares/authenticateToken');
 const timerController = require("../controllers/timerController");
 
 // Sauvegarder l'état du timer

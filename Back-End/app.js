@@ -6,14 +6,39 @@ const cors = require('cors');
 const path = require('path');
 const helmet = require('helmet');
 const corsOptions = require('./config/corsConfig');
+const cookieParser = require('cookie-parser');
+const { attachCookieManager } = require('./middlewares/cookieManager');
+
+
 require('dotenv').config();
 
 // Création de l'application Express
 const app = express();
 
+app.use(attachCookieManager);
+
 // Middlewares de sécurité
-app.use(helmet());
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://unpkg.com", "https://cdnjs.cloudflare.com"],
+            styleSrc: ["'self'", "'unsafe-inline'", "https://unpkg.com", "https://cdnjs.cloudflare.com"],
+            imgSrc: ["'self'", "data:", "https:"],
+            connectSrc: ["'self'", "https://api.example.com"],
+            fontSrc: ["'self'", "https://cdnjs.cloudflare.com"],
+            objectSrc: ["'none'"],
+            mediaSrc: ["'self'"],
+            frameSrc: ["'self'"],
+        },
+    },
+    crossOriginEmbedderPolicy: false,
+    crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
+
 app.use(cors(corsOptions));
+
+app.use(cookieParser());
 
 // Configuration des parsers
 app.use(bodyParser.json({ limit: '10kb' }));
@@ -74,7 +99,7 @@ const langConfig = {
 };
 
 // Route catch-all pour le SPA avec gestion de la langue
-app.get('*', (req, res) => {
+app.get('*', (req, res, next) => {
     if (req.url.startsWith('/api')) {
         return next();
     }

@@ -13,27 +13,20 @@ const allowedOrigins = {
 };
 
 const corsOptions = {
-    origin: function (origin, callback) {
-        // Récupérer les origines autorisées selon l'environnement
+    origin: function(origin, callback) {
         const allowed = allowedOrigins[process.env.NODE_ENV || 'development'];
         
-        // Autoriser les requêtes sans origine (comme les appels API directs)
-        if (!origin) {
-            return callback(null, true);
-        }
-        
-        if (allowed.indexOf(origin) !== -1) {
+        if (!origin || allowed.indexOf(origin) !== -1) {
             callback(null, true);
         } else {
-            console.warn(`Origine non autorisée: ${origin}`);
             callback(new Error('Non autorisé par CORS'));
         }
     },
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-    exposedHeaders: ['Authorization'],
-    maxAge: 3600 // 1 heure
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    exposedHeaders: ['set-cookie'],
+    maxAge: 86400 // 24 heures
 };
 
 module.exports = corsOptions;

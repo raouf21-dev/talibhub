@@ -3,7 +3,9 @@
 import { switchTab, initializeTabToggle, navigateTo } from "./utils.js";
 import { BotTracker } from "./bot-tracker.js";
 import CaptchaHandler from './captcha.js';
-import { apiClient, API_CONFIG } from './Config/apiConfig.js';
+import { apiClient} from './Config/apiConfig.js';
+import { authService } from './Services/authService.js';
+
 
 const botTracker = new BotTracker();
 const captchaHandler = new CaptchaHandler();
@@ -89,7 +91,7 @@ async function handleSignup(event) {
     event.preventDefault();
 
     try {
-        // Vérifier d'abord le CAPTCHA
+        // Vérification du CAPTCHA
         const isCaptchaValid = await captchaHandler.verify();
         if (!isCaptchaValid) {
             alert("Veuillez valider le captcha");
@@ -111,22 +113,17 @@ async function handleSignup(event) {
             metrics: metrics,
         };
 
-        // Validation des champs obligatoires
+        // Validation des champs
         if (!formData.username || !formData.email || !formData.password) {
             throw new Error("Veuillez remplir tous les champs obligatoires");
         }
 
-        // Validation de la correspondance des emails
         if (formData.email !== formData.confirmEmail) {
             throw new Error("Les adresses email ne correspondent pas");
         }
 
-        const response = await apiClient.post(
-            API_CONFIG.endpoints.auth.register,
-            formData
-        );
-
-        localStorage.setItem("token", response.token);
+        // Utilisation de l'authService pour l'inscription
+        await authService.register(formData);
         alert("Inscription réussie!");
         navigateTo("dashboard");
     } catch (error) {
@@ -139,34 +136,13 @@ async function handleSignup(event) {
 
 async function handleSignin(event) {
     event.preventDefault();
-    const email = document.getElementById("welcomepage-signin-email").value;
-    const password = document.getElementById("welcomepage-signin-password").value;
-
-    // Debug des données envoyées
-    const requestData = {
-        email: email,
-        password: password
-    };
-
-
+    
     try {
-        const response = await fetch(`${window.location.origin}/api/auth/login`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(requestData),
-            credentials: 'include'
-        });
+        const email = document.getElementById("welcomepage-signin-email").value;
+        const password = document.getElementById("welcomepage-signin-password").value;
 
-        console.log('Status de la réponse:', response.status);
-        const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(data.message || "Email ou mot de passe incorrect");
-        }
-
-        localStorage.setItem("token", data.token);
+        // Utilisation de l'authService pour la connexion
+        await authService.login(email, password);
         console.log("Connexion réussie, redirection vers le tableau de bord");
         setTimeout(() => navigateTo("dashboard"), 1000);
     } catch (error) {

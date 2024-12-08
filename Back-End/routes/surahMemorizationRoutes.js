@@ -2,7 +2,7 @@
 const express = require("express");
 const router = express.Router();
 const surahMemorizationController = require("../controllers/surahMemorizationControllers");
-const authenticateToken = require("../middlewares/authenticateToken");
+const { authenticateToken } = require('../middlewares/authenticateToken');
 
 // Routes
 router.get("/surahs", authenticateToken, surahMemorizationController.getSurahs);

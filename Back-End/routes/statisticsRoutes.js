@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const statisticsController = require("../controllers/statisticsController");
-const authenticateToken = require("../middlewares/authenticateToken");
+const { authenticateToken } = require('../middlewares/authenticateToken');
 
 router.get("/daily", authenticateToken, statisticsController.getDailyStats);
 router.get("/weekly", authenticateToken, statisticsController.getWeeklyStats);

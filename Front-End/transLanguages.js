@@ -44,3 +44,8 @@ document.addEventListener("DOMContentLoaded", () => {
       localStorage.setItem("userLang", lang);
     }
   });
+
+  document.addEventListener('languageChanged', async (event) => {
+    const mosqueTimeManager = new MosqueTimeManager();
+    await mosqueTimeManager.initialize();
+});

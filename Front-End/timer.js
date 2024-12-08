@@ -1,5 +1,4 @@
 // timer.js
-
 import { updateDOMIfExists } from './utils.js';
 import { loadTasks } from './tasks.js';
 
@@ -29,6 +28,7 @@ function initializeTimer() {
     updateTaskTitle();
     enableControls();
 
+    // Gestionnaire d'événements pour la section apprentissage
     const apprentissageSection = document.getElementById('apprentissage');
     if (apprentissageSection) {
         apprentissageSection.addEventListener('click', function(event) {
@@ -58,7 +58,6 @@ function initializeTimer() {
                     case 'start-new-session':
                         startNewSession();
                         break;
-                    // Ajoutez d'autres cas pour les autres actions si nécessaire
                     default:
                         console.warn('Action inconnue :', action);
                 }
@@ -66,10 +65,20 @@ function initializeTimer() {
         });
     }
 
+    // Gestionnaire pour sélection de tâche
     const taskSelect = document.getElementById('task-select');
     if (taskSelect) {
         taskSelect.addEventListener('change', updateTaskTitle);
     }
+
+    // Gestionnaire pour l'ajout manuel de temps
+    const addManualTimeBtn = document.getElementById('add-manual-time-btn');
+    if (addManualTimeBtn) {
+        addManualTimeBtn.addEventListener('click', addManualTime);
+    }
+
+    // Mise à jour de l'affichage initial du timer
+    updateTimerDisplay();
 }
 
 // Fonction pour activer/désactiver les contrôles
@@ -82,7 +91,6 @@ function enableControls() {
 
 // Fonction pour mettre à jour le titre de la tâche sélectionnée
 async function updateTaskTitle(forceRefresh = false) {
-    console.log('updateTaskTitle called');
     const taskSelect = document.getElementById('task-select');
     const selectedTaskTitle = document.getElementById('counter-task-title');
     const selectedTask = taskSelect.options[taskSelect.selectedIndex].text;
@@ -91,7 +99,6 @@ async function updateTaskTitle(forceRefresh = false) {
     console.log('Selected task:', selectedTask, 'Task ID:', selectedTaskId);
 
     if (!selectedTaskId || selectedTaskId === "") {
-        console.log('No task selected');
         selectedTaskTitle.textContent = "Sélectionnez une tâche";
         document.getElementById('current-session-id').textContent = "Veuillez démarrer une nouvelle session";
         document.getElementById('previous-sessions-count').textContent = "0";
@@ -105,7 +112,6 @@ async function updateTaskTitle(forceRefresh = false) {
     selectedTaskTitle.textContent = selectedTask;
 
     try {
-        console.log('Fetching last session for task:', selectedTaskId);
         const response = await fetch(`/api/session/last/${selectedTaskId}`, {
             method: 'GET',
             headers: {
@@ -115,17 +121,13 @@ async function updateTaskTitle(forceRefresh = false) {
             cache: forceRefresh ? 'no-cache' : 'default'
         });
 
-        console.log('Response status:', response.status);
-
         if (!response.ok) {
             throw new Error(`Erreur ${response.status}: ${await response.text()}`);
         }
 
         const data = await response.json();
-        console.log('Received data:', data);
 
         if (data.message === 'No previous session found for this task') {
-            console.log('No previous session found');
             Counter.value = 0;
             timerTime = 0;
             stopwatchTime = 0;
@@ -133,7 +135,6 @@ async function updateTaskTitle(forceRefresh = false) {
             document.getElementById('current-session-id').textContent = "Pas d'ancienne session";
             document.getElementById('previous-sessions-count').textContent = "0";
         } else {
-            console.log('Previous session found');
             Counter.value = data.lastSession.counter_value || 0;
             timerTime = data.lastSession.timer_time || 0;
             stopwatchTime = data.lastSession.stopwatch_time || 0;
@@ -143,8 +144,6 @@ async function updateTaskTitle(forceRefresh = false) {
         }
 
         document.getElementById('counter-value').textContent = Counter.value;
-        
-        // Afficher le temps total
         totalWorkTime = calculateTotalWorkTime();
         document.getElementById('total-work-time').textContent = formatTime(totalWorkTime);
 
@@ -196,7 +195,7 @@ async function startNewSession() {
         document.getElementById('start-new-session').disabled = true;
 
     } catch (error) {
-        console.error('Erreur détaillée:', error);
+        console.error('Erreur lors de l\'initialisation de la nouvelle session:', error);
         alert('Erreur lors de l\'initialisation de la nouvelle session: ' + error.message);
     }
 }
@@ -270,12 +269,9 @@ async function saveSessionData() {
 
         const saveData = await saveResponse.json();
         alert('Données de la session sauvegardées avec succès.');
-        console.log('Session data saved:', saveData);
 
-        // Mettre à jour l'affichage avec les nouvelles informations de session
-        await updateTaskTitle(true); // Forcer le rafraîchissement des données
+        await updateTaskTitle(true);
 
-        // Réinitialiser les valeurs après l'enregistrement
         timerTime = 0;
         stopwatchTime = 0;
         manualTimeInSeconds = 0;
@@ -288,7 +284,6 @@ async function saveSessionData() {
         isSessionActive = false;
         document.getElementById('start-new-session').disabled = false;
 
-        // Réinitialiser les timers si nécessaire
         clearInterval(timer);
         clearInterval(stopwatchInterval);
         isRunning = false;
@@ -324,7 +319,6 @@ function updateTimer() {
         document.getElementById('start_stop').textContent = 'Démarrer';
         isRunning = false;
     }
-    // Mettre à jour l'affichage du temps total
     document.getElementById('total-work-time').textContent = formatTime(calculateTotalWorkTime());
 }
 
@@ -428,44 +422,43 @@ function loadCounter() {
         Counter.value = 0;
         document.getElementById('counter-value').textContent = Counter.value;
     }
-}
-
-// Fonction pour changer le compteur
-function changeCounter(value) {
+ }
+ 
+ // Fonction pour changer le compteur
+ function changeCounter(value) {
     if (!isSessionActive) {
         alert("Veuillez démarrer une nouvelle session avant d'utiliser le compteur.");
         return;
     }
     Counter.value = Math.max(0, Counter.value + value);
     document.getElementById('counter-value').textContent = Counter.value;
-}
-
-// Fonction pour ajouter manuellement du temps d'étude
-function addManualTime() {
+ }
+ 
+ // Fonction pour ajouter manuellement du temps d'étude
+ function addManualTime() {
     if (!isSessionActive) {
         alert("Veuillez démarrer une nouvelle session avant d'ajouter du temps manuellement.");
         return;
     }
-
+ 
     const hours = parseInt(document.getElementById('manual-hours').value) || 0;
     const minutes = parseInt(document.getElementById('manual-minutes').value) || 0;
-
+ 
     if (hours < 0 || minutes < 0 || minutes >= 60) {
         alert('Veuillez entrer un temps valide.');
         return;
     }
-
+ 
     manualTimeInSeconds += (hours * 3600) + (minutes * 60);
-
+ 
     document.getElementById('manual-hours').value = '';
     document.getElementById('manual-minutes').value = '';
-
+ 
     // Mettre à jour l'affichage du temps total
     document.getElementById('total-work-time').textContent = formatTime(calculateTotalWorkTime());
-
+ 
     alert('Temps d\'étude ajouté manuellement.');
-}
-
-// Exportation des fonctions nécessaires
-export { initializeTimer };
-
+ }
+ 
+ // Exportation des fonctions nécessaires
+ export { initializeTimer };

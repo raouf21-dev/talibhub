@@ -1,7 +1,7 @@
 // routes/sessionRoutes.js
 const express = require("express");
 const router = express.Router();
-const authenticateToken = require("../middlewares/authenticateToken");
+const { authenticateToken } = require('../middlewares/authenticateToken');
 const sessionController = require("../controllers/sessionController");
 
 router.get("/load", authenticateToken, sessionController.getAllSessions);

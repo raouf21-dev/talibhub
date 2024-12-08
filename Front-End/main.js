@@ -1,6 +1,7 @@
 // main.js
 
 import { initializeAuth } from "./auth.js";
+
 import { initializeNavigation } from "./navigation.js";
 import { initializeUtils, navigateTo, updateNavVisibility } from "./utils.js";
 import { initializeDashboard } from "./dashboard.js";
@@ -8,6 +9,7 @@ import { initializeSurahSelector } from "./surahSelector.js";
 import { initializeMosqueTime } from "./mosqueTime.js";
 import { initSurahMemorization } from "./surahMemorization.js";
 import { langConfig } from './Config/apiConfig.js';
+import { initializeTimer } from './timer.js';
 
 // Fonction pour vérifier l'état de l'authentification
 async function checkAuthStatus() {
@@ -48,6 +50,7 @@ function initializeAuthenticatedModules(token) {
   initializeSurahSelector();
   initializeMosqueTime();
   initSurahMemorization();
+  initializeTimer();
 }
 
 // Fonction principale d'initialisation

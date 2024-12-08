@@ -1,22 +1,19 @@
+// routes/authRoutes.js
 const express = require('express');
 const authController = require('../controllers/authController');
-const authenticateToken = authController.authenticateToken;
+const { authenticateToken } = require('../middlewares/authenticateToken');  // Changement ici
 
 const router = express.Router();
 
-// Fonction d'inscription
+// Routes publiques
 router.post('/register', authController.register);
-
-// Fonction de connexion
 router.post('/login', authController.login);
+router.post('/refresh', authController.refreshToken);
+router.get('/verify', authController.verify);
 
-// Endpoint pour récupérer les informations de profil
+// Routes protégées
 router.get('/profile', authenticateToken, authController.getProfile);
-
-// Changer le mot de passe
 router.post('/changePassword', authenticateToken, authController.changePassword);
-
-
 router.post('/logout', authenticateToken, authController.logout);
 
 module.exports = router;

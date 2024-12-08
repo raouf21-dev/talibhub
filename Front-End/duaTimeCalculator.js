@@ -135,10 +135,8 @@ function calculateDuaLastThird(Fajr, Maghrib, type) {
 function toggleDuaCustomMethodInput() {
     const method = document.getElementById('duaMethodSelect').value;
     const customMethodDiv = document.getElementById('duaCustomMethod');
-    if (method === "24") {
-        customMethodDiv.style.display = "block";
-    } else {
-        customMethodDiv.style.display = "none";
+    if (customMethodDiv) {
+        customMethodDiv.style.display = method === "24" ? "block" : "none";
     }
 }
 
@@ -160,4 +158,4 @@ function showDuaError(error) {
 }
 
 // Exportation des fonctions nécessaires
-export { initializeDuaTimeCalculator };
+export { toggleDuaCustomMethodInput };

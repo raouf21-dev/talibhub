@@ -139,10 +139,13 @@ function generateSourateList() {
     }
     
     sourateList.innerHTML = '';
-    sourates.forEach((sourate, index) => {
+
+    // Parcours du tableau en ordre inverse
+    for (let i = sourates.length - 1; i >= 0; i--) {
+        const sourate = sourates[i];
         const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
-        checkbox.id = `sourate-${sourate.number}`; // Utilisez sourate.number au lieu de index
+        checkbox.id = `sourate-${sourate.number}`;
         checkbox.value = sourate.number;
         if (knownSourates.includes(sourate.number)) {
             checkbox.checked = true;
@@ -159,9 +162,10 @@ function generateSourateList() {
         listItem.appendChild(label);
 
         sourateList.appendChild(listItem);
-    });
+    }
     console.log('Fin de la génération de la liste des sourates');
 }
+
 
 function updateKnownSouratesCount() {
     const countElement = document.getElementById('knownSouratesCount');

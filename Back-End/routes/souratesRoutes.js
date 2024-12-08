@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const authenticateToken = require("../middlewares/authenticateToken"); // Assurez-vous que l'authentification est bien gérée
-const sourateController = require("../controllers/sourateController");
+const { authenticateToken } = require('../middlewares/authenticateToken');const sourateController = require("../controllers/sourateController");
 
 // Routes pour les sourates
 router.get("/", authenticateToken, sourateController.getAllSourates);
