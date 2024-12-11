@@ -24,10 +24,11 @@ function initializeTasks() {
         taskList.addEventListener('click', (e) => {
             if (e.target.closest('.todo-delete-btn')) {
                 const taskId = e.target.closest('.todo-delete-btn').dataset.taskId;
-                removeTask(taskId);
+                confirmAndRemoveTask(taskId);
             } else if (e.target.closest('.todo-rename-btn')) {
                 const taskId = e.target.closest('.todo-rename-btn').dataset.taskId;
-                renameTask(taskId);
+                const taskElement = e.target.closest('.todo-item');
+                startInlineRename(taskId, taskElement);
             }
         });
     }
@@ -46,11 +47,11 @@ async function loadTasks() {
                 let li = document.createElement('li');
                 li.className = `todo-item ${task.completed ? 'completed' : ''}`;
                 li.innerHTML = `
-                    <div>
+                    <div class="task-content">
                         <input type="checkbox" id="todo-task-${task.id}" class="todo-checkbox" ${task.completed ? 'checked' : ''}>
-                        <label for="todo-task-${task.id}">${escapeHTML(task.name)}</label>
+                        <label for="todo-task-${task.id}" class="task-name">${escapeHTML(task.name)}</label>
                     </div>
-                    <div>
+                    <div class="task-actions">
                         <button class="todo-rename-btn" data-task-id="${task.id}">
                             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                             <span class="sr-only">Renommer</span>
@@ -93,6 +94,15 @@ async function addNewTask() {
     if (taskName === '') return;
 
     try {
+        // Vérifier si une tâche avec le même nom existe déjà
+        const tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+        const taskExists = tasks.some(task => task.name.toLowerCase() === taskName.toLowerCase());
+        
+        if (taskExists) {
+            alert('Une tâche avec ce nom existe déjà !');
+            return;
+        }
+
         await api.post('/tasks/addTask', { name: taskName });
         newTaskInput.value = '';
         await loadTasks();
@@ -115,27 +125,76 @@ async function toggleTask(taskId) {
     }
 }
 
-async function removeTask(taskId) {
-    try {
-        await api.delete(`/tasks/deleteTask/${taskId}`);
-        await loadTasks();
-    } catch (error) {
-        console.error('Error deleting task:', error);
+async function confirmAndRemoveTask(taskId) {
+    if (confirm('Êtes-vous sûr de vouloir supprimer cette tâche ?')) {
+        try {
+            await api.delete(`/tasks/deleteTask/${taskId}`);
+            await loadTasks();
+        } catch (error) {
+            console.error('Error deleting task:', error);
+        }
     }
 }
 
-async function renameTask(taskId) {
-    const newName = prompt("Entrez le nouveau nom de la tâche:");
-    if (!newName || newName.trim() === "") return;
+function startInlineRename(taskId, taskElement) {
+    const labelElement = taskElement.querySelector('.task-name');
+    const currentName = labelElement.textContent;
+    
+    // Créer l'input de modification
+    const inputElement = document.createElement('input');
+    inputElement.type = 'text';
+    inputElement.value = currentName;
+    inputElement.className = 'inline-edit-input';
+    
+    // Remplacer le label par l'input
+    labelElement.style.display = 'none';
+    labelElement.parentNode.insertBefore(inputElement, labelElement);
+    
+    // Focus sur l'input
+    inputElement.focus();
+    
+    // Gestionnaire pour la validation de la modification
+    const finishRename = async () => {
+        const newName = inputElement.value.trim();
+        
+        if (newName && newName !== currentName) {
+            try {
+                // Vérifier si le nouveau nom existe déjà
+                const tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+                const taskExists = tasks.some(task => 
+                    task.name.toLowerCase() === newName.toLowerCase() && 
+                    task.id !== parseInt(taskId)
+                );
+                
+                if (taskExists) {
+                    alert('Une tâche avec ce nom existe déjà !');
+                    inputElement.remove();
+                    labelElement.style.display = '';
+                    return;
+                }
 
-    try {
-        await api.put(`/tasks/updateTask/${taskId}`, { 
-            name: newName.trim() 
-        });
-        await loadTasks();
-    } catch (error) {
-        console.error('Error renaming task:', error);
-    }
+                await api.put(`/tasks/updateTask/${taskId}`, { name: newName });
+                await loadTasks();
+            } catch (error) {
+                console.error('Error renaming task:', error);
+                inputElement.remove();
+                labelElement.style.display = '';
+            }
+        } else {
+            // Si pas de changement ou nom vide, restaurer l'affichage original
+            inputElement.remove();
+            labelElement.style.display = '';
+        }
+    };
+    
+    // Événements pour la validation
+    inputElement.addEventListener('blur', finishRename);
+    inputElement.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            finishRename();
+        }
+    });
 }
 
 export { 
