@@ -1,7 +1,7 @@
 const axios = require('axios');
 const mosqueTimesModel = require('./models/mosqueTimesModel');
 
-const baseURL = 'http://localhost:3000/mosque-times';
+const baseURL = 'http://localhost:4000/mosque-times';
 
 const testMosqueTimes = async () => {
   try {

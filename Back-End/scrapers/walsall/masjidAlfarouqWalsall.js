@@ -1,268 +1,159 @@
-// masjidAlfarouqWalsall.js
-
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
-const { DateTime } = require('luxon'); // Importer luxon
-const fs = require('fs'); // Pour sauvegarder le contenu de la page en cas d'échec
+const { executablePath } = require('puppeteer');
+const { DateTime } = require('luxon');
+const fs = require('fs');
 
-// Configuration StealthPlugin avec des options optimisées
+// Configuration StealthPlugin
 const stealth = StealthPlugin();
-
-// Désactiver certaines évasions du StealthPlugin pour améliorer les performances
 stealth.enabledEvasions.delete('webgl.vendor');
 stealth.enabledEvasions.delete('webgl.renderer');
-// Vous pouvez ajouter d'autres évasions à désactiver si nécessaire
 
 puppeteer.use(stealth);
 
-// Définir plusieurs user agents
 const userAgents = [
-  // Navigateur Chrome sur Windows
-  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
-  // Navigateur Firefox sur Windows
-  'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:115.0) Gecko/20100101 Firefox/115.0',
-  // Navigateur Safari sur macOS
-  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.1 Safari/605.1.15',
-  // Navigateur Safari sur iPhone
-  'Mozilla/5.0 (iPhone; CPU iPhone OS 15_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.5 Mobile/15E148 Safari/604.1',
-  // Navigateur Chrome sur Android
-  'Mozilla/5.0 (Linux; Android 12; SM-G991B Build/SP1A.210812.016; wv) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.74 Mobile Safari/537.36',
-  // Cinq user agents supplémentaires
-  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.5845.111 Safari/537.36',
-  'Mozilla/5.0 (Macintosh; Intel Mac OS X 11_2_3) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.3 Safari/605.1.15',
-  'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36',
-  'Mozilla/5.0 (iPad; CPU OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1',
-  'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:116.0) Gecko/20100101 Firefox/116.0',
+ 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
+ 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:115.0) Gecko/20100101 Firefox/115.0',
+ 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.1 Safari/605.1.15',
+ 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.5 Mobile/15E148 Safari/604.1',
+ 'Mozilla/5.0 (Linux; Android 12; SM-G991B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.74 Mobile Safari/537.36',
 ];
 
-// Fonction pour générer un délai aléatoire
-const randomDelay = (min, max) =>
-  new Promise((resolve) =>
-    setTimeout(resolve, Math.floor(Math.random() * (max - min + 1)) + min)
-  );
+const randomDelay = async (min, max) => {
+ const delay = Math.floor(Math.random() * (max - min + 1)) + min;
+ await new Promise(resolve => setTimeout(resolve, delay));
+};
 
-// Fonction principale de scraping
 const scrapeMasjidAlFarouq = async () => {
-  let browser;
-  try {
-    console.log('Démarrage du scraping...');
-    // Sélectionner un user agent aléatoire
-    const randomUserAgent = userAgents[Math.floor(Math.random() * userAgents.length)];
+ let browser;
+ try {
+   console.log('Démarrage du scraping Masjid Al-Farouq...');
+   const randomUserAgent = userAgents[Math.floor(Math.random() * userAgents.length)];
 
-    browser = await puppeteer.launch({
-      headless: true, // Mode headless pour la vitesse
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-blink-features=AutomationControlled',
-        '--window-size=800,600', // Taille de viewport réduite
-      ],
-    });
+   const launchOptions = {
+     headless: true,
+     args: [
+       '--no-sandbox',
+       '--disable-setuid-sandbox',
+       '--disable-dev-shm-usage',
+       '--disable-gpu',
+       '--disable-blink-features=AutomationControlled',
+       '--disable-features=IsolateOrigins,site-per-process',
+       '--window-size=1920,1080',
+     ],
+     ignoreHTTPSErrors: true,
+   };
 
-    const page = await browser.newPage();
+   try {
+     if (fs.existsSync('/usr/bin/chromium-browser')) {
+       console.log('Utilisation de Chromium système');
+       launchOptions.executablePath = '/usr/bin/chromium-browser';
+     } else {
+       console.log('Utilisation de Chromium Puppeteer');
+       launchOptions.executablePath = executablePath();
+     }
+   } catch (error) {
+     console.log('Fallback sur Chromium Puppeteer');
+     launchOptions.executablePath = executablePath();
+   }
 
-    // Définir le user agent sélectionné
-    await page.setUserAgent(randomUserAgent);
+   browser = await puppeteer.launch(launchOptions);
+   const page = await browser.newPage();
+   
+   await page.setDefaultNavigationTimeout(45000);
+   await page.setViewport({ width: 1920, height: 1080 });
+   await page.setUserAgent(randomUserAgent);
+   
+   await page.setRequestInterception(true);
+   page.on('request', (request) => {
+     const resourceType = request.resourceType();
+     if (['image', 'stylesheet', 'font'].includes(resourceType)) {
+       request.abort();
+     } else {
+       request.continue();
+     }
+   });
 
-    // Réduire la taille du viewport
-    await page.setViewport({ width: 800, height: 600 });
+   await page.evaluateOnNewDocument(() => {
+     delete Object.getPrototypeOf(navigator).webdriver;
+     Object.defineProperty(navigator, 'platform', { get: () => 'Win32' });
+     Object.defineProperty(navigator, 'productSub', { get: () => '20100101' });
+     Object.defineProperty(navigator, 'vendor', { get: () => 'Google Inc.' });
+     window.navigator.chrome = { runtime: {} };
+   });
 
-    // Activer l'interception des requêtes pour bloquer les ressources non essentielles
-    await page.setRequestInterception(true);
-    page.on('request', (request) => {
-      const resourceType = request.resourceType();
-      if (['image', 'stylesheet', 'font'].includes(resourceType)) {
-        request.abort();
-      } else {
-        request.continue();
-      }
-    });
+   console.log('Navigation vers Masjid Al-Farouq...');
+   await page.goto('https://www.masjidalfarouq.org.uk/', {
+     waitUntil: 'domcontentloaded',
+     timeout: 25000
+   });
 
-    // Masquer le webdriver
-    await page.evaluateOnNewDocument(() => {
-      Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
-    });
+   await page.waitForSelector('div.my-5', { timeout: 15000 });
+   await randomDelay(1000, 2000);
 
-    let retryCount = 0;
-    const maxRetries = 2; // Nombre maximal de tentatives
+   console.log('Extraction des données...');
+   const ukTime = DateTime.now().setZone('Europe/London');
+   const dateText = ukTime.toISODate();
 
-    let frame; // Déclarer frame ici pour qu'il soit accessible en dehors de la boucle
+   const data = await page.evaluate(() => {
+     const times = {};
+     const prayerElements = document.querySelectorAll(
+       'div.my-5 div.flex.flex-row.justify-around.items-center.flex-wrap.mt-2 div.flex.flex-col.items-center.max-w-xs.flex'
+     );
 
-    while (retryCount < maxRetries) {
-      try {
-        console.log('Navigation vers la page principale...');
-        await page.goto('https://www.masjidalfarouq.org.uk/', {
-          waitUntil: 'domcontentloaded', // Utiliser domcontentloaded pour accélérer
-          timeout: 25000, // Timeout réduit
-        });
-        console.log('Page principale chargée avec succès');
+     prayerElements.forEach((prayerElement) => {
+       const nameElement = prayerElement.querySelector('h3.font-elMessiri.font-medium');
+       const timeElements = prayerElement.querySelectorAll('h4.p-0\\.5.sm\\:p-1.font-medium');
+       const timeElement = timeElements.length >= 2 ? timeElements[1] : null;
 
-        // Simuler des mouvements de souris et des délais aléatoires
-        // Minimiser les mouvements et les délais pour accélérer
-        // Vous pouvez supprimer ou réduire ces lignes si elles ne sont pas nécessaires
-        await page.mouse.move(100, 100);
-        await randomDelay(50, 150);
+       if (nameElement && timeElement) {
+         let prayerName = nameElement.textContent.trim().toLowerCase();
+         let time = timeElement.textContent.trim();
 
-        // Attendre que l'élément principal soit chargé
-        await page.waitForSelector('div.my-5', { timeout: 15000 });
+         switch (prayerName) {
+           case 'fajr': prayerName = 'fajr'; break;
+           case 'zuhr':
+           case 'dhuhr': prayerName = 'dhuhr'; break;
+           case 'asr': prayerName = 'asr'; break;
+           case 'maghrib': prayerName = 'maghrib'; break;
+           case 'isha': prayerName = 'isha'; break;
+           default: prayerName = null;
+         }
 
-        // Accéder au contenu de la page
-        frame = page; // Si le contenu n'est pas dans une iframe, utiliser la page principale
+         if (prayerName) {
+           const [timeStr, period] = time.split(/\s+/);
+           const [hours, minutes] = timeStr.split(/[:.]/);
+           let hour = parseInt(hours);
+           
+           if (period === 'PM' && hour < 12) hour += 12;
+           if (period === 'AM' && hour === 12) hour = 0;
+           
+           times[prayerName] = `${hour.toString().padStart(2, '0')}:${minutes}`;
+         }
+       }
+     });
+     
+     return times;
+   });
 
-        // Si le contenu est dans une iframe, décommentez les lignes suivantes
-        /*
-        const frameHandle = await page.$('iframe');
-        frame = await frameHandle.contentFrame();
+   const result = {
+     source: 'Masjid Al-Farouq Walsall',
+     date: dateText,
+     times: data
+   };
 
-        if (!frame) {
-          throw new Error("Impossible d'accéder au contenu de l'iframe (possiblement à cause de restrictions cross-origin).");
-        }
-        */
+   console.log('Données extraites avec succès:', result);
+   return result;
 
-        // Attendre que les éléments de prière soient chargés
-        await frame.waitForSelector('div.my-5', { timeout: 10000 });
-
-        // Vérifier si les éléments attendus sont présents
-        const hasContent = await frame.evaluate(() => {
-          return document.querySelectorAll('div.my-5 div.flex.flex-row.justify-around.items-center.flex-wrap.mt-2 div.flex.flex-col.items-center.max-w-xs.flex').length > 0;
-        });
-
-        if (hasContent) {
-          console.log('Contenu valide détecté');
-          break; // Sortir de la boucle si le contenu est trouvé
-        } else {
-          throw new Error("Contenu de la page non valide");
-        }
-      } catch (error) {
-        retryCount++;
-        console.log(`Tentative ${retryCount}/${maxRetries} échouée:`, error.message);
-        if (retryCount === maxRetries) {
-          // Sauvegarder le contenu de la page pour diagnostic
-          const content = await page.content();
-          fs.writeFileSync('failed_page_masjidalfarouq.html', content);
-          console.log('Le contenu de la page a été sauvegardé dans failed_page_masjidalfarouq.html pour analyse.');
-          throw error;
-        }
-        await randomDelay(3000, 5000); // Délais entre les tentatives
-      }
-    }
-
-    // Vérifier que frame est défini avant de continuer
-    if (!frame) {
-      throw new Error("Frame non défini après les tentatives");
-    }
-
-    console.log('Extraction des données...');
-    const ukTime = DateTime.now().setZone('Europe/London');
-    const dateText = ukTime.toISODate();
-
-    const data = await frame.evaluate(
-      (isFriday, dateText) => {
-        const times = {};
-        // Utiliser dateText passé depuis Node.js
-
-        const prayerElements = document.querySelectorAll(
-          'div.my-5 div.flex.flex-row.justify-around.items-center.flex-wrap.mt-2 div.flex.flex-col.items-center.max-w-xs.flex'
-        );
-
-        prayerElements.forEach((prayerElement) => {
-          const nameElement = prayerElement.querySelector('h3.font-elMessiri.font-medium');
-          const timeElements = prayerElement.querySelectorAll('h4.p-0\\.5.sm\\:p-1.font-medium');
-          const timeElement = timeElements.length >= 2 ? timeElements[1] : null;
-
-          if (nameElement && timeElement) {
-            let prayerName = nameElement.textContent.trim().toLowerCase();
-            const prayerTime = timeElement.textContent.trim();
-
-            // Normalisation des noms de prières pour correspondre aux noms des colonnes de la base de données
-            switch (prayerName) {
-              case 'fajr':
-                prayerName = 'fajr';
-                break;
-              case 'zuhr':
-              case 'dhuhr':
-                prayerName = 'dhuhr';
-                break;
-              case 'asr':
-                prayerName = 'asr';
-                break;
-              case 'maghrib':
-                prayerName = 'maghrib';
-                break;
-              case 'isha':
-                prayerName = 'isha';
-                break;
-              default:
-                prayerName = null;
-            }
-
-            if (prayerName) {
-              times[prayerName] = prayerTime;
-            }
-          }
-        });
-
-        if (isFriday) {
-          // Fonction pour normaliser le texte et gérer les différentes apostrophes
-          const normalizeText = (text) =>
-            text.replace(/[\u2019\u0027]/g, "'").trim().toLowerCase();
-
-          const h2Elements = document.querySelectorAll('h2');
-          let jumuahTimesSection = null;
-
-          for (let h2 of h2Elements) {
-            const text = normalizeText(h2.textContent);
-            if (text.includes("jumu'ah times")) {
-              jumuahTimesSection = h2;
-              break;
-            }
-          }
-
-          if (jumuahTimesSection) {
-            const jumuahDiv = jumuahTimesSection.parentElement; // Le div contenant le h2
-
-            const liElements = jumuahDiv.querySelectorAll('ul li');
-
-            liElements.forEach((liElement, index) => {
-              // Extraire l'heure du 'p' élément
-              const pElements = liElement.querySelectorAll('p');
-              pElements.forEach((pElement) => {
-                const textContent = pElement.textContent.trim();
-                const timeMatch = textContent.match(/(\d{1,2}:\d{2})/);
-                if (timeMatch) {
-                  const prayerTime = timeMatch[1];
-                  const prayerName = `jumuah${index + 1}`; // Correspond aux colonnes jumuah1, jumuah2, etc.
-                  times[prayerName] = prayerTime;
-                }
-              });
-            });
-          }
-        }
-
-        return { dateText, times };
-      },
-      // Passer isFriday si nécessaire
-      false, // Remplacer par la valeur réelle si isFriday est utilisé
-      dateText
-    );
-
-    if (!data || Object.keys(data.times).length === 0) {
-      throw new Error("Les données n'ont pas pu être extraites.");
-    }
-
-    console.log('Date extraite :', data.dateText);
-    console.log('Horaires extraits :', data.times);
-
-    return data;
-  } catch (error) {
-    console.error('Erreur lors du scraping :', error.message);
-    throw error;
-  } finally {
-    if (browser) {
-      await browser.close();
-      console.log('Navigateur fermé');
-    }
-  }
+ } catch (error) {
+   console.error('Erreur détaillée lors du scraping:', error);
+   throw new Error(`Erreur de scraping: ${error.message}`);
+ } finally {
+   if (browser) {
+     await browser.close();
+     console.log('Navigateur fermé');
+   }
+ }
 };
 
 module.exports = scrapeMasjidAlFarouq;

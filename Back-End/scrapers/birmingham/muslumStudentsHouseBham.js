@@ -2,7 +2,6 @@ const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 const { executablePath } = require('puppeteer');
 const { DateTime } = require('luxon');
-const fs = require('fs');
 
 // Configuration StealthPlugin
 const stealth = StealthPlugin();
@@ -24,13 +23,11 @@ const randomDelay = async (min, max) => {
   await new Promise(resolve => setTimeout(resolve, delay));
 };
 
-const convertTo24Hour = (timeStr) => {
-  const [time, modifier] = timeStr.split(' ');
-  let [hours, minutes] = time.split(':');
-  hours = parseInt(hours, 10);
-  if (modifier === 'PM' && hours < 12) hours += 12;
-  if (modifier === 'AM' && hours === 12) hours = 0;
-  return `${hours.toString().padStart(2, '0')}:${minutes}`;
+const detectCloudflare = async (page) => {
+  const content = await page.content();
+  return content.includes('challenge-running') || 
+         content.includes('cf-browser-verification') ||
+         content.includes('_cf-browser-verification');
 };
 
 const waitForCloudflare = async (page) => {
@@ -45,15 +42,14 @@ const waitForCloudflare = async (page) => {
     );
     await randomDelay(1000, 1500);
   } catch (error) {
-    console.log('Erreur lors de l\'attente Cloudflare:', error.message);
-    throw new Error('Impossible de passer la protection Cloudflare');
+    throw new Error('Cloudflare protection détectée et non contournée');
   }
 };
 
-const scrapeCentralMosque = async () => {
+const scrapeMSHUK = async () => {
   let browser;
   try {
-    console.log('Démarrage du scraping...');
+    console.log('Démarrage du scraping MSHUK...');
     const randomUserAgent = userAgents[Math.floor(Math.random() * userAgents.length)];
 
     const launchOptions = {
@@ -63,17 +59,15 @@ const scrapeCentralMosque = async () => {
         '--disable-setuid-sandbox',
         '--disable-dev-shm-usage',
         '--disable-gpu',
-        '--disable-web-security',
-        '--disable-features=IsolateOrigins,site-per-process',
         '--disable-blink-features=AutomationControlled',
-        '--disable-infobars',
-        '--window-size=1920,1080',
+        '--disable-features=IsolateOrigins,site-per-process',
+        '--window-size=1024,768',
       ],
-      ignoreHTTPSErrors: true
+      ignoreHTTPSErrors: true,
     };
 
     try {
-      if (fs.existsSync('/usr/bin/chromium-browser')) {
+      if (require('fs').existsSync('/usr/bin/chromium-browser')) {
         console.log('Utilisation de Chromium système');
         launchOptions.executablePath = '/usr/bin/chromium-browser';
       } else {
@@ -86,8 +80,8 @@ const scrapeCentralMosque = async () => {
     }
 
     browser = await puppeteer.launch(launchOptions);
+
     const page = await browser.newPage();
-    
     await page.setDefaultNavigationTimeout(45000);
     await page.setViewport({ width: 1920, height: 1080 });
     await page.setUserAgent(randomUserAgent);
@@ -113,30 +107,60 @@ const scrapeCentralMosque = async () => {
       window.navigator.chrome = { runtime: {} };
     });
 
-    console.log('Navigation vers Central Mosque...');
-
     let retryCount = 0;
     const maxRetries = 2;
 
     while (retryCount < maxRetries) {
       try {
-        const response = await page.goto('http://centralmosque.org.uk/', {
+        console.log('Navigation vers MSHUK...');
+        const response = await page.goto('https://www.mshuk.org/', {
           waitUntil: 'domcontentloaded',
           timeout: 25000
         });
 
-        if (response.status() === 520 || response.status() === 403) {
-          console.log(`Statut de réponse ${response.status()}, tentative de contournement Cloudflare...`);
+        if (await detectCloudflare(page)) {
+          console.log('Protection Cloudflare détectée, tentative de contournement...');
           await waitForCloudflare(page);
         }
 
-        const content = await page.content();
-        if (content.includes('mptt-wrapper-container')) {
-          console.log('Page chargée avec succès');
-          break;
-        } else {
-          throw new Error('Contenu de la page non valide');
-        }
+        await page.waitForSelector('.section-prayer-horizontal-times', {
+          timeout: 15000,
+          visible: true
+        });
+
+        console.log('Extraction des données...');
+        const data = await page.evaluate(() => {
+          const prayers = {};
+          const prayerItems = document.querySelectorAll('.section-prayer-horizontal-times-item');
+          
+          prayerItems.forEach(item => {
+            const nameElement = item.querySelector('span');
+            const jamaatElement = item.querySelector('div:last-child');
+            
+            if (nameElement && jamaatElement) {
+              const name = nameElement.textContent.trim().toLowerCase();
+              const time = jamaatElement.textContent.trim();
+              if (name && time) {
+                prayers[name] = time;
+              }
+            }
+          });
+          
+          return prayers;
+        });
+
+        const ukTime = DateTime.now().setZone('Europe/London');
+        const dateText = ukTime.toISODate();
+
+        const result = {
+          source: 'MSHUK',
+          date: dateText,
+          times: data
+        };
+
+        console.log('Données extraites avec succès:', result);
+        return result;
+
       } catch (error) {
         retryCount++;
         console.log(`Tentative ${retryCount}/${maxRetries} échouée:`, error.message);
@@ -144,53 +168,6 @@ const scrapeCentralMosque = async () => {
         await randomDelay(3000, 5000);
       }
     }
-
-    console.log('Attente des éléments de prière...');
-    await page.waitForSelector('.mptt-wrapper-container', { 
-      timeout: 15000,
-      visible: true 
-    });
-
-    const ukTime = DateTime.now().setZone('Europe/London');
-    const dateText = ukTime.toISODate();
-
-    console.log('Extraction des données...');
-    const data = await page.evaluate(() => {
-      const prayers = {};
-      const prayerElements = document.querySelectorAll('.prayer-time');
-
-      prayerElements.forEach(element => {
-        const titleElement = element.querySelector('.mptt-sec-title');
-        const jamaatElement = element.querySelector('.prayer-jamaat');
-
-        if (titleElement && jamaatElement) {
-          let title = titleElement.textContent.trim().toLowerCase();
-          const jamaatTime = jamaatElement.textContent.trim();
-
-          if (title === 'zuhr') {
-            title = 'dhuhr';
-          }
-
-          prayers[title] = jamaatTime;
-        }
-      });
-
-      return prayers;
-    });
-
-    const formattedTimes = {};
-    for (const [prayer, time] of Object.entries(data)) {
-      formattedTimes[prayer] = convertTo24Hour(time);
-    }
-
-    const result = {
-      source: 'Central Mosque Birmingham',
-      date: dateText,
-      times: formattedTimes
-    };
-
-    console.log('Données extraites avec succès:', result);
-    return result;
 
   } catch (error) {
     console.error('Erreur détaillée lors du scraping:', error);
@@ -203,4 +180,4 @@ const scrapeCentralMosque = async () => {
   }
 };
 
-module.exports = scrapeCentralMosque;
+module.exports = scrapeMSHUK;

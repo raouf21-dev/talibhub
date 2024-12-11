@@ -1,103 +1,145 @@
-// aishaMosqueWalsall.js
-
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+const { executablePath } = require('puppeteer');
+const { DateTime } = require('luxon');
+const fs = require('fs');
 
-// Utilisation du plugin Stealth pour éviter la détection
-puppeteer.use(StealthPlugin());
+// Configuration StealthPlugin
+const stealth = StealthPlugin();
+stealth.enabledEvasions.delete('webgl.vendor');
+stealth.enabledEvasions.delete('webgl.renderer');
+
+puppeteer.use(stealth);
+
+const userAgents = [
+ 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.5845.111 Safari/537.36',
+ 'Mozilla/5.0 (Macintosh; Intel Mac OS X 11_2_3) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.3 Safari/605.1.15',
+ 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36',
+ 'Mozilla/5.0 (iPad; CPU OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1',
+ 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:116.0) Gecko/20100101 Firefox/116.0'
+];
 
 const scrapeAishaMosque = async () => {
-  let browser;
-  try {
-    // Lancer le navigateur en mode headless
-    browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] });
-    const page = await browser.newPage();
+ let browser;
+ try {
+   console.log('Démarrage du scraping...');
+   const randomUserAgent = userAgents[Math.floor(Math.random() * userAgents.length)];
 
-    // Définir un User Agent
-    await page.setUserAgent(
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36'
-    );
+   const launchOptions = {
+     headless: true,
+     args: [
+       '--no-sandbox',
+       '--disable-setuid-sandbox',
+       '--disable-dev-shm-usage',
+       '--disable-gpu',
+       '--disable-blink-features=AutomationControlled',
+       '--disable-features=IsolateOrigins,site-per-process',
+       '--window-size=1024,768',
+     ],
+     ignoreHTTPSErrors: true,
+   };
 
-    console.log('Navigating to the main page...');
-    await page.goto('https://www.aishamosque.org/', { waitUntil: 'networkidle2' });
-    console.log('Main page loaded successfully');
+   try {
+     if (fs.existsSync('/usr/bin/chromium-browser')) {
+       console.log('Utilisation de Chromium système');
+       launchOptions.executablePath = '/usr/bin/chromium-browser';
+     } else {
+       console.log('Utilisation de Chromium Puppeteer');
+       launchOptions.executablePath = executablePath();
+     }
+   } catch (error) {
+     console.log('Fallback sur Chromium Puppeteer');
+     launchOptions.executablePath = executablePath();
+   }
 
-    // Attendre que l'iframe soit chargé
-    await page.waitForSelector('iframe', { timeout: 30000 });
-    const frameHandle = await page.$('iframe');
-    const frame = await frameHandle.contentFrame();
+   browser = await puppeteer.launch(launchOptions);
+   const page = await browser.newPage();
 
-    if (!frame) {
-      throw new Error("Unable to access iframe content (possibly due to cross-origin restrictions).");
-    }
+   await page.setUserAgent(randomUserAgent);
+   await page.setDefaultNavigationTimeout(45000);
+   await page.setViewport({ width: 1024, height: 768 });
 
-    // Attendre que la date et les horaires soient chargés
-    await frame.waitForSelector('.mbx-widget-timetable-nav-date', { timeout: 15000 });
-    await frame.waitForSelector('.styles__Item-sc-1h272ay-1', { timeout: 15000 });
+   console.log('Navigation vers Aisha Mosque...');
+   await page.goto('https://www.aishamosque.org/', { waitUntil: 'networkidle2' });
+   console.log('Page principale chargée avec succès');
 
-    const data = await frame.evaluate(() => {
-      const times = {};
+   await page.waitForSelector('iframe', { timeout: 30000 });
+   const frameHandle = await page.$('iframe');
+   const frame = await frameHandle.contentFrame();
 
-      // Utiliser la date système
-      const dateText = new Date().toISOString().split('T')[0]; // Format "YYYY-MM-DD"
+   if (!frame) {
+     throw new Error("Unable to access iframe content (possibly due to cross-origin restrictions).");
+   }
 
-      const prayerItems = document.querySelectorAll('.styles__Item-sc-1h272ay-1');
+   await frame.waitForSelector('.mbx-widget-timetable-nav-date', { timeout: 15000 });
+   await frame.waitForSelector('.styles__Item-sc-1h272ay-1', { timeout: 15000 });
 
-      prayerItems.forEach((item) => {
-        const titleElement = item.querySelector('.title');
-        const timeElement = item.querySelector('.time.mono');
+   console.log('Extraction des données...');
+   const ukTime = DateTime.now().setZone('Europe/London');
+   const dateText = ukTime.toISODate();
 
-        if (titleElement && timeElement) {
-          let prayerName = titleElement.textContent.trim().toLowerCase();
+   const times = await frame.evaluate(() => {
+     const prayerTimes = {};
+     const prayerItems = document.querySelectorAll('.styles__Item-sc-1h272ay-1');
 
-          // Normalisation des noms de prières
-          if (prayerName === 'zuhr') prayerName = 'dhuhr';
-          if (prayerName === 'dhuhr') prayerName = 'dhuhr';
-          if (prayerName === 'jummah' || prayerName === "jumu'ah") prayerName = 'jumuah';
+     prayerItems.forEach((item) => {
+       const titleElement = item.querySelector('.title');
+       const timeElement = item.querySelector('.time.mono');
 
-          const allowedPrayers = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
+       if (titleElement && timeElement) {
+         let prayerName = titleElement.textContent.trim().toLowerCase();
+         let timeText = timeElement.textContent.trim();
 
-          if (allowedPrayers.includes(prayerName)) {
-            let timeText = timeElement.textContent.trim();
+         if (prayerName === 'zuhr') prayerName = 'dhuhr';
 
-            // Remplacer les séparateurs par un deux-points si nécessaire
-            timeText = timeText.replace('•', ':');
+         const allowedPrayers = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
 
-            // Utiliser une expression régulière pour formater le temps
-            const regex = /^(\d{1,2})(\d{2})(AM|PM)?$/i;
-            const match = timeText.match(regex);
+         if (allowedPrayers.includes(prayerName)) {
+           const regex = /^(\d{1,2})(\d{2})(AM|PM)?$/i;
+           const match = timeText.match(regex);
 
-            if (match) {
-              const hours = parseInt(match[1], 10);
-              const minutes = match[2];
-              const ampm = match[3] ? ` ${match[3].toUpperCase()}` : '';
-              const formattedTime = `${hours}:${minutes}${ampm}`;
-              times[prayerName] = formattedTime;
-            } else {
-              times[prayerName] = timeText;
-            }
-          }
-        }
-      });
+           if (match) {
+             let hours = parseInt(match[1], 10);
+             const minutes = match[2];
+             const period = match[3] ? match[3].toUpperCase() : '';
 
-      return { dateText, times };
-    });
+             if (period === 'PM' && hours < 12) hours += 12;
+             if (period === 'AM' && hours === 12) hours = 0;
 
-    if (!data) {
-      throw new Error("Data could not be extracted.");
-    }
+             prayerTimes[prayerName] = `${hours.toString().padStart(2, '0')}:${minutes}`;
+           } else {
+             timeText = timeText.replace(/[^0-9]/g, '');
+             if (timeText.length === 3 || timeText.length === 4) {
+               const hours = parseInt(timeText.slice(0, timeText.length - 2), 10);
+               const minutes = timeText.slice(-2);
+               prayerTimes[prayerName] = `${hours.toString().padStart(2, '0')}:${minutes}`;
+             }
+           }
+         }
+       }
+     });
 
-    console.log('Date extraite:', data.dateText);
-    console.log('Horaires extraits:', data.times);
+     return prayerTimes;
+   });
 
-    return data;
-  } catch (error) {
-    console.error('Error during scraping:', error);
-  } finally {
-    if (browser) {
-      await browser.close();
-    }
-  }
+   const result = {
+     source: 'Aisha Mosque Walsall',
+     date: dateText,
+     times: times
+   };
+
+   console.log('Données extraites avec succès:', result);
+   return result;
+
+ } catch (error) {
+   console.error('Erreur lors du scraping:', error);
+   throw error;
+ } finally {
+   if (browser) {
+     await browser.close();
+     console.log('Navigateur fermé');
+   }
+ }
 };
 
 module.exports = scrapeAishaMosque;
