@@ -1,11 +1,9 @@
 // auth.js
-
 import { switchTab, initializeTabToggle, navigateTo } from "./utils.js";
 import { BotTracker } from "./bot-tracker.js";
 import CaptchaHandler from './captcha.js';
-import { apiClient} from './Config/apiConfig.js';
-import { authService } from './Services/authService.js';
-
+import { apiClient } from './Config/apiConfig.js';
+import { api } from './dynamicLoader.js';
 
 const botTracker = new BotTracker();
 const captchaHandler = new CaptchaHandler();
@@ -122,8 +120,8 @@ async function handleSignup(event) {
             throw new Error("Les adresses email ne correspondent pas");
         }
 
-        // Utilisation de l'authService pour l'inscription
-        await authService.register(formData);
+        // Utilisation du nouveau service API avec loader
+        await api.post('/auth/register', formData);
         alert("Inscription réussie!");
         navigateTo("dashboard");
     } catch (error) {
@@ -138,13 +136,20 @@ async function handleSignin(event) {
     event.preventDefault();
     
     try {
-        const email = document.getElementById("welcomepage-signin-email").value;
-        const password = document.getElementById("welcomepage-signin-password").value;
+        const credentials = {
+            email: document.getElementById("welcomepage-signin-email").value,
+            password: document.getElementById("welcomepage-signin-password").value
+        };
 
-        // Utilisation de l'authService pour la connexion
-        await authService.login(email, password);
-        console.log("Connexion réussie, redirection vers le tableau de bord");
-        setTimeout(() => navigateTo("dashboard"), 1000);
+        // Utilisation du nouveau service API avec loader
+        const response = await api.post('/auth/login', credentials);
+        if (response && response.token) {
+            api.updateToken(response.token);
+            console.log("Connexion réussie, redirection vers le tableau de bord");
+            setTimeout(() => navigateTo("dashboard"), 1000);
+        } else {
+            throw new Error("Token de connexion non reçu");
+        }
     } catch (error) {
         console.error("Erreur détaillée:", error);
         alert("Erreur lors de la connexion : " + error.message);
@@ -168,7 +173,7 @@ function initializeCountryInput() {
     async function loadCountries(lang) {
         try {
             if (!countryCache[lang]) {
-                const response = await apiClient.get(`/data/countries_${lang}.json`);
+                const response = await api.get(`/data/countries_${lang}.json`);
                 countryCache[lang] = response;
             }
             countries = countryCache[lang];

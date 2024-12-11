@@ -1,43 +1,5 @@
-// tasks.js
-
 import { escapeHTML } from './utils.js';
-
-async function makeAuthenticatedRequest(url, options = {}) {
-    const defaultOptions = {
-        credentials: 'include', // Pour les cookies
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}` // Fallback token
-        }
-    };
-
-    const finalOptions = {
-        ...defaultOptions,
-        ...options,
-        headers: {
-            ...defaultOptions.headers,
-            ...options.headers
-        }
-    };
-
-    try {
-        const response = await fetch(url, finalOptions);
-        
-        if (response.status === 401) {
-            window.location.href = '/welcomepage';
-            return;
-        }
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        return response;
-    } catch (error) {
-        console.error('Request error:', error);
-        throw error;
-    }
-}
+import { api } from './dynamicLoader.js';
 
 function initializeTasks() {
     loadTasks();
@@ -73,13 +35,11 @@ function initializeTasks() {
 
 async function loadTasks() {
     try {
-        const response = await makeAuthenticatedRequest('/api/tasks/getAllTasks');
-        const tasks = await response.json();
+        const tasks = await api.get('/tasks/getAllTasks');
 
         const taskList = document.getElementById('todo-task-list');
         const taskSelect = document.getElementById('task-select');
 
-        // Mise à jour du DOM pour afficher les tâches dans la liste
         if (taskList) {
             taskList.innerHTML = '';
             tasks.forEach(task => {
@@ -108,7 +68,6 @@ async function loadTasks() {
             });
         }
 
-        // Mise à jour du sélecteur de tâches s'il existe
         if (taskSelect) {
             taskSelect.innerHTML = '<option value="">Sélectionnez une tâche</option>';
             tasks.forEach(task => {
@@ -119,10 +78,12 @@ async function loadTasks() {
             });
         }
 
-        // Sauvegarde des tâches localement
         localStorage.setItem('tasks', JSON.stringify(tasks));
     } catch (error) {
         console.error('Error loading tasks:', error);
+        if (error.status === 401) {
+            window.location.href = '/welcomepage';
+        }
     }
 }
 
@@ -132,11 +93,7 @@ async function addNewTask() {
     if (taskName === '') return;
 
     try {
-        await makeAuthenticatedRequest('/api/tasks/addTask', {
-            method: 'POST',
-            body: JSON.stringify({ name: taskName })
-        });
-
+        await api.post('/tasks/addTask', { name: taskName });
         newTaskInput.value = '';
         await loadTasks();
     } catch (error) {
@@ -149,9 +106,8 @@ async function toggleTask(taskId) {
         const taskElement = document.querySelector(`#todo-task-${taskId}`).closest('.todo-item');
         const isCompleted = taskElement.classList.toggle('completed');
 
-        await makeAuthenticatedRequest(`/api/tasks/updateTask/${taskId}`, {
-            method: 'PUT',
-            body: JSON.stringify({ completed: isCompleted })
+        await api.put(`/tasks/updateTask/${taskId}`, { 
+            completed: isCompleted 
         });
     } catch (error) {
         console.error('Error toggling task:', error);
@@ -161,9 +117,7 @@ async function toggleTask(taskId) {
 
 async function removeTask(taskId) {
     try {
-        await makeAuthenticatedRequest(`/api/tasks/deleteTask/${taskId}`, {
-            method: 'DELETE'
-        });
+        await api.delete(`/tasks/deleteTask/${taskId}`);
         await loadTasks();
     } catch (error) {
         console.error('Error deleting task:', error);
@@ -175,9 +129,8 @@ async function renameTask(taskId) {
     if (!newName || newName.trim() === "") return;
 
     try {
-        await makeAuthenticatedRequest(`/api/tasks/updateTask/${taskId}`, {
-            method: 'PUT',
-            body: JSON.stringify({ name: newName.trim() })
+        await api.put(`/tasks/updateTask/${taskId}`, { 
+            name: newName.trim() 
         });
         await loadTasks();
     } catch (error) {

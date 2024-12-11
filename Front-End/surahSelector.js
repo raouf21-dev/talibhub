@@ -1,10 +1,9 @@
-// surahSelector.js
 import { navigateTo } from './utils.js';
+import { api } from './dynamicLoader.js';
 
 function initializeSurahSelector() {
     const surahSelectorSection = document.getElementById('salatSurahSelector');
     if (surahSelectorSection) {
-        // Ajouter les écouteurs d'événements
         surahSelectorSection.addEventListener('click', function(event) {
             const target = event.target.closest('[data-action]');
             if (target) {
@@ -25,7 +24,6 @@ function initializeSurahSelector() {
             }
         });
 
-        // Appeler ici le code d'initialisation de l'application
         (async () => {
             try {
                 await loadAllSourates();
@@ -34,11 +32,8 @@ function initializeSurahSelector() {
                 generateSourateList();
                 updateKnownSouratesCount();
                 updateRecitationInfo(recitationData);
-                // Si vous avez une fonction pour initialiser l'historique, appelez-la ici
-                // initializeHistory();
             } catch (error) {
                 console.error('Erreur lors de l\'initialisation de l\'application:', error);
-                // Gérer l'erreur de manière appropriée, par exemple en affichant un message à l'utilisateur
             }
         })();
 
@@ -54,47 +49,26 @@ let recitationProgress = { totalKnown: 0, recitedAtLeastOnce: 0 };
 let cyclesCount = 0;
 let isHistoryVisible = false;
 
-
 async function loadAllSourates() {
     try {
-        const response = await fetch(`/api/sourates`, {
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error('Erreur lors du chargement des sourates');
-        }
-
-        const data = await response.json();
+        const data = await api.get('/sourates');
         sourates.length = 0;
         sourates.push(...data);
         console.log('Sourates chargées:', sourates.length);
     } catch (error) {
-        console.error('Erreur lors du chargement des sourates :', error.message);
+        console.error('Erreur lors du chargement des sourates:', error.message);
         throw error;
     }
 }
 
 async function loadKnownSourates() {
     try {
-        const response = await fetch(`/api/sourates/known`, {
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
-        });
-        if (!response.ok) {
-            throw new Error('Erreur lors du chargement des sourates connues');
-        }
-        const data = await response.json();
-        // Assurez-vous que data est un tableau d'objets avec une propriété sourate_number
+        const data = await api.get('/sourates/known');
         knownSourates = data.filter(s => s && s.sourate_number).map(s => s.sourate_number);
         localStorage.setItem('knownSourates', JSON.stringify(knownSourates));
         console.log('Sourates connues chargées:', knownSourates);
     } catch (error) {
-        console.error('Erreur lors du chargement des sourates connues :', error);
-        // Chargement depuis le localStorage en cas d'erreur
+        console.error('Erreur lors du chargement des sourates connues:', error);
         knownSourates = JSON.parse(localStorage.getItem('knownSourates') || '[]');
         console.log('Utilisation des sourates connues du localStorage:', knownSourates);
     }
@@ -108,25 +82,13 @@ async function saveKnownSourates() {
     ));
 
     try {
-        const response = await fetch(`/api/sourates/known`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            },
-            body: JSON.stringify({ sourates: selectedSourates })
-        });
-
-        if (!response.ok) {
-            throw new Error('Erreur de sauvegarde des sourates');
-        }
-
+        await api.post('/sourates/known', { sourates: selectedSourates });
         console.log('Sourates connues sauvegardées avec succès');
         knownSourates = selectedSourates;
         localStorage.setItem('knownSourates', JSON.stringify(knownSourates));
         updateKnownSouratesCount();
     } catch (error) {
-        console.error('Erreur lors de la sauvegarde des sourates connues :', error);
+        console.error('Erreur lors de la sauvegarde des sourates connues:', error);
     }
 }
 
@@ -140,7 +102,6 @@ function generateSourateList() {
     
     sourateList.innerHTML = '';
 
-    // Parcours du tableau en ordre inverse
     for (let i = sourates.length - 1; i >= 0; i--) {
         const sourate = sourates[i];
         const checkbox = document.createElement('input');
@@ -166,7 +127,6 @@ function generateSourateList() {
     console.log('Fin de la génération de la liste des sourates');
 }
 
-
 function updateKnownSouratesCount() {
     const countElement = document.getElementById('knownSouratesCount');
     if (countElement) {
@@ -177,22 +137,8 @@ function updateKnownSouratesCount() {
 async function loadRecitationInfo() {
     try {
         console.log('Début du chargement des informations de récitation');
-        const response = await fetch(`/api/sourates/recitations/stats`, {
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
-        });
-        console.log('Réponse reçue:', response);
-        console.log('Statut de la réponse:', response.status);
-        
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error('Contenu de la réponse en erreur:', errorText);
-            throw new Error(`Erreur lors du chargement des informations de récitation: ${response.status} ${response.statusText}`);
-        }
-        
-        const data = await response.json();
-        console.log('Données reçues:', data);
+        const data = await api.get('/sourates/recitations/stats');
+        console.log('Statistiques reçues:', data);
         
         return {
             cycles: data.complete_cycles || 0,
@@ -200,59 +146,30 @@ async function loadRecitationInfo() {
             total_known: data.total_known || 0
         };
     } catch (error) {
-        console.error('Erreur détaillée lors du chargement des informations de récitation:', error);
-        // Retourner des valeurs par défaut en cas d'erreur
+        console.error('Erreur lors du chargement des informations de récitation:', error);
         return { cycles: 0, recited_at_least_once: 0, total_known: 0 };
     }
 }
 
-
 async function selectRandomSourates() {
     try {
-        // Récupérer les sourates connues
-        const response = await fetch(`/api/sourates/known`, {
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
-        });
+        const knownSouratesData = await api.get('/sourates/known');
 
-        if (!response.ok) {
-            throw new Error('Erreur lors de la récupération des sourates connues');
-        }
-
-        const knownSouratesData = await response.json();
-
-        // Vérifier qu'au moins une sourate est connue
         if (knownSouratesData.length < 1) {
             throw new Error('Veuillez sélectionner au moins une sourate connue pour la récitation.');
         }
 
-        // Obtenir les sourates non récitées dans le cycle actuel
         let notRecitedSourates = await getNotRecitedSourates();
-
-        // Si moins de 2 sourates non récitées, inclure les sourates déjà récitées pour compléter la paire
         let selectableSourates = [...notRecitedSourates];
+
         if (notRecitedSourates.length < 2) {
-            // Récupérer toutes les sourates connues pour compléter la paire
             const allKnownSourateNumbers = knownSouratesData.map(s => s.sourate_number);
-            const responseAllSourates = await fetch(`/api/sourates/by-numbers`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                },
-                body: JSON.stringify({ sourateNumbers: allKnownSourateNumbers })
+            const allKnownSouratesData = await api.post('/sourates/by-numbers', { 
+                sourateNumbers: allKnownSourateNumbers 
             });
-
-            if (!responseAllSourates.ok) {
-                throw new Error('Erreur lors de la récupération des sourates connues');
-            }
-
-            const allKnownSouratesData = await responseAllSourates.json();
             selectableSourates = allKnownSouratesData;
         }
 
-        // Vérifier qu'il y a au moins une sourate sélectionnable
         if (selectableSourates.length < 1) {
             throw new Error('Aucune sourate disponible pour la récitation.');
         }
@@ -260,16 +177,13 @@ async function selectRandomSourates() {
         let firstSourate, secondSourate;
 
         if (selectableSourates.length === 1) {
-            // Si une seule sourate est disponible, utiliser la même pour les deux rakas
             firstSourate = secondSourate = selectableSourates[0];
         } else {
-            // Sélectionner deux sourates différentes
             const shuffledSourates = selectableSourates.sort(() => Math.random() - 0.5);
             firstSourate = shuffledSourates[0];
             secondSourate = shuffledSourates.find(s => s.number !== firstSourate.number) || firstSourate;
         }
 
-        // Vérifier l'ordre des sourates et inverser si nécessaire
         if (firstSourate.number > secondSourate.number) {
             [firstSourate, secondSourate] = [secondSourate, firstSourate];
         }
@@ -277,26 +191,12 @@ async function selectRandomSourates() {
         document.getElementById('firstRaka').textContent = `${firstSourate.number}. ${firstSourate.name}`;
         document.getElementById('secondRaka').textContent = `${secondSourate.number}. ${secondSourate.name}`;
 
-        // Enregistrer la récitation
-        const selectResponse = await fetch(`/api/sourates/recitations`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            },
-            body: JSON.stringify({ 
-                firstSourate: firstSourate.number, 
-                secondSourate: secondSourate.number 
-            })
+        const data = await api.post('/sourates/recitations', {
+            firstSourate: firstSourate.number,
+            secondSourate: secondSourate.number
         });
 
-        if (!selectResponse.ok) {
-            throw new Error('Erreur lors de l\'enregistrement de la récitation');
-        }
-
-        const data = await selectResponse.json();
         console.log('Données reçues après l\'enregistrement de la récitation:', data);
-        
         await getRecitationStats();
 
     } catch (error) {
@@ -306,20 +206,28 @@ async function selectRandomSourates() {
 }
 
 async function getNotRecitedSourates() {
-    const notRecitedSouratesResponse = await fetch(`/api/sourates/recitations/not-recited`, {
-        headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-    });
-
-    if (!notRecitedSouratesResponse.ok) {
-        throw new Error('Erreur lors de la récupération des sourates non récitées');
-    }
-
-    const notRecitedSourates = await notRecitedSouratesResponse.json();
+    const notRecitedSourates = await api.get('/sourates/recitations/not-recited');
     return notRecitedSourates;
 }
 
+async function toggleRecitationHistory() {
+    const historySection = document.getElementById('recitationHistory');
+    isHistoryVisible = !isHistoryVisible;
+    
+    if (isHistoryVisible) {
+        try {
+            const data = await api.get('/sourates/recitations/history');
+            displayRecitationHistory(data);
+            historySection.style.display = 'block';
+        } catch (error) {
+            console.error('Erreur lors du chargement de l\'historique:', error);
+            alert('Erreur lors du chargement de l\'historique de récitation');
+            isHistoryVisible = false;
+        }
+    } else {
+        historySection.style.display = 'none';
+    }
+}
 
 function displayRecitationHistory(history) {
     const historyContainer = document.getElementById('recitationHistory');
@@ -340,17 +248,7 @@ function displayRecitationHistory(history) {
 
 async function getRecitationStats() {
     try {
-        const response = await fetch(`/api/sourates/recitations/stats`, {
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error('Erreur lors de la récupération des statistiques');
-        }
-
-        const stats = await response.json();
+        const stats = await api.get('/sourates/recitations/stats');
         console.log('Statistiques récupérées:', stats);
         updateRecitationInfo(stats);
     } catch (error) {
@@ -374,11 +272,4 @@ function updateRecitationInfo(data) {
     }
 }
 
-
-function initializeHistory() {
-    // Cette fonction est maintenant gérée par le gestionnaire d'événements `data-action`
-    // Supprimez toute logique redondante ici si nécessaire
-}
-
-// Exportation des fonctions nécessaires
 export { initializeSurahSelector };

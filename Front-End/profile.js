@@ -1,6 +1,5 @@
-// profile.js
-
 import { navigateTo } from './utils.js';
+import { api } from './dynamicLoader.js';
 
 function initializeProfile() {
     loadProfile();
@@ -21,7 +20,6 @@ function initializeProfile() {
     }
 }
 
-// Fonction pour charger le profil de l'utilisateur
 async function loadProfile() {
     try {
         const token = localStorage.getItem('token');
@@ -31,19 +29,7 @@ async function loadProfile() {
             return;
         }
 
-        const response = await fetch(`/api/auth/profile`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const user = await response.json();
+        const user = await api.get('/auth/profile');
         console.log('Données du profil complètes:', user);
 
         const setAndLogValue = (id, value) => {
@@ -69,34 +55,20 @@ async function loadProfile() {
     }
 }
 
-// Fonction pour mettre à jour le profil
 async function updateProfile(event) {
     event.preventDefault();
 
-    const username = document.getElementById('usernameprofil').value;
-    const lastName = document.getElementById('last-nameprofil').value;
-    const firstName = document.getElementById('first-nameprofil').value;
-    const age = document.getElementById('ageprofil').value;
-    const gender = document.getElementById('genderprofil').value;
-    const email = document.getElementById('emailprofil').value;
+    const profileData = {
+        username: document.getElementById('usernameprofil').value,
+        lastName: document.getElementById('last-nameprofil').value,
+        firstName: document.getElementById('first-nameprofil').value,
+        age: document.getElementById('ageprofil').value,
+        gender: document.getElementById('genderprofil').value,
+        email: document.getElementById('emailprofil').value
+    };
 
     try {
-        const token = localStorage.getItem('token');
-        const response = await fetch(`/api/auth/updateProfile`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({
-                username, lastName, firstName, age, gender, email
-            })
-        });
-
-        if (!response.ok) {
-            throw new Error('Erreur lors de la mise à jour du profil');
-        }
-
+        await api.post('/auth/updateProfile', profileData);
         alert('Profil mis à jour avec succès');
     } catch (error) {
         console.error('Erreur:', error);
@@ -104,7 +76,6 @@ async function updateProfile(event) {
     }
 }
 
-// Fonction pour changer le mot de passe
 async function handleChangePassword(event) {
     event.preventDefault();
 
@@ -131,49 +102,36 @@ async function handleChangePassword(event) {
             return;
         }
 
-        const response = await fetch(`/api/auth/changePassword`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({ currentPassword, newPassword })
+        await api.post('/auth/changePassword', { 
+            currentPassword, 
+            newPassword 
         });
-
-        if (!response.ok) {
-            let errorData = {};
-            try {
-                errorData = await response.json();
-            } catch (parseError) {
-                console.error('Failed to parse error response:', parseError);
-            }
-
-            const errorMessage = errorData.message || 'Une erreur est survenue lors du changement de mot de passe.';
-            alert(`Erreur: ${errorMessage}`);
-            return;
-        }
 
         alert('Mot de passe changé avec succès');
         document.getElementById('passwordChangeForm').reset();
     } catch (error) {
         console.error('Erreur:', error);
-        alert('Erreur lors du changement de mot de passe : ' + error.message);
+        if (error.response) {
+            const errorMessage = error.response.message || 'Une erreur est survenue lors du changement de mot de passe.';
+            alert(`Erreur: ${errorMessage}`);
+        } else {
+            alert('Erreur lors du changement de mot de passe : ' + error.message);
+        }
     }
 }
 
-// Fonction pour afficher/masquer le mot de passe
 function toggleNewPasswordVisibility() {
     const newPasswordField = document.getElementById('new-password');
     const confirmNewPasswordField = document.getElementById('confirm-new-password');
-    if (newPasswordField.type === 'password') {
-        newPasswordField.type = 'text';
-        confirmNewPasswordField.type = 'text';
-    } else {
-        newPasswordField.type = 'password';
-        confirmNewPasswordField.type = 'password';
+    if (newPasswordField && confirmNewPasswordField) {
+        if (newPasswordField.type === 'password') {
+            newPasswordField.type = 'text';
+            confirmNewPasswordField.type = 'text';
+        } else {
+            newPasswordField.type = 'password';
+            confirmNewPasswordField.type = 'password';
+        }
     }
 }
 
-// Exportation des fonctions nécessaires
 export { initializeProfile };
-

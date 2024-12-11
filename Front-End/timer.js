@@ -1,6 +1,6 @@
-// timer.js
 import { updateDOMIfExists } from './utils.js';
 import { loadTasks } from './tasks.js';
+import { api } from './dynamicLoader.js';
 
 // Variables globales
 let isRunning = false;
@@ -20,7 +20,6 @@ let currentSessionId = null;
 let taskLastSessionId = null;
 let totalWorkTime = 0;
 
-// Fonction pour initialiser le module Timer
 function initializeTimer() {
     loadTasks();
     loadSessionFromCache();
@@ -28,7 +27,6 @@ function initializeTimer() {
     updateTaskTitle();
     enableControls();
 
-    // Gestionnaire d'événements pour la section apprentissage
     const apprentissageSection = document.getElementById('apprentissage');
     if (apprentissageSection) {
         apprentissageSection.addEventListener('click', function(event) {
@@ -65,23 +63,19 @@ function initializeTimer() {
         });
     }
 
-    // Gestionnaire pour sélection de tâche
     const taskSelect = document.getElementById('task-select');
     if (taskSelect) {
         taskSelect.addEventListener('change', updateTaskTitle);
     }
 
-    // Gestionnaire pour l'ajout manuel de temps
     const addManualTimeBtn = document.getElementById('add-manual-time-btn');
     if (addManualTimeBtn) {
         addManualTimeBtn.addEventListener('click', addManualTime);
     }
 
-    // Mise à jour de l'affichage initial du timer
     updateTimerDisplay();
 }
 
-// Fonction pour activer/désactiver les contrôles
 function enableControls() {
     const controls = document.querySelectorAll('.session-control');
     controls.forEach(control => {
@@ -89,12 +83,11 @@ function enableControls() {
     });
 }
 
-// Fonction pour mettre à jour le titre de la tâche sélectionnée
 async function updateTaskTitle(forceRefresh = false) {
     const taskSelect = document.getElementById('task-select');
     const selectedTaskTitle = document.getElementById('counter-task-title');
-    const selectedTask = taskSelect.options[taskSelect.selectedIndex].text;
-    selectedTaskId = taskSelect.value;
+    const selectedTask = taskSelect?.options[taskSelect.selectedIndex]?.text;
+    selectedTaskId = taskSelect?.value;
 
     console.log('Selected task:', selectedTask, 'Task ID:', selectedTaskId);
 
@@ -112,20 +105,7 @@ async function updateTaskTitle(forceRefresh = false) {
     selectedTaskTitle.textContent = selectedTask;
 
     try {
-        const response = await fetch(`/api/session/last/${selectedTaskId}`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            },
-            cache: forceRefresh ? 'no-cache' : 'default'
-        });
-
-        if (!response.ok) {
-            throw new Error(`Erreur ${response.status}: ${await response.text()}`);
-        }
-
-        const data = await response.json();
+        const data = await api.get(`/session/last/${selectedTaskId}`);
 
         if (data.message === 'No previous session found for this task') {
             Counter.value = 0;
@@ -161,7 +141,6 @@ async function updateTaskTitle(forceRefresh = false) {
     }
 }
 
-// Fonction pour démarrer une nouvelle session
 async function startNewSession() {
     if (!selectedTaskId) {
         alert("Veuillez sélectionner une tâche avant de créer une nouvelle session.");
@@ -174,13 +153,7 @@ async function startNewSession() {
     }
 
     try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-            throw new Error('No authentication token found');
-        }
-
         await updateTaskTitle(true);
-
         document.getElementById('current-session-id').textContent = 'Nouvelle Session en cours';
 
         timerTime = 0;
@@ -193,14 +166,12 @@ async function startNewSession() {
         isSessionActive = true;
         enableControls();
         document.getElementById('start-new-session').disabled = true;
-
     } catch (error) {
         console.error('Erreur lors de l\'initialisation de la nouvelle session:', error);
         alert('Erreur lors de l\'initialisation de la nouvelle session: ' + error.message);
     }
 }
 
-// Sauvegarder l'état actuel des outils dans le cache local
 function saveSessionToCache() {
     const sessionData = {
         sessionId: currentSessionId,
@@ -214,7 +185,6 @@ function saveSessionToCache() {
     localStorage.setItem('currentSessionData', JSON.stringify(sessionData));
 }
 
-// Charger les données de session du cache local
 async function loadSessionFromCache() {
     const savedSession = JSON.parse(localStorage.getItem('currentSessionData'));
     if (savedSession) {
@@ -238,7 +208,6 @@ async function loadSessionFromCache() {
     enableControls();
 }
 
-// Enregistrer les données de session au serveur
 async function saveSessionData() {
     if (!selectedTaskId || !isSessionActive) {
         alert("Aucune session active à enregistrer.");
@@ -248,28 +217,15 @@ async function saveSessionData() {
     const totalWorkTime = calculateTotalWorkTime();
 
     try {
-        const saveResponse = await fetch(`/api/session/save`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            },
-            body: JSON.stringify({
-                taskId: selectedTaskId,
-                totalWorkTime: totalWorkTime,
-                stopwatchTime: stopwatchTime,
-                timerTime: timerTime,
-                counterValue: Counter.value
-            })
+        await api.post('/session/save', {
+            taskId: selectedTaskId,
+            totalWorkTime: totalWorkTime,
+            stopwatchTime: stopwatchTime,
+            timerTime: timerTime,
+            counterValue: Counter.value
         });
 
-        if (!saveResponse.ok) {
-            throw new Error('Erreur lors de l\'enregistrement des données de la session');
-        }
-
-        const saveData = await saveResponse.json();
         alert('Données de la session sauvegardées avec succès.');
-
         await updateTaskTitle(true);
 
         timerTime = 0;
@@ -298,7 +254,6 @@ async function saveSessionData() {
     }
 }
 
-// Mettre à jour l'affichage du Timer
 function updateTimer() {
     if (currentTime > 0) {
         currentTime--;
@@ -322,14 +277,12 @@ function updateTimer() {
     document.getElementById('total-work-time').textContent = formatTime(calculateTotalWorkTime());
 }
 
-// Fonction pour mettre à jour l'affichage du timer
 function updateTimerDisplay() {
     const minutes = Math.floor(currentTime / 60);
     const seconds = currentTime % 60;
     document.getElementById('time-left').textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
 }
 
-// Fonction pour démarrer/pauser le timer
 function toggleTimer() {
     if (!isSessionActive) {
         alert("Veuillez démarrer une nouvelle session avant d'utiliser le timer.");
@@ -354,12 +307,10 @@ function toggleTimer() {
     isRunning = !isRunning;
 }
 
-// Fonction pour calculer le temps total de travail
 function calculateTotalWorkTime() {
     return timerTime + stopwatchTime + manualTimeInSeconds;
 }
 
-// Fonction pour réinitialiser le timer
 function resetTimer() {
     clearInterval(timer);
     isRunning = false;
@@ -371,7 +322,6 @@ function resetTimer() {
     document.getElementById('total-work-time').textContent = formatTime(calculateTotalWorkTime());
 }
 
-// Fonction pour démarrer/pauser le chronomètre
 function toggleStopwatch() {
     if (!isSessionActive) {
         alert("Veuillez démarrer une nouvelle session avant d'utiliser le chronomètre.");
@@ -387,14 +337,12 @@ function toggleStopwatch() {
     }
 }
 
-// Fonction pour mettre à jour le chronomètre
 function updateStopwatch() {
     stopwatchTime++;
     document.getElementById('stopwatch-time').textContent = formatTime(stopwatchTime);
     document.getElementById('total-work-time').textContent = formatTime(calculateTotalWorkTime());
 }
 
-// Fonction pour réinitialiser le chronomètre
 function resetStopwatch() {
     clearInterval(stopwatchInterval);
     stopwatchInterval = null;
@@ -404,7 +352,6 @@ function resetStopwatch() {
     document.getElementById('total-work-time').textContent = formatTime(calculateTotalWorkTime());
 }
 
-// Formater le temps pour l'affichage
 function formatTime(timeInSeconds) {
     const hours = Math.floor(timeInSeconds / 3600);
     const minutes = Math.floor((timeInSeconds % 3600) / 60);
@@ -412,53 +359,47 @@ function formatTime(timeInSeconds) {
     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 }
 
-// Gérer le compteur
 function loadCounter() {
     const savedCounter = JSON.parse(localStorage.getItem('currentSessionData'));
-    if (savedCounter && savedCounter.counterValue !== undefined) {
+    if (savedCounter?.counterValue !== undefined) {
         Counter.value = savedCounter.counterValue;
         document.getElementById('counter-value').textContent = Counter.value;
     } else {
         Counter.value = 0;
         document.getElementById('counter-value').textContent = Counter.value;
     }
- }
- 
- // Fonction pour changer le compteur
- function changeCounter(value) {
+}
+
+function changeCounter(value) {
     if (!isSessionActive) {
         alert("Veuillez démarrer une nouvelle session avant d'utiliser le compteur.");
         return;
     }
     Counter.value = Math.max(0, Counter.value + value);
     document.getElementById('counter-value').textContent = Counter.value;
- }
- 
- // Fonction pour ajouter manuellement du temps d'étude
- function addManualTime() {
+}
+
+function addManualTime() {
     if (!isSessionActive) {
         alert("Veuillez démarrer une nouvelle session avant d'ajouter du temps manuellement.");
         return;
     }
- 
-    const hours = parseInt(document.getElementById('manual-hours').value) || 0;
-    const minutes = parseInt(document.getElementById('manual-minutes').value) || 0;
- 
+
+    const hours = parseInt(document.getElementById('manual-hours')?.value) || 0;
+    const minutes = parseInt(document.getElementById('manual-minutes')?.value) || 0;
+
     if (hours < 0 || minutes < 0 || minutes >= 60) {
         alert('Veuillez entrer un temps valide.');
         return;
     }
- 
+
     manualTimeInSeconds += (hours * 3600) + (minutes * 60);
- 
-    document.getElementById('manual-hours').value = '';
-    document.getElementById('manual-minutes').value = '';
- 
-    // Mettre à jour l'affichage du temps total
+
+    if (document.getElementById('manual-hours')) document.getElementById('manual-hours').value = '';
+    if (document.getElementById('manual-minutes')) document.getElementById('manual-minutes').value = '';
+
     document.getElementById('total-work-time').textContent = formatTime(calculateTotalWorkTime());
- 
     alert('Temps d\'étude ajouté manuellement.');
- }
- 
- // Exportation des fonctions nécessaires
- export { initializeTimer };
+}
+
+export { initializeTimer };
