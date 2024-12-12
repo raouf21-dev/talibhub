@@ -54,6 +54,7 @@ const scrapeMSHUK = async () => {
 
     const launchOptions = {
       headless: true,
+      executablePath: '/snap/bin/chromium',
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
@@ -61,7 +62,7 @@ const scrapeMSHUK = async () => {
         '--disable-gpu',
         '--disable-blink-features=AutomationControlled',
         '--disable-features=IsolateOrigins,site-per-process',
-        '--window-size=1024,768',
+        '--window-size=1920,1080',
       ],
       ignoreHTTPSErrors: true,
     };

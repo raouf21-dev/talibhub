@@ -31,18 +31,19 @@ const scrapeGreenLaneMasjidBham = async () => {
    const randomUserAgent = userAgents[Math.floor(Math.random() * userAgents.length)];
 
    const launchOptions = {
-     headless: true,
-     args: [
-       '--no-sandbox',
-       '--disable-setuid-sandbox',
-       '--disable-dev-shm-usage',
-       '--disable-gpu',
-       '--disable-blink-features=AutomationControlled',
-       '--disable-features=IsolateOrigins,site-per-process',
-       '--window-size=1024,768',
-     ],
-     ignoreHTTPSErrors: true,
-   };
+    headless: true,
+    executablePath: '/snap/bin/chromium',
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-gpu',
+      '--disable-blink-features=AutomationControlled',
+      '--disable-features=IsolateOrigins,site-per-process',
+      '--window-size=1920,1080',
+    ],
+    ignoreHTTPSErrors: true,
+  };
 
    try {
      if (fs.existsSync('/usr/bin/chromium-browser')) {

@@ -31,18 +31,19 @@ const scrapeMasjidAbuBakrWalsall = async () => {
    const randomUserAgent = userAgents[Math.floor(Math.random() * userAgents.length)];
 
    const launchOptions = {
-     headless: true,
-     args: [
-       '--no-sandbox',
-       '--disable-setuid-sandbox',
-       '--disable-dev-shm-usage',
-       '--disable-gpu',
-       '--disable-blink-features=AutomationControlled',
-       '--disable-features=IsolateOrigins,site-per-process',
-       '--window-size=1920,1080',
-     ],
-     ignoreHTTPSErrors: true,
-   };
+    headless: true,
+    executablePath: '/snap/bin/chromium',  // Chemin fixe vers Chromium snap
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-gpu',
+      '--disable-blink-features=AutomationControlled',
+      '--disable-features=IsolateOrigins,site-per-process',
+      '--window-size=1920,1080',
+    ],
+    ignoreHTTPSErrors: true,
+  };
 
    try {
      if (fs.existsSync('/usr/bin/chromium-browser')) {
@@ -56,8 +57,8 @@ const scrapeMasjidAbuBakrWalsall = async () => {
      console.log('Fallback sur Chromium Puppeteer');
      launchOptions.executablePath = executablePath();
    }
-
-   browser = await puppeteer.launch(launchOptions);
+   
+   browser = await puppeteer.launch(launchOptions);  
    const page = await browser.newPage();
 
    await page.setDefaultNavigationTimeout(45000);

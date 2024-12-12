@@ -37,6 +37,7 @@ const scrapeQubaIsmalicCenter = async () => {
 
     const launchOptions = {
       headless: true,
+      executablePath: '/snap/bin/chromium',
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
@@ -44,7 +45,7 @@ const scrapeQubaIsmalicCenter = async () => {
         '--disable-gpu',
         '--disable-blink-features=AutomationControlled',
         '--disable-features=IsolateOrigins,site-per-process',
-        '--window-size=800,600',
+        '--window-size=1920,1080',
       ],
       ignoreHTTPSErrors: true,
     };

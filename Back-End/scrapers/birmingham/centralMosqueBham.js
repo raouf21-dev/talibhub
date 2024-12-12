@@ -58,18 +58,17 @@ const scrapeCentralMosque = async () => {
 
     const launchOptions = {
       headless: true,
+      executablePath: '/snap/bin/chromium',
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
         '--disable-dev-shm-usage',
         '--disable-gpu',
-        '--disable-web-security',
-        '--disable-features=IsolateOrigins,site-per-process',
         '--disable-blink-features=AutomationControlled',
-        '--disable-infobars',
+        '--disable-features=IsolateOrigins,site-per-process',
         '--window-size=1920,1080',
       ],
-      ignoreHTTPSErrors: true
+      ignoreHTTPSErrors: true,
     };
 
     try {

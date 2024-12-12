@@ -27,6 +27,7 @@ const scrapeAishaMosque = async () => {
 
    const launchOptions = {
      headless: true,
+     executablePath: '/snap/bin/chromium',
      args: [
        '--no-sandbox',
        '--disable-setuid-sandbox',
@@ -34,23 +35,10 @@ const scrapeAishaMosque = async () => {
        '--disable-gpu',
        '--disable-blink-features=AutomationControlled',
        '--disable-features=IsolateOrigins,site-per-process',
-       '--window-size=1024,768',
+       '--window-size=1920,1080',
      ],
      ignoreHTTPSErrors: true,
    };
-
-   try {
-     if (fs.existsSync('/usr/bin/chromium-browser')) {
-       console.log('Utilisation de Chromium système');
-       launchOptions.executablePath = '/usr/bin/chromium-browser';
-     } else {
-       console.log('Utilisation de Chromium Puppeteer');
-       launchOptions.executablePath = executablePath();
-     }
-   } catch (error) {
-     console.log('Fallback sur Chromium Puppeteer');
-     launchOptions.executablePath = executablePath();
-   }
 
    browser = await puppeteer.launch(launchOptions);
    const page = await browser.newPage();
