@@ -156,7 +156,5 @@ const scrapeMasjidAlFarouq = async () => {
  }
 };
 
-scrapeMasjidAlFarouq();
-
 
 module.exports = scrapeMasjidAlFarouq;
