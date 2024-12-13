@@ -631,7 +631,7 @@ body {
 
 .dashboard-card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
   gap: 1rem;
 }
 
@@ -648,9 +648,11 @@ body {
 
 .dashboard-card img {
   height: auto;
-  min-height: 120px;
-  width: 10vw;
-  min-width: 100px;
+  max-height: 90px;
+  min-height: 70px;
+  width: 5vw;
+  max-width: 70px;
+  min-width: 50px;
 }
 
 .dashboard-card h2 {
@@ -668,7 +670,26 @@ body {
   color: #274c77;
 }
 
+@media (max-width: 1245px) {
+
+  .dashboard-card h2 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #274c77;
+  }
+}
+
 @media (max-width: 1024px) {
+
+  .dashboard-card-grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+
+  .dashboard-card h2 {
+    font-size: 1rem;
+  }
+
   .dashboard-main-content {
     margin-left: 0;
   }
@@ -699,36 +720,30 @@ body {
   }
 }
 
-@media (max-width: 1024px) {
-  .dashboard-main-content {
-    margin-left: 0;
-  }
+@media (max-width: 768px) {
 
-  .dashboard-main-content h1 {
-    font-size: 22px;
-    text-align: center;
-  }
-
-  .dashboard-sidebar {
-    transform: translateX(-100%);
-  }
-
-  .dashboard-sidebar.open {
-    transform: translateX(0);
-  }
-
-  .dashboard-close-btn {
-    display: block;
-  }
-
-  .dashboard-main-content {
-    margin-left: 0;
-  }
-
-  .dashboard-menu-btn {
-    display: block;
+  .dashboard-card h2 {
+    font-size: 0.90rem;
+    font-weight: 600;
+    color: #274c77;
   }
 }
+
+@media (max-width: 480px) {
+
+  .dashboard-card-grid {
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 1rem;
+  }
+
+  .dashboard-card h2 {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #274c77;
+  }
+}
+
+
 
 /*TalibTimer*/
 
