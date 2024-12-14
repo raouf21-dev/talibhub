@@ -46,17 +46,21 @@ export async function navigateTo(pageId, addToHistory = true) {
     });
     
     // Afficher la page cible
-    const activePage = document.getElementById(pageId);
-    if (activePage) {
-        activePage.style.display = 'block';
-        activePage.classList.add('active');
+    const targetPage = document.getElementById(pageId);
+    if (targetPage) {
+        targetPage.style.display = 'block';
+        targetPage.classList.add('active');
         if (addToHistory) {
             history.pushState({ pageId }, '', `/${pageId}`);
         }
+    } else {
+        console.warn(`Page not found: ${pageId}`);
+        return false;
     }
 
     updateNavVisibility(pageId);
     await loadInitialPage(pageId);
+    return true;
 }
 
 // Initialisation au chargement du DOM
@@ -115,9 +119,16 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 export function updateNavVisibility(pageId) {
-    const navHeader = document.getElementById('nav');
-    if (navHeader) {
-        navHeader.style.display = (pageId === 'welcomepage') ? 'none' : 'block';
+    // Gestion de la barre latérale
+    const sideNav = document.getElementById('nav');
+    if (sideNav) {
+        sideNav.style.display = (pageId === 'welcomepage') ? 'none' : 'block';
+    }
+
+    // Gestion de la barre supérieure
+    const topNav = document.querySelector('.top-nav');
+    if (topNav) {
+        topNav.classList.toggle('top-nav-hidden', pageId === 'welcomepage');
     }
 }
 
@@ -184,6 +195,20 @@ export function loadInitialPage(pageId) {
                 await contactModule.initializeContactForm();
             } catch (error) {
                 console.error('Erreur lors du chargement du formulaire de contact:', error);
+            }
+        },
+        'aboutus': async () => {
+            try {
+                console.log('About Us page loaded');
+                // Initialisation spécifique pour About Us si nécessaire
+                document.title = 'About Us - TalibHub';
+                // Assurez-vous que la page est visible
+                const aboutusPage = document.getElementById('aboutus');
+                if (aboutusPage) {
+                    aboutusPage.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Erreur lors du chargement de la page About Us:', error);
             }
         },
         'dashboard': async () => {

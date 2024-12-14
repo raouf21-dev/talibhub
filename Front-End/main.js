@@ -10,6 +10,8 @@ import { initializeMosqueTime } from "./mosqueTime.js";
 import { initSurahMemorization } from "./surahMemorization.js";
 import { langConfig } from './Config/apiConfig.js';
 import { initializeTimer } from './timer.js';
+import { initializeTopNav } from "./topnav.js";
+
 
 // Fonction pour vérifier l'état de l'authentification
 async function checkAuthStatus() {
@@ -64,6 +66,7 @@ async function initializeApp() {
   // Initialisation des modules de base
   initializeUtils();
   initializeNavigation();
+  initializeTopNav(); 
 
   const activePageId =
     document.querySelector(".page.active")?.id || "welcomepage";

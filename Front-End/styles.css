@@ -34,7 +34,6 @@ body {
   color: var(--text-color);
   line-height: 1.6;
   min-height: 100vh;
-  padding: 1rem;
   margin: 0;
   overflow: hidden; /* Avoid scrolling */
   transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
@@ -46,6 +45,10 @@ body {
   transition: opacity 0.5s ease-in-out;
   height: 100vh;
   overflow-y: auto; /* Allow scrolling within the page */
+}
+
+.page-no-welcome{
+  margin-top: 60px; /* Hauteur de la top-nav */
 }
 
 .page.active {
@@ -449,14 +452,222 @@ body {
   display: none;
 }
 
+/*Top Nav*/
+
+/* Top Navigation Bar */
+.top-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  background-color: var(--card-background);
+  border-bottom: 1px solid var(--border-color);
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0; /* Changé de 250px à 0 pour prendre toute la largeur */
+  height: 60px;
+  z-index: 99; /* Baissé pour passer sous la sidebar qui devrait être à 100 */
+}
+
+
+.top-nav-hidden {
+  display: none;
+}
+
+/* Hamburger Button */
+.hamburger-btn {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  line-height: 1;
+}
+
+/* App Branding/Logo */
+.app-branding h1 {
+  font-size: 1.5rem;
+  color: var(--primary-color);
+  margin: 0;
+}
+
+/* Profile Section */
+.profile-section {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* Profile Button */
+.profile-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  border: 1px solid var(--border-color);
+  border-radius: 2rem;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  color: var(--text-color);
+}
+
+.profile-icon {
+  font-size: 0.75rem;
+}
+
+/* Dropdown Menu */
+.profile-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: var(--card-background);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  min-width: 200px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  display: none;
+  margin-top: 0.5rem;
+}
+
+.profile-dropdown.show {
+  display: block;
+}
+
+/* Dropdown Items */
+.dropdown-item {
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--text-color);
+  text-decoration: none;
+}
+
+.dropdown-item:hover {
+  background-color: var(--background-color);
+}
+
+/* Dropdown Divider */
+.dropdown-divider {
+  border-top: 1px solid var(--border-color);
+  margin: 0.5rem 0;
+}
+
+/* Theme Toggle */
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+/* Switch for Theme Toggle */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 24px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--gray-color);
+  transition: .4s;
+  border-radius: 24px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: var(--primary-color);
+}
+
+input:checked + .slider:before {
+  transform: translateX(24px);
+}
+
+/* Language Selector */
+.language-selector {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.lang-btn {
+  font-size: 1.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+}
+
+.lang-btn:hover {
+  transform: scale(1.1);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .top-nav {
+      left: 0;
+      padding-left: 4rem;
+  }
+
+  .hamburger-btn {
+      display: block;
+      position: fixed;
+      left: 1rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .app-branding h1 {
+      font-size: 1.25rem;
+  }
+
+  .profile-button {
+      padding: 0.5rem;
+  }
+
+  .profile-dropdown {
+      right: -1rem;
+      min-width: 180px;
+  }
+}
+
 /* Barre de navigation latérale */
 
 .sidebar {
+  z-index: 1; /* Plus élevé que la top-nav */
   background-color: #6096ba;
   color: white;
   width: 250px;
   height: 100vh;
   position: fixed;
+  top: 0;   
+  left: 0;
   overflow-y: auto;
   transition: transform 0.3s ease-in-out;
 }
@@ -516,21 +727,6 @@ body {
   font-weight: 500;
 }
 
-/* Bouton hamburger */
-.hamburger-btn {
-  display: none;
-  background: none;
-  border: none;
-  font-size: 2.25rem; /* 1.5 fois plus grand que 1.5rem */
-  cursor: pointer;
-  position: fixed;
-  top: 1rem;
-  left: 1rem;
-  z-index: 1000;
-  padding: 0.5rem;
-  line-height: 1;
-}
-
 /* Overlay */
 
 .sidebar-overlay {
@@ -577,6 +773,11 @@ body {
 
 /* Styles responsives */
 @media (max-width: 1024px) {
+  .top-nav {
+    left: 0;
+    padding-left: 4rem;
+}
+
   .sidebar {
     transform: translateX(-109%);
     z-index: 1000;
@@ -640,7 +841,6 @@ body {
   border: 1px solid #a3cef1;
   border-radius: 0.25rem;
   padding: 0.75rem;
-  margin-bottom: 2vh;
   text-align: center;
   cursor: pointer;
   transition: box-shadow 0.3s;
@@ -649,10 +849,10 @@ body {
 .dashboard-card img {
   height: auto;
   max-height: 90px;
-  min-height: 70px;
+  min-height: 80px;
   width: 5vw;
   max-width: 70px;
-  min-width: 50px;
+  min-width: 60px;
 }
 
 .dashboard-card h2 {
@@ -751,420 +951,436 @@ body {
   margin-left: 260px;
 }
 
-#apprentissage {
-  display: flex;
-  background-color: var(--background-color);
-  color: var(--primary-color);
-  margin-left: 250px;
-  padding: 1rem;
-  font-size: 16px;
+/* Variables */
+:root {
   --primary-color: #274c77;
   --secondary-color: #6096ba;
+  --tertiary-color: #a3cef1;
   --background-color: #e7ecef;
+  --text-color: #274c77;
+  --card-background: #ffffff;
   --border-color: #a3cef1;
+  --gray-color: #8b8c89;
+  --main-font: "Poppins", sans-serif;
 }
 
-#navheader {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  justify-content: center;
+/* Layout principal */
+#apprentissage {
+  margin-left: 250px;
+  padding: 1rem;
+  background-color: var(--background-color);
+  min-height: 100vh;
+  font-family: var(--main-font);
+  color: var(--text-color);
 }
 
+/* En-tête */
 #apprentissage h1 {
   text-align: center;
   font-size: 2rem;
-  margin-bottom: 1.5rem;
   color: var(--primary-color);
-}
-
-.timers-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  justify-content: center;
-}
-
-.timer {
-  flex: 1 1 400px;
-  justify-content: center;
-  background-color: white;
-  border: 1px solid var(--border-color);
-  border-radius: 0.5rem;
-  overflow: hidden;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   margin-bottom: 1rem;
+}
+
+/* Timer Cards */
+.timer {
+  background-color: var(--card-background);
+  border-radius: 0.5rem;
+  border: 1px solid var(--border-color);
+  margin-bottom: 1rem;
+  overflow: hidden;
 }
 
 .timer h2 {
   background-color: var(--secondary-color);
-  color: white;
-  margin: 0;
+  color: var(--card-background);
   padding: 0.75rem;
   font-size: 1.1rem;
-  font-weight: normal;
+  margin: 0;
 }
 
+/* Timer Containers */
+.timers-container:nth-of-type(2) {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+/* Timer Content */
 .timer-content {
-  padding: 1rem;
-  display: flex; /* Utilisation de flexbox pour placer les éléments côte à côte */
-  align-items: center; /* Aligne les éléments verticalement au centre */
-  justify-content: space-between; /* Espacement entre chaque élément */
-  gap: 0.7rem; /* Ajoute de l'espace entre chaque bouton */
-}
-
-.time_displayed {
-  padding: 1rem;
-  justify-content: flex-start; /* Espacement entre chaque élément */
-  gap: 0.7rem; /* Ajoute de l'espace entre chaque bouton */
-}
-
-#manual-time-container {
+  padding: 1.5rem;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 1rem; /* Espacement entre les heures et minutes */
-  flex-wrap: wrap; /* S'assurer que les éléments se déplacent si l'espace est limité */
+  text-align: center;
+  min-height: 200px;
 }
 
-#manual-time-container label {
-  margin-bottom: 0.5rem;
-}
-
-#manual-time-container div {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem; /* Réduire l'espace entre le label et l'input */
-}
-
-#apprentissage select,
-#apprentissage input[type="number"] {
+/* Task Selection */
+#task-select {
   width: 100%;
-  padding: 0.5rem;
-  margin-bottom: 0.5rem;
+  padding: 0.75rem;
   border: 1px solid var(--border-color);
-  border-radius: 0.25rem;
-  font-size: 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+  background-color: var(--card-background);
+  color: var(--text-color);
 }
 
-#apprentissage button img {
-  display: flex;
-  height: 50px;
-  width: auto;
-  display: block; /* Assure que l'image se comporte comme un bloc */
-  margin: 0 auto; /* Centre l'image dans le bouton */
+#session-info {
+  margin: 1rem 0;
+  text-align: center;
 }
 
-#apprentissage button {
-  margin: 0; /* Supprime toutes les marges pour s'assurer que l'espacement provient uniquement de flexbox */
+/* Temps affichés */
+.time_displayed {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: var(--primary-color);
+  margin: 1.5rem 0;
+}
+
+/* Groupement des boutons */
+.button-group {
   display: flex;
+  gap: 0.5rem;
   justify-content: center;
   align-items: center;
-  background-color: white;
-  padding: 0.5rem;
-  border: none;
-  border-radius: 0.25rem;
-  cursor: pointer;
-  font-size: 1rem;
-}
-
-#apprentissage button:hover {
-  background-color: var(--secondary-color);
-}
-
-#time-left,
-#stopwatch-time,
-#counter-value {
-  font-size: 2rem;
-  font-weight: bold;
-  text-align: center;
   margin: 1rem 0;
-}
-
-#counter-buttons {
-  display: flex;
-  justify-content: space-between;
   flex-wrap: wrap;
 }
 
-#counter-buttons button {
-  flex: 1 0 18%;
-  margin: 0.25rem;
-  min-width: 60px;
+/* Style commun pour tous les boutons */
+.button-group button {
+  width: 45px;
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--secondary-color);
+  background-color: var(--card-background);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0.5rem;
 }
 
-.session-control {
-  margin-top: 1rem;
-  padding: 1rem;
-  font-size: 1.2rem;
-  background-color: var(--primary-color);
+.button-group button:hover {
+  background-color: var(--secondary-color);
+}
+
+.button-group button:hover img {
+  filter: brightness(0) invert(1);
+}
+
+.button-group button img {
+  height: 25px;
+  width: auto;
+  transition: filter 0.2s ease;
+}
+
+/* Boutons du compteur */
+.button-group .counter-button {
+  min-width: 60px;
+  padding: 0.5rem 1rem;
+}
+
+/*Boutons de sauvegarde*/
+#save-button-session {
+ margin-left: 1.5vw;
+ background-color:#6096ba;
+}
+
+#save-button-session {
+  margin-left: 1.5vw;
+  background-color:#6096ba;
+ }
+
+/* Bouton nouvelle session */
+.session-button {
+  padding: 0.75rem 1.5rem;
+  width: auto !important;
+  height: auto !important;
+  background-color: var(--secondary-color) !important;
   color: white;
 }
 
-#session-info p {
-  margin: 0.5rem 0;
+.session-button:hover {
+  background-color: var(--primary-color) !important;
 }
 
-#apprentissage label {
-  display: block;
-  margin-bottom: 0.25rem;
+/* Manual Time */
+#manual-time-container {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  align-items: center;
+  margin: 1rem 0;
+  width: 100%;
 }
 
-#timer-label,
-#counter-task-title {
-  font-size: 1.1rem;
-  margin-bottom: 0.5rem;
-}
-
-#total-work-time {
-  font-weight: bold;
-}
-
-#start_stop {
-  margin-right: 0.5rem; /* Ajoute un espacement spécifique entre le bouton "Start" et "Restart" */
-}
-
-@media (max-width: 1024px) {
-  #talibtimer {
-    margin-left: 0px;
-  }
-  #apprentissage {
-    margin-left: 0;
-  }
-
-  .timers-container {
-    width: 90vw;
-  }
-}
-
-@media (max-width: 768px) {
-  #apprentissage {
-    padding: 0.5rem;
-  }
-
-  #apprentissage h1 {
-    font-size: 1.75rem;
-  }
-
-  .timer {
-    flex-basis: 100%;
-  }
-
-  .timer h2 {
-    font-size: 1rem;
-  }
-
-  #time-left,
-  #stopwatch-time,
-  #counter-value {
-    font-size: 1.75rem;
-  }
-
-  #counter-buttons button {
-    flex-basis: calc(33.333% - 0.5rem);
-  }
-}
-
-@media (max-width: 480px) {
-  #apprentissage h1 {
-    font-size: 1.5rem;
-  }
-
-  .timer-content {
-    padding: 0.75rem;
-  }
-
-  #time-left,
-  #stopwatch-time,
-  #counter-value {
-    font-size: 1.5rem;
-  }
-
-  #counter-buttons button {
-    flex-basis: calc(50% - 0.5rem);
-  }
-}
-
-/*ToDoList*/
-
-#todoLists {
-  font-family: Arial, sans-serif;
-  background-color: #e7ecef;
-  color: #274c77;
-  padding: 1rem;
-  margin-left: 250px;
-  width: calc(100% - 250px);
+#manual-time-container div {
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
-#todoLists h1 {
-  margin-bottom: 1rem;
-  width: 100%;
+#manual-time-container label {
+  margin-bottom: 0.5rem;
+  color: var(--text-color);
+}
+
+#manual-time-container input {
+  width: 80px;
+  padding: 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
   text-align: center;
 }
 
-.todo-card {
-  width: 100%;
-  max-width: 65vw;
-  margin: 0 auto;
-  background-color: white;
-  border: 1px solid #a3cef1;
-  border-radius: 0.5rem;
-  overflow: hidden;
+.total-time {
+  margin: 1rem 0;
+  color: var(--text-color);
 }
 
-/* Le reste du CSS reste inchangé */
-.todo-card-header {
-  background-color: #6096ba;
-  color: white;
-  padding: 1rem;
+/* Counter */
+#counter-task-title {
+  color: var(--text-color);
+  margin: 1rem 0;
 }
 
-.todo-card-title {
-  font-size: 1.25rem;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
+#counter-value {
+  font-size: 2.5rem;
+  color: var(--primary-color);
+  margin: 1rem 0;
 }
 
-.todo-card-content {
-  padding: 1rem;
-}
-
-.todo-input-group {
-  display: flex;
-  margin-bottom: 1rem;
-}
-
-.todo-input {
-  flex-grow: 1;
-  margin-right: 0.5rem;
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 0.25rem;
-}
-
-.todo-btn {
-  background-color: #274c77;
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 0.25rem;
-  cursor: pointer;
-}
-
-.todo-btn:hover {
-  background-color: #6096ba;
-}
-
-.todo-list {
-  list-style-type: none;
-  padding: 0;
-}
-
-.todo-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.5rem;
-  background-color: #e7ecef;
-  border-radius: 0.5rem;
-  margin-bottom: 0.5rem;
-}
-
-.todo-item label {
-  font-size: 1.5rem; /* Taille de police doublée */
-  margin-left: 2rem;
-  display: flex;
-  align-items: center;
-}
-
-.todo-item.completed label {
-  text-decoration: line-through;
-  color: #8b8c89;
-}
-
-.todo-checkbox {
-  width: 1.5rem;
-  height: 1.5rem;
-  margin-right: 0.5rem;
-}
-
-/* Style pour la coche */
-.todo-checkbox:checked::after {
-  content: "✓";
-  font-size: 1.2rem;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: #274c77;
-}
-
-.todo-delete-btn,
-.todo-rename-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0.25rem;
-  margin-left: 0.5rem;
-}
-
-.todo-delete-btn {
-  color: #ff0000;
-}
-
-.todo-delete-btn:hover {
-  background-color: #ffeeee;
-}
-
-.todo-rename-btn {
-  color: #274c77;
-}
-
-.todo-rename-btn:hover {
-  background-color: #e7ecef;
-}
-
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border-width: 0;
-}
-
+/* Responsive */
 @media (max-width: 1024px) {
-  #todoLists {
-    margin-left: auto;
-    margin-right: auto;
-    width: 85vw;
-    max-width: 1400px; /* Vous pouvez ajuster cette valeur selon vos besoins */
+  #apprentissage {
+    margin-left: 0;
+  }
+  
+  .timers-container:nth-of-type(2) {
+    grid-template-columns: 1fr;
   }
 }
 
-@media (min-width: 640px) {
-  #todoLists {
-    padding: 2rem;
+@media (max-width: 480px) {
+  .time_displayed {
+    font-size: 2rem;
   }
-
-  h1 {
-    font-size: 2.25rem;
+  
+  .button-group {
+    flex-direction:row;
   }
-
-  .todo-card-title {
-    font-size: 1.5rem;
+  
+  #manual-time-container {
+    flex-direction: column;
+    gap: 1rem;
   }
-
-  .todo-card-content {
-    padding: 1.5rem;
+  
+  .timer-content {
+    padding: 1rem;
   }
 }
+
+/* Todo List Container */
+        #todoLists {
+            font-family: Arial, sans-serif;
+            background-color: #e7ecef;
+            color: #274c77;
+            padding: 1rem;
+            margin-left: 250px;
+            width: calc(100% - 250px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #todoLists h1 {
+            margin-bottom: 1rem;
+            width: 100%;
+            text-align: center;
+        }
+
+        /* Card Styles */
+        .todo-card {
+            width: 100%;
+            max-width: 65vw;
+            margin: 0 auto;
+            background-color: white;
+            border: 1px solid #a3cef1;
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+
+        .todo-card-header {
+            background-color: #6096ba;
+            color: white;
+            padding: 1rem;
+        }
+
+        .todo-card-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+        }
+
+        .todo-card-content {
+            padding: 1rem;
+        }
+
+        /* Input Group */
+        .todo-input-group {
+            display: flex;
+            margin-bottom: 1rem;
+        }
+
+        .todo-input {
+            flex-grow: 1;
+            margin-right: 0.5rem;
+            padding: 0.5rem;
+            border: 1px solid #ccc;
+            border-radius: 0.25rem;
+        }
+
+        .todo-btn {
+            background-color: #274c77;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+        }
+
+        .todo-btn:hover {
+            background-color: #6096ba;
+        }
+
+        .todo-list {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .todo-item {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 0.5rem;
+          background-color: #e7ecef;
+          border-radius: 0.5rem;
+          margin-bottom: 0.5rem;
+        }
+        
+        .todo-item-left {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem; /* Ajoute un espacement uniforme entre la checkbox et le label */
+          flex: 1;
+        }
+        
+        .todo-item label {
+          display: inline-flex; /* Changé de flex à inline-flex */
+          align-items: center;
+          margin: 0; /* Supprime la marge à gauche */
+        }
+        
+
+        .todo-item.completed label {
+            text-decoration: line-through;
+            color: #8b8c89;
+        }
+
+        .todo-checkbox {
+            width: 1.5rem;
+            height: 1.5rem;
+            margin: 0 0.5rem;
+            cursor: pointer;
+        }
+
+        .todo-checkbox:checked::after {
+            content: "✓";
+            font-size: 1.2rem;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #274c77;
+        }
+
+        .todo-item-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .todo-delete-btn,
+        .todo-rename-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.25rem;
+            margin-left: 0.5rem;
+        }
+
+        .todo-delete-btn {
+            color: #ff0000;
+        }
+
+        .todo-delete-btn:hover {
+            background-color: #ffeeee;
+        }
+
+        .todo-rename-btn {
+            color: #274c77;
+        }
+
+        .todo-rename-btn:hover {
+            background-color: #e7ecef;
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            #todoLists {
+                margin-left: auto;
+                margin-right: auto;
+                width: 85vw;
+                max-width: 1400px;
+            }
+        }
+
+        @media (min-width: 640px) {
+            #todoLists {
+                padding: 2rem;
+            }
+
+            h1 {
+                font-size: 2.25rem;
+            }
+
+            .todo-card-title {
+                font-size: 1.5rem;
+            }
+
+            .todo-card-content {
+                padding: 1.5rem;
+            }
+        }
 
 /*Statistics*/
 /* Statistics */
@@ -1302,7 +1518,6 @@ body {
   background-color: #e7ecef;
   color: #274c77;
   padding: 1rem;
-  margin: 0;
   margin-left: 250px;
 }
 
@@ -1376,6 +1591,11 @@ body {
 #salatSurahSelector #recitationHistory {
   width: 100%;
   margin-top: 1rem;
+}
+
+#knownSouratesCount, #recitationCyclesCount, #recitationProgress,
+.surahselector-card p {
+  font-size :1.25rem;
 }
 
 @media (max-width: 1024px) {
@@ -2202,31 +2422,24 @@ button[type="submit"]:hover {
 }
 
 /*AboutUs*/
-
 .aboutus-wrapper {
+  padding: 2rem;
+  width: 100%;
+  max-width: 1200px;
   display: flex;
-  justify-content: center; /* Centre le contenu horizontalement */
-  padding-left: 250px; /* Ajoute un espace fixe à gauche de 250px */
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 #aboutus {
-  width: 70vw; /* Définit une largeur de 70% de la fenêtre */
-  max-width: 80vw; /* Vous pouvez ajuster cette valeur pour limiter la largeur */
-  margin-left: 0; /* Supprime toute marge à gauche */
-  margin-right: 0; /* Supprime toute marge à droite */
-}
-
-@media (max-width: 1024px) {
-  .aboutus-wrapper {
-    padding-left: 0; /* Supprime la marge gauche pour les petits écrans */
-  }
-
-  #aboutus {
-    margin-left: auto;
-    margin-right: auto;
-    width: 90vw;
-    max-width: 1500px; /* Ajuster selon vos besoins */
-  }
+  width: 100%;
+  margin-left: 250px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .aboutus-title {
@@ -2234,6 +2447,7 @@ button[type="submit"]:hover {
   font-weight: bold;
   text-align: center;
   margin-bottom: 2rem;
+  color: var(--text-color);
 }
 
 .aboutus-card {
@@ -2242,6 +2456,7 @@ button[type="submit"]:hover {
   border-radius: 0.5rem;
   margin-bottom: 2rem;
   overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .aboutus-card-header {
@@ -2255,68 +2470,59 @@ button[type="submit"]:hover {
   font-weight: bold;
   display: flex;
   align-items: center;
+  gap: 0.5rem;
 }
 
 .aboutus-card-content {
   padding: 1.5rem;
+  color: var(--text-color);
 }
 
 .aboutus-grid {
   display: grid;
   gap: 2rem;
-}
-
-@media (max-width: 1024px) {
-  #aboutus {
-    margin-left: auto;
-    margin-right: auto;
-    width: 90vw;
-    max-width: 1500px; /* Vous pouvez ajuster cette valeur selon vos besoins */
-  }
-}
-
-@media (min-width: 768px) {
-  .aboutus-grid-cols-2 {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  .aboutus-grid-cols-4 {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
+  margin: 2rem 0;
 }
 
 .aboutus-list {
   list-style-type: disc;
   list-style-position: inside;
+  margin: 0;
+  padding: 0;
 }
 
-.aboutus-avatar {
-  width: 6rem;
-  height: 6rem;
-  border-radius: 50%;
-  margin: 0 auto 0.5rem;
-  display: block;
+.aboutus-list li {
+  margin-bottom: 0.5rem;
+  line-height: 1.5;
 }
 
-.aboutus-text-center {
-  text-align: center;
+/* Responsive Design */
+@media (min-width: 768px) {
+  .aboutus-grid-cols-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .aboutus-grid-cols-4 {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 
-.aboutus-testimonial {
-  text-align: center;
-  margin-bottom: 1rem;
-}
-
-.aboutus-button {
-  background-color: transparent;
-  border: 1px solid var(--primary-color);
-  padding: 0.5rem 1rem;
-  margin: 0 0.25rem;
-  cursor: pointer;
-}
-
-.aboutus-button.active {
-  background-color: var(--primary-color);
-  color: var(--card-background);
+@media (max-width: 767px) {
+  .aboutus-wrapper {
+    padding: 1rem;
+  }
+  
+  .aboutus-title {
+    font-size: 1.75rem;
+  }
+  
+  .aboutus-card-title {
+    font-size: 1.25rem;
+  }
+  
+  .aboutus-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /*SurahMemorization*/

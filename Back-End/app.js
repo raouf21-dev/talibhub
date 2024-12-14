@@ -25,7 +25,7 @@ app.use(helmet({
             scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://unpkg.com", "https://cdnjs.cloudflare.com"],
             styleSrc: ["'self'", "'unsafe-inline'", "https://unpkg.com", "https://cdnjs.cloudflare.com"],
             imgSrc: ["'self'", "data:", "https:"],
-            connectSrc: ["'self'", "https://api.example.com"],
+            connectSrc: ["'self'", "https://api.example.com", "https://api.aladhan.com"],
             fontSrc: ["'self'", "https://cdnjs.cloudflare.com"],
             objectSrc: ["'none'"],
             mediaSrc: ["'self'"],
@@ -73,6 +73,8 @@ const statisticsRoutes = require('./routes/statisticsRoutes');
 const mosqueTimesRoutes = require('./routes/mosqueTimesRoutes');
 const surahMemorizationRoutes = require('./routes/surahMemorizationRoutes');
 const captchaRoutes = require('./routes/captchaRoutes');
+const duaTimeRoutes = require('./routes/duaTimeRoutes');
+
 
 // Routes API
 app.use('/api/auth', authRoutes);
@@ -85,6 +87,7 @@ app.use('/api/statistics', statisticsRoutes);
 app.use('/api/mosque-times', mosqueTimesRoutes);
 app.use('/api/surah-memorization', surahMemorizationRoutes);
 app.use('/api/captcha', captchaRoutes);
+app.use('/api/dua-time', duaTimeRoutes);
 
 // Route pour les données statiques
 app.use('/api/data', express.static(path.join(__dirname, 'data')));

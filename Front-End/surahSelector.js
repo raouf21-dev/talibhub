@@ -48,6 +48,8 @@ let recitationCycles = 0;
 let recitationProgress = { totalKnown: 0, recitedAtLeastOnce: 0 };
 let cyclesCount = 0;
 let isHistoryVisible = false;
+let isSelecting = false; 
+let cachedKnownSourates = null;
 
 async function loadAllSourates() {
     try {
@@ -130,7 +132,7 @@ function generateSourateList() {
 function updateKnownSouratesCount() {
     const countElement = document.getElementById('knownSouratesCount');
     if (countElement) {
-        countElement.textContent = `Sourates connues : ${knownSourates.length}`;
+        countElement.innerHTML = `Sourates connues : <strong>${knownSourates.length}</strong>`;
     }
 }
 
@@ -151,17 +153,36 @@ async function loadRecitationInfo() {
     }
 }
 
-async function selectRandomSourates() {
-    try {
-        const knownSouratesData = await api.get('/sourates/known');
+async function getKnownSouratesOnce() {
+    if (cachedKnownSourates) {
+        return cachedKnownSourates;
+    }
+    const data = await api.get('/sourates/known');
+    cachedKnownSourates = data;
+    return data;
+}
 
-        if (knownSouratesData.length < 1) {
+async function selectRandomSourates() {
+    if (isSelecting) {
+        console.log('Sélection déjà en cours, requête ignorée');
+        return;
+    }
+    
+    isSelecting = true;
+    
+    try {
+        // 1. Obtenir les sourates connues (avec cache)
+        const knownSouratesData = await getKnownSouratesOnce();
+
+        if (!knownSouratesData || knownSouratesData.length < 1) {
             throw new Error('Veuillez sélectionner au moins une sourate connue pour la récitation.');
         }
 
-        let notRecitedSourates = await getNotRecitedSourates();
+        // 2. Obtenir les sourates non récitées (un seul appel)
+        const notRecitedSourates = await getNotRecitedSourates();
         let selectableSourates = [...notRecitedSourates];
 
+        // 3. Si pas assez de sourates non récitées, obtenir toutes les sourates connues
         if (notRecitedSourates.length < 2) {
             const allKnownSourateNumbers = knownSouratesData.map(s => s.sourate_number);
             const allKnownSouratesData = await api.post('/sourates/by-numbers', { 
@@ -174,34 +195,58 @@ async function selectRandomSourates() {
             throw new Error('Aucune sourate disponible pour la récitation.');
         }
 
-        let firstSourate, secondSourate;
+        // 4. Sélection aléatoire (une seule fois)
+        const [firstSourate, secondSourate] = selectTwoRandomSourates(selectableSourates);
 
-        if (selectableSourates.length === 1) {
-            firstSourate = secondSourate = selectableSourates[0];
-        } else {
-            const shuffledSourates = selectableSourates.sort(() => Math.random() - 0.5);
-            firstSourate = shuffledSourates[0];
-            secondSourate = shuffledSourates.find(s => s.number !== firstSourate.number) || firstSourate;
-        }
+        // 5. Mise à jour de l'interface (une seule fois)
+        updateUIWithSelectedSourates(firstSourate, secondSourate);
 
-        if (firstSourate.number > secondSourate.number) {
-            [firstSourate, secondSourate] = [secondSourate, firstSourate];
-        }
-
-        document.getElementById('firstRaka').textContent = `${firstSourate.number}. ${firstSourate.name}`;
-        document.getElementById('secondRaka').textContent = `${secondSourate.number}. ${secondSourate.name}`;
-
-        const data = await api.post('/sourates/recitations', {
+        // 6. Enregistrement de la récitation (un seul appel)
+        const recitationResult = await api.post('/sourates/recitations', {
             firstSourate: firstSourate.number,
             secondSourate: secondSourate.number
         });
 
-        console.log('Données reçues après l\'enregistrement de la récitation:', data);
-        await getRecitationStats();
+        // 7. Mise à jour des statistiques (un seul appel)
+        if (recitationResult) {
+            await getRecitationStats();
+        }
 
     } catch (error) {
         console.error('Erreur dans selectRandomSourates:', error);
         alert(error.message);
+    } finally {
+        isSelecting = false;
+        // Réinitialiser le cache après un délai
+        setTimeout(() => {
+            cachedKnownSourates = null;
+        }, 5000);
+    }
+}
+
+function selectTwoRandomSourates(sourates) {
+    const shuffledSourates = [...sourates].sort(() => Math.random() - 0.5);
+    let firstSourate = shuffledSourates[0];
+    let secondSourate = shuffledSourates.find(s => s.number !== firstSourate.number) || firstSourate;
+
+    // S'assurer que les sourates sont dans l'ordre croissant
+    if (firstSourate.number > secondSourate.number) {
+        [firstSourate, secondSourate] = [secondSourate, firstSourate];
+    }
+
+    return [firstSourate, secondSourate];
+}
+
+function updateUIWithSelectedSourates(firstSourate, secondSourate) {
+    const firstRakaElement = document.getElementById('firstRaka');
+    const secondRakaElement = document.getElementById('secondRaka');
+
+    if (firstRakaElement) {
+        firstRakaElement.innerHTML = `1st raka : <strong>${firstSourate.number}. ${firstSourate.name}</strong>`;
+    }
+
+    if (secondRakaElement) {
+        secondRakaElement.innerHTML = `2nd raka : <strong>${secondSourate.number}. ${secondSourate.name}</strong>`;
     }
 }
 
@@ -262,13 +307,13 @@ function updateRecitationInfo(data) {
     const progressElement = document.getElementById('recitationProgress');
 
     if (cyclesElement) {
-        cyclesElement.textContent = `Cycles de récitation complets : ${data.complete_cycles || 0}`;
+        cyclesElement.innerHTML = `Cycles de récitation complets : <strong>${data.complete_cycles || 0}</strong>`;
     }
 
     if (progressElement) {
         const recitedAtLeastOnce = data.recited_at_least_once || 0;
         const totalKnown = data.total_known || 0;
-        progressElement.textContent = `Progrès : ${recitedAtLeastOnce} / ${totalKnown} sourates récitées`;
+        progressElement.innerHTML = `Progrès : <strong>${recitedAtLeastOnce} / ${totalKnown}</strong> sourates récitées`;
     }
 }
 
