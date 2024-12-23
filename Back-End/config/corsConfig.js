@@ -3,12 +3,14 @@
 const allowedOrigins = {
     development: [
         'http://45.133.178.159',
+        'http://45.133.178.159:4000',
         'http://localhost:4000',
         'http://localhost:3000',
         'http://127.0.0.1:4000',
     ],
     production: [
         'http://45.133.178.159',
+        'http://45.133.178.159:4000',
         process.env.FRONTEND_URL,
         // autres domaines de production si nécessaire
     ]

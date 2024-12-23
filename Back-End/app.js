@@ -75,6 +75,18 @@ const surahMemorizationRoutes = require('./routes/surahMemorizationRoutes');
 const captchaRoutes = require('./routes/captchaRoutes');
 const duaTimeRoutes = require('./routes/duaTimeRoutes');
 
+// AJOUTEZ LE NOUVEAU MIDDLEWARE DE LOGGING ICI, après les parsers mais avant les routes
+app.use((req, res, next) => {
+    console.log('Full request details:');
+    console.log('Method:', req.method);
+    console.log('Path:', req.path);
+    console.log('Headers:', req.headers);
+    console.log('Cookies:', req.cookies);
+    console.log('Body:', req.body);
+    console.log('Query:', req.query);
+    next();
+});
+
 
 // Routes API
 app.use('/api/auth', authRoutes);
