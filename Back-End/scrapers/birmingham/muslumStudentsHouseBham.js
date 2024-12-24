@@ -1,3 +1,6 @@
+// //Back-End/scrapers/birmingham/muslumStudentsHouseBham.js
+
+
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 const { executablePath } = require('puppeteer');
@@ -17,6 +20,31 @@ const userAgents = [
   'Mozilla/5.0 (iPhone; CPU iPhone OS 15_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.5 Mobile/15E148 Safari/604.1',
   'Mozilla/5.0 (Linux; Android 12; SM-G991B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.74 Mobile Safari/537.36',
 ];
+
+const normalizeTime = (timeStr) => {
+  if (!timeStr || timeStr === 'NaN:undefined' || timeStr === '--') return null;
+  
+  // Retire tous les caractères non numériques sauf ':'
+  timeStr = timeStr.replace(/[^0-9:]/g, '');
+  
+  // Gère le cas où l'heure est au format HHMM ou H:MM
+  if (!timeStr.includes(':')) {
+    timeStr = timeStr.padStart(4, '0');
+    timeStr = `${timeStr.slice(0, 2)}:${timeStr.slice(2)}`;
+  }
+  
+  // S'assure que les heures et minutes sont sur 2 chiffres
+  const [hours, minutes] = timeStr.split(':');
+  if (!hours || !minutes) return null;
+  
+  const hour = parseInt(hours);
+  const minute = parseInt(minutes);
+  
+  if (isNaN(hour) || isNaN(minute)) return null;
+  if (hour < 0 || hour > 23 || minute < 0 || minute > 59) return null;
+  
+  return `${hour.toString().padStart(2, '0')}:${minutes.padStart(2, '0')}`;
+};
 
 const randomDelay = async (min, max) => {
   const delay = Math.floor(Math.random() * (max - min + 1)) + min;
@@ -46,7 +74,15 @@ const waitForCloudflare = async (page) => {
   }
 };
 
+let isScrapingInProgress = false;
+
 const scrapeMSHUK = async () => {
+  if (isScrapingInProgress) {
+    console.log('Un scraping est déjà en cours, attente...');
+    return null;
+  }
+
+  isScrapingInProgress = true;
   let browser;
   try {
     console.log('Démarrage du scraping MSHUK...');
@@ -130,7 +166,7 @@ const scrapeMSHUK = async () => {
         });
 
         console.log('Extraction des données...');
-        const data = await page.evaluate(() => {
+        const rawData = await page.evaluate(() => {
           const prayers = {};
           const prayerItems = document.querySelectorAll('.section-prayer-horizontal-times-item');
           
@@ -141,8 +177,21 @@ const scrapeMSHUK = async () => {
             if (nameElement && jamaatElement) {
               const name = nameElement.textContent.trim().toLowerCase();
               const time = jamaatElement.textContent.trim();
-              if (name && time) {
-                prayers[name] = time;
+              
+              // Mapping des noms de prières
+              if (name) {
+                const prayerMap = {
+                  'fajr': 'fajr',
+                  'zuhr': 'dhuhr',
+                  'dhuhr': 'dhuhr',
+                  'asr': 'asr',
+                  'maghrib': 'maghrib',
+                  'isha': 'isha'
+                };
+                
+                if (prayerMap[name] && time) {
+                  prayers[prayerMap[name]] = time;
+                }
               }
             }
           });
@@ -150,13 +199,22 @@ const scrapeMSHUK = async () => {
           return prayers;
         });
 
+        // Normalise tous les temps avant de les renvoyer
+        const normalizedTimes = {};
+        for (const [prayer, time] of Object.entries(rawData)) {
+          const normalizedTime = normalizeTime(time);
+          if (normalizedTime) {
+            normalizedTimes[prayer] = normalizedTime;
+          }
+        }
+
         const ukTime = DateTime.now().setZone('Europe/London');
         const dateText = ukTime.toISODate();
 
         const result = {
           source: 'MSHUK',
           date: dateText,
-          times: data
+          times: normalizedTimes
         };
 
         console.log('Données extraites avec succès:', result);
@@ -178,6 +236,7 @@ const scrapeMSHUK = async () => {
       await browser.close();
       console.log('Navigateur fermé');
     }
+    isScrapingInProgress = false;
   }
 };
 

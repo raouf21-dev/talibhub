@@ -2,12 +2,12 @@
 const jwt = require('jsonwebtoken');
 
 const authenticateToken = (req, res, next) => {
-    console.log('Headers:', req.headers);
-    console.log('Cookies:', req.cookies);
+    /*console.log('Headers:', req.headers);
+    console.log('Cookies:', req.cookies);*/
     
     const token = req.cookies?.auth_token || req.headers.authorization?.split(' ')[1];
     
-    console.log('Token found:', token ? 'Yes' : 'No');
+    /*console.log('Token found:', token ? 'Yes' : 'No');*/
     
     if (!token) {
         console.log('Authentication failed: No token found');

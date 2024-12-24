@@ -1,3 +1,5 @@
+//Back-End/scrapers/birmingham/greenLaneMasjidBham.js
+
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 const { executablePath } = require('puppeteer'); 
@@ -19,12 +21,38 @@ const userAgents = [
  'Mozilla/5.0 (Linux; Android 12; SM-G991B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.74 Mobile Safari/537.36',
 ];
 
+const normalizeTime = (timeStr) => {
+  if (!timeStr || timeStr === 'NaN:undefined') return null;
+  
+  const [time, period] = timeStr.split(' ');
+  if (!time) return null;
+
+  let [hours, minutes] = time.split(':');
+  if (!hours || !minutes) return null;
+
+  hours = parseInt(hours);
+  if (isNaN(hours)) return null;
+  
+  if (period === 'PM' && hours < 12) hours += 12;
+  if (period === 'AM' && hours === 12) hours = 0;
+  
+  return `${hours.toString().padStart(2, '0')}:${minutes.padStart(2, '0')}`;
+};
+
 const randomDelay = (min, max) =>
  new Promise((resolve) =>
    setTimeout(resolve, Math.floor(Math.random() * (max - min + 1)) + min)
  );
 
+let isScrapingInProgress = false;
+
 const scrapeGreenLaneMasjidBham = async () => {
+ if (isScrapingInProgress) {
+   console.log('Un scraping est déjà en cours, attente...');
+   return null;
+ }
+
+ isScrapingInProgress = true;
  let browser;
  try {
    console.log('Démarrage du scraping...');
@@ -43,7 +71,7 @@ const scrapeGreenLaneMasjidBham = async () => {
       '--window-size=1920,1080',
     ],
     ignoreHTTPSErrors: true,
-  };
+   };
 
    try {
      if (fs.existsSync('/usr/bin/chromium-browser')) {
@@ -117,7 +145,7 @@ const scrapeGreenLaneMasjidBham = async () => {
    const ukTime = DateTime.now().setZone('Europe/London');
    const dateText = ukTime.toISODate();
 
-   const times = await page.evaluate(() => {
+   const rawTimes = await page.evaluate(() => {
      const prayerTimes = {};
      const rows = document.querySelectorAll('table tbody tr');
 
@@ -130,32 +158,22 @@ const scrapeGreenLaneMasjidBham = async () => {
          const jamaahTime = cells[3].textContent.trim() || cells[2].textContent.trim();
          
          if (jamaahTime) {
-           const timeStr = jamaahTime.trim();
-           const [time, period] = timeStr.split(' ');
-           const [hours, minutes] = time.split(':');
-           let hour = parseInt(hours);
-           
-           if (period === 'PM' && hour < 12) hour += 12;
-           if (period === 'AM' && hour === 12) hour = 0;
-           
-           const formattedTime = `${hour.toString().padStart(2, '0')}:${minutes}`;
-
            switch (prayerName) {
              case 'fajr':
-               prayerTimes.fajr = formattedTime;
+               prayerTimes.fajr = jamaahTime;
                break;
              case 'dhuhr':
              case 'zuhr':
-               prayerTimes.dhuhr = formattedTime;
+               prayerTimes.dhuhr = jamaahTime;
                break;
              case 'asr':
-               prayerTimes.asr = formattedTime;
+               prayerTimes.asr = jamaahTime;
                break;
              case 'maghrib':
-               prayerTimes.maghrib = formattedTime;
+               prayerTimes.maghrib = jamaahTime;
                break;
              case 'isha':
-               prayerTimes.isha = formattedTime;
+               prayerTimes.isha = jamaahTime;
                break;
            }
          }
@@ -165,10 +183,19 @@ const scrapeGreenLaneMasjidBham = async () => {
      return prayerTimes;
    });
 
+   // Normalise tous les temps avant de les renvoyer
+   const normalizedTimes = {};
+   for (const [prayer, time] of Object.entries(rawTimes)) {
+     const normalizedTime = normalizeTime(time);
+     if (normalizedTime) {
+       normalizedTimes[prayer] = normalizedTime;
+     }
+   }
+
    const result = {
      source: 'Green Lane Masjid Birmingham',
      date: dateText,
-     times: times
+     times: normalizedTimes
    };
 
    console.log('Données extraites avec succès:', result);
@@ -182,6 +209,7 @@ const scrapeGreenLaneMasjidBham = async () => {
      await browser.close();
      console.log('Navigateur fermé');
    }
+   isScrapingInProgress = false;
  }
 };
 

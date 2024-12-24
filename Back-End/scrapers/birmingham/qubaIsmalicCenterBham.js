@@ -1,3 +1,6 @@
+// Back-End/scrapers/birmingham/qubaIsmalicCenterBham.js
+
+
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 const { executablePath } = require('puppeteer');
@@ -24,12 +27,44 @@ const userAgents = [
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:116.0) Gecko/20100101 Firefox/116.0',
 ];
 
+const normalizeTime = (timeStr, offsetMinutes = 0) => {
+  if (!timeStr || timeStr === 'NaN:undefined') return null;
+  
+  // Valide le format HH:MM
+  const timeMatch = timeStr.match(/^(\d{1,2}):(\d{2})$/);
+  if (!timeMatch) return null;
+  
+  let [_, hours, minutes] = timeMatch.map(Number);
+  
+  // Applique le décalage
+  if (offsetMinutes !== 0) {
+    const date = new Date();
+    date.setHours(hours, minutes + offsetMinutes, 0, 0);
+    hours = date.getHours();
+    minutes = date.getMinutes();
+  }
+  
+  // Validation des plages
+  if (isNaN(hours) || isNaN(minutes)) return null;
+  if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) return null;
+  
+  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+};
+
 const randomDelay = (min, max) =>
   new Promise((resolve) =>
     setTimeout(resolve, Math.floor(Math.random() * (max - min + 1)) + min)
   );
 
+let isScrapingInProgress = false;
+
 const scrapeQubaIsmalicCenter = async () => {
+  if (isScrapingInProgress) {
+    console.log('Un scraping est déjà en cours, attente...');
+    return null;
+  }
+
+  isScrapingInProgress = true;
   let browser;
   try {
     console.log('Démarrage du scraping...');
@@ -135,7 +170,7 @@ const scrapeQubaIsmalicCenter = async () => {
     const ukTime = DateTime.now().setZone('Europe/London');
     const dateText = ukTime.toISODate();
 
-    const times = await frame.evaluate(() => {
+    const rawTimes = await frame.evaluate(() => {
       const prayerTimes = {};
       const prayerElements = document.querySelectorAll('div.prayers > div');
 
@@ -146,8 +181,8 @@ const scrapeQubaIsmalicCenter = async () => {
 
         if (nameElement && timeElement) {
           let prayerName = nameElement.textContent.trim().toLowerCase();
-          let prayerTime = timeElement.textContent.trim();
-          let waitText = waitElement ? waitElement.textContent.trim() : '+0';
+          const prayerTime = timeElement.textContent.trim();
+          const waitText = waitElement ? waitElement.textContent.trim() : '+0';
 
           switch (prayerName) {
             case 'fajr': prayerName = 'fajr'; break;
@@ -156,31 +191,37 @@ const scrapeQubaIsmalicCenter = async () => {
             case 'asr': prayerName = 'asr'; break;
             case 'maghrib': prayerName = 'maghrib'; break;
             case 'isha': prayerName = 'isha'; break;
-            default: prayerName = null;
+            default: return;
           }
 
-          if (prayerName) {
-            if (/^\+\d+$/.test(waitText)) {
-              const offsetMinutes = parseInt(waitText.replace('+', ''), 10);
-              const [hours, minutes] = prayerTime.split(':').map(Number);
-              const date = new Date();
-              date.setHours(hours, minutes, 0, 0);
-              date.setMinutes(date.getMinutes() + offsetMinutes);
-              prayerTimes[prayerName] = `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
-            } else if (/^\d{1,2}:\d{2}$/.test(waitText)) {
-              prayerTimes[prayerName] = waitText;
-            }
-          }
+          prayerTimes[prayerName] = {
+            baseTime: prayerTime,
+            offset: waitText
+          };
         }
       });
       
       return prayerTimes;
     });
 
+    // Normalise les temps en tenant compte des délais
+    const normalizedTimes = {};
+    for (const [prayer, data] of Object.entries(rawTimes)) {
+      let offsetMinutes = 0;
+      if (/^\+\d+$/.test(data.offset)) {
+        offsetMinutes = parseInt(data.offset.replace('+', ''), 10);
+      }
+      
+      const normalizedTime = normalizeTime(data.baseTime, offsetMinutes);
+      if (normalizedTime) {
+        normalizedTimes[prayer] = normalizedTime;
+      }
+    }
+
     const result = {
       source: 'Quba Islamic Center Birmingham',
       date: dateText,
-      times: times
+      times: normalizedTimes
     };
 
     console.log('Données extraites avec succès:', result);
@@ -194,6 +235,7 @@ const scrapeQubaIsmalicCenter = async () => {
       await browser.close();
       console.log('Navigateur fermé');
     }
+    isScrapingInProgress = false;
   }
 };
 

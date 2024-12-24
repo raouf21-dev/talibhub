@@ -12,149 +12,228 @@ stealth.enabledEvasions.delete('webgl.renderer');
 puppeteer.use(stealth);
 
 const userAgents = [
- 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
- 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:115.0) Gecko/20100101 Firefox/115.0',
- 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.1 Safari/605.1.15',
- 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.5 Mobile/15E148 Safari/604.1',
- 'Mozilla/5.0 (Linux; Android 12; SM-G991B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.74 Mobile Safari/537.36',
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:115.0) Gecko/20100101 Firefox/115.0', 
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.1 Safari/605.1.15',
+  'Mozilla/5.0 (iPhone; CPU iPhone OS 15_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.5 Mobile/15E148 Safari/604.1',
+  'Mozilla/5.0 (Linux; Android 12; SM-G991B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.74 Mobile Safari/537.36',
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.5845.111 Safari/537.36',
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 11_2_3) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.3 Safari/605.1.15',
+  'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36',
+  'Mozilla/5.0 (iPad; CPU OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1',
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:116.0) Gecko/20100101 Firefox/116.0',
 ];
 
-const randomDelay = async (min, max) => {
- const delay = Math.floor(Math.random() * (max - min + 1)) + min;
- await new Promise(resolve => setTimeout(resolve, delay));
+const normalizeTime = (timeStr, offsetMinutes = 0) => {
+  if (!timeStr || timeStr === 'NaN:undefined') return null;
+  
+  // Valide le format HH:MM
+  const timeMatch = timeStr.match(/^(\d{1,2}):(\d{2})$/);
+  if (!timeMatch) return null;
+  
+  let [_, hours, minutes] = timeMatch.map(Number);
+  
+  // Applique le décalage
+  if (offsetMinutes !== 0) {
+    const date = new Date();
+    date.setHours(hours, minutes + offsetMinutes, 0, 0);
+    hours = date.getHours();
+    minutes = date.getMinutes();
+  }
+  
+  // Validation des plages
+  if (isNaN(hours) || isNaN(minutes)) return null;
+  if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) return null;
+  
+  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
 };
 
-const scrapeMasjidAlFarouq = async () => {
- let browser;
- try {
-   console.log('Démarrage du scraping Masjid Al-Farouq...');
-   const randomUserAgent = userAgents[Math.floor(Math.random() * userAgents.length)];
+const randomDelay = (min, max) =>
+  new Promise((resolve) =>
+    setTimeout(resolve, Math.floor(Math.random() * (max - min + 1)) + min)
+  );
 
-   const launchOptions = {
-    headless: true,
-    executablePath: '/snap/bin/chromium',  // Chemin fixe vers Chromium snap
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
-      '--disable-gpu',
-      '--disable-blink-features=AutomationControlled',
-      '--disable-features=IsolateOrigins,site-per-process',
-      '--window-size=1920,1080',
-    ],
-    ignoreHTTPSErrors: true,
-  };
+let isScrapingInProgress = false;
 
-   try {
-     if (fs.existsSync('/usr/bin/chromium-browser')) {
-       console.log('Utilisation de Chromium système');
-       launchOptions.executablePath = '/usr/bin/chromium-browser';
-     } else {
-       console.log('Utilisation de Chromium Puppeteer');
-       launchOptions.executablePath = executablePath();
-     }
-   } catch (error) {
-     console.log('Fallback sur Chromium Puppeteer');
-     launchOptions.executablePath = executablePath();
-   }
-   browser = await puppeteer.launch(launchOptions);
-   const page = await browser.newPage();
-   
-   await page.setDefaultNavigationTimeout(45000);
-   await page.setViewport({ width: 1920, height: 1080 });
-   await page.setUserAgent(randomUserAgent);
-   
-   await page.setRequestInterception(true);
-   page.on('request', (request) => {
-     const resourceType = request.resourceType();
-     if (['image', 'stylesheet', 'font'].includes(resourceType)) {
-       request.abort();
-     } else {
-       request.continue();
-     }
-   });
+const scrapeQubaIsmalicCenter = async () => {
+  if (isScrapingInProgress) {
+    console.log('Un scraping est déjà en cours, attente...');
+    return null;
+  }
 
-   await page.evaluateOnNewDocument(() => {
-     delete Object.getPrototypeOf(navigator).webdriver;
-     Object.defineProperty(navigator, 'platform', { get: () => 'Win32' });
-     Object.defineProperty(navigator, 'productSub', { get: () => '20100101' });
-     Object.defineProperty(navigator, 'vendor', { get: () => 'Google Inc.' });
-     window.navigator.chrome = { runtime: {} };
-   });
+  isScrapingInProgress = true;
+  let browser;
+  try {
+    console.log('Démarrage du scraping...');
+    const randomUserAgent = userAgents[Math.floor(Math.random() * userAgents.length)];
 
-   console.log('Navigation vers Masjid Al-Farouq...');
-   await page.goto('https://www.masjidalfarouq.org.uk/', {
-     waitUntil: 'domcontentloaded',
-     timeout: 25000
-   });
+    const launchOptions = {
+      headless: true,
+      executablePath: '/snap/bin/chromium',
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-gpu',
+        '--disable-blink-features=AutomationControlled',
+        '--disable-features=IsolateOrigins,site-per-process',
+        '--window-size=1920,1080',
+      ],
+      ignoreHTTPSErrors: true,
+    };
 
-   await page.waitForSelector('div.my-5', { timeout: 15000 });
-   await randomDelay(1000, 2000);
+    try {
+      if (fs.existsSync('/usr/bin/chromium-browser')) {
+        console.log('Utilisation de Chromium système');
+        launchOptions.executablePath = '/usr/bin/chromium-browser';
+      } else {
+        console.log('Utilisation de Chromium Puppeteer');
+        launchOptions.executablePath = executablePath();
+      }
+    } catch (error) {
+      console.log('Fallback sur Chromium Puppeteer');
+      launchOptions.executablePath = executablePath();
+    }
 
-   console.log('Extraction des données...');
-   const ukTime = DateTime.now().setZone('Europe/London');
-   const dateText = ukTime.toISODate();
+    browser = await puppeteer.launch(launchOptions);
 
-   const data = await page.evaluate(() => {
-     const times = {};
-     const prayerElements = document.querySelectorAll(
-       'div.my-5 div.flex.flex-row.justify-around.items-center.flex-wrap.mt-2 div.flex.flex-col.items-center.max-w-xs.flex'
-     );
+    const page = await browser.newPage();
+    await page.setUserAgent(randomUserAgent);
+    await page.setViewport({ width: 800, height: 600 });
 
-     prayerElements.forEach((prayerElement) => {
-       const nameElement = prayerElement.querySelector('h3.font-elMessiri.font-medium');
-       const timeElements = prayerElement.querySelectorAll('h4.p-0\\.5.sm\\:p-1.font-medium');
-       const timeElement = timeElements.length >= 2 ? timeElements[1] : null;
+    await page.setRequestInterception(true);
+    page.on('request', (request) => {
+      const resourceType = request.resourceType();
+      if (['image', 'stylesheet', 'font'].includes(resourceType)) {
+        request.abort();
+      } else {
+        request.continue();
+      }
+    });
 
-       if (nameElement && timeElement) {
-         let prayerName = nameElement.textContent.trim().toLowerCase();
-         let time = timeElement.textContent.trim();
+    await page.evaluateOnNewDocument(() => {
+      Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
+    });
 
-         switch (prayerName) {
-           case 'fajr': prayerName = 'fajr'; break;
-           case 'zuhr':
-           case 'dhuhr': prayerName = 'dhuhr'; break;
-           case 'asr': prayerName = 'asr'; break;
-           case 'maghrib': prayerName = 'maghrib'; break;
-           case 'isha': prayerName = 'isha'; break;
-           default: prayerName = null;
-         }
+    let retryCount = 0;
+    const maxRetries = 2;
+    let frame;
 
-         if (prayerName) {
-           const [timeStr, period] = time.split(/\s+/);
-           const [hours, minutes] = timeStr.split(/[:.]/);
-           let hour = parseInt(hours);
-           
-           if (period === 'PM' && hour < 12) hour += 12;
-           if (period === 'AM' && hour === 12) hour = 0;
-           
-           times[prayerName] = `${hour.toString().padStart(2, '0')}:${minutes}`;
-         }
-       }
-     });
-     
-     return times;
-   });
+    while (retryCount < maxRetries) {
+      try {
+        console.log('Navigation vers Quba Islamic Center...');
+        await page.goto('https://mawaqit.net/en/quba-islamic-cultural-centre-birmingham-b7-4ny-united-kingdom/', {
+          waitUntil: 'domcontentloaded',
+          timeout: 25000,
+        });
+        console.log('Page principale chargée avec succès');
 
-   const result = {
-     source: 'Masjid Al-Farouq Walsall',
-     date: dateText,
-     times: data
-   };
+        await page.mouse.move(100, 100);
+        await randomDelay(50, 150);
 
-   console.log('Données extraites avec succès:', result);
-   return result;
+        await page.waitForSelector('div.prayers', { timeout: 15000 });
+        frame = page;
 
- } catch (error) {
-   console.error('Erreur détaillée lors du scraping:', error);
-   throw new Error(`Erreur de scraping: ${error.message}`);
- } finally {
-   if (browser) {
-     await browser.close();
-     console.log('Navigateur fermé');
-   }
- }
+        await frame.waitForSelector('div.prayers', { timeout: 10000 });
+
+        const hasContent = await frame.evaluate(() => {
+          return document.querySelectorAll('div.prayers > div').length > 0;
+        });
+
+        if (hasContent) {
+          console.log('Contenu valide détecté');
+          break;
+        } else {
+          throw new Error("Contenu de la page non valide");
+        }
+      } catch (error) {
+        retryCount++;
+        console.log(`Tentative ${retryCount}/${maxRetries} échouée:`, error.message);
+        if (retryCount === maxRetries) {
+          const content = await page.content();
+          fs.writeFileSync('failed_page_qubaIslamicCenter.html', content);
+          console.log('Le contenu de la page a été sauvegardé dans failed_page_qubaIslamicCenter.html pour analyse.');
+          throw error;
+        }
+        await randomDelay(3000, 5000);
+      }
+    }
+
+    if (!frame) {
+      throw new Error("Frame non défini après les tentatives");
+    }
+
+    console.log('Extraction des données...');
+    const ukTime = DateTime.now().setZone('Europe/London');
+    const dateText = ukTime.toISODate();
+
+    const rawTimes = await frame.evaluate(() => {
+      const prayerTimes = {};
+      const prayerElements = document.querySelectorAll('div.prayers > div');
+
+      prayerElements.forEach((prayerElement) => {
+        const nameElement = prayerElement.querySelector('div.name');
+        const timeElement = prayerElement.querySelector('div.time');
+        const waitElement = prayerElement.querySelector('div.wait > div');
+
+        if (nameElement && timeElement) {
+          let prayerName = nameElement.textContent.trim().toLowerCase();
+          const prayerTime = timeElement.textContent.trim();
+          const waitText = waitElement ? waitElement.textContent.trim() : '+0';
+
+          switch (prayerName) {
+            case 'fajr': prayerName = 'fajr'; break;
+            case 'zuhr':
+            case 'dhuhr': prayerName = 'dhuhr'; break;
+            case 'asr': prayerName = 'asr'; break;
+            case 'maghrib': prayerName = 'maghrib'; break;
+            case 'isha': prayerName = 'isha'; break;
+            default: return;
+          }
+
+          prayerTimes[prayerName] = {
+            baseTime: prayerTime,
+            offset: waitText
+          };
+        }
+      });
+      
+      return prayerTimes;
+    });
+
+    // Normalise les temps en tenant compte des délais
+    const normalizedTimes = {};
+    for (const [prayer, data] of Object.entries(rawTimes)) {
+      let offsetMinutes = 0;
+      if (/^\+\d+$/.test(data.offset)) {
+        offsetMinutes = parseInt(data.offset.replace('+', ''), 10);
+      }
+      
+      const normalizedTime = normalizeTime(data.baseTime, offsetMinutes);
+      if (normalizedTime) {
+        normalizedTimes[prayer] = normalizedTime;
+      }
+    }
+
+    const result = {
+      source: 'Quba Islamic Center Birmingham',
+      date: dateText,
+      times: normalizedTimes
+    };
+
+    console.log('Données extraites avec succès:', result);
+    return result;
+
+  } catch (error) {
+    console.error('Erreur lors du scraping:', error.message);
+    throw error;
+  } finally {
+    if (browser) {
+      await browser.close();
+      console.log('Navigateur fermé');
+    }
+    isScrapingInProgress = false;
+  }
 };
 
-
-module.exports = scrapeMasjidAlFarouq;
+module.exports = scrapeQubaIsmalicCenter;

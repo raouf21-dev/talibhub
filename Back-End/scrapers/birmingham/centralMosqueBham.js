@@ -1,3 +1,6 @@
+//Back-End/scrapers/birmingham/centralMosqueBham.js
+
+
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 const { executablePath } = require('puppeteer');
@@ -19,18 +22,27 @@ const userAgents = [
   'Mozilla/5.0 (Linux; Android 12; SM-G991B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.74 Mobile Safari/537.36',
 ];
 
+const normalizeTime = (timeStr) => {
+  if (!timeStr || timeStr === 'NaN:undefined') return null;
+  
+  const [time, modifier] = timeStr.split(' ');
+  if (!time) return null;
+
+  let [hours, minutes] = time.split(':');
+  if (!hours || !minutes) return null;
+
+  hours = parseInt(hours, 10);
+  if (isNaN(hours)) return null;
+  
+  if (modifier === 'PM' && hours < 12) hours += 12;
+  if (modifier === 'AM' && hours === 12) hours = 0;
+  
+  return `${hours.toString().padStart(2, '0')}:${minutes.padStart(2, '0')}`;
+};
+
 const randomDelay = async (min, max) => {
   const delay = Math.floor(Math.random() * (max - min + 1)) + min;
   await new Promise(resolve => setTimeout(resolve, delay));
-};
-
-const convertTo24Hour = (timeStr) => {
-  const [time, modifier] = timeStr.split(' ');
-  let [hours, minutes] = time.split(':');
-  hours = parseInt(hours, 10);
-  if (modifier === 'PM' && hours < 12) hours += 12;
-  if (modifier === 'AM' && hours === 12) hours = 0;
-  return `${hours.toString().padStart(2, '0')}:${minutes}`;
 };
 
 const waitForCloudflare = async (page) => {
@@ -50,7 +62,15 @@ const waitForCloudflare = async (page) => {
   }
 };
 
+let isScrapingInProgress = false;
+
 const scrapeCentralMosque = async () => {
+  if (isScrapingInProgress) {
+    console.log('Un scraping est déjà en cours, attente...');
+    return null;
+  }
+
+  isScrapingInProgress = true;
   let browser;
   try {
     console.log('Démarrage du scraping...');
@@ -177,15 +197,19 @@ const scrapeCentralMosque = async () => {
       return prayers;
     });
 
-    const formattedTimes = {};
+    // Normalise tous les temps avant de les renvoyer
+    const normalizedTimes = {};
     for (const [prayer, time] of Object.entries(data)) {
-      formattedTimes[prayer] = convertTo24Hour(time);
+      const normalizedTime = normalizeTime(time);
+      if (normalizedTime) {
+        normalizedTimes[prayer] = normalizedTime;
+      }
     }
 
     const result = {
       source: 'Central Mosque Birmingham',
       date: dateText,
-      times: formattedTimes
+      times: normalizedTimes
     };
 
     console.log('Données extraites avec succès:', result);
@@ -199,6 +223,7 @@ const scrapeCentralMosque = async () => {
       await browser.close();
       console.log('Navigateur fermé');
     }
+    isScrapingInProgress = false;
   }
 };
 

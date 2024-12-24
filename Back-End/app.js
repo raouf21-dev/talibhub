@@ -76,7 +76,7 @@ const captchaRoutes = require('./routes/captchaRoutes');
 const duaTimeRoutes = require('./routes/duaTimeRoutes');
 
 // AJOUTEZ LE NOUVEAU MIDDLEWARE DE LOGGING ICI, après les parsers mais avant les routes
-app.use((req, res, next) => {
+/*app.use((req, res, next) => {
     console.log('Full request details:');
     console.log('Method:', req.method);
     console.log('Path:', req.path);
@@ -85,7 +85,7 @@ app.use((req, res, next) => {
     console.log('Body:', req.body);
     console.log('Query:', req.query);
     next();
-});
+});*/
 
 
 // Routes API

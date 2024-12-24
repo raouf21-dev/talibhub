@@ -1,3 +1,5 @@
+//Back-End/scrapers/walsall/masjidAlfarouqWalsall.js
+
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 const { executablePath } = require('puppeteer');
@@ -19,12 +21,39 @@ const userAgents = [
  'Mozilla/5.0 (Linux; Android 12; SM-G991B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.74 Mobile Safari/537.36',
 ];
 
+const normalizeTime = (timeStr) => {
+  if (!timeStr || timeStr === 'NaN:undefined') return null;
+  
+  // Retire tous les caractères non numériques sauf ':'
+  timeStr = timeStr.replace(/[^0-9:]/g, '');
+  
+  // Gère le cas où l'heure est au format HHMM
+  if (!timeStr.includes(':')) {
+    timeStr = timeStr.padStart(4, '0');
+    timeStr = `${timeStr.slice(0, 2)}:${timeStr.slice(2)}`;
+  }
+  
+  // S'assure que les heures et minutes sont sur 2 chiffres
+  const [hours, minutes] = timeStr.split(':');
+  if (!hours || !minutes) return null;
+  
+  return `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`;
+};
+
 const randomDelay = async (min, max) => {
  const delay = Math.floor(Math.random() * (max - min + 1)) + min;
  await new Promise(resolve => setTimeout(resolve, delay));
 };
 
+let isScrapingInProgress = false;
+
 const scrapeMasjidAlFarouq = async () => {
+ if (isScrapingInProgress) {
+   console.log('Un scraping est déjà en cours, attente...');
+   return null;
+ }
+
+ isScrapingInProgress = true;
  let browser;
  try {
    console.log('Démarrage du scraping Masjid Al-Farouq...');
@@ -32,7 +61,7 @@ const scrapeMasjidAlFarouq = async () => {
 
    const launchOptions = {
     headless: true,
-    executablePath: '/snap/bin/chromium',  // Chemin fixe vers Chromium snap
+    executablePath: '/snap/bin/chromium',
     args: [
       '--no-sandbox',
       '--disable-setuid-sandbox',
@@ -43,7 +72,7 @@ const scrapeMasjidAlFarouq = async () => {
       '--window-size=1920,1080',
     ],
     ignoreHTTPSErrors: true,
-  };
+   };
 
    try {
      if (fs.existsSync('/usr/bin/chromium-browser')) {
@@ -121,15 +150,20 @@ const scrapeMasjidAlFarouq = async () => {
            default: prayerName = null;
          }
 
-         if (prayerName) {
+         if (prayerName && time) {
            const [timeStr, period] = time.split(/\s+/);
+           if (!timeStr) return;
+
            const [hours, minutes] = timeStr.split(/[:.]/);
+           if (!hours || !minutes) return;
+
            let hour = parseInt(hours);
+           if (isNaN(hour)) return;
            
            if (period === 'PM' && hour < 12) hour += 12;
            if (period === 'AM' && hour === 12) hour = 0;
            
-           times[prayerName] = `${hour.toString().padStart(2, '0')}:${minutes}`;
+           times[prayerName] = `${hour}:${minutes}`;
          }
        }
      });
@@ -137,10 +171,19 @@ const scrapeMasjidAlFarouq = async () => {
      return times;
    });
 
+   // Normalise tous les temps avant de les renvoyer
+   const normalizedTimes = {};
+   for (const [prayer, time] of Object.entries(data)) {
+     const normalizedTime = normalizeTime(time);
+     if (normalizedTime) {
+       normalizedTimes[prayer] = normalizedTime;
+     }
+   }
+
    const result = {
      source: 'Masjid Al-Farouq Walsall',
      date: dateText,
-     times: data
+     times: normalizedTimes
    };
 
    console.log('Données extraites avec succès:', result);
@@ -154,6 +197,7 @@ const scrapeMasjidAlFarouq = async () => {
      await browser.close();
      console.log('Navigateur fermé');
    }
+   isScrapingInProgress = false;
  }
 };
 

@@ -1,85 +1,108 @@
+// timer.js
 import { updateDOMIfExists } from './utils.js';
 import { loadTasks } from './tasks.js';
 import { api } from './dynamicLoader.js';
-
-// Variables globales
-let isRunning = false;
-let isWorkSession = true;
-let workDuration = 25 * 60;
-let breakDuration = 5 * 60;
-let currentTime = workDuration;
-let timer;
-let stopwatchInterval = null;
-let timerTime = 0;
-let stopwatchTime = 0;
-let manualTimeInSeconds = 0;
-let selectedTaskId = '';
-let isSessionActive = false;
-const Counter = { value: 0 };
-let currentSessionId = null;
-let taskLastSessionId = null;
-let totalWorkTime = 0;
+import AppState from './state.js';
 
 function initializeTimer() {
-    loadTasks();
-    loadSessionFromCache();
-    loadCounter();
-    updateTaskTitle();
-    enableControls();
+    try {
+        loadTasks();
+        initializeSessionState();
+        updateTaskTitle();
+        enableControls();
 
-    const apprentissageSection = document.getElementById('apprentissage');
-    if (apprentissageSection) {
-        apprentissageSection.addEventListener('click', function(event) {
-            const target = event.target.closest('[data-action]');
-            if (target) {
-                const action = target.getAttribute('data-action');
-                switch(action) {
-                    case 'toggle-timer':
-                        toggleTimer();
-                        break;
-                    case 'reset-timer':
-                        resetTimer();
-                        break;
-                    case 'toggle-stopwatch':
-                        toggleStopwatch();
-                        break;
-                    case 'reset-stopwatch':
-                        resetStopwatch();
-                        break;
-                    case 'change-counter':
-                        const value = parseInt(target.getAttribute('data-value'));
-                        changeCounter(value);
-                        break;
-                    case 'save-session-data':
-                        saveSessionData();
-                        break;
-                    case 'start-new-session':
-                        startNewSession();
-                        break;
-                    default:
-                        console.warn('Action inconnue :', action);
+        const apprentissageSection = document.getElementById('apprentissage');
+        if (apprentissageSection) {
+            apprentissageSection.addEventListener('click', handleApprentissageEvents);
+        }
+
+        const taskSelect = document.getElementById('task-select');
+        if (taskSelect) {
+            taskSelect.addEventListener('change', updateTaskTitle);
+        }
+
+        const addManualTimeBtn = document.getElementById('add-manual-time-btn');
+        if (addManualTimeBtn) {
+            addManualTimeBtn.addEventListener('click', addManualTime);
+        }
+
+        updateTimerDisplay();
+    } catch (error) {
+        console.error('Erreur dans initializeTimer:', error);
+    }
+}
+
+function initializeSessionState() {
+    try {
+        const savedSession = localStorage.getItem('currentSessionData');
+        if (savedSession) {
+            const sessionData = JSON.parse(savedSession);
+            
+            // Restaurer l'état de la session
+            Object.entries({
+                'session.currentSessionId': sessionData.sessionId,
+                'session.taskLastSessionId': sessionData.taskLastSessionId,
+                'session.selectedTaskId': sessionData.taskId,
+                'session.totalWorkTime': sessionData.totalWorkTime,
+                'timer.stopwatchTime': sessionData.stopwatchTime,
+                'session.counter.value': sessionData.counterValue,
+                'timer.manualTimeInSeconds': sessionData.manualTimeInSeconds || 0
+            }).forEach(([key, value]) => AppState.set(key, value));
+
+            // Mettre à jour l'interface
+            updateDOMIfExists('task-last-session-id', 
+                sessionData.taskLastSessionId !== null ? sessionData.taskLastSessionId : '0');
+            updateDOMIfExists('current-session-id', sessionData.sessionId);
+            updateDOMIfExists('counter-value', sessionData.counterValue);
+
+            updateTimerDisplay();
+            AppState.set('session.isActive', true);
+        } else {
+            AppState.set('session.isActive', false);
+        }
+        enableControls();
+    } catch (error) {
+        console.error('Erreur lors de l\'initialisation de l\'état de la session:', error);
+        AppState.set('session.isActive', false);
+        enableControls();
+    }
+}
+
+function handleApprentissageEvents(event) {
+    const target = event.target.closest('[data-action]');
+    if (!target) return;
+
+    try {
+        const action = target.getAttribute('data-action');
+        const actions = {
+            'toggle-timer': toggleTimer,
+            'reset-timer': resetTimer,
+            'toggle-stopwatch': toggleStopwatch,
+            'reset-stopwatch': resetStopwatch,
+            'save-session-data': saveSessionData,
+            'start-new-session': startNewSession,
+            'change-counter': () => {
+                const value = parseInt(target.getAttribute('data-value'));
+                if (!isNaN(value)) {
+                    changeCounter(value);
                 }
             }
-        });
-    }
+        };
 
-    const taskSelect = document.getElementById('task-select');
-    if (taskSelect) {
-        taskSelect.addEventListener('change', updateTaskTitle);
+        if (actions[action]) {
+            actions[action]();
+        } else {
+            console.warn('Action inconnue:', action);
+        }
+    } catch (error) {
+        console.error('Erreur lors du traitement de l\'action:', error);
     }
-
-    const addManualTimeBtn = document.getElementById('add-manual-time-btn');
-    if (addManualTimeBtn) {
-        addManualTimeBtn.addEventListener('click', addManualTime);
-    }
-
-    updateTimerDisplay();
 }
 
 function enableControls() {
     const controls = document.querySelectorAll('.session-control');
     controls.forEach(control => {
-        control.disabled = !isSessionActive;
+        control.disabled = !AppState.get('session.isActive');
     });
 }
 
@@ -87,18 +110,12 @@ async function updateTaskTitle(forceRefresh = false) {
     const taskSelect = document.getElementById('task-select');
     const selectedTaskTitle = document.getElementById('counter-task-title');
     const selectedTask = taskSelect?.options[taskSelect.selectedIndex]?.text;
-    selectedTaskId = taskSelect?.value;
+    
+    AppState.set('session.selectedTaskId', taskSelect?.value || '');
+    const selectedTaskId = AppState.get('session.selectedTaskId');
 
-    console.log('Selected task:', selectedTask, 'Task ID:', selectedTaskId);
-
-    if (!selectedTaskId || selectedTaskId === "") {
-        selectedTaskTitle.textContent = "Sélectionnez une tâche";
-        document.getElementById('current-session-id').textContent = "Veuillez démarrer une nouvelle session";
-        document.getElementById('previous-sessions-count').textContent = "0";
-        document.getElementById('counter-value').textContent = "0";
-        document.getElementById('total-work-time').textContent = "00:00:00";
-        isSessionActive = false;
-        enableControls();
+    if (!selectedTaskId) {
+        resetUIState();
         return;
     }
 
@@ -106,147 +123,176 @@ async function updateTaskTitle(forceRefresh = false) {
 
     try {
         const data = await api.get(`/session/last/${selectedTaskId}`);
+        console.log('Session data received:', data);
 
         if (data.message === 'No previous session found for this task') {
-            Counter.value = 0;
-            timerTime = 0;
-            stopwatchTime = 0;
-            manualTimeInSeconds = 0;
-            document.getElementById('current-session-id').textContent = "Pas d'ancienne session";
-            document.getElementById('previous-sessions-count').textContent = "0";
+            resetSessionState();
+            updateDOMIfExists('current-session-id', "Pas d'ancienne session");
+            updateDOMIfExists('previous-sessions-count', "0");
         } else {
-            Counter.value = data.lastSession.counter_value || 0;
-            timerTime = data.lastSession.timer_time || 0;
-            stopwatchTime = data.lastSession.stopwatch_time || 0;
-            document.getElementById('current-session-id').textContent = 'Dernière session trouvée';
-            document.getElementById('previous-sessions-count').textContent = 
-                data.sessionCount !== undefined ? data.sessionCount.toString() : "N/A";
+            const lastSession = data.lastSession;
+            updateSessionWithLastData(lastSession, data.sessionCount);
         }
 
-        document.getElementById('counter-value').textContent = Counter.value;
-        totalWorkTime = calculateTotalWorkTime();
-        document.getElementById('total-work-time').textContent = formatTime(totalWorkTime);
-
-        isSessionActive = false;
+        AppState.set('session.isActive', false);
         document.getElementById('start-new-session').disabled = false;
         enableControls();
 
     } catch (error) {
         console.error('Erreur lors du chargement de la dernière session:', error);
-        alert('Erreur lors du chargement de la dernière session.');
-        document.getElementById('current-session-id').textContent = "Erreur de chargement";
-        document.getElementById('previous-sessions-count').textContent = "N/A";
-        isSessionActive = false;
-        enableControls();
+        handleSessionError();
     }
 }
 
-async function startNewSession() {
-    if (!selectedTaskId) {
+function updateSessionWithLastData(lastSession, sessionCount) {
+    AppState.set('session.counter.value', lastSession.counter_value || 0);
+    AppState.set('timer.timerTime', lastSession.timer_time || 0);
+    AppState.set('timer.stopwatchTime', lastSession.stopwatch_time || 0);
+    
+    updateDOMIfExists('current-session-id', 'Dernière session trouvée');
+    updateDOMIfExists('previous-sessions-count', sessionCount?.toString() || "N/A");
+    updateDOMIfExists('counter-value', AppState.get('session.counter.value'));
+    updateDOMIfExists('total-work-time', formatTime(calculateTotalWorkTime()));
+}
+
+function resetUIState() {
+    updateDOMIfExists('current-session-id', "Veuillez démarrer une nouvelle session");
+    updateDOMIfExists('previous-sessions-count', "0");
+    updateDOMIfExists('counter-value', "0");
+    updateDOMIfExists('total-work-time', "00:00:00");
+    AppState.set('session.isActive', false);
+    enableControls();
+}
+
+function resetSessionState() {
+    AppState.set('session.counter.value', 0);
+    AppState.set('timer.timerTime', 0);
+    AppState.set('timer.stopwatchTime', 0);
+    AppState.set('timer.manualTimeInSeconds', 0);
+    AppState.set('timer.isRunning', false);
+    AppState.set('timer.currentTime', AppState.get('timer.workDuration'));
+    
+    // S'assurer que les intervalles sont nettoyés
+    if (AppState.get('timer.timer')) {
+        clearInterval(AppState.get('timer.timer'));
+        AppState.set('timer.timer', null);
+    }
+    if (AppState.get('timer.stopwatchInterval')) {
+        clearInterval(AppState.get('timer.stopwatchInterval'));
+        AppState.set('timer.stopwatchInterval', null);
+    }
+}
+
+function handleSessionError() {
+    updateDOMIfExists('current-session-id', "Erreur de chargement");
+    updateDOMIfExists('previous-sessions-count', "N/A");
+    AppState.set('session.isActive', false);
+    enableControls();
+}
+
+function startNewSession() {
+    if (!AppState.get('session.selectedTaskId')) {
         alert("Veuillez sélectionner une tâche avant de créer une nouvelle session.");
         return;
     }
 
-    if (isSessionActive) {
+    if (AppState.get('session.isActive')) {
         alert("Une session est déjà en cours. Veuillez l'enregistrer avant d'en commencer une nouvelle.");
         return;
     }
 
     try {
-        await updateTaskTitle(true);
+        resetSessionState();
+        
+        // Mise à jour de l'interface
         document.getElementById('current-session-id').textContent = 'Nouvelle Session en cours';
-
-        timerTime = 0;
-        stopwatchTime = 0;
-        manualTimeInSeconds = 0;
-        Counter.value = 0;
-        document.getElementById('counter-value').textContent = Counter.value;
+        document.getElementById('counter-value').textContent = '0';
         document.getElementById('total-work-time').textContent = '00:00:00';
+        document.getElementById('stopwatch-time').textContent = '00:00:00';
 
-        isSessionActive = true;
+        // Réinitialisation des boutons avec leurs icônes
+        const startStopBtn = document.getElementById('start_stop');
+        if (startStopBtn) {
+            startStopBtn.innerHTML = `
+                <img src="./Icones/ButtonsIcone/Start_icone.png" alt="play" class="timer-icon" />
+            `;
+        }
+
+        const stopwatchStartBtn = document.getElementById('stopwatch-start');
+        if (stopwatchStartBtn) {
+            stopwatchStartBtn.innerHTML = `
+                <img src="./Icones/ButtonsIcone/Start_icone.png" alt="play" class="timer-icon" />
+            `;
+        }
+        
+        AppState.set('session.isActive', true);
         enableControls();
         document.getElementById('start-new-session').disabled = true;
+        
+        saveSessionToCache();
+
     } catch (error) {
         console.error('Erreur lors de l\'initialisation de la nouvelle session:', error);
         alert('Erreur lors de l\'initialisation de la nouvelle session: ' + error.message);
     }
 }
 
+function resetTimer() {
+    if (AppState.get('timer.timer')) {
+        clearInterval(AppState.get('timer.timer'));
+        AppState.set('timer.timer', null);
+    }
+    
+    AppState.set('timer.isRunning', false);
+    AppState.set('timer.isWorkSession', true);
+    AppState.set('timer.currentTime', AppState.get('timer.workDuration'));
+    AppState.set('timer.timerTime', 0);
+    
+    updateTimerDisplay();
+    const startStopBtn = document.getElementById('start_stop');
+    if (startStopBtn) {
+        startStopBtn.innerHTML = `
+            <img src="./Icones/ButtonsIcone/Start_icone.png" alt="play" class="timer-icon" />
+        `;
+    }
+    document.getElementById('timer-label').textContent = 'Travail';
+    updateTotalWorkTimeDisplay();
+}
+
+
+
 function saveSessionToCache() {
     const sessionData = {
-        sessionId: currentSessionId,
-        taskLastSessionId: taskLastSessionId,
-        taskId: selectedTaskId,
-        totalWorkTime: totalWorkTime,
-        stopwatchTime: stopwatchTime,
-        counterValue: Counter.value,
-        manualTimeInSeconds: manualTimeInSeconds
+        sessionId: AppState.get('session.currentSessionId'),
+        taskLastSessionId: AppState.get('session.taskLastSessionId'),
+        taskId: AppState.get('session.selectedTaskId'),
+        totalWorkTime: AppState.get('session.totalWorkTime'),
+        stopwatchTime: AppState.get('timer.stopwatchTime'),
+        counterValue: AppState.get('session.counter.value'),
+        manualTimeInSeconds: AppState.get('timer.manualTimeInSeconds')
     };
     localStorage.setItem('currentSessionData', JSON.stringify(sessionData));
 }
 
-async function loadSessionFromCache() {
-    const savedSession = JSON.parse(localStorage.getItem('currentSessionData'));
-    if (savedSession) {
-        currentSessionId = savedSession.sessionId;
-        taskLastSessionId = savedSession.taskLastSessionId;
-        selectedTaskId = savedSession.taskId;
-        totalWorkTime = savedSession.totalWorkTime;
-        stopwatchTime = savedSession.stopwatchTime;
-        Counter.value = savedSession.counterValue;
-        manualTimeInSeconds = savedSession.manualTimeInSeconds || 0;
-
-        updateDOMIfExists('task-last-session-id', taskLastSessionId !== null ? taskLastSessionId : '0');
-        updateDOMIfExists('current-session-id', currentSessionId);
-        updateDOMIfExists('counter-value', Counter.value);
-
-        updateTimerDisplay();
-        isSessionActive = true;
-    } else {
-        isSessionActive = false;
-    }
-    enableControls();
-}
-
 async function saveSessionData() {
-    if (!selectedTaskId || !isSessionActive) {
+    if (!AppState.get('session.selectedTaskId') || !AppState.get('session.isActive')) {
         alert("Aucune session active à enregistrer.");
         return;
     }
 
-    const totalWorkTime = calculateTotalWorkTime();
-
     try {
         await api.post('/session/save', {
-            taskId: selectedTaskId,
-            totalWorkTime: totalWorkTime,
-            stopwatchTime: stopwatchTime,
-            timerTime: timerTime,
-            counterValue: Counter.value
+            taskId: AppState.get('session.selectedTaskId'),
+            totalWorkTime: calculateTotalWorkTime(),
+            stopwatchTime: AppState.get('timer.stopwatchTime'),
+            timerTime: AppState.get('timer.timerTime'),
+            counterValue: AppState.get('session.counter.value')
         });
 
         alert('Données de la session sauvegardées avec succès.');
+        resetSessionState();
+        resetUIAfterSave();
         await updateTaskTitle(true);
-
-        timerTime = 0;
-        stopwatchTime = 0;
-        manualTimeInSeconds = 0;
-        Counter.value = 0;
-        
-        document.getElementById('counter-value').textContent = Counter.value;
-        document.getElementById('current-session-id').textContent = 'Session terminée';
-        document.getElementById('total-work-time').textContent = '00:00:00';
-
-        isSessionActive = false;
-        document.getElementById('start-new-session').disabled = false;
-
-        clearInterval(timer);
-        clearInterval(stopwatchInterval);
-        isRunning = false;
-        document.getElementById('start_stop').textContent = 'Démarrer';
-        document.getElementById('stopwatch-start').textContent = 'Démarrer';
-        updateTimerDisplay();
-        document.getElementById('stopwatch-time').textContent = '00:00:00';
 
     } catch (error) {
         console.error('Error saving session data:', error);
@@ -254,133 +300,184 @@ async function saveSessionData() {
     }
 }
 
-function updateTimer() {
-    if (currentTime > 0) {
-        currentTime--;
-        timerTime++;
-        updateTimerDisplay();
-    } else {
-        clearInterval(timer);
-        if (isWorkSession) {
-            isWorkSession = false;
-            currentTime = breakDuration;
-            document.getElementById('timer-label').textContent = 'Pause';
-        } else {
-            isWorkSession = true;
-            currentTime = workDuration;
-            document.getElementById('timer-label').textContent = 'Travail';
-        }
-        updateTimerDisplay();
-        document.getElementById('start_stop').textContent = 'Démarrer';
-        isRunning = false;
-    }
-    document.getElementById('total-work-time').textContent = formatTime(calculateTotalWorkTime());
+function resetUIAfterSave() {
+    // Réinitialiser tous les affichages
+    clearAllIntervals();
+    updateAllDisplays();
+    resetAllButtons();
+    updateSessionState();
 }
 
-function updateTimerDisplay() {
-    const minutes = Math.floor(currentTime / 60);
-    const seconds = currentTime % 60;
-    document.getElementById('time-left').textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+function clearAllIntervals() {
+    // Nettoyer les intervalles
+    if (AppState.get('timer.timer')) {
+        clearInterval(AppState.get('timer.timer'));
+        AppState.set('timer.timer', null);
+    }
+    if (AppState.get('timer.stopwatchInterval')) {
+        clearInterval(AppState.get('timer.stopwatchInterval'));
+        AppState.set('timer.stopwatchInterval', null);
+    }
+}
+
+function updateAllDisplays() {
+    // Mettre à jour tous les affichages
+    updateDOMIfExists('current-session-id', 'Session terminée');
+    updateDOMIfExists('counter-value', '0');
+    updateDOMIfExists('total-work-time', '00:00:00');
+    updateDOMIfExists('stopwatch-time', '00:00:00');
+    updateTimerDisplay();
+}
+
+function resetAllButtons() {
+    // Réinitialiser l'état des boutons avec leurs icônes
+    document.getElementById('start-new-session').disabled = false;
+    
+    const startStopBtn = document.getElementById('start_stop');
+    if (startStopBtn) {
+        startStopBtn.innerHTML = `
+            <img src="./Icones/ButtonsIcone/Start_icone.png" alt="play" class="timer-icon" />
+  
+        `;
+    }
+
+    const stopwatchStartBtn = document.getElementById('stopwatch-start');
+    if (stopwatchStartBtn) {
+        stopwatchStartBtn.innerHTML = `
+            <img src="./Icones/ButtonsIcone/Start_icone.png" alt="play" class="timer-icon" />
+        `;
+    }
+}
+
+function updateSessionState() {
+    // Mettre à jour l'état de la session
+    AppState.set('session.isActive', false);
+    AppState.set('timer.isRunning', false);
+    enableControls();
+}
+
+function updateTimer() {
+    let currentTime = AppState.get('timer.currentTime');
+    if (currentTime > 0) {
+        currentTime--;
+        AppState.set('timer.currentTime', currentTime);
+        AppState.set('timer.timerTime', AppState.get('timer.timerTime') + 1);
+        updateTimerDisplay();
+    } else {
+        clearInterval(AppState.get('timer.timer'));
+        toggleWorkBreakSession();
+    }
+    updateTotalWorkTimeDisplay();
+}
+
+function toggleWorkBreakSession() {
+    const isWorkSession = AppState.get('timer.isWorkSession');
+    AppState.set('timer.isWorkSession', !isWorkSession);
+    
+    if (!isWorkSession) {
+        AppState.set('timer.currentTime', AppState.get('timer.workDuration'));
+        updateDOMIfExists('timer-label', 'Travail');
+    } else {
+        AppState.set('timer.currentTime', AppState.get('timer.breakDuration'));
+        updateDOMIfExists('timer-label', 'Pause');
+    }
+
+    updateTimerDisplay();
+    AppState.set('timer.isRunning', false);
+    document.getElementById('start_stop').textContent = 'Démarrer';
 }
 
 function toggleTimer() {
-    if (!isSessionActive) {
+    if (!AppState.get('session.isActive')) {
         alert("Veuillez démarrer une nouvelle session avant d'utiliser le timer.");
         return;
     }
-    if (!selectedTaskId) {
+
+    if (!AppState.get('session.selectedTaskId')) {
         alert("Veuillez sélectionner une tâche avant de démarrer le Pomodoro Timer.");
         return;
     }
-    if (stopwatchInterval !== null) {
+
+    if (AppState.get('timer.stopwatchInterval') !== null) {
         alert("Veuillez arrêter et réinitialiser le chronomètre avant de démarrer le Pomodoro Timer.");
         return;
     }
 
-    if (isRunning) {
-        clearInterval(timer);
-        document.getElementById('start_stop').textContent = 'Démarrer';
+    const startStopBtn = document.getElementById('start_stop');
+    if (!startStopBtn) return;
+
+    if (AppState.get('timer.isRunning')) {
+        // Arrêt du timer
+        clearInterval(AppState.get('timer.timer'));
+        startStopBtn.innerHTML = `
+            <img src="./Icones/ButtonsIcone/Start_icone.png" alt="play" class="timer-icon" />
+        `;
     } else {
-        timer = setInterval(updateTimer, 1000);
-        document.getElementById('start_stop').textContent = 'Pause';
+        // Démarrage du timer
+        const timer = setInterval(updateTimer, 1000);
+        AppState.set('timer.timer', timer);
+        startStopBtn.innerHTML = `
+            <img src="./Icones/ButtonsIcone/pause_icone.png" alt="pause" class="timer-icon" />
+        `;
     }
-    isRunning = !isRunning;
+
+    AppState.set('timer.isRunning', !AppState.get('timer.isRunning'));
 }
 
 function calculateTotalWorkTime() {
-    return timerTime + stopwatchTime + manualTimeInSeconds;
-}
-
-function resetTimer() {
-    clearInterval(timer);
-    isRunning = false;
-    isWorkSession = true;
-    currentTime = workDuration;
-    timerTime = 0;
-    updateTimerDisplay();
-    document.getElementById('start_stop').textContent = 'Démarrer';
-    document.getElementById('total-work-time').textContent = formatTime(calculateTotalWorkTime());
+    return AppState.get('timer.timerTime') + 
+           AppState.get('timer.stopwatchTime') + 
+           AppState.get('timer.manualTimeInSeconds');
 }
 
 function toggleStopwatch() {
-    if (!isSessionActive) {
+    if (!AppState.get('session.isActive')) {
         alert("Veuillez démarrer une nouvelle session avant d'utiliser le chronomètre.");
         return;
     }
-    if (!stopwatchInterval) {
-        stopwatchInterval = setInterval(updateStopwatch, 1000);
-        document.getElementById('stopwatch-start').textContent = 'Pause';
+
+    const stopwatchStartBtn = document.getElementById('stopwatch-start');
+    if (!stopwatchStartBtn) return;
+
+    if (!AppState.get('timer.stopwatchInterval')) {
+        const interval = setInterval(updateStopwatch, 1000);
+        AppState.set('timer.stopwatchInterval', interval);
+        stopwatchStartBtn.innerHTML = `
+            <img src="./Icones/ButtonsIcone/pause_icone.png" alt="pause" class="timer-icon" />
+        `;
     } else {
-        clearInterval(stopwatchInterval);
-        stopwatchInterval = null;
-        document.getElementById('stopwatch-start').textContent = 'Reprendre';
+        clearInterval(AppState.get('timer.stopwatchInterval'));
+        AppState.set('timer.stopwatchInterval', null);
+        stopwatchStartBtn.innerHTML = `
+            <img src="./Icones/ButtonsIcone/Start_icone.png" alt="play" class="timer-icon" />
+        `;
     }
 }
 
+
 function updateStopwatch() {
-    stopwatchTime++;
-    document.getElementById('stopwatch-time').textContent = formatTime(stopwatchTime);
-    document.getElementById('total-work-time').textContent = formatTime(calculateTotalWorkTime());
+    AppState.set('timer.stopwatchTime', AppState.get('timer.stopwatchTime') + 1);
+    updateDOMIfExists('stopwatch-time', formatTime(AppState.get('timer.stopwatchTime')));
+    updateTotalWorkTimeDisplay();
 }
 
 function resetStopwatch() {
-    clearInterval(stopwatchInterval);
-    stopwatchInterval = null;
-    stopwatchTime = 0;
-    document.getElementById('stopwatch-time').textContent = '00:00:00';
-    document.getElementById('stopwatch-start').textContent = 'Démarrer';
-    document.getElementById('total-work-time').textContent = formatTime(calculateTotalWorkTime());
-}
-
-function formatTime(timeInSeconds) {
-    const hours = Math.floor(timeInSeconds / 3600);
-    const minutes = Math.floor((timeInSeconds % 3600) / 60);
-    const seconds = timeInSeconds % 60;
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-}
-
-function loadCounter() {
-    const savedCounter = JSON.parse(localStorage.getItem('currentSessionData'));
-    if (savedCounter?.counterValue !== undefined) {
-        Counter.value = savedCounter.counterValue;
-        document.getElementById('counter-value').textContent = Counter.value;
-    } else {
-        Counter.value = 0;
-        document.getElementById('counter-value').textContent = Counter.value;
+    clearInterval(AppState.get('timer.stopwatchInterval'));
+    AppState.set('timer.stopwatchInterval', null);
+    AppState.set('timer.stopwatchTime', 0);
+    updateDOMIfExists('stopwatch-time', '00:00:00');
+    
+    const stopwatchStartBtn = document.getElementById('stopwatch-start');
+    if (stopwatchStartBtn) {
+        stopwatchStartBtn.innerHTML = `
+            <img src="./Icones/ButtonsIcone/Start_icone.png" alt="play" class="timer-icon" />
+        `;
     }
-}
-
-function changeCounter(value) {
-    if (!isSessionActive) {
-        alert("Veuillez démarrer une nouvelle session avant d'utiliser le compteur.");
-        return;
-    }
-    Counter.value = Math.max(0, Counter.value + value);
-    document.getElementById('counter-value').textContent = Counter.value;
+    updateTotalWorkTimeDisplay();
 }
 
 function addManualTime() {
-    if (!isSessionActive) {
+    if (!AppState.get('session.isActive')) {
         alert("Veuillez démarrer une nouvelle session avant d'ajouter du temps manuellement.");
         return;
     }
@@ -393,13 +490,57 @@ function addManualTime() {
         return;
     }
 
-    manualTimeInSeconds += (hours * 3600) + (minutes * 60);
+    const newManualTime = AppState.get('timer.manualTimeInSeconds') + (hours * 3600) + (minutes * 60);
+    AppState.set('timer.manualTimeInSeconds', newManualTime);
 
-    if (document.getElementById('manual-hours')) document.getElementById('manual-hours').value = '';
-    if (document.getElementById('manual-minutes')) document.getElementById('manual-minutes').value = '';
-
-    document.getElementById('total-work-time').textContent = formatTime(calculateTotalWorkTime());
+    resetManualTimeInputs();
+    updateTotalWorkTimeDisplay();
     alert('Temps d\'étude ajouté manuellement.');
 }
 
-export { initializeTimer };
+function resetManualTimeInputs() {
+    const hoursInput = document.getElementById('manual-hours');
+    const minutesInput = document.getElementById('manual-minutes');
+    if (hoursInput) hoursInput.value = '';
+    if (minutesInput) minutesInput.value = '';
+}
+
+function formatTime(timeInSeconds) {
+    const hours = Math.floor(timeInSeconds / 3600);
+    const minutes = Math.floor((timeInSeconds % 3600) / 60);
+    const seconds = timeInSeconds % 60;
+    return [hours, minutes, seconds]
+        .map(v => v.toString().padStart(2, '0'))
+        .join(':');
+}
+
+function updateTimerDisplay() {
+    const currentTime = AppState.get('timer.currentTime');
+    const minutes = Math.floor(currentTime / 60);
+    const seconds = currentTime % 60;
+    updateDOMIfExists('time-left', `${minutes}:${seconds.toString().padStart(2, '0')}`);
+}
+
+function updateTotalWorkTimeDisplay() {
+    updateDOMIfExists('total-work-time', formatTime(calculateTotalWorkTime()));
+}
+
+function changeCounter(value) {
+    if (!AppState.get('session.isActive')) {
+        alert("Veuillez démarrer une nouvelle session avant d'utiliser le compteur.");
+        return;
+    }
+    
+    // Modification ici pour s'assurer que la valeur est correctement mise à jour
+    const currentValue = parseInt(AppState.get('session.counter.value') || 0);
+    const newValue = Math.max(0, currentValue + value);
+    AppState.set('session.counter.value', newValue);
+    document.getElementById('counter-value').textContent = newValue.toString();
+}
+
+export { 
+    initializeTimer,
+    saveSessionToCache,
+    resetTimer,
+    handleApprentissageEvents,
+};

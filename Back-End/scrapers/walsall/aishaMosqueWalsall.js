@@ -1,3 +1,5 @@
+//Back-End/scrapers/walsall/aishaMosqueWalsall.js
+
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 const { executablePath } = require('puppeteer');
@@ -19,8 +21,38 @@ const userAgents = [
  'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:116.0) Gecko/20100101 Firefox/116.0'
 ];
 
+// Fonction utilitaire pour normaliser le format de l'heure
+const normalizeTime = (timeStr) => {
+  if (!timeStr || timeStr === 'NaN:undefined') return null;
+  
+  // Retire tous les caractères non numériques sauf ':'
+  timeStr = timeStr.replace(/[^0-9:]/g, '');
+  
+  // Gère le cas où l'heure est au format HHMM
+  if (!timeStr.includes(':')) {
+    timeStr = timeStr.padStart(4, '0');
+    timeStr = `${timeStr.slice(0, 2)}:${timeStr.slice(2)}`;
+  }
+  
+  // S'assure que les heures et minutes sont sur 2 chiffres
+  const [hours, minutes] = timeStr.split(':');
+  if (!hours || !minutes) return null;
+  
+  return `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`;
+};
+
+let isScrapingInProgress = false;
+
 const scrapeAishaMosque = async () => {
+ // Évite les scraping simultanés
+ if (isScrapingInProgress) {
+   console.log('Un scraping est déjà en cours, attente...');
+   return null;
+ }
+ 
+ isScrapingInProgress = true;
  let browser;
+
  try {
    console.log('Démarrage du scraping...');
    const randomUserAgent = userAgents[Math.floor(Math.random() * userAgents.length)];
@@ -94,13 +126,13 @@ const scrapeAishaMosque = async () => {
              if (period === 'PM' && hours < 12) hours += 12;
              if (period === 'AM' && hours === 12) hours = 0;
 
-             prayerTimes[prayerName] = `${hours.toString().padStart(2, '0')}:${minutes}`;
+             prayerTimes[prayerName] = `${hours}:${minutes}`;
            } else {
              timeText = timeText.replace(/[^0-9]/g, '');
              if (timeText.length === 3 || timeText.length === 4) {
                const hours = parseInt(timeText.slice(0, timeText.length - 2), 10);
                const minutes = timeText.slice(-2);
-               prayerTimes[prayerName] = `${hours.toString().padStart(2, '0')}:${minutes}`;
+               prayerTimes[prayerName] = `${hours}:${minutes}`;
              }
            }
          }
@@ -110,10 +142,19 @@ const scrapeAishaMosque = async () => {
      return prayerTimes;
    });
 
+   // Normalise tous les temps avant de les renvoyer
+   const normalizedTimes = {};
+   for (const [prayer, time] of Object.entries(times)) {
+     const normalizedTime = normalizeTime(time);
+     if (normalizedTime) {
+       normalizedTimes[prayer] = normalizedTime;
+     }
+   }
+
    const result = {
      source: 'Aisha Mosque Walsall',
      date: dateText,
-     times: times
+     times: normalizedTimes
    };
 
    console.log('Données extraites avec succès:', result);
@@ -127,7 +168,9 @@ const scrapeAishaMosque = async () => {
      await browser.close();
      console.log('Navigateur fermé');
    }
+   isScrapingInProgress = false;
  }
 };
+
 
 module.exports = scrapeAishaMosque;
