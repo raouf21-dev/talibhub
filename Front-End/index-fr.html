@@ -992,9 +992,8 @@
             près de chez vous
           </p>
         </header>
+        
         <div class="mosquetime-content">
-          <!-- Front-End HTML -->
-
           <div class="mosquetime-location-search">
             <button id="mosquetime-use-location" class="mosquetime-button">
               <i class="fas fa-map-marker-alt"></i> Utiliser ma localisation
@@ -1002,93 +1001,66 @@
             <select id="mosquetime-location-select" class="mosquetime-select">
               <option value="">Sélectionnez une ville</option>
             </select>
-            <button id="mosquetime-search" class="mosquetime-button">Rechercher</button>            
+            <button id="mosquetime-search" class="mosquetime-button">Rechercher</button>
           </div>
-            <button id="mosquetime-search" class="mosquetime-button">
-              Rechercher
-            </button>            
-          </div>
+    
           <div id="mosquetime-loading" style="display: none">
             Chargement des horaires de prière, veuillez patienter...
           </div>
-          <div
-            id="mosquetime-error"
-            class="mosquetime-error"
-            style="display: none"
-          ></div>
-
+    
+          <div id="mosquetime-error" class="mosquetime-error" style="display: none"></div>
+    
           <div class="mosquetime-date-display">
-            <h2 id="mosquetime-city-date">New York City, 8 Septembre 2024</h2>
-            <input id="mosquetime-date-picker" type="date" value="" />
+            <h2 id="mosquetime-city-date"></h2>
+            <input id="mosquetime-date-picker" type="date" />
           </div>
-
+    
           <div class="mosquetime-tabs">
             <div class="mosquetime-tab active" data-tab="single">
               Mosquée Unique
             </div>
             <div class="mosquetime-tab" data-tab="all">Toutes les Mosquées</div>
           </div>
-
-          <div
-            id="mosquetime-single-mosque"
-            class="mosquetime-tab-content active"
-          >
-            <select
-              id="mosquetime-mosque-select"
-              class="mosquetime-mosque-select"
-            >
-              <!-- Les options seront peuplées dynamiquement -->
+    
+          <!-- Vue Mosquée Unique -->
+          <div id="mosquetime-single-mosque" class="mosquetime-tab-content" style="display: block">
+            <select id="mosquetime-mosque-select" class="mosquetime-select">
+                <option value="">Sélectionnez une mosquée</option>
             </select>
-            <table class="mosquetime-table">
-              <thead>
-                <tr>
-                  <th>Prière</th>
-                  <th>Heure de Congrégation</th>
-                </tr>
-              </thead>
-              <tbody id="mosquetime-single-mosque-times">
-                <!-- Les horaires de prière seront peuplés dynamiquement -->
-              </tbody>
-            </table>
-          </div>
-
-          <div
-            id="mosquetime-all-mosques"
-            class="mosquetime-tab-content"
-            style="display: none"
-          >
+            <div class="mosquetime-mosque-card">
+                <div class="mosque-header">
+                    <div class="mosque-image"></div>
+                    <div class="mosque-info">
+                        <h3 class="mosque-name">Sélectionnez une mosquée</h3>
+                        <p class="mosque-address"></p>
+                    </div>
+                </div>
+                <div class="prayer-times-grid">
+                    <!-- Les horaires seront chargés dynamiquement -->
+                </div>
+            </div>
+        </div>
+    
+          <!-- Vue Toutes les Mosquées -->
+          <div id="mosquetime-all-mosques" class="mosquetime-tab-content" style="display: none">
             <div class="mosquetime-sort-buttons">
-              <button id="mosquetime-sort-asc" class="mosquetime-button">
-                A à Z
-              </button>
-              <button id="mosquetime-sort-desc" class="mosquetime-button">
-                Z à A
-              </button>
-              <button id="mosquetime-sort-nearest" class="mosquetime-button">
-                Les Plus Proches
-              </button>
+              <button id="mosquetime-sort-asc" class="mosquetime-button">A à Z</button>
+              <button id="mosquetime-sort-desc" class="mosquetime-button">Z à A</button>
+              <button id="mosquetime-sort-nearest" class="mosquetime-button">Les Plus Proches</button>
             </div>
             <div id="mosquetime-all-mosques-list">
-              <!-- Les cartes des mosquées seront peuplées dynamiquement -->
+              <!-- Cartes de mosquées ajoutées dynamiquement -->
             </div>
           </div>
-
+    
           <p class="mosquetime-disclaimer">
             Ces horaires correspondent aux prières en congrégation à la mosquée
             et peuvent différer des horaires de prières individuels.
           </p>
-
-          <div class="mosquetime-actions">
-            <button id="mosquetime-share" class="mosquetime-button">
-              Partager
-            </button>
-            <button id="mosquetime-reminders" class="mosquetime-button">
-              Définir des Rappels
-            </button>
-          </div>
         </div>
       </div>
     </section>
+    
 
     <section id="notifications" class="page page-no-welcome">
       <div class="notifications-container">

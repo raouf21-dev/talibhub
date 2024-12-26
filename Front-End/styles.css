@@ -45,6 +45,8 @@ body {
   transition: opacity 0.5s ease-in-out;
   height: 100vh;
   overflow-y: auto; /* Allow scrolling within the page */
+
+  padding-bottom: 5rem !important;
 }
 
 .page-no-welcome{
@@ -2803,44 +2805,35 @@ button[type="submit"]:hover {
 
 /*MosqueTime*/
 
+/* Conteneur principal */
+/* Variables globales */
+:root {
+  /* Colors */
+  --primary-color: #274c77;
+  --secondary-color: #6096ba;
+  --tertiary-color: #a3cef1;
+  --background-color: #e7ecef;
+  --text-color: #274c77;
+  --card-background: #ffffff;
+  --border-color: #a3cef1;
+  --gray-color: #8b8c89;
+  --error-background: #FEE2E2;
+  --error-text: #DC2626;
+
+  /* Fonts */
+  --main-font: "Poppins", sans-serif;
+}
+
+/* Conteneur principal */
 #mosquetime {
   margin-left: 250px;
+  font-family: var(--main-font);
 }
 
-.mosquetime-select {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  appearance: none; /* Pour personnaliser l'apparence du select */
-  background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="5"><path fill="%23333" d="M0 0l5 5 5-5z"/></svg>'); /* Icône flèche */
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-  background-size: 10px 5px;
-}
-
-.mosquetime-select:focus {
-  outline: none;
-  border-color: var(--secondary-color);
-  box-shadow: 0 0 5px rgba(30, 58, 106, 0.5);
-}
-
-.mosquetime-button {
-  background-color: var(--secondary-color);
-  color: white;
-  border: none;
-  padding: 10px 15px;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.mosquetime-button:hover {
-  background-color: #1e3a6a;
-}
-
+/* Card principale */
 .mosquetime-card {
   max-width: 800px;
-  background-color: white;
+  background-color: var(--card-background);
   margin-right: auto;
   margin-left: auto;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -2848,27 +2841,60 @@ button[type="submit"]:hover {
   overflow: hidden;
 }
 
+/* Header */
 .mosquetime-header {
   background-color: var(--secondary-color);
   color: white;
   padding: 20px;
 }
+
 .mosquetime-title {
   margin: 0;
   font-size: 24px;
+  font-weight: 600;
 }
+
 .mosquetime-subtitle {
   margin: 5px 0 0;
   font-size: 14px;
+  opacity: 0.9;
 }
+
+/* Content */
 .mosquetime-content {
   padding: 20px;
 }
+
+/* Recherche et localisation */
 .mosquetime-location-search {
   display: flex;
   gap: 10px;
   margin-bottom: 20px;
 }
+
+.mosquetime-select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-family: var(--main-font);
+  background-color: var(--card-background);
+  color: var(--text-color);
+  font-size: 14px;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2214%22%20height%3D%2214%22%20viewBox%3D%220%200%2014%2014%22%3E%3Cpath%20fill%3D%22%23274c77%22%20d%3D%22M7%2010L0%200h14L7%2010z%22%2F%3E%3C%2Fsvg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 10px;
+  cursor: pointer;
+}
+
+.mosquetime-select:focus {
+  outline: none;
+  border-color: var(--secondary-color);
+  box-shadow: 0 0 0 2px rgba(96, 150, 186, 0.2);
+}
+
 .mosquetime-button {
   background-color: var(--secondary-color);
   color: white;
@@ -2876,102 +2902,261 @@ button[type="submit"]:hover {
   padding: 10px 15px;
   border-radius: 4px;
   cursor: pointer;
+  font-family: var(--main-font);
+  font-weight: 500;
+  transition: background-color 0.3s ease;
+  white-space: nowrap;
 }
+
 .mosquetime-button:hover {
-  background-color: #1e3a6a;
+  background-color: var(--primary-color);
 }
-.mosquetime-input {
-  flex-grow: 1;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
+
+/* Date display */
 .mosquetime-date-display {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
 }
+
+#mosquetime-city-date {
+  font-size: 18px;
+  color: var(--text-color);
+  margin: 0;
+  font-weight: 600;
+}
+
+#mosquetime-date-picker {
+  padding: 8px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-family: var(--main-font);
+  color: var(--text-color);
+}
+
+/* Tabs */
 .mosquetime-tabs {
   display: flex;
   margin-bottom: 20px;
+  background-color: var(--background-color);
+  border-radius: 8px;
+  padding: 4px;
+  gap: 4px;
 }
+
 .mosquetime-tab {
   flex: 1;
   text-align: center;
-  padding: 10px;
-  background-color: #f0f0f0;
+  padding: 12px;
   cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  color: var(--text-color);
 }
+
 .mosquetime-tab.active {
   background-color: var(--secondary-color);
   color: white;
 }
-.mosquetime-mosque-select {
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 20px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-.mosquetime-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-.mosquetime-table th,
-.mosquetime-table td {
-  padding: 10px;
-  border-bottom: 1px solid #eee;
-  text-align: left;
-}
-.mosquetime-table th {
-  font-weight: normal;
-  color: #666;
-}
-.mosquetime-sort-buttons {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-bottom: 20px;
-}
+
+/* Mosque Cards */
 .mosquetime-mosque-card {
-  background-color: #f9f9f9;
-  border-radius: 4px;
-  padding: 15px;
-  margin-bottom: 15px;
-}
-.mosquetime-mosque-card h3 {
-  margin-top: 0;
-  display: flex;
-  justify-content: space-between;
-}
-.mosquetime-disclaimer {
-  font-style: italic;
-  color: #666;
-  font-size: 14px;
-  margin-top: 20px;
-}
-.mosquetime-actions {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 20px;
+  background-color: var(--card-background);
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--border-color);
 }
 
+.mosque-header {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.mosque-image {
+  width: 60px;
+  height: 60px;
+  border-radius: 4px;
+  margin-right: 15px;
+  background-color: var(--background-color);
+  flex-shrink: 0;
+}
+
+.mosque-info {
+  flex: 1;
+}
+
+.mosque-name {
+  font-size: 18px;
+  color: var(--text-color);
+  font-weight: 600;
+  margin: 0 0 4px 0;
+}
+
+.mosque-address {
+  font-size: 14px;
+  color: var(--gray-color);
+  margin: 0;
+}
+
+/* Prayer Times Grid */
+.prayer-times-grid,
+.additional-times-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 15px;
+}
+
+.additional-times-grid {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid var(--border-color);
+}
+
+.prayer-item {
+  text-align: center;
+}
+
+.prayer-label {
+  font-size: 14px;
+  color: var(--text-color);
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.jamaa-time {
+  font-size: 16px;
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+/* Sort Buttons */
+.mosquetime-sort-buttons {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+/* Error Messages */
+.mosquetime-error {
+  background-color: var(--error-background);
+  color: var(--error-text);
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 16px;
+  display: none;
+  font-size: 14px;
+}
+
+/* Disclaimer */
+.mosquetime-disclaimer {
+  font-style: italic;
+  color: var(--gray-color);
+  font-size: 14px;
+  margin-top: 20px;
+  text-align: center;
+}
+
+/* Loading State */
+#mosquetime-loading {
+  text-align: center;
+  padding: 20px;
+  color: var(--gray-color);
+  font-size: 14px;
+}
+
+#mosquetime-single-mosque {
+  display: block;
+}
+
+#mosquetime-single-mosque .mosquetime-select {
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+#mosquetime-single-mosque .mosquetime-mosque-card {
+  min-height: 200px;
+}
+
+/* Responsive Design */
 @media (max-width: 1024px) {
   #mosquetime {
     margin-left: auto;
     margin-right: auto;
     width: 90vw;
-    max-width: 1500px; /* Vous pouvez ajuster cette valeur selon vos besoins */
+    max-width: 1500px;
   }
 }
 
-@media (max-width: 428px) {
-  .mosquetime-header {
+@media (max-width: 768px) {
+  .mosquetime-location-search {
+    flex-direction: column;
+  }
+  
+  .prayer-times-grid,
+  .additional-times-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  
+  .prayer-label {
+    font-size: 13px;
+  }
+  
+  .jamaa-time {
+    font-size: 15px;
+  }
+  
+  .mosque-header {
+    flex-direction: column;
+    align-items: center;
     text-align: center;
   }
-  .mosquetime-error{
-    flex-basis: 100%;
+  
+  .mosque-image {
+    margin-right: 0;
+    margin-bottom: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .mosquetime-header {
+    text-align: center;
+    padding: 15px;
+  }
+  
+  .mosquetime-title {
+    font-size: 20px;
+  }
+  
+  .mosquetime-subtitle {
     font-size: 12px;
+  }
+  
+  .prayer-times-grid,
+  .additional-times-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .mosque-name {
+    font-size: 16px;
+  }
+  
+  .mosque-address {
+    font-size: 12px;
+  }
+  
+  .mosquetime-error {
+    font-size: 12px;
+  }
+  
+  .mosquetime-button {
+    font-size: 13px;
+    padding: 8px 12px;
   }
 }
