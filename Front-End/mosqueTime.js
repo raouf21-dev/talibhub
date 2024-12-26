@@ -131,10 +131,18 @@ export class MosqueTimeManager {
         });
     }
 
+    formatTime(timeString) {
+        if (!timeString || timeString === '--:--') return '--:--';
+        if (timeString.includes(':')) {
+            return timeString.split(':').slice(0, 2).join(':');
+        }
+        return timeString;
+    }
+
     updateAllMosques() {
         const container = document.getElementById('mosquetime-all-mosques-list');
         if (!container) return;
-
+    
         container.innerHTML = '';
         
         this.currentMosques.forEach(mosque => {
@@ -147,19 +155,19 @@ export class MosqueTimeManager {
             let mainPrayerTimesHTML = mainPrayers.map(prayer => `
                 <div class="prayer-item">
                     <div class="prayer-label">${prayer.charAt(0).toUpperCase() + prayer.slice(1)}</div>
-                    <div class="jamaa-time">${prayerTimes[prayer] || '--:--'}</div>
+                    <div class="jamaa-time">${this.formatTime(prayerTimes[prayer])}</div>
                 </div>
             `).join('');
-
+    
             // Prières additionnelles
             const additionalPrayers = ['jumuah1', 'jumuah2', 'jumuah3', 'jumuah4', 'tarawih'];
             let additionalPrayerTimesHTML = additionalPrayers.map(prayer => `
                 <div class="prayer-item">
                     <div class="prayer-label">${prayer.charAt(0).toUpperCase() + prayer.slice(1)}</div>
-                    <div class="jamaa-time">${prayerTimes[prayer] || '--:--'}</div>
+                    <div class="jamaa-time">${this.formatTime(prayerTimes[prayer])}</div>
                 </div>
             `).join('');
-
+    
             card.innerHTML = `
                 <div class="mosque-header">
                     <div class="mosque-image"></div>
@@ -221,7 +229,6 @@ export class MosqueTimeManager {
             return;
         }
     
-    
         const date = document.getElementById('mosquetime-date-picker')?.value 
             || new Date().toISOString().split('T')[0];
     
@@ -235,14 +242,14 @@ export class MosqueTimeManager {
             let mainPrayerTimesHTML = mainPrayers.map(prayer => `
                 <div class="prayer-item">
                     <div class="prayer-label">${prayer.charAt(0).toUpperCase() + prayer.slice(1)}</div>
-                    <div class="jamaa-time">${times[prayer] || '--:--'}</div>
+                    <div class="jamaa-time">${this.formatTime(times[prayer])}</div>
                 </div>
             `).join('');
     
             let additionalPrayerTimesHTML = additionalPrayers.map(prayer => `
                 <div class="prayer-item">
                     <div class="prayer-label">${prayer.charAt(0).toUpperCase() + prayer.slice(1)}</div>
-                    <div class="jamaa-time">${times[prayer] || '--:--'}</div>
+                    <div class="jamaa-time">${this.formatTime(times[prayer])}</div>
                 </div>
             `).join('');
     
