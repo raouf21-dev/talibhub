@@ -23,21 +23,64 @@ const userAgents = [
 ];
 
 const normalizeTime = (timeStr) => {
-  if (!timeStr || timeStr === 'NaN:undefined') return null;
-  
-  const [time, modifier] = timeStr.split(' ');
-  if (!time) return null;
+  // Vérifications de base
+  if (!timeStr || timeStr === 'NaN:undefined' || timeStr === '--') return null;
 
-  let [hours, minutes] = time.split(':');
-  if (!hours || !minutes) return null;
+  try {
+    // Détection AM/PM et nettoyage de la chaîne
+    const originalStr = timeStr.toLowerCase();
+    const isPM = originalStr.includes('pm');
+    const isAM = originalStr.includes('am');
+    timeStr = timeStr.replace(/[^0-9:]/g, '');
 
-  hours = parseInt(hours, 10);
-  if (isNaN(hours)) return null;
-  
-  if (modifier === 'PM' && hours < 12) hours += 12;
-  if (modifier === 'AM' && hours === 12) hours = 0;
-  
-  return `${hours.toString().padStart(2, '0')}:${minutes.padStart(2, '0')}`;
+    // Formatte en HH:MM si nécessaire
+    if (!timeStr.includes(':')) {
+      timeStr = timeStr.padStart(4, '0');
+      timeStr = `${timeStr.slice(0, 2)}:${timeStr.slice(2)}`;
+    }
+
+    let [hours, minutes] = timeStr.split(':').map(Number);
+    
+    // Validation des composants
+    if (isNaN(hours) || isNaN(minutes)) return null;
+    if (minutes < 0 || minutes > 59) return null;
+
+    // Conversion en format 24 heures
+    if (hours <= 12) {
+      if (isPM && hours < 12) {
+        hours += 12;
+      } else if (isAM && hours === 12) {
+        hours = 0;
+      } else if (!isAM && !isPM) {
+        // Conversion automatique pour les prières de l'après-midi
+        switch (hours) {
+          case 2: 
+          case 3: // asr
+            hours += 12;
+            break;
+          case 4: 
+          case 5: // maghrib
+            hours += 12;
+            break;
+          case 6: 
+          case 7: // isha
+            if (minutes === 30) { // Une heuristique pour isha
+              hours += 12;
+            }
+            break;
+        }
+      }
+    }
+
+    // Validation finale de l'heure
+    if (hours < 0 || hours > 23) return null;
+
+    // Retourne au format HH:MM
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+  } catch (error) {
+    console.error('Erreur de normalisation du temps:', error);
+    return null;
+  }
 };
 
 const randomDelay = async (min, max) => {

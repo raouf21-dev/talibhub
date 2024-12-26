@@ -1,10 +1,11 @@
-// //Back-End/scrapers/birmingham/muslumStudentsHouseBham.js
+//Back-End/scrapers/birmingham/centralMosqueBham.js
 
 
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 const { executablePath } = require('puppeteer');
 const { DateTime } = require('luxon');
+const fs = require('fs');
 
 // Configuration StealthPlugin
 const stealth = StealthPlugin();
@@ -52,7 +53,6 @@ const normalizeTime = (timeStr) => {
         hours = 0;
       } else if (!isAM && !isPM) {
         // Conversion automatique pour les prières de l'après-midi
-        // quand il n'y a pas d'indication AM/PM
         switch (hours) {
           case 2: 
           case 3: // asr
@@ -75,8 +75,8 @@ const normalizeTime = (timeStr) => {
     // Validation finale de l'heure
     if (hours < 0 || hours > 23) return null;
 
-    // Retourne au format HH:MM:00
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:00`;
+    // Retourne au format HH:MM
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
   } catch (error) {
     console.error('Erreur de normalisation du temps:', error);
     return null;
@@ -86,13 +86,6 @@ const normalizeTime = (timeStr) => {
 const randomDelay = async (min, max) => {
   const delay = Math.floor(Math.random() * (max - min + 1)) + min;
   await new Promise(resolve => setTimeout(resolve, delay));
-};
-
-const detectCloudflare = async (page) => {
-  const content = await page.content();
-  return content.includes('challenge-running') || 
-         content.includes('cf-browser-verification') ||
-         content.includes('_cf-browser-verification');
 };
 
 const waitForCloudflare = async (page) => {
@@ -107,13 +100,14 @@ const waitForCloudflare = async (page) => {
     );
     await randomDelay(1000, 1500);
   } catch (error) {
-    throw new Error('Cloudflare protection détectée et non contournée');
+    console.log('Erreur lors de l\'attente Cloudflare:', error.message);
+    throw new Error('Impossible de passer la protection Cloudflare');
   }
 };
 
 let isScrapingInProgress = false;
 
-const scrapeMSHUK = async () => {
+const scrapeCentralMosque = async () => {
   if (isScrapingInProgress) {
     console.log('Un scraping est déjà en cours, attente...');
     return null;
@@ -122,7 +116,7 @@ const scrapeMSHUK = async () => {
   isScrapingInProgress = true;
   let browser;
   try {
-    console.log('Démarrage du scraping MSHUK...');
+    console.log('Démarrage du scraping...');
     const randomUserAgent = userAgents[Math.floor(Math.random() * userAgents.length)];
 
     const launchOptions = {
@@ -141,7 +135,7 @@ const scrapeMSHUK = async () => {
     };
 
     try {
-      if (require('fs').existsSync('/usr/bin/chromium-browser')) {
+      if (fs.existsSync('/usr/bin/chromium-browser')) {
         console.log('Utilisation de Chromium système');
         launchOptions.executablePath = '/usr/bin/chromium-browser';
       } else {
@@ -154,8 +148,8 @@ const scrapeMSHUK = async () => {
     }
 
     browser = await puppeteer.launch(launchOptions);
-
     const page = await browser.newPage();
+    
     await page.setDefaultNavigationTimeout(45000);
     await page.setViewport({ width: 1920, height: 1080 });
     await page.setUserAgent(randomUserAgent);
@@ -181,82 +175,30 @@ const scrapeMSHUK = async () => {
       window.navigator.chrome = { runtime: {} };
     });
 
+    console.log('Navigation vers Central Mosque...');
+
     let retryCount = 0;
     const maxRetries = 2;
 
     while (retryCount < maxRetries) {
       try {
-        console.log('Navigation vers MSHUK...');
-        const response = await page.goto('https://www.mshuk.org/', {
+        const response = await page.goto('http://centralmosque.org.uk/', {
           waitUntil: 'domcontentloaded',
           timeout: 25000
         });
 
-        if (await detectCloudflare(page)) {
-          console.log('Protection Cloudflare détectée, tentative de contournement...');
+        if (response.status() === 520 || response.status() === 403) {
+          console.log(`Statut de réponse ${response.status()}, tentative de contournement Cloudflare...`);
           await waitForCloudflare(page);
         }
 
-        await page.waitForSelector('.section-prayer-horizontal-times', {
-          timeout: 15000,
-          visible: true
-        });
-
-        console.log('Extraction des données...');
-        const rawData = await page.evaluate(() => {
-          const prayers = {};
-          const prayerItems = document.querySelectorAll('.section-prayer-horizontal-times-item');
-          
-          prayerItems.forEach(item => {
-            const nameElement = item.querySelector('span');
-            const jamaatElement = item.querySelector('div:last-child');
-            
-            if (nameElement && jamaatElement) {
-              const name = nameElement.textContent.trim().toLowerCase();
-              const time = jamaatElement.textContent.trim();
-              
-              // Mapping des noms de prières
-              if (name) {
-                const prayerMap = {
-                  'fajr': 'fajr',
-                  'zuhr': 'dhuhr',
-                  'dhuhr': 'dhuhr',
-                  'asr': 'asr',
-                  'maghrib': 'maghrib',
-                  'isha': 'isha'
-                };
-                
-                if (prayerMap[name] && time) {
-                  prayers[prayerMap[name]] = time;
-                }
-              }
-            }
-          });
-          
-          return prayers;
-        });
-
-        // Normalise tous les temps avant de les renvoyer
-        const normalizedTimes = {};
-        for (const [prayer, time] of Object.entries(rawData)) {
-          const normalizedTime = normalizeTime(time);
-          if (normalizedTime) {
-            normalizedTimes[prayer] = normalizedTime;
-          }
+        const content = await page.content();
+        if (content.includes('mptt-wrapper-container')) {
+          console.log('Page chargée avec succès');
+          break;
+        } else {
+          throw new Error('Contenu de la page non valide');
         }
-
-        const ukTime = DateTime.now().setZone('Europe/London');
-        const dateText = ukTime.toISODate();
-
-        const result = {
-          source: 'MSHUK',
-          date: dateText,
-          times: normalizedTimes
-        };
-
-        console.log('Données extraites avec succès:', result);
-        return result;
-
       } catch (error) {
         retryCount++;
         console.log(`Tentative ${retryCount}/${maxRetries} échouée:`, error.message);
@@ -264,6 +206,57 @@ const scrapeMSHUK = async () => {
         await randomDelay(3000, 5000);
       }
     }
+
+    console.log('Attente des éléments de prière...');
+    await page.waitForSelector('.mptt-wrapper-container', { 
+      timeout: 15000,
+      visible: true 
+    });
+
+    const ukTime = DateTime.now().setZone('Europe/London');
+    const dateText = ukTime.toISODate();
+
+    console.log('Extraction des données...');
+    const data = await page.evaluate(() => {
+      const prayers = {};
+      const prayerElements = document.querySelectorAll('.prayer-time');
+
+      prayerElements.forEach(element => {
+        const titleElement = element.querySelector('.mptt-sec-title');
+        const jamaatElement = element.querySelector('.prayer-jamaat');
+
+        if (titleElement && jamaatElement) {
+          let title = titleElement.textContent.trim().toLowerCase();
+          const jamaatTime = jamaatElement.textContent.trim();
+
+          if (title === 'zuhr') {
+            title = 'dhuhr';
+          }
+
+          prayers[title] = jamaatTime;
+        }
+      });
+
+      return prayers;
+    });
+
+    // Normalise tous les temps avant de les renvoyer
+    const normalizedTimes = {};
+    for (const [prayer, time] of Object.entries(data)) {
+      const normalizedTime = normalizeTime(time);
+      if (normalizedTime) {
+        normalizedTimes[prayer] = normalizedTime;
+      }
+    }
+
+    const result = {
+      source: 'Central Mosque Birmingham',
+      date: dateText,
+      times: normalizedTimes
+    };
+
+    console.log('Données extraites avec succès:', result);
+    return result;
 
   } catch (error) {
     console.error('Erreur détaillée lors du scraping:', error);
@@ -277,5 +270,6 @@ const scrapeMSHUK = async () => {
   }
 };
 
+scrapeCentralMosque();
 
-module.exports = scrapeMSHUK;
+module.exports = scrapeCentralMosque;

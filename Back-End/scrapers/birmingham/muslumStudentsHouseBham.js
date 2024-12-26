@@ -75,8 +75,8 @@ const normalizeTime = (timeStr) => {
     // Validation finale de l'heure
     if (hours < 0 || hours > 23) return null;
 
-    // Retourne au format HH:MM:00
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:00`;
+    // Retourne au format HH:MM
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
   } catch (error) {
     console.error('Erreur de normalisation du temps:', error);
     return null;
