@@ -270,6 +270,4 @@ const scrapeCentralMosque = async () => {
   }
 };
 
-scrapeCentralMosque();
-
 module.exports = scrapeCentralMosque;

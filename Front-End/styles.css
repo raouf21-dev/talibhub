@@ -939,31 +939,16 @@ input:checked + .slider:before {
   }
 
   .dashboard-card h2 {
-    font-size: 0.75rem;
+    font-size: 0.65rem;
     font-weight: 600;
     color: #274c77;
   }
 }
 
-
-
 /*TalibTimer*/
 
 #talibtimer {
   margin-left: 260px;
-}
-
-/* Variables */
-:root {
-  --primary-color: #274c77;
-  --secondary-color: #6096ba;
-  --tertiary-color: #a3cef1;
-  --background-color: #e7ecef;
-  --text-color: #274c77;
-  --card-background: #ffffff;
-  --border-color: #a3cef1;
-  --gray-color: #8b8c89;
-  --main-font: "Poppins", sans-serif;
 }
 
 /* Layout principal */
@@ -1170,22 +1155,41 @@ input:checked + .slider:before {
 }
 
 @media (max-width: 480px) {
+
+  .timer{
+    margin-bottom: 0.5rem;
+  }
+
+  .timer h2{
+    padding: 0.25rem;
+    margin-bottom: 0.5rem;
+  }
+
   .time_displayed {
     font-size: 2rem;
+    margin: 0.25rem;
   }
   
   .button-group {
     flex-direction:row;
+    margin: 0.15rem;
   }
   
   #manual-time-container {
     flex-direction: column;
     gap: 1rem;
+    margin: 0;
   }
   
   .timer-content {
-    padding: 1rem;
-  }
+  padding: 0.25rem;
+  min-height: 130px;
+}
+
+.total-time {
+  margin: 0;
+};
+
 }
 
 /* Todo List Container */
@@ -2535,30 +2539,37 @@ button[type="submit"]:hover {
 
 /*SurahMemorization*/
 
+/*SurahMemorization*/
+
+/* Layout de base */
 #surahmemorization {
   margin-left: 250px;
 }
 
-#quran-app-container {
-  max-width: 1000px;
-  margin-right: auto;
-  margin-left: auto;
-  background-color: white;
-  border: 1px solid #a3cef1;
-  border-radius: 8px;
-  overflow: hidden;
+#surahmemorization h1 {
+  margin: 1rem 0;
+  text-align: center;
+  font-size: 1.5rem;
+  color: var(--primary-color);
 }
 
-#surahmemorization-list-container {
-  max-height: 400px; /* Ajustez la hauteur selon vos besoins */
-  overflow-y: auto;
+#quran-app-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  position: relative;
 }
+
+/* Navigation */
 .quran-app-nav {
   position: sticky;
   background-color: #6096ba;
   padding: 10px;
   display: flex;
   justify-content: space-around;
+  border-radius: 8px 8px 0 0;
 }
 
 .quran-app-nav-button {
@@ -2574,6 +2585,7 @@ button[type="submit"]:hover {
   background-color: rgba(255, 255, 255, 0.2);
 }
 
+/* Sections principales */
 .quran-app-section {
   padding: 20px;
 }
@@ -2581,71 +2593,148 @@ button[type="submit"]:hover {
 .surahmemorization-title {
   color: #274c77;
   margin-top: 0;
+  margin-bottom: 20px;
 }
 
-.surahmemorization-search-filter,
-.surahmemorization-filter {
-  display: flex;
-  gap: 10px;
+/* Recherche et filtres */
+.surahmemorization-search-filter {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
   margin-bottom: 20px;
 }
 
 .surahmemorization-input,
 .surahmemorization-select {
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  flex-grow: 1;
+  padding: 8px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  width: 100%;
 }
 
-.surahmemorization-item {
+/* Liste des sourates */
+#surahmemorization-list-container {
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+  max-height: calc(100vh - 400px);
+  overflow-y: auto;
+  position: relative;
+}
+
+/* En-têtes du tableau */
+.surahmemorization-headers {
+  display: grid;
+  grid-template-columns: minmax(200px, 1fr) 160px 120px;
+  gap: 20px;
+  align-items: center;
+  padding: 12px 16px;
+  background-color: white;
+  border-bottom: 1px solid #e5e7eb;
+  font-weight: 600;
+  color: #374151;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+/* Alignement des colonnes */
+.header-left, .item-left {
   display: flex;
   align-items: center;
-  padding: 10px;
-  background-color: #f8f8f8;
-  border-radius: 4px;
-  margin-bottom: 10px;
 }
 
-.surahmemorization-level {
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 12px;
+.header-center, .item-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.header-right, .item-right {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+/* Items de la liste */
+.surahmemorization-item {
+  display: grid;
+  grid-template-columns: minmax(200px, 1fr) 160px 120px;
+  gap: 20px;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  background-color: white;
+}
+
+.surahmemorization-item:hover {
+  background-color: #f8f9fa;
+}
+
+/* Styles des éléments */
+.item-left input[type="checkbox"] {
+  margin-right: 12px;
+}
+
+.surah-name {
+  font-weight: 500;
+  margin-right: 4px;
+}
+
+.surah-number {
+  color: #666;
+}
+
+/* Badges de niveau */
+.memorization-level {
+  padding: 6px 16px;
+  border-radius: 50px;
+  font-size: 0.875rem;
   color: white;
-  margin-left: 10px;
+  min-width: 90px;
+  text-align: center;
+  display: inline-block;
 }
 
-.surahmemorization-level-strong {
-  background-color: #22c55e;
-}
-.surahmemorization-level-good {
-  background-color: #3b82f6;
-}
-.surahmemorization-level-moderate {
-  background-color: #eab308;
-}
-.surahmemorization-level-weak {
-  background-color: #ef4444;
-}
-.surahmemorization-level-na {
-  background-color: #9ca3af;
-}
+.surahmemorization-level-strong { background-color: #22c55e; }
+.surahmemorization-level-good { background-color: #3b82f6; }
+.surahmemorization-level-moderate { background-color: #eab308; }
+.surahmemorization-level-weak { background-color: #ef4444; }
+.surahmemorization-level-na { background-color: #9ca3af; }
 
-.surahmemorization-summary,
-.surahmemorization-actions {
+/* Zone des actions */
+.surahmemorization-summary {
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: white;
+  padding: 16px;
+  border-top: 1px solid #e5e7eb;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 20px;
+  gap: 10px;
+  z-index: 10;
 }
 
+/* Boutons et compteur */
 .surahmemorization-button {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  background-color: #274c77;
+  background-color: var(--primary-color);
   color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.surahmemorization-button:not(:disabled):hover {
+  background-color: #1e3a8a;
+  transform: translateY(-1px);
 }
 
 .surahmemorization-button:disabled {
@@ -2653,56 +2742,20 @@ button[type="submit"]:hover {
   cursor: not-allowed;
 }
 
-#surahmemorization-evaluation {
-  display: flex;
-  justify-content: space-around;
-  margin: 20px 0;
+.surahmemorization-count {
+  padding: 8px 16px;
+  color: #374151;
+  font-size: 0.875rem;
+  white-space: nowrap;
 }
 
-.surahmemorization-charts {
-  display: flex;
-  justify-content: space-around;
-  margin-bottom: 20px;
-}
-
-.surahmemorization-charts canvas {
-  max-width: 45%;
-}
-
-.surahmemorization-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.surahmemorization-table th,
-.surahmemorization-table td {
-  text-align: left;
-  padding: 8px;
-  border-bottom: 1px solid #ddd;
-}
-
-.surahmemorization-table th {
-  background-color: #f2f2f2;
-}
-
-/*SurahMemorizationrevise*/
-
+/* Section de révision */
 #surahmemorization-revise {
   max-width: 400px;
   margin: 0 auto;
-  background-color: #fff;
+  background-color: white;
   border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   overflow: hidden;
-}
-
-#surahmemorization-revise .surahmemorization-title {
-  background-color: #5b9bd5;
-  color: white;
-  padding: 20px;
-  margin: 0;
-  text-align: center;
-  font-size: 24px;
 }
 
 #surahmemorization-progress {
@@ -2714,6 +2767,7 @@ button[type="submit"]:hover {
   font-size: 16px;
 }
 
+/* Barre de progression */
 .surahmemorization-progress-bar {
   background-color: #e0e0e0;
   height: 10px;
@@ -2723,43 +2777,10 @@ button[type="submit"]:hover {
 .surahmemorization-progress-bar-fill {
   background-color: #333;
   height: 100%;
-  width: 20%; /* Adjust based on actual progress */
+  width: 20%;
 }
 
-#surahmemorization-toggle-text {
-  display: block;
-  margin: 20px auto;
-  padding: 10px 20px;
-  background-color: #f0f0f0;
-  border: none;
-  border-radius: 20px;
-  cursor: pointer;
-  font-size: 16px;
-}
-
-#surahmemorization-toggle-text:hover {
-  background-color: #e0e0e0;
-}
-
-.surahmemorization-navigation {
-  display: flex;
-  justify-content: space-between;
-  padding: 0 20px 20px;
-}
-
-.surahmemorization-navigation button {
-  padding: 10px 20px;
-  background-color: #f0f0f0;
-  border: none;
-  border-radius: 20px;
-  cursor: pointer;
-  font-size: 16px;
-}
-
-.surahmemorization-navigation button:hover {
-  background-color: #e0e0e0;
-}
-
+/* Boutons d'évaluation */
 #surahmemorization-evaluation {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -2779,33 +2800,99 @@ button[type="submit"]:hover {
   justify-content: center;
 }
 
-.surahmemorization-eval-btn[data-level="Strong"] {
-  background-color: #4caf50;
-}
-
-.surahmemorization-eval-btn[data-level="Good"] {
-  background-color: #8bc34a;
-}
-
-.surahmemorization-eval-btn[data-level="Moderate"] {
-  background-color: #ffc107;
-}
-
-.surahmemorization-eval-btn[data-level="Weak"] {
-  background-color: #ff5722;
-}
+.surahmemorization-eval-btn[data-level="Strong"] { background-color: #4caf50; }
+.surahmemorization-eval-btn[data-level="Good"] { background-color: #8bc34a; }
+.surahmemorization-eval-btn[data-level="Moderate"] { background-color: #ffc107; }
+.surahmemorization-eval-btn[data-level="Weak"] { background-color: #ff5722; }
 
 .surahmemorization-eval-btn::before {
   content: "★";
   margin-right: 5px;
 }
 
+/* Section historique */
+.surahmemorization-charts {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 20px;
+}
+
+.surahmemorization-charts canvas {
+  max-width: 45%;
+}
+
+/* Tableau d'historique */
+.surahmemorization-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.surahmemorization-table th,
+.surahmemorization-table td {
+  text-align: left;
+  padding: 8px;
+  border-bottom: 1px solid #ddd;
+}
+
+.surahmemorization-table th {
+  background-color: #f2f2f2;
+}
+
+/* Media Queries */
 @media (max-width: 1024px) {
   #surahmemorization {
     margin-left: auto;
     margin-right: auto;
+    width: 98vw;
+  }
+
+  #quran-app-container {
     width: 90vw;
-    max-width: 1500px; /* Vous pouvez ajuster cette valeur selon vos besoins */
+  }
+}
+
+@media (max-width: 768px) {
+  #quran-app-container {
+    width: 97vw;
+  }
+
+  .surahmemorization-title {
+    font-size: 1rem;
+  }
+
+  .surahmemorization-item,
+  .surahmemorization-headers {
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 8px;
+    font-size: 0.75rem;
+    padding: 8px;
+  }
+
+  .memorization-level {
+    padding: 4px 8px;
+    font-size: 0.75rem;
+    min-width: 55px;
+  }
+
+  .surahmemorization-summary {
+    padding: 8px;
+    gap: 5px;
+  }
+
+  .surahmemorization-button {
+    padding: 6px 12px;
+    font-size: 0.75rem;
+  }
+
+  .surahmemorization-count {
+    padding: 6px 12px;
+    font-size: 0.75rem;
+  }
+
+  .surahmemorization-search-filter {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    margin-bottom: 16px;
   }
 }
 
@@ -3004,6 +3091,10 @@ button[type="submit"]:hover {
  }
  
  @media (max-width: 480px) {
+
+
+
+
   .mosquetime-header {
     text-align: center;
   }
@@ -3039,5 +3130,26 @@ button[type="submit"]:hover {
  
   .mosquetime-error {
     font-size: 12px;
+  }
+
+  .mosquetime-content {
+    padding: 10px; /* Réduire le padding du content container */
+  }
+
+  .mosquetime-mosque-card {
+    padding: 15px; /* Réduire le padding de la carte */
+    margin-left: -10px; /* Compensation pour le padding du content */
+    margin-right: -10px;
+    width: calc(100% + 20px); /* Ajuster la largeur en tenant compte des marges négatives */
+  }
+
+  .mosquetime-card {
+    width: 100%; /* Assurer que la carte prend toute la largeur disponible */
+    margin: 0;
+  }
+
+  #mosquetime {
+    width: 100%; /* Assurer que le conteneur principal prend toute la largeur */
+    padding: 0 10px; /* Ajouter un petit padding sur les côtés */
   }
  }

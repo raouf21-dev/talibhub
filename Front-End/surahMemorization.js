@@ -36,6 +36,16 @@ const historyTable = document.getElementById('surahmemorization-history-table')?
 const exportBtn = document.getElementById('surahmemorization-export');
 const clearHistoryBtn = document.getElementById('surahmemorization-clear');
 
+function formatDate(dateString) {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('fr-FR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+    });
+}
+
 // Fonction de mélange aléatoire (Fisher-Yates)
 function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
@@ -106,20 +116,51 @@ function getLevelClass(level) {
 
 // Section Sélection des Sourates
 function renderSurahList() {
+    // Vérifier si le conteneur principal existe
+    let container = document.getElementById('surahmemorization-list-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'surahmemorization-list-container';
+        document.querySelector('#surahmemorization-select').appendChild(container);
+        
+        // Ajouter les en-têtes et le conteneur de liste
+        container.innerHTML = `
+            <div class="surahmemorization-headers">
+                <div class="header-left">
+                    <span>Sourates</span>
+                </div>
+                <div class="header-center">
+                    <span>Level</span>
+                </div>
+                <div class="header-right">
+                    <span>Last Revised</span>
+                </div>
+            </div>
+            <div id="surahmemorization-list"></div>
+        `;
+    }
+
     surahList.innerHTML = '';
     surahs.forEach(surah => {
         const surahItem = document.createElement('div');
         surahItem.className = 'surahmemorization-item';
         surahItem.innerHTML = `
-            <input type="checkbox" id="surah-${surah.number}" ${surah.isSelected ? 'checked' : ''}>
-            <label for="surah-${surah.number}">
-                <span class="surahmemorization-name">${surah.name}</span>
-                <span class="surahmemorization-number">(${surah.number})</span>
-            </label>
-            <span class="surahmemorization-level ${getLevelClass(surah.memorizationLevel)}">${surah.memorizationLevel || 'N/A'}</span>
-            <span class="surahmemorization-last-revision">Last revised: ${surah.lastRevisionDate || 'N/A'}</span>
+            <div class="item-left">
+                <input type="checkbox" id="surah-${surah.number}" ${surah.isSelected ? 'checked' : ''}>
+                <label for="surah-${surah.number}">
+                    <span class="surah-name">${surah.name}</span>
+                    <span class="surah-number">(${surah.number})</span>
+                </label>
+            </div>
+            <div class="item-center">
+                <span class="memorization-level ${getLevelClass(surah.memorizationLevel)}">
+                    ${surah.memorizationLevel || 'N/A'}
+                </span>
+            </div>
+            <div class="item-right">
+                ${formatDate(surah.lastRevisionDate)}
+            </div>
         `;
-        surahList.appendChild(surahItem);
 
         const checkbox = surahItem.querySelector('input');
         checkbox.addEventListener('change', async (e) => {
@@ -139,8 +180,11 @@ function renderSurahList() {
                 updateSelectedCount();
             }
         });
+
+        surahList.appendChild(surahItem);
     });
 }
+
 
 function updateSelectedCount() {
     const selectedCount = surahs.filter(surah => surah.isSelected).length;
@@ -165,15 +209,22 @@ function renderFilteredSurahList(filteredSurahs) {
         const surahItem = document.createElement('div');
         surahItem.className = 'surahmemorization-item';
         surahItem.innerHTML = `
-            <input type="checkbox" id="surah-${surah.number}" ${surah.isSelected ? 'checked' : ''}>
-            <label for="surah-${surah.number}">
-                <span class="surahmemorization-name">${surah.name}</span>
-                <span class="surahmemorization-number">(${surah.number})</span>
-            </label>
-            <span class="surahmemorization-level ${getLevelClass(surah.memorizationLevel)}">${surah.memorizationLevel || 'N/A'}</span>
-            <span class="surahmemorization-last-revision">Last revised: ${surah.lastRevisionDate || 'N/A'}</span>
+            <div class="item-left">
+                <input type="checkbox" id="surah-${surah.number}" ${surah.isSelected ? 'checked' : ''}>
+                <label for="surah-${surah.number}">
+                    <span class="surah-name">${surah.name}</span>
+                    <span class="surah-number">(${surah.number})</span>
+                </label>
+            </div>
+            <div class="item-center">
+                <span class="memorization-level ${getLevelClass(surah.memorizationLevel)}">
+                    ${surah.memorizationLevel || 'N/A'}
+                </span>
+            </div>
+            <div class="item-right">
+                ${formatDate(surah.lastRevisionDate)}
+            </div>
         `;
-        surahList.appendChild(surahItem);
 
         const checkbox = surahItem.querySelector('input');
         checkbox.addEventListener('change', async (e) => {
@@ -192,6 +243,8 @@ function renderFilteredSurahList(filteredSurahs) {
                 updateSelectedCount();
             }
         });
+
+        surahList.appendChild(surahItem);
     });
 }
 
@@ -321,6 +374,12 @@ async function renderHistoryCharts() {
     if (!ctx1 || !ctx2) return;
 
     try {
+        // Vérifier si Chart est défini
+        if (typeof Chart === 'undefined') {
+            console.error('Chart.js n\'est pas chargé');
+            return;
+        }
+
         const data = await api.get('/surah-memorization/history');
         const historyData = data.history;
 
@@ -342,81 +401,73 @@ async function renderHistoryCharts() {
             data: {
                 labels: historyData.map(entry => entry.name),
                 datasets: [{
-                  label: 'Date de la Dernière Révision',
-                  data: historyData.map(entry => new Date(entry.lastRevisionDate).getTime()),
-                  backgroundColor: historyData.map(entry => levelColors[entry.memorizationLevel] || 'rgba(201, 203, 207, 0.6)'),
-                  borderColor: historyData.map(entry => levelColors[entry.memorizationLevel] || 'rgba(201, 203, 207, 1)'),
-                  borderWidth: 1
-              }]
-          },
-          options: {
-              scales: {
-                  x: { 
-                      title: { display: true, text: 'Sourate' } 
-                  },
-                  y: { 
-                      title: { display: true, text: 'Timestamp' },
-                      beginAtZero: true,
-                      ticks: {
-                          callback: function(value) {
-                              const date = new Date(value);
-                              return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
-                          }
-                      }
-                  }
-              },
-              plugins: {
-                  legend: { display: false },
-                  tooltip: {
-                      callbacks: {
-                          label: function(context) {
-                              const date = new Date(context.parsed.y);
-                              return `Date de Révision: ${date.toLocaleDateString()}`;
-                          }
-                      }
-                  }
-              }
-          }
-      });
+                    label: 'Date de la Dernière Révision',
+                    data: historyData.map(entry => new Date(entry.lastRevisionDate).getTime()),
+                    backgroundColor: historyData.map(entry => levelColors[entry.memorizationLevel] || 'rgba(201, 203, 207, 0.6)'),
+                    borderColor: historyData.map(entry => levelColors[entry.memorizationLevel] || 'rgba(201, 203, 207, 1)'),
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    x: { 
+                        title: { display: true, text: 'Sourate' } 
+                    },
+                    y: { 
+                        title: { display: true, text: 'Timestamp' },
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                const date = new Date(value);
+                                return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const date = new Date(context.parsed.y);
+                                return `Date de Révision: ${date.toLocaleDateString()}`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
 
-      // Performance Chart
-      const levelCounts = historyData.reduce((acc, entry) => {
-          const level = entry.memorizationLevel || 'N/A';
-          acc[level] = (acc[level] || 0) + 1;
-          return acc;
-      }, {});
+        // Performance Chart
+        const levelCounts = historyData.reduce((acc, entry) => {
+            const level = entry.memorizationLevel || 'N/A';
+            acc[level] = (acc[level] || 0) + 1;
+            return acc;
+        }, {});
 
-      const filteredLevels = ['Strong', 'Good', 'Moderate', 'Weak'];
-      const filteredLevelCounts = {};
-      filteredLevels.forEach(level => {
-          if (levelCounts[level]) {
-              filteredLevelCounts[level] = levelCounts[level];
-          }
-      });
+        performanceChart = new Chart(ctx2, {
+            type: 'pie',
+            data: {
+                labels: Object.keys(levelCounts),
+                datasets: [{
+                    data: Object.values(levelCounts),
+                    backgroundColor: Object.keys(levelCounts).map(level => levelColors[level]),
+                    borderColor: Object.keys(levelCounts).map(level => 'rgba(255, 255, 255, 1)'),
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                plugins: {
+                    legend: { position: 'top' },
+                    title: { display: true, text: 'Niveaux de Mémorisation' }
+                }
+            }
+        });
 
-      performanceChart = new Chart(ctx2, {
-          type: 'pie',
-          data: {
-              labels: Object.keys(filteredLevelCounts),
-              datasets: [{
-                  data: Object.values(filteredLevelCounts),
-                  backgroundColor: Object.keys(filteredLevelCounts).map(level => levelColors[level]),
-                  borderColor: Object.keys(filteredLevelCounts).map(level => 'rgba(255, 255, 255, 1)'),
-                  borderWidth: 2
-              }]
-          },
-          options: {
-              plugins: {
-                  legend: { position: 'top' },
-                  title: { display: true, text: 'Niveaux de Mémorisation' }
-              }
-          }
-      });
-
-  } catch (error) {
-      console.error('Error loading history:', error);
-      alert('Une erreur s\'est produite lors du chargement de l\'historique.');
-  }
+    } catch (error) {
+        console.error('Error loading history:', error);
+        alert('Une erreur s\'est produite lors du chargement de l\'historique.');
+    }
 }
 
 async function renderHistoryTable() {

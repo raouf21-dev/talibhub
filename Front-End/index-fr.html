@@ -42,6 +42,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
 
+        <!-- Surah memorization charts -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+
     <!-- FullCalendar JS via unpkg.com -->
     <script src="https://unpkg.com/fullcalendar@6.1.15/index.global.min.js"></script>
   </head>
@@ -789,197 +792,199 @@
       </div>
   </section>
 
-    <section id="surahmemorization" class="page page-no-welcome">
-      <!-- surahMemorization.html -->
+  <section id="surahmemorization" class="page page-no-welcome">
+    <h1>Mémorisation des sourates</h1>
 
-      <div id="quran-app-container">
-        <!-- Navigation -->
-        <div class="quran-app-nav">
-          <button
-            id="quran-app-nav-button-select"
-            class="quran-app-nav-button"
-            data-target="select"
-          >
-            Sélectionner une Sourate
-          </button>
-          <button
-            id="quran-app-nav-button-revise"
-            class="quran-app-nav-button"
-            data-target="revise"
-          >
-            Réviser
-          </button>
-          <button
-            id="quran-app-nav-button-history"
-            class="quran-app-nav-button"
-            data-target="history"
-          >
-            Historique
-          </button>
-        </div>
-
-        <!-- Section Sélectionner les Sourates -->
-        <div id="surahmemorization-select" class="quran-app-section">
-          <h2 class="surahmemorization-title">
-            Sélectionner des Sourates pour Révision
-          </h2>
-
-          <!-- Recherche et Filtrage -->
-          <div class="surahmemorization-search-filter">
-            <input
-              type="text"
-              id="surahmemorization-search"
-              class="surahmemorization-input"
-              placeholder="Rechercher des Sourates"
-            />
-            <select
-              id="surahmemorization-filter"
-              class="surahmemorization-select"
-            >
-              <option value="default">Par Défaut</option>
-              <option value="memorization">Par Niveau de Mémorisation</option>
-              <option value="alphabetical">Ordre Alphabétique</option>
-              <option value="numerical">Ordre Numérique</option>
-            </select>
-          </div>
-
-          <!-- Liste des Sourates avec Boîte de Défilement -->
-          <div id="surahmemorization-list-container">
-            <div id="surahmemorization-list">
-              <!-- Les éléments de la liste seront injectés ici par JavaScript -->
-            </div>
-          </div>
-
-          <!-- Actions -->
-          <div class="surahmemorization-summary">
-            <button
-              id="surahmemorization-toggle-all"
-              class="surahmemorization-button"
-            >
-              Sélectionner Tout
-            </button>
-            <span id="surahmemorization-count" class="surahmemorization-count">
-              0 sourates sélectionnées
-            </span>
-            <!-- Bouton Enregistrer -->
-            <button
-              id="surahmemorization-save"
-              class="surahmemorization-button"
-            >
-              Enregistrer
-            </button>
-            <!-- Bouton Démarrer Révision -->
-            <button
-              id="surahmemorization-start"
-              class="surahmemorization-button"
-              disabled
-            >
-              Démarrer la Révision
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div
-        id="surahmemorization-revise"
-        class="quran-app-section"
-        style="display: none"
-      >
-        <h1
-          id="surahmemorization-current-title"
-          class="surahmemorization-title"
+    <div id="quran-app-container">
+      <!-- Navigation -->
+      <div class="quran-app-nav">
+        <button
+          id="quran-app-nav-button-select"
+          class="quran-app-nav-button"
+          data-target="select"
         >
-          Al-Fatihah
-        </h1>
-        <p id="surahmemorization-progress">Sourate 1 sur 5</p>
-        <div class="surahmemorization-progress-bar">
-          <div class="surahmemorization-progress-bar-fill"></div>
-        </div>
-        <div
-          id="surahmemorization-text"
-          class="surahmemorization-text"
-          style="display: none"
-        ></div>
-        <button id="surahmemorization-toggle-text">
-          <span class="icon">👁</span> Afficher le Texte
+          Sélectionner Sourate
         </button>
-        <!-- Suppression des boutons de navigation -->
-        <!-- 
-                <div class="surahmemorization-navigation">
-                    <button id="surahmemorization-prev">← Précédent</button>
-                    <button id="surahmemorization-skip">Passer</button>
-                    <button id="surahmemorization-next">Suivant →</button>
-                </div>
-                -->
-        <h2 style="text-align: center; margin-top: 20px">
-          Comment évaluez-vous votre mémorisation de cette sourate ?
-        </h2>
-        <div id="surahmemorization-evaluation">
-          <button class="surahmemorization-eval-btn" data-level="Strong">
-            Fort
-          </button>
-          <button class="surahmemorization-eval-btn" data-level="Good">
-            Bon
-          </button>
-          <button class="surahmemorization-eval-btn" data-level="Moderate">
-            Modéré
-          </button>
-          <button class="surahmemorization-eval-btn" data-level="Weak">
-            Faible
-          </button>
-        </div>
+        <button
+          id="quran-app-nav-button-revise"
+          class="quran-app-nav-button"
+          data-target="revise"
+        >
+          Réviser
+        </button>
+        <button
+          id="quran-app-nav-button-history"
+          class="quran-app-nav-button"
+          data-target="history"
+        >
+          Historique
+        </button>
       </div>
 
-      <div
-        id="surahmemorization-history"
-        class="quran-app-section"
-        style="display: none"
-      >
-        <h1 class="surahmemorization-title">Historique des Révisions</h1>
-        <div id="surahmemorization-charts" class="surahmemorization-charts">
-          <canvas id="surahmemorization-progress-chart"></canvas>
-          <canvas id="surahmemorization-performance-chart"></canvas>
-        </div>
-        <div class="surahmemorization-filter">
+      <!-- Section Select Surahs -->
+      <div id="surahmemorization-select" class="quran-app-section">
+        <h2 class="surahmemorization-title">Sélection des sourates pour révision</h2>
+
+        <!-- Search and Filter -->
+        <div class="surahmemorization-search-filter">
+          <input
+            type="text"
+            id="surahmemorization-search"
+            class="surahmemorization-input"
+            placeholder="Rechercher des sourates"
+          />
           <select
-            id="surahmemorization-history-filter"
+            id="surahmemorization-filter"
             class="surahmemorization-select"
           >
-            <option value="all">Tous les Niveaux</option>
-            <option value="strong">Fort</option>
-            <option value="good">Bon</option>
-            <option value="moderate">Modéré</option>
-            <option value="weak">Faible</option>
+            <option value="default">Par défaut</option>
+            <option value="memorization">Par niveau de mémorisation</option>
+            <option value="alphabetical">Ordre alphabétique</option>
+            <option value="numerical">Ordre numérique</option>
           </select>
         </div>
-        <table
-          id="surahmemorization-history-table"
-          class="surahmemorization-table"
-        >
-          <thead>
-            <tr>
-              <th>Nom de la Sourate</th>
-              <th>Numéro</th>
-              <th>Date de Révision</th>
-              <th>Niveau</th>
-              <th>Prochaine Révision</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-        <div class="surahmemorization-actions">
+
+        <!-- List of Surahs with Scroll Box -->
+        <div id="surahmemorization-list-container">
+          <div class="surahmemorization-headers">
+            <div class="header-left">
+                <span>Sourates</span>
+            </div>
+            <div class="header-center">
+                <span>Niveau</span>
+            </div>
+            <div class="header-right">
+                <span>Dernière révision</span>
+            </div>
+          </div>
+        
+          <div id="surahmemorization-list">
+            <!-- List items will be injected here by JavaScript -->
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="surahmemorization-summary">
           <button
-            id="surahmemorization-export"
+            id="surahmemorization-toggle-all"
             class="surahmemorization-button"
           >
-            Exporter les Données
+            Tout sélectionner
           </button>
-          <button id="surahmemorization-clear" class="surahmemorization-button">
-            Effacer l'Historique
+          <span id="surahmemorization-count" class="surahmemorization-count">
+            0 sourates sélectionnées
+          </span>
+          <!-- Save Button -->
+          <button
+            id="surahmemorization-save"
+            class="surahmemorization-button"
+          >
+            Enregistrer
+          </button>
+          <!-- Start Revision Button -->
+          <button
+            id="surahmemorization-start"
+            class="surahmemorization-button"
+            disabled
+          >
+            Commencer la révision
           </button>
         </div>
       </div>
-    </section>
+    </div>
+
+    <div
+      id="surahmemorization-revise"
+      class="quran-app-section"
+      style="display: none"
+    >
+      <h1
+        id="surahmemorization-current-title"
+        class="surahmemorization-title"
+      >
+        Al-Fatihah
+      </h1>
+      <p id="surahmemorization-progress">Sourate 1 sur 5</p>
+      <div class="surahmemorization-progress-bar">
+        <div class="surahmemorization-progress-bar-fill"></div>
+      </div>
+      <div
+        id="surahmemorization-text"
+        class="surahmemorization-text"
+        style="display: none"
+      ></div>
+      <button id="surahmemorization-toggle-text">
+        <span class="icon">👁</span> Afficher le texte
+      </button>
+      <h2 style="text-align: center; margin-top: 20px">
+        Comment évaluez-vous votre mémorisation de cette sourate ?
+      </h2>
+      <div id="surahmemorization-evaluation">
+        <button class="surahmemorization-eval-btn" data-level="Strong">
+          Fort
+        </button>
+        <button class="surahmemorization-eval-btn" data-level="Good">
+          Bon
+        </button>
+        <button class="surahmemorization-eval-btn" data-level="Moderate">
+          Moyen
+        </button>
+        <button class="surahmemorization-eval-btn" data-level="Weak">
+          Faible
+        </button>
+      </div>
+    </div>
+
+    <div
+      id="surahmemorization-history"
+      class="quran-app-section"
+      style="display: none"
+    >
+      <h1 class="surahmemorization-title">Historique des révisions</h1>
+      <div id="surahmemorization-charts" class="surahmemorization-charts">
+        <canvas id="surahmemorization-progress-chart"></canvas>
+        <canvas id="surahmemorization-performance-chart"></canvas>
+      </div>
+      <div class="surahmemorization-filter">
+        <select
+          id="surahmemorization-history-filter"
+          class="surahmemorization-select"
+        >
+          <option value="all">Tous les niveaux</option>
+          <option value="strong">Fort</option>
+          <option value="good">Bon</option>
+          <option value="moderate">Moyen</option>
+          <option value="weak">Faible</option>
+        </select>
+      </div>
+      <table
+        id="surahmemorization-history-table"
+        class="surahmemorization-table"
+      >
+        <thead>
+          <tr>
+            <th>Nom de la sourate</th>
+            <th>Numéro</th>
+            <th>Date de révision</th>
+            <th>Niveau</th>
+            <th>Prochaine révision</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <div class="surahmemorization-actions">
+        <button
+          id="surahmemorization-export"
+          class="surahmemorization-button"
+        >
+          Exporter
+        </button>
+        <button id="surahmemorization-clear" class="surahmemorization-button">
+          Effacer l'historique
+        </button>
+      </div>
+    </div>
+  </section>
 
     <section id="mosquetime" class="page page-no-welcome">
       <div class="mosquetime-card">
