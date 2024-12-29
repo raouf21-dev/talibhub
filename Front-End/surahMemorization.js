@@ -214,10 +214,9 @@ function renderCurrentSurah() {
 }
 
 async function renderHistoryCharts() {
-    const ctx1 = document.getElementById('surahmemorization-progress-chart')?.getContext('2d');
-    const ctx2 = document.getElementById('surahmemorization-performance-chart')?.getContext('2d');
+    const ctx = document.getElementById('surahmemorization-performance-chart')?.getContext('2d');
     
-    if (!ctx1 || !ctx2) return;
+    if (!ctx) return;
 
     try {
         if (typeof Chart === 'undefined') {
@@ -233,50 +232,7 @@ async function renderHistoryCharts() {
             return;
         }
 
-        if (progressChart) progressChart.destroy();
         if (performanceChart) performanceChart.destroy();
-
-        progressChart = new Chart(ctx1, {
-            type: 'bar',
-            data: {
-                labels: historyData.map(entry => entry.name),
-                datasets: [{
-                    label: 'Date de la Dernière Révision',
-                    data: historyData.map(entry => new Date(entry.lastRevisionDate).getTime()),
-                    backgroundColor: historyData.map(entry => levelColors[entry.memorizationLevel] || 'rgba(201, 203, 207, 0.6)'),
-                    borderColor: historyData.map(entry => levelColors[entry.memorizationLevel] || 'rgba(201, 203, 207, 1)'),
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                scales: {
-                    x: { 
-                        title: { display: true, text: 'Sourate' } 
-                    },
-                    y: { 
-                        title: { display: true, text: 'Timestamp' },
-                        beginAtZero: true,
-                        ticks: {
-                            callback: function(value) {
-                                const date = new Date(value);
-                                return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
-                            }
-                        }
-                    }
-                },
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                const date = new Date(context.parsed.y);
-                                return `Date de Révision: ${date.toLocaleDateString()}`;
-                            }
-                        }
-                    }
-                }
-            }
-        });
 
         const levelCounts = historyData.reduce((acc, entry) => {
             const level = entry.memorizationLevel || 'N/A';
@@ -284,14 +240,14 @@ async function renderHistoryCharts() {
             return acc;
         }, {});
 
-        performanceChart = new Chart(ctx2, {
-            type: 'pie',
+        performanceChart = new Chart(ctx, {
+            type: 'doughnut',
             data: {
                 labels: Object.keys(levelCounts),
                 datasets: [{
                     data: Object.values(levelCounts),
-                    backgroundColor: Object.keys(levelCounts).map(level => levelColors[level]),
-                    borderColor: Object.keys(levelCounts).map(level => 'rgba(255, 255, 255, 1)'),
+                    backgroundColor: Object.keys(levelCounts).map(level => levelColors[level] || '#9ca3af'),
+                    borderColor: 'white',
                     borderWidth: 2
                 }]
             },
@@ -302,9 +258,42 @@ async function renderHistoryCharts() {
                     legend: {
                         position: 'bottom',
                         labels: {
-                            boxWidth: 12,
-                            padding: 15,
-                            font: { size: 12 }
+                            padding: 20,
+                            font: {
+                                size: 14
+                            },
+                            generateLabels: function(chart) {
+                                const data = chart.data;
+                                if (data.labels.length && data.datasets.length) {
+                                    return data.labels.map((label, i) => {
+                                        const value = data.datasets[0].data[i];
+                                        const total = data.datasets[0].data.reduce((acc, val) => acc + val, 0);
+                                        const percentage = ((value / total) * 100).toFixed(1);
+                                        
+                                        return {
+                                            text: `${label}: ${percentage}% (${value})`,
+                                            fillStyle: data.datasets[0].backgroundColor[i],
+                                            strokeStyle: data.datasets[0].borderColor,
+                                            lineWidth: data.datasets[0].borderWidth,
+                                            hidden: isNaN(data.datasets[0].data[i]),
+                                            index: i
+                                        };
+                                    });
+                                }
+                                return [];
+                            }
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: '',
+                        padding: {
+                            top: 10,
+                            bottom: 30
+                        },
+                        font: {
+                            size: 18,
+                            weight: 'bold'
                         }
                     }
                 }

@@ -941,21 +941,13 @@
       style="display: none"
     >
       <h1 class="surahmemorization-title">Historique des révisions</h1>
-      <div id="surahmemorization-charts" class="surahmemorization-charts">
-        <canvas id="surahmemorization-progress-chart"></canvas>
-        <canvas id="surahmemorization-performance-chart"></canvas>
-      </div>
-      <div class="surahmemorization-filter">
-        <select
-          id="surahmemorization-history-filter"
-          class="surahmemorization-select"
-        >
-          <option value="all">Tous les niveaux</option>
-          <option value="strong">Fort</option>
-          <option value="good">Bon</option>
-          <option value="moderate">Moyen</option>
-          <option value="weak">Faible</option>
-        </select>
+      <div class="surahmemorization-charts">
+        <div class="chart-container">
+            <h3 class="chart-title">Distribution des Niveaux de Mémorisation</h3>
+            <div class="chart-area">
+                <canvas id="surahmemorization-performance-chart"></canvas>
+            </div>
+        </div>
       </div>
       <table
         id="surahmemorization-history-table"

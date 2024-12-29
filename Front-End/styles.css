@@ -2539,8 +2539,6 @@ button[type="submit"]:hover {
 
 /*SurahMemorization*/
 
-/*SurahMemorization*/
-
 /* Layout de base */
 #surahmemorization {
   margin-left: 250px;
@@ -2751,7 +2749,9 @@ button[type="submit"]:hover {
 
 /* Section de révision */
 #surahmemorization-revise {
-  max-width: 400px;
+  max-width: 1000px;
+  max-height: 85vh;
+  width: 90vw;
   margin: 0 auto;
   background-color: white;
   border-radius: 8px;
@@ -2800,31 +2800,96 @@ button[type="submit"]:hover {
   justify-content: center;
 }
 
-.surahmemorization-eval-btn[data-level="Strong"] { background-color: #4caf50; }
-.surahmemorization-eval-btn[data-level="Good"] { background-color: #8bc34a; }
-.surahmemorization-eval-btn[data-level="Moderate"] { background-color: #ffc107; }
-.surahmemorization-eval-btn[data-level="Weak"] { background-color: #ff5722; }
+.surahmemorization-eval-btn[data-level="Strong"] { background-color: #22c55e; }
+.surahmemorization-eval-btn[data-level="Good"] { background-color: #3b82f6; }
+.surahmemorization-eval-btn[data-level="Moderate"] { background-color: #eab308; }
+.surahmemorization-eval-btn[data-level="Weak"] { background-color: #ef4444; }
 
 .surahmemorization-eval-btn::before {
   content: "★";
   margin-right: 5px;
 }
 
-/* Section historique */
+/* Section des graphiques mise à jour */
 .surahmemorization-charts {
   display: flex;
-  justify-content: space-around;
+  justify-content: center;
+  padding: 24px;
+  margin: 0 auto 24px;
+  max-width: 800px;
+  background-color: white;
+  border-radius: 8px;
+}
+
+/* Container pour le graphique */
+.chart-container {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 24px;
+  width: 100%;
+  height: 500px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Titre du graphique */
+.chart-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+  text-align: center;
   margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e5e7eb;
 }
 
-.surahmemorization-charts canvas {
-  max-width: 45%;
+/* Zone de canvas */
+.chart-area {
+  flex: 1;
+  position: relative;
+  width: 100%;
+  min-height: 0;
 }
 
-/* Tableau d'historique */
+/* Style du canvas */
+#surahmemorization-performance-chart {
+  max-height: 400px;
+}
+
+/* Légende */
+.chart-legend {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 16px;
+  margin-top: 20px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+  color: #4b5563;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background-color: #f3f4f6;
+}
+
+.legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+}
+
+/* Table d'historique */
 .surahmemorization-table {
   width: 100%;
   border-collapse: collapse;
+  margin-top: 20px;
 }
 
 .surahmemorization-table th,
@@ -2836,90 +2901,7 @@ button[type="submit"]:hover {
 
 .surahmemorization-table th {
   background-color: #f2f2f2;
-}
-
-.surahmemorization-charts {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 24px;
-  padding: 24px;
-  margin: 0 auto 24px;
-  max-width: 1200px;
-  background-color: white;
-  border-radius: 8px;
-}
-
-/* Container individuel pour chaque graphique */
-.chart-container {
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 20px;
-  height: 400px; /* Hauteur fixe pour uniformité */
-  display: flex;
-  flex-direction: column;
-}
-
-/* Titre des graphiques */
-.chart-title {
-  font-size: 1.1rem;
   font-weight: 600;
-  color: #374151;
-  text-align: center;
-  margin-bottom: 16px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-/* Zone de canvas */
-.chart-area {
-  flex: 1;
-  position: relative;
-  width: 100%;
-  min-height: 0; /* Important pour flex */
-}
-
-/* Style des canvas */
-.surahmemorization-charts canvas {
-  width: 100% !important;
-  height: 100% !important;
-}
-
-/* Légende des niveaux */
-.chart-legend {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 16px;
-  padding: 12px;
-  margin-top: 16px;
-  border-top: 1px solid #e5e7eb;
-}
-
-.legend-item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.875rem;
-  color: #4b5563;
-}
-
-.legend-color {
-  width: 12px;
-  height: 12px;
-  border-radius: 3px;
-}
-
-/* Zone de filtrage */
-.surahmemorization-filter {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 24px;
-}
-
-.surahmemorization-select {
-  width: 100%;
-  max-width: 200px;
 }
 
 /* Media Queries */
@@ -2936,11 +2918,11 @@ button[type="submit"]:hover {
 
   .surahmemorization-charts {
     padding: 16px;
-    gap: 16px;
   }
 
   .chart-container {
-    height: 350px;
+    height: 450px;
+    padding: 16px;
   }
 }
 
@@ -2989,24 +2971,47 @@ button[type="submit"]:hover {
   }
 
   .surahmemorization-charts {
-    grid-template-columns: 1fr;
-    padding: 10px;
+    padding: 12px;
   }
 
   .chart-container {
-    height: 300px;
+    height: 400px;
+    padding: 12px;
+  }
+
+  .chart-title {
+    font-size: 1.1rem;
+    margin-bottom: 16px;
+  }
+
+  .legend-item {
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .surahmemorization-charts {
+    padding: 8px;
+  }
+
+  .chart-container {
+    height: 350px;
+    padding: 8px;
   }
 
   .chart-title {
     font-size: 1rem;
+    margin-bottom: 12px;
   }
 
   .chart-legend {
     padding: 8px;
-    gap: 12px;
+    gap: 8px;
   }
 
-  .legend-item {
+  .surahmemorization-table th,
+  .surahmemorization-table td {
+    padding: 6px;
     font-size: 0.75rem;
   }
 }
