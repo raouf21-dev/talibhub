@@ -47,8 +47,15 @@ const incrementRecitationCount = async (userId, sourateNumber) => {
 const checkCycleCompletion = async (client, userId, cycleId) => {
     // Obtenir toutes les sourates connues de l'utilisateur
     const { rows: knownSouratesRows } = await client.query(`
-        SELECT sourate_number FROM known_sourates WHERE user_id = $1
+        SELECT sourate_number FROM known_sourates 
+        WHERE user_id = $1
     `, [userId]);
+    
+    // Si aucune sourate connue, pas de cycle possible
+    if (knownSouratesRows.length === 0) {
+        return false;
+    }
+
     const knownSourates = knownSouratesRows.map(row => row.sourate_number);
 
     // Obtenir les sourates récitées dans le cycle actuel
@@ -56,17 +63,28 @@ const checkCycleCompletion = async (client, userId, cycleId) => {
         SELECT DISTINCT sourate_number FROM sourate_recitations
         WHERE user_id = $1 AND cycle_id = $2
     `, [userId, cycleId]);
+    
     const recitedSourates = recitedSouratesRows.map(row => row.sourate_number);
 
     // Vérifier si toutes les sourates connues ont été récitées
-    const allRecited = knownSourates.every(sourate => recitedSourates.includes(sourate));
+    const allRecited = knownSourates.every(sourate => 
+        recitedSourates.includes(sourate)
+    );
 
     if (allRecited) {
         // Marquer le cycle comme complet
         await client.query(`
-            UPDATE recitation_cycles SET is_complete = true, end_date = CURRENT_TIMESTAMP
-            WHERE id = $1
+            UPDATE recitation_cycles 
+            SET is_complete = true, end_date = CURRENT_TIMESTAMP
+            WHERE id = $1 AND is_complete = false
         `, [cycleId]);
+
+        // Créer un nouveau cycle si celui-ci est complété
+        await client.query(`
+            INSERT INTO recitation_cycles (user_id, start_date)
+            VALUES ($1, CURRENT_TIMESTAMP)
+        `, [userId]);
+
         return true;
     }
     return false;

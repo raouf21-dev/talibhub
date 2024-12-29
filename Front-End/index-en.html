@@ -1010,12 +1010,12 @@
 
           <!-- Actions -->
           <div class="surahmemorization-summary">
-            <button
+            <!--<button
               id="surahmemorization-toggle-all"
               class="surahmemorization-button"
             >
               Select All
-            </button>
+            </button> -->
             <span id="surahmemorization-count" class="surahmemorization-count">
               0 surahs selected
             </span>
@@ -1094,22 +1094,51 @@
         style="display: none"
       >
         <h1 class="surahmemorization-title">Revision History</h1>
-        <div id="surahmemorization-charts" class="surahmemorization-charts">
-          <canvas id="surahmemorization-progress-chart"></canvas>
-          <canvas id="surahmemorization-performance-chart"></canvas>
-        </div>
-        <div class="surahmemorization-filter">
-          <select
-            id="surahmemorization-history-filter"
-            class="surahmemorization-select"
-          >
-            <option value="all">All Levels</option>
-            <option value="strong">Strong</option>
-            <option value="good">Good</option>
-            <option value="moderate">Moderate</option>
-            <option value="weak">Weak</option>
-          </select>
-        </div>
+        <!-- Filter -->
+<div class="surahmemorization-filter">
+  <select id="surahmemorization-history-filter" class="surahmemorization-select">
+    <option value="all">Tous les niveaux</option>
+    <option value="strong">Fort</option>
+    <option value="good">Bon</option>
+    <option value="moderate">Moyen</option>
+    <option value="weak">Faible</option>
+  </select>
+</div>
+
+<!-- Charts -->
+<div class="surahmemorization-charts">
+  <div class="chart-container">
+    <h3 class="chart-title">Progression des révisions</h3>
+    <div class="chart-area">
+      <canvas id="surahmemorization-progress-chart"></canvas>
+    </div>
+  </div>
+
+  <div class="chart-container">
+    <h3 class="chart-title">Distribution des niveaux</h3>
+    <div class="chart-area">
+      <canvas id="surahmemorization-performance-chart"></canvas>
+    </div>
+    <div class="chart-legend">
+      <div class="legend-item">
+        <span class="legend-color" style="background-color: #22c55e;"></span>
+        <span>Fort</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-color" style="background-color: #3b82f6;"></span>
+        <span>Bon</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-color" style="background-color: #eab308;"></span>
+        <span>Moyen</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-color" style="background-color: #ef4444;"></span>
+        <span>Faible</span>
+      </div>
+    </div>
+  </div>
+</div>
         <table
           id="surahmemorization-history-table"
           class="surahmemorization-table"

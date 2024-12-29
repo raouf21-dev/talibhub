@@ -2838,6 +2838,90 @@ button[type="submit"]:hover {
   background-color: #f2f2f2;
 }
 
+.surahmemorization-charts {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  padding: 24px;
+  margin: 0 auto 24px;
+  max-width: 1200px;
+  background-color: white;
+  border-radius: 8px;
+}
+
+/* Container individuel pour chaque graphique */
+.chart-container {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 20px;
+  height: 400px; /* Hauteur fixe pour uniformité */
+  display: flex;
+  flex-direction: column;
+}
+
+/* Titre des graphiques */
+.chart-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #374151;
+  text-align: center;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+/* Zone de canvas */
+.chart-area {
+  flex: 1;
+  position: relative;
+  width: 100%;
+  min-height: 0; /* Important pour flex */
+}
+
+/* Style des canvas */
+.surahmemorization-charts canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Légende des niveaux */
+.chart-legend {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 12px;
+  margin-top: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.875rem;
+  color: #4b5563;
+}
+
+.legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+}
+
+/* Zone de filtrage */
+.surahmemorization-filter {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.surahmemorization-select {
+  width: 100%;
+  max-width: 200px;
+}
+
 /* Media Queries */
 @media (max-width: 1024px) {
   #surahmemorization {
@@ -2848,6 +2932,15 @@ button[type="submit"]:hover {
 
   #quran-app-container {
     width: 90vw;
+  }
+
+  .surahmemorization-charts {
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .chart-container {
+    height: 350px;
   }
 }
 
@@ -2893,6 +2986,28 @@ button[type="submit"]:hover {
     grid-template-columns: 1fr;
     gap: 8px;
     margin-bottom: 16px;
+  }
+
+  .surahmemorization-charts {
+    grid-template-columns: 1fr;
+    padding: 10px;
+  }
+
+  .chart-container {
+    height: 300px;
+  }
+
+  .chart-title {
+    font-size: 1rem;
+  }
+
+  .chart-legend {
+    padding: 8px;
+    gap: 12px;
+  }
+
+  .legend-item {
+    font-size: 0.75rem;
   }
 }
 
@@ -3088,6 +3203,21 @@ button[type="submit"]:hover {
   .jamaa-time {
     font-size: 15px;
   }
+
+  .mosquetime-title {
+    margin: 0;
+    font-size: 19px;
+   }
+   
+   .mosquetime-subtitle {
+    margin: 5px 0 0;
+    font-size: 12px;
+   }
+
+   #mosquetime-city-date{
+    font-size: 16px;
+   }
+
  }
  
  @media (max-width: 480px) {

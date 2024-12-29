@@ -1,3 +1,5 @@
+// surahSelector.js
+
 import { navigateTo } from './utils.js';
 import { api } from './dynamicLoader.js';
 
@@ -173,17 +175,43 @@ async function selectRandomSourates() {
     try {
         // 1. Obtenir les sourates connues (avec cache)
         const knownSouratesData = await getKnownSouratesOnce();
+        console.log('Sourates connues récupérées:', knownSouratesData);
 
         if (!knownSouratesData || knownSouratesData.length < 1) {
             throw new Error('Veuillez sélectionner au moins une sourate connue pour la récitation.');
         }
 
-        // 2. Obtenir les sourates non récitées (un seul appel)
+        // 2. Obtenir les sourates non récitées
         const notRecitedSourates = await getNotRecitedSourates();
+        console.log('Sourates non récitées:', notRecitedSourates);
+
+        // Si nous n'avons qu'une seule sourate non récitée
+        if (notRecitedSourates.length === 1) {
+            const lastSourate = notRecitedSourates[0];
+            // Utiliser la même sourate pour les deux rakas
+            updateUIWithSelectedSourates(lastSourate, lastSourate);
+            
+            // Enregistrer la dernière récitation
+            const recitationResult = await api.post('/sourates/recitations', {
+                firstSourate: lastSourate.number,
+                secondSourate: lastSourate.number
+            });
+            console.log('Dernière sourate récitée:', recitationResult);
+
+            // Mettre à jour les statistiques
+            await getRecitationStats();
+
+            if (recitationResult.cycleCompleted) {
+                alert('Félicitations ! Vous avez complété un cycle de récitation !');
+            }
+            return;
+        }
+
         let selectableSourates = [...notRecitedSourates];
 
-        // 3. Si pas assez de sourates non récitées, obtenir toutes les sourates connues
-        if (notRecitedSourates.length < 2) {
+        // 3. Si pas de sourates non récitées, recommencer un nouveau cycle
+        if (selectableSourates.length === 0) {
+            console.log('Toutes les sourates ont été récitées, début d\'un nouveau cycle');
             const allKnownSourateNumbers = knownSouratesData.map(s => s.sourate_number);
             const allKnownSouratesData = await api.post('/sourates/by-numbers', { 
                 sourateNumbers: allKnownSourateNumbers 
@@ -191,33 +219,39 @@ async function selectRandomSourates() {
             selectableSourates = allKnownSouratesData;
         }
 
-        if (selectableSourates.length < 1) {
-            throw new Error('Aucune sourate disponible pour la récitation.');
-        }
-
-        // 4. Sélection aléatoire (une seule fois)
+        // 4. Sélection aléatoire
         const [firstSourate, secondSourate] = selectTwoRandomSourates(selectableSourates);
+        console.log('Sourates sélectionnées:', { firstSourate, secondSourate });
 
-        // 5. Mise à jour de l'interface (une seule fois)
+        // 5. Mise à jour de l'interface
         updateUIWithSelectedSourates(firstSourate, secondSourate);
 
-        // 6. Enregistrement de la récitation (un seul appel)
+        // 6. Enregistrer la récitation
         const recitationResult = await api.post('/sourates/recitations', {
             firstSourate: firstSourate.number,
             secondSourate: secondSourate.number
         });
+        console.log('Résultat de la récitation:', recitationResult);
 
-        // 7. Mise à jour des statistiques (un seul appel)
-        if (recitationResult) {
-            await getRecitationStats();
+        // 7. Mettre à jour les statistiques immédiatement après l'enregistrement
+        const stats = await api.get('/sourates/recitations/stats');
+        console.log('Nouvelles statistiques:', stats);
+        updateRecitationInfo(stats);
+
+        if (recitationResult.cycleCompleted) {
+            alert('Félicitations ! Vous avez complété un cycle de récitation !');
+            // Forcer le rechargement des statistiques après la complétion du cycle
+            setTimeout(async () => {
+                const updatedStats = await api.get('/sourates/recitations/stats');
+                updateRecitationInfo(updatedStats);
+            }, 1000);
         }
 
     } catch (error) {
         console.error('Erreur dans selectRandomSourates:', error);
-        alert(error.message);
+        alert(error.message || 'Une erreur est survenue lors de la sélection des sourates');
     } finally {
         isSelecting = false;
-        // Réinitialiser le cache après un délai
         setTimeout(() => {
             cachedKnownSourates = null;
         }, 5000);
@@ -229,7 +263,6 @@ function selectTwoRandomSourates(sourates) {
     let firstSourate = shuffledSourates[0];
     let secondSourate = shuffledSourates.find(s => s.number !== firstSourate.number) || firstSourate;
 
-    // S'assurer que les sourates sont dans l'ordre croissant
     if (firstSourate.number > secondSourate.number) {
         [firstSourate, secondSourate] = [secondSourate, firstSourate];
     }
@@ -242,11 +275,11 @@ function updateUIWithSelectedSourates(firstSourate, secondSourate) {
     const secondRakaElement = document.getElementById('secondRaka');
 
     if (firstRakaElement) {
-        firstRakaElement.innerHTML = `1st raka : <strong>${firstSourate.number}. ${firstSourate.name}</strong>`;
+        firstRakaElement.innerHTML = `<strong>${firstSourate.number}. ${firstSourate.name}</strong>`;
     }
 
     if (secondRakaElement) {
-        secondRakaElement.innerHTML = `2nd raka : <strong>${secondSourate.number}. ${secondSourate.name}</strong>`;
+        secondRakaElement.innerHTML = `<strong>${secondSourate.number}. ${secondSourate.name}</strong>`;
     }
 }
 
@@ -306,14 +339,25 @@ function updateRecitationInfo(data) {
     const cyclesElement = document.getElementById('recitationCyclesCount');
     const progressElement = document.getElementById('recitationProgress');
 
+    if (!data) {
+        console.error('Pas de données reçues pour la mise à jour des informations de récitation');
+        return;
+    }
+
+    console.log('Mise à jour des informations de récitation avec:', data);
+
     if (cyclesElement) {
-        cyclesElement.innerHTML = `Cycles de récitation complets : <strong>${data.complete_cycles || 0}</strong>`;
+        const cycles = data.complete_cycles || data.cycles || 0;
+        cyclesElement.innerHTML = `Cycles de récitation complets : <strong>${cycles}</strong>`;
     }
 
     if (progressElement) {
-        const recitedAtLeastOnce = data.recited_at_least_once || 0;
-        const totalKnown = data.total_known || 0;
-        progressElement.innerHTML = `Progrès : <strong>${recitedAtLeastOnce} / ${totalKnown}</strong> sourates récitées`;
+        const recited = data.recited_at_least_once || 0;
+        const total = data.total_known || 0;
+        progressElement.innerHTML = `Progrès : <strong>${recited} / ${total}</strong> sourates récitées`;
+        
+        // Log pour débogage
+        console.log(`Mise à jour du progrès : ${recited}/${total}`);
     }
 }
 
