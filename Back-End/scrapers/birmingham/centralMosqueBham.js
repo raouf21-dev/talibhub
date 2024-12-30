@@ -11,7 +11,7 @@ const {
   getDefaultBrowserConfig, 
   getDefaultHeaders, 
   setupBasicBrowserPage 
-} = require('./scrapers/scraperUtils');
+} = require('../scraperUtils');
 
 // Configuration StealthPlugin
 const stealth = StealthPlugin();

@@ -14,7 +14,7 @@ const {
  errorUtils,
  dateUtils,
  prayerUtils
-} = require('./scrapers/scraperUtils');
+} = require('../scraperUtils');
 
 // Configuration StealthPlugin
 const stealth = StealthPlugin();
