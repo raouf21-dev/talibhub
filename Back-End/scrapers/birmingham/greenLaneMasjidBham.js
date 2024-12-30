@@ -1,10 +1,20 @@
-//Back-End/scrapers/birmingham/greenLaneMasjidBham.js
+// Back-End/scrapers/birmingham/greenLaneMasjidBham.js
 
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
-const { executablePath } = require('puppeteer'); 
-const { DateTime } = require('luxon');
-const fs = require('fs');
+const { executablePath } = require('puppeteer');
+const { 
+ normalizeTime,
+ randomDelay,
+ getDefaultBrowserConfig,
+ setupBasicBrowserPage,
+ setupChromiumPath, 
+ setupResourceInterception,
+ safeNavigation,
+ errorUtils,
+ dateUtils,
+ prayerUtils
+} = require('./scrapers/scraperUtils');
 
 // Configuration StealthPlugin
 const stealth = StealthPlugin();
@@ -13,181 +23,42 @@ stealth.enabledEvasions.delete('webgl.renderer');
 
 puppeteer.use(stealth);
 
-const userAgents = [
- 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
- 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:115.0) Gecko/20100101 Firefox/115.0',
- 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.1 Safari/605.1.15',
- 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.5 Mobile/15E148 Safari/604.1',
- 'Mozilla/5.0 (Linux; Android 12; SM-G991B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.74 Mobile Safari/537.36',
-];
-
-const normalizeTime = (timeStr) => {
-  // Vérifications de base
-  if (!timeStr || timeStr === 'NaN:undefined' || timeStr === '--') return null;
-
-  try {
-    // Détection AM/PM et nettoyage de la chaîne
-    const originalStr = timeStr.toLowerCase();
-    const isPM = originalStr.includes('pm');
-    const isAM = originalStr.includes('am');
-    timeStr = timeStr.replace(/[^0-9:]/g, '');
-
-    // Formatte en HH:MM si nécessaire
-    if (!timeStr.includes(':')) {
-      timeStr = timeStr.padStart(4, '0');
-      timeStr = `${timeStr.slice(0, 2)}:${timeStr.slice(2)}`;
-    }
-
-    let [hours, minutes] = timeStr.split(':').map(Number);
-    
-    // Validation des composants
-    if (isNaN(hours) || isNaN(minutes)) return null;
-    if (minutes < 0 || minutes > 59) return null;
-
-    // Conversion en format 24 heures
-    if (hours <= 12) {
-      if (isPM && hours < 12) {
-        hours += 12;
-      } else if (isAM && hours === 12) {
-        hours = 0;
-      } else if (!isAM && !isPM) {
-        // Conversion automatique pour les prières de l'après-midi
-        switch (hours) {
-          case 2: 
-          case 3: // asr
-            hours += 12;
-            break;
-          case 4: 
-          case 5: // maghrib
-            hours += 12;
-            break;
-          case 6: 
-          case 7: // isha
-            if (minutes === 30) { // Une heuristique pour isha
-              hours += 12;
-            }
-            break;
-        }
-      }
-    }
-
-    // Validation finale de l'heure
-    if (hours < 0 || hours > 23) return null;
-
-    // Retourne au format HH:MM
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-  } catch (error) {
-    console.error('Erreur de normalisation du temps:', error);
-    return null;
-  }
-};
-
-const randomDelay = (min, max) =>
- new Promise((resolve) =>
-   setTimeout(resolve, Math.floor(Math.random() * (max - min + 1)) + min)
- );
-
-let isScrapingInProgress = false;
-
 const scrapeGreenLaneMasjidBham = async () => {
- if (isScrapingInProgress) {
-   console.log('Un scraping est déjà en cours, attente...');
-   return null;
- }
-
- isScrapingInProgress = true;
  let browser;
  try {
    console.log('Démarrage du scraping...');
-   const randomUserAgent = userAgents[Math.floor(Math.random() * userAgents.length)];
 
    const launchOptions = {
-    headless: true,
-    executablePath: '/snap/bin/chromium',
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
-      '--disable-gpu',
-      '--disable-blink-features=AutomationControlled',
-      '--disable-features=IsolateOrigins,site-per-process',
-      '--window-size=1920,1080',
-    ],
-    ignoreHTTPSErrors: true,
+     ...getDefaultBrowserConfig(),
+     executablePath: await setupChromiumPath()
    };
 
-   try {
-     if (fs.existsSync('/usr/bin/chromium-browser')) {
-       console.log('Utilisation de Chromium système');
-       launchOptions.executablePath = '/usr/bin/chromium-browser';
-     } else {
-       console.log('Utilisation de Chromium Puppeteer');
-       launchOptions.executablePath = executablePath();
-     }
-   } catch (error) {
-     console.log('Fallback sur Chromium Puppeteer');
-     launchOptions.executablePath = executablePath();
-   }
-
    browser = await puppeteer.launch(launchOptions);
-   const page = await browser.newPage();
+   const page = await setupBasicBrowserPage(browser);
 
-   await page.setUserAgent(randomUserAgent);
-   await page.setViewport({ width: 1024, height: 768 });
+   // Configuration spécifique pour Green Lane Masjid
    await page.setJavaScriptEnabled(true);
+   await setupResourceInterception(page);
 
-   await page.setRequestInterception(true);
-   page.on('request', (request) => {
-     const resourceType = request.resourceType();
-     if (['image', 'stylesheet', 'font'].includes(resourceType)) {
-       request.abort();
-     } else {
-       request.continue();
-     }
-   });
-
-   await page.evaluateOnNewDocument(() => {
-     Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
-   });
-
-   let retryCount = 0;
-   const maxRetries = 2;
-
-   while (retryCount < maxRetries) {
-     try {
-       console.log('Navigation vers Green Lane Masjid...');
-       await page.goto('https://greenlanemasjid.org/', { 
-         waitUntil: 'domcontentloaded', 
-         timeout: 25000 
-       });
-       console.log('Page chargée avec succès');
-
+   console.log('Navigation vers Green Lane Masjid...');
+   await safeNavigation(page, 'https://greenlanemasjid.org/', {
+     retries: 2,
+     timeout: 25000,
+     waitUntil: 'domcontentloaded',
+     validate: async () => {
        await page.waitForSelector('table tbody tr', { timeout: 20000, visible: true });
-
        const rows = await page.$$eval('table tbody tr', rows => rows.length);
-       if (rows > 0) {
-         console.log('Contenu valide détecté');
-         break;
-       } else {
-         throw new Error('Tableau des prières vide');
+       return rows > 0;
+     },
+     onError: async (error, retryCount) => {
+       console.log(`Tentative ${retryCount} échouée:`, error.message);
+       if (retryCount === 2) {
+         await errorUtils.saveFailedPage(page, 'failed_greenlane_masjid.html');
        }
-     } catch (error) {
-       retryCount++;
-       console.log(`Tentative ${retryCount}/${maxRetries} échouée:`, error.message);
-       if (retryCount === maxRetries) {
-         const content = await page.content();
-         fs.writeFileSync('failed_page.html', content);
-         console.log('Le contenu de la page a été sauvegardé dans failed_page.html pour analyse.');
-         throw error;
-       }
-       await randomDelay(3000, 5000);
      }
-   }
+   });
 
    console.log('Extraction des données...');
-   const ukTime = DateTime.now().setZone('Europe/London');
-   const dateText = ukTime.toISODate();
-
    const rawTimes = await page.evaluate(() => {
      const prayerTimes = {};
      const rows = document.querySelectorAll('table tbody tr');
@@ -199,26 +70,8 @@ const scrapeGreenLaneMasjidBham = async () => {
        const cells = row.querySelectorAll('td');
        if (cells.length >= 4) {
          const jamaahTime = cells[3].textContent.trim() || cells[2].textContent.trim();
-         
          if (jamaahTime) {
-           switch (prayerName) {
-             case 'fajr':
-               prayerTimes.fajr = jamaahTime;
-               break;
-             case 'dhuhr':
-             case 'zuhr':
-               prayerTimes.dhuhr = jamaahTime;
-               break;
-             case 'asr':
-               prayerTimes.asr = jamaahTime;
-               break;
-             case 'maghrib':
-               prayerTimes.maghrib = jamaahTime;
-               break;
-             case 'isha':
-               prayerTimes.isha = jamaahTime;
-               break;
-           }
+           prayerTimes[prayerName] = jamaahTime;
          }
        }
      });
@@ -226,9 +79,10 @@ const scrapeGreenLaneMasjidBham = async () => {
      return prayerTimes;
    });
 
-   // Normalise tous les temps avant de les renvoyer
+   // Normalise les temps et standardise les noms de prière
    const normalizedTimes = {};
-   for (const [prayer, time] of Object.entries(rawTimes)) {
+   for (let [prayer, time] of Object.entries(rawTimes)) {
+     prayer = prayerUtils.standardizePrayerName(prayer);
      const normalizedTime = normalizeTime(time);
      if (normalizedTime) {
        normalizedTimes[prayer] = normalizedTime;
@@ -237,22 +91,23 @@ const scrapeGreenLaneMasjidBham = async () => {
 
    const result = {
      source: 'Green Lane Masjid Birmingham',
-     date: dateText,
+     date: dateUtils.getUKDate(),
      times: normalizedTimes
    };
 
-   console.log('Données extraites avec succès:', result);
-   return result;
+   // Standardise le format de sortie
+   const standardizedResult = prayerUtils.normalizeResult(result);
+   console.log('Données extraites avec succès:', standardizedResult);
+   return standardizedResult;
 
  } catch (error) {
-   console.error('Erreur lors du scraping :', error);
+   errorUtils.logScrapingError('Green Lane Masjid', error);
    throw error;
  } finally {
    if (browser) {
      await browser.close();
      console.log('Navigateur fermé');
    }
-   isScrapingInProgress = false;
  }
 };
 
