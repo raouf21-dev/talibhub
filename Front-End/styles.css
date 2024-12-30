@@ -45,8 +45,7 @@ body {
   transition: opacity 0.5s ease-in-out;
   height: 100vh;
   overflow-y: auto; /* Allow scrolling within the page */
-
-  padding-bottom: 5rem !important;
+  padding-bottom: 5rem;
 }
 
 .page-no-welcome{
@@ -59,6 +58,10 @@ body {
 }
 
 /* Styles pour la page d'inscription/connexion */
+
+#welcomepage {
+  padding-bottom: 0;
+}
 
 .welcomepage-header {
   background-color: var(--secondary-color);
@@ -453,6 +456,81 @@ body {
 .hidden {
   display: none;
 }
+
+@media (max-width: 480px) {
+
+
+  .welcomepage-header {
+    padding: 0.25rem;
+  }
+
+  .language-selector .lang-btn {
+    font-size: 2.5em;
+    padding: 5px;
+  }
+
+  .welcomepage-hero h2 {
+    font-size:1.5rem;
+  }
+
+  .welcomepage-hero p {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .welcomepage-btn {
+    margin-top: 25px;
+    padding: 0.5rem 1rem;
+    font-size: 1.5rem;
+    cursor: pointer;
+    border-radius: 15px;
+    animation: pulse 2s infinite ease-in-out;
+  }
+  
+  @keyframes pulse {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.1);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  .welcomepage-hero {
+    margin-bottom: 2.5rem;
+  }
+
+  .welcomepage-features h2, .welcomepage-vision h2, .welcomepage-why-choose h2, .welcomepage-commitment h2 {
+    font-size: 1.5rem;
+  }
+
+  .welcomepage-feature-card h3, .welcomepage-why-choose-card h3 {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .welcomepage-feature-card p, .welcomepage-why-choose-card p {
+    font-size: 1rem;
+  }
+
+  .welcomepage-vision p, .welcomepage-commitment p, .welcomepage-commitment li {
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+  }
+
+  .welcomepage-features, .welcomepage-vision, .welcomepage-why-choose, .welcomepage-commitment {
+    margin-bottom: 3rem;
+  }
+
+  .welcomepage-footer {
+    padding: 1rem;
+    font-size: 1rem;
+  }
+}
+
 
 /*Top Nav*/
 

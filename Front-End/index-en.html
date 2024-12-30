@@ -45,7 +45,6 @@
     <!-- Surah memorization charts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 
-
     <!-- FullCalendar JS via unpkg.com -->
     <script src="https://unpkg.com/fullcalendar@6.1.15/index.global.min.js"></script>
   </head>
@@ -993,16 +992,16 @@
           <div id="surahmemorization-list-container">
             <div class="surahmemorization-headers">
               <div class="header-left">
-                  <span>Sourates</span>
+                <span>Sourates</span>
               </div>
               <div class="header-center">
-                  <span>Level</span>
+                <span>Level</span>
               </div>
               <div class="header-right">
-                  <span>Last Revised</span>
+                <span>Last Revised</span>
               </div>
-          </div>
-          
+            </div>
+
             <div id="surahmemorization-list">
               <!-- List items will be injected here by JavaScript -->
             </div>
@@ -1095,25 +1094,28 @@
       >
         <h1 class="surahmemorization-title">Revision History</h1>
         <!-- Filter -->
-<div class="surahmemorization-filter">
-  <select id="surahmemorization-history-filter" class="surahmemorization-select">
-    <option value="all">Tous les niveaux</option>
-    <option value="strong">Fort</option>
-    <option value="good">Bon</option>
-    <option value="moderate">Moyen</option>
-    <option value="weak">Faible</option>
-  </select>
-</div>
+        <div class="surahmemorization-filter">
+          <select
+            id="surahmemorization-history-filter"
+            class="surahmemorization-select"
+          >
+            <option value="all">Tous les niveaux</option>
+            <option value="strong">Fort</option>
+            <option value="good">Bon</option>
+            <option value="moderate">Moyen</option>
+            <option value="weak">Faible</option>
+          </select>
+        </div>
 
-<!-- Charts -->
-<div class="surahmemorization-charts">
-  <div class="chart-container">
-      <h3 class="chart-title">Distribution of Memorization Levels</h3>
-      <div class="chart-area">
-          <canvas id="surahmemorization-performance-chart"></canvas>
-      </div>
-  </div>
-</div>
+        <!-- Charts -->
+        <div class="surahmemorization-charts">
+          <div class="chart-container">
+            <h3 class="chart-title">Distribution of Memorization Levels</h3>
+            <div class="chart-area">
+              <canvas id="surahmemorization-performance-chart"></canvas>
+            </div>
+          </div>
+        </div>
         <table
           id="surahmemorization-history-table"
           class="surahmemorization-table"
