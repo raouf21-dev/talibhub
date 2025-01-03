@@ -191,15 +191,14 @@ body {
 .welcomepage-why-choose h2 {
   color: var(--primary-color);
   font-size: 2.5rem;
-  text-align: center;
   margin-bottom: 2rem;
+  text-align: center;
 }
 
 .welcomepage-vision h2,
 .welcomepage-commitment h2 {
   color: var(--primary-color);
   font-size: 2.5rem;
-  text-align: left;
   margin-bottom: 0.5rem;
 }
 
@@ -274,7 +273,7 @@ body {
 /* Styles pour la page d'inscription/connexion */
 .welcomepage-auth-forms {
   width: 100%;
-  margin: -5rem auto 5rem auto;
+  margin: -6rem auto 4rem auto;
   max-width: 50vw; /* Par exemple, pour limiter la largeur sur grands écrans */
   animation: slideDown 0.3s ease-out;
 }
@@ -425,6 +424,13 @@ body {
   #welcomepage-features {
     margin-left: auto;
   }
+
+.welcomepage-features p,
+.welcomepage-vision p,
+.welcomepage-why-choose p,
+.welcomepage-commitment p {
+  text-align: left;
+}
 }
 
 @media (max-width: 1024px) {
@@ -443,7 +449,15 @@ body {
   .welcomepage-why-choose h2,
   .welcomepage-commitment h2 {
     font-size: 1.75rem;
+    text-align: center;
   }
+
+  .welcomepage-features p,
+.welcomepage-vision p,
+.welcomepage-why-choose p,
+.welcomepage-commitment p {
+  text-align: center;
+}
 
   .welcomepage-features,
   .welcomepage-vision,
@@ -478,6 +492,10 @@ body {
     margin-bottom: 1rem;
   }
 
+  .welcomepage-auth-forms {
+    margin: -2rem auto 2rem auto;
+  }
+
   .welcomepage-btn {
     margin-top: 25px;
     padding: 0.5rem 1rem;
@@ -505,6 +523,7 @@ body {
 
   .welcomepage-features h2, .welcomepage-vision h2, .welcomepage-why-choose h2, .welcomepage-commitment h2 {
     font-size: 1.5rem;
+    
   }
 
   .welcomepage-feature-card h3, .welcomepage-why-choose-card h3 {
