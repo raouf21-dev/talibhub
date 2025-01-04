@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CGU - BlueticksWeb</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #274c77;
+            --secondary-color: #6096ba;
+            --tertiary-color: #a3cef1;
+            --background-color: #e7ecef;
+            --text-color: #274c77;
+            --card-background: #ffffff;
+            --border-color: #a3cef1;
+            --gray-color: #8b8c89;
+            --main-font: "Poppins", sans-serif;
+        }
+
+        body {
+            font-family: var(--main-font);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+
+        .language-selector {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        .lang-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            font-family: var(--main-font);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .lang-btn:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .lang-btn.active {
+            background: var(--secondary-color);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .terms-container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .terms-wrapper {
+            background: var(--card-background);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 40px;
+            border: 1px solid var(--border-color);
+        }
+
+        .terms-content {
+            display: none;
+        }
+
+        .terms-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        h2 {
+            color: var(--primary-color);
+            font-size: 2em;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--tertiary-color);
+        }
+
+        h3 {
+            color: var(--secondary-color);
+            font-size: 1.5em;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        h4 {
+            color: var(--secondary-color);
+            font-size: 1.2em;
+            margin-top: 1.5rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            line-height: 1.8;
+            color: var(--text-color);
+        }
+
+        ul {
+            margin-bottom: 1.5rem;
+            padding-left: 1.5rem;
+        }
+
+        li {
+            margin-bottom: 0.8rem;
+            position: relative;
+            color: var(--text-color);
+        }
+
+        li::before {
+            content: "•";
+            color: var(--tertiary-color);
+            font-weight: bold;
+            position: absolute;
+            left: -1rem;
+        }
+
+        @media (max-width: 768px) {
+            .terms-wrapper {
+                padding: 20px;
+                margin: 20px 0;
+                border-radius: 8px;
+            }
+
+            h2 {
+                font-size: 1.5em;
+            }
+
+            h3 {
+                font-size: 1.2em;
+            }
+
+            .language-selector {
+                position: sticky;
+                top: 0;
+                background: var(--background-color);
+                padding: 10px;
+                justify-content: center;
+                width: 100%;
+                margin: 0;
+                right: 0;
+            }
+
+            .lang-btn {
+                padding: 8px 16px;
+            }
+        }
+
+        a {
+            color: var(--secondary-color);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        a:hover {
+            color: var(--primary-color);
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="language-selector">
+        <button class="lang-btn active" data-lang="fr">Français</button>
+        <button class="lang-btn" data-lang="en">English</button>
+    </div>
+
+    <div class="terms-container">
+        <!-- Version française -->
+        <div class="terms-content active" id="terms-fr">
+            <div class="terms-wrapper">
+                <h2>Conditions Générales d'Utilisation - BlueticksWeb</h2>
+
+                <h3>1. Introduction</h3>
+                <p>Les présentes Conditions Générales d'Utilisation régissent l'utilisation du site web et des services fournis par BlueticksWeb, une société immatriculée au Royaume-Uni. En accédant à notre plateforme, vous acceptez d'être lié par ces conditions.</p>
+
+                <h3>2. Définitions</h3>
+                <ul>
+                    <li>"Service" désigne l'ensemble des fonctionnalités proposées par BlueticksWeb</li>
+                    <li>"Utilisateur" désigne toute personne physique créant un compte sur la plateforme</li>
+                    <li>"Contenu" désigne l'ensemble des éléments disponibles sur la plateforme</li>
+                </ul>
+
+                <h3>3. Inscription et Compte Utilisateur</h3>
+                <h4>3.1 Conditions d'inscription</h4>
+                <ul>
+                    <li>Fournir des informations exactes et complètes</li>
+                    <li>Maintenir vos informations à jour</li>
+                    <li>Créer un mot de passe sécurisé</li>
+                    <li>Ne pas créer plusieurs comptes</li>
+                </ul>
+
+                <h4>3.2 Sécurité du compte</h4>
+                <p>Vous êtes responsable de la confidentialité de vos identifiants et de toute activité sur votre compte.</p>
+
+                <h3>4. Protection des Données</h3>
+                <h4>4.1 Données collectées</h4>
+                <ul>
+                    <li>Informations personnelles (nom, prénom, âge)</li>
+                    <li>Coordonnées (email)</li>
+                    <li>Données démographiques (pays, sexe)</li>
+                </ul>
+
+                <h4>4.2 Utilisation des données</h4>
+                <p>Vos données sont utilisées pour :</p>
+                <ul>
+                    <li>La gestion de votre compte</li>
+                    <li>L'amélioration de nos services</li>
+                    <li>La communication avec vous</li>
+                </ul>
+
+                <h3>5. Droits et Obligations</h3>
+                <h4>5.1 Vos droits</h4>
+                <ul>
+                    <li>Accès à vos données personnelles</li>
+                    <li>Modification de vos informations</li>
+                    <li>Suppression de votre compte</li>
+                </ul>
+
+                <h4>5.2 Vos obligations</h4>
+                <ul>
+                    <li>Respecter les conditions d'utilisation</li>
+                    <li>Ne pas utiliser le service de manière frauduleuse</li>
+                    <li>Respecter les droits des autres utilisateurs</li>
+                </ul>
+
+                <h3>6. Contact</h3>
+                <p>Pour toute question : support@bluticksweb.com</p>
+            </div>
+        </div>
+
+        <!-- English version -->
+        <div class="terms-content" id="terms-en">
+            <div class="terms-wrapper">
+                <h2>Terms of Service - BlueticksWeb</h2>
+
+                <h3>1. Introduction</h3>
+                <p>These Terms of Service govern the use of the website and services provided by BlueticksWeb, a company registered in the United Kingdom. By accessing our platform, you agree to be bound by these terms.</p>
+
+                <h3>2. Definitions</h3>
+                <ul>
+                    <li>"Service" refers to all features offered by BlueticksWeb</li>
+                    <li>"User" refers to any individual creating an account on the platform</li>
+                    <li>"Content" refers to all elements available on the platform</li>
+                </ul>
+
+                <h3>3. Registration and User Account</h3>
+                <h4>3.1 Registration Requirements</h4>
+                <ul>
+                    <li>Provide accurate and complete information</li>
+                    <li>Keep your information up to date</li>
+                    <li>Create a secure password</li>
+                    <li>Do not create multiple accounts</li>
+                </ul>
+
+                <h4>3.2 Account Security</h4>
+                <p>You are responsible for maintaining the confidentiality of your credentials and all activity on your account.</p>
+
+                <h3>4. Data Protection</h3>
+                <h4>4.1 Collected Data</h4>
+                <ul>
+                    <li>Personal information (first name, last name, age)</li>
+                    <li>Contact details (email)</li>
+                    <li>Demographic data (country, gender)</li>
+                </ul>
+
+                <h4>4.2 Data Usage</h4>
+                <p>Your data is used for:</p>
+                <ul>
+                    <li>Account management</li>
+                    <li>Service improvement</li>
+                    <li>Communication with you</li>
+                </ul>
+
+                <h3>5. Rights and Obligations</h3>
+                <h4>5.1 Your Rights</h4>
+                <ul>
+                    <li>Access to your personal data</li>
+                    <li>Modification of your information</li>
+                    <li>Account deletion</li>
+                </ul>
+
+                <h4>5.2 Your Obligations</h4>
+                <ul>
+                    <li>Comply with terms of use</li>
+                    <li>Do not use the service fraudulently</li>
+                    <li>Respect other users' rights</li>
+                </ul>
+
+                <h3>6. Contact</h3>
+                <p>For any questions: support@bluticksweb.com</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const langButtons = document.querySelectorAll('.lang-btn');
+            const termsContents = document.querySelectorAll('.terms-content');
+
+            langButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const lang = this.getAttribute('data-lang');
+                    
+                    // Update buttons
+                    langButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Update content
+                    termsContents.forEach(content => {
+                        content.classList.remove('active');
+                        if (content.id === `terms-${lang}`) {
+                            content.classList.add('active');
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>

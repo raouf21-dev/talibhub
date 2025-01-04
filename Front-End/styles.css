@@ -550,6 +550,83 @@ body {
   }
 }
 
+/*terms*/
+
+.terms-group {
+  grid-column: 1 / -1;
+  margin: 1rem 0;
+  padding: 1rem;
+  background-color: var(--card-background);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.terms-checkbox-container {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  position: relative;
+}
+
+.terms-checkbox-container input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  cursor: pointer;
+  border: 2px solid var(--primary-color);
+  border-radius: 4px;
+  appearance: none;
+  -webkit-appearance: none;
+  background-color: white;
+  transition: all 0.2s ease;
+}
+
+.terms-checkbox-container input[type="checkbox"]:checked {
+  background-color: var(--primary-color);
+  position: relative;
+}
+
+.terms-checkbox-container input[type="checkbox"]:checked::after {
+  content: '✓';
+  position: absolute;
+  color: white;
+  font-size: 14px;
+  left: 4px;
+  top: 0px;
+}
+
+.terms-checkbox-container label {
+  font-size: 0.95rem;
+  color: var(--text-color);
+  cursor: pointer;
+  user-select: none;
+}
+
+.terms-link {
+  color: #000;
+  text-decoration: none;
+  font-size: 1.1rem;
+  font-weight:bolder;
+  transition: all 0.2s ease;
+}
+
+.terms-link:hover {
+  color: var(--primary-color);
+  text-decoration: underline;
+}
+
+/* Désactiver le bouton si la case n'est pas cochée */
+#welcomepage-signupForm button[type="submit"] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transition: all 0.3s ease;
+}
+
+#welcomepage-signupForm button[type="submit"].enabled {
+  opacity: 1;
+  cursor: pointer;
+}
+
 
 /*Top Nav*/
 
@@ -2021,7 +2098,7 @@ input:checked + .slider:before {
   margin-left: 250px;
   padding: 1rem;
   min-height: 100vh;
-  max-width: 90vw;
+  max-width: 98vw;
 }
 
 .notifications-container {
@@ -2185,8 +2262,19 @@ input:checked + .slider:before {
   }
 
   .notifications-container {
-    width: 98vw;
-    max-width: 98vw;
+    width: 95vw;
+    max-width: 95vw;
+  }
+
+  .notifications-card-content {
+    width: 100%;
+    padding: 0.25rem 0rem;
+  }
+
+  .notification-item {
+    padding: 1rem 0rem 1rem 0rem;
+    border-radius: 0.5rem;
+    margin-bottom: 0.5rem;
   }
 
   .notification-message {
@@ -2196,6 +2284,7 @@ input:checked + .slider:before {
   .notification-read-btn{
     font-size: 0.85rem;
     padding: 0.15rem 0.25rem;
+    margin-right: 0rem;
   }
 }
 
@@ -2343,8 +2432,7 @@ button[type="submit"]:hover {
   #profile {
     margin-left: auto;
     margin-right: auto;
-    width: 90vw;
-    max-width: 1500px; /* Vous pouvez ajuster cette valeur selon vos besoins */
+    width: 98vw;
   }
 
   #profileForm,
@@ -2370,209 +2458,128 @@ button[type="submit"]:hover {
     grid-column: span 1;
   }
 }
-/* contactForm */
 
+/* contactForm */
 #contactform {
   font-family: Arial, sans-serif;
-  background-color: #e7ecef;
-  color: #274c77;
-  margin: 0;
-  padding: 1rem;
-  height: 100vh;
-  width: 90vw;
+  background-color: var(--background-color);
+  min-height: 100vh;
+  padding: 3rem 2rem;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
-  margin-left: 175px;
 }
 
 #contactform h1 {
   text-align: center;
+  color: var(--primary-color);
+  font-size: 2.5rem;
+  margin-bottom: 3rem;
 }
 
 .contactform-wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
 }
 
 .contactform-container {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  max-width: 75vw;
-  background-color: white;
-  border: 1px solid #a3cef1;
-  border-radius: 0.5rem;
+  background-color: var(--card-background);
+  border: 1px solid var(--border-color);
+  border-radius: 1rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   overflow: hidden;
 }
 
-.contactform-left-column,
-.contactform-right-column {
-  flex: 1;
-  padding: 1.5rem;
-}
-
 .contactform-left-column {
-  background-color: #6096ba;
-  color: white;
+  padding: 3rem;
 }
 
 .contactform-title {
-  font-size: 1.75rem;
-  font-weight: bold;
-  margin-bottom: 1.5rem;
+  color: var(--primary-color);
+  font-size: 2rem;
+  line-height: 1.4;
+  margin-bottom: 2.5rem;
 }
 
 .contactform-highlight {
-  color: var(--primary-color);
+  color: var(--secondary-color);
 }
 
 .contactform-info {
-  margin-bottom: 1.5rem;
+  margin-bottom: 2.5rem;
 }
 
 .contactform-info-item {
   display: flex;
   align-items: center;
-  margin-bottom: 1rem;
+  gap: 1rem;
+  color: var(--text-color);
+  font-size: 1.1rem;
+  margin-bottom: 1.5rem;
 }
 
 .contactform-info-item svg {
-  margin-right: 0.5rem;
+  color: var(--secondary-color);
 }
 
 .contactform-social-buttons {
   display: flex;
-  gap: 1rem;
+  gap: 1.5rem;
 }
 
 .contactform-social-button {
   background: none;
-  border: none;
-  color: white;
+  border: 2px solid var(--border-color);
+  border-radius: 0.75rem;
+  padding: 0.75rem;
+  color: var(--secondary-color);
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.contactform-right-column {
-  background-color: white;
-  color: #274c77;
-}
-
-.contactform-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.contactform-interests {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-}
-
-.contactform-interest-button {
-  background-color: white;
-  border: 1px solid #6096ba;
-  color: #6096ba;
-  padding: 0.5rem 1rem;
-  border-radius: 9999px;
-  cursor: pointer;
-}
-
-.contactform-interest-button.active {
-  background-color: #6096ba;
-  color: white;
-}
-
-.contactform-interest-button:hover {
-  background-color: #6096ba;
-  color: white;
-}
-
-.contactform-input,
-.contactform-textarea {
-  width: 100%;
-  padding: 0.5rem;
-  border: 1px solid #a3cef1;
-  border-radius: 0.25rem;
-  background-color: white;
-  color: #274c77;
-}
-
-.contactform-textarea {
-  min-height: 100px;
-  resize: vertical;
-}
-
-.contactform-submit {
-  background-color: var(--primary-color);
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.25rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.contactform-submit:hover {
+.contactform-social-button:hover {
   background-color: var(--secondary-color);
+  color: var(--card-background);
+  border-color: var(--secondary-color);
+  transform: translateY(-2px);
 }
 
-.contactform-submit svg {
-  margin-right: 0.5rem;
-}
-
-@media (max-width: 1024px) {
+/* Responsive Design */
+@media (min-width: 1024px) {
   #contactform {
-    margin-left: auto;
-    margin-right: auto;
-    width: 90vw;
-    max-width: 1500px; /* Vous pouvez ajuster cette valeur selon vos besoins */
-  }
-
-  .contactform-container {
-    width: 90vw;
+    margin-left: 250px;
+    width: calc(100% - 250px);
   }
 }
 
-@media (min-width: 768px) {
-  .contactform-container {
-    flex-direction: row;
-    height: 60vh;
-  }
-}
-
-@media (max-width: 767px) {
-  #contactform h1 {
-    margin-left: 0;
-  }
-
-  .contactform-wrapper {
-    width: 100%;
-    margin-left: 0;
-  }
-
-  .contactform-container {
-    width: 90vw;
-  }
-
-  .contactform-left-column {
-    order: -1;
+@media (max-width: 1023px) {
+  #contactform {
+    padding: 2rem 1.5rem;
   }
 }
 
 @media (max-width: 640px) {
   #contactform {
-    padding: 1rem;
+    padding: 2rem 1rem;
+  }
+
+  #contactform h1 {
+    font-size: 2rem;
+    margin-bottom: 2rem;
   }
 
   .contactform-title {
     font-size: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .contactform-left-column {
+    padding: 2rem;
+  }
+
+  .contactform-info-item {
+    font-size: 1rem;
   }
 }
 

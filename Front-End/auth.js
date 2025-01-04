@@ -4,14 +4,19 @@ import { BotTracker } from "./bot-tracker.js";
 import CaptchaHandler from './captcha.js';
 import { apiClient } from './Config/apiConfig.js';
 import { api } from './dynamicLoader.js';
+import TermsHandler from './terms.js';
+
 
 const botTracker = new BotTracker();
 const captchaHandler = new CaptchaHandler();
+let termsHandler; 
 
 function initializeAuth() {
     initializeAuthForms();
     initializeTabToggle();
     initializeCountryInput();
+    termsHandler = new TermsHandler()
+
 }
 
 function initializeAuthForms() {
@@ -89,6 +94,12 @@ async function handleSignup(event) {
     event.preventDefault();
 
     try {
+        // Vérification des CGU
+        if (!termsHandler.isAccepted()) {
+            alert("Veuillez accepter les Conditions Générales d'Utilisation");
+            return;
+        }
+
         // Vérification du CAPTCHA
         const isCaptchaValid = await captchaHandler.verify();
         if (!isCaptchaValid) {
@@ -121,9 +132,21 @@ async function handleSignup(event) {
         }
 
         // Utilisation du nouveau service API avec loader
-        await api.post('/auth/register', formData);
-        alert("Inscription réussie!");
-        navigateTo("dashboard");
+        const response = await api.post('/auth/register', formData);
+        
+        // Vérification et stockage du token
+        if (response && response.token) {
+            api.updateToken(response.token);
+            alert("Inscription réussie!");
+            
+            // Redirection vers le dashboard avec délai
+            setTimeout(() => {
+                navigateTo('dashboard');
+            }, 1000);
+        } else {
+            throw new Error("Erreur lors de l'inscription : token non reçu");
+        }
+
     } catch (error) {
         console.error("Erreur:", error);
         alert(error.message || "Une erreur est survenue lors de l'inscription");
