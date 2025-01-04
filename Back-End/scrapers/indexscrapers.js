@@ -9,7 +9,8 @@ const scrapeMasjidAbuBakrWalsall = require("./walsall/masjidAbuBakrWalsall");
 const scrapeGreenLaneMasjidBham = require("./birmingham/greenLaneMasjidBham");
 const scrapeCentralMosqueBham = require("./birmingham/centralMosqueBham");
 const scrapeQubaIsmalicCenter = require("./birmingham/qubaIsmalicCenterBham");
-const scrapeMSHUK = require("./birmingham/muslumStudentsHouseBham");
+const scrapeMSHUK = require("./birmingham/muslimStudentsHouseBham");
+const scrapeArRahmaCentreBham = require("./birmingham/arRahmaCentreBham.js");
 
 // Configuration des scrapers
 const SCRAPER_CONFIG = {
@@ -19,7 +20,8 @@ const SCRAPER_CONFIG = {
     4: { name: 'Green Lane Masjid Birmingham', fn: scrapeGreenLaneMasjidBham },
     5: { name: 'Central Mosque Birmingham', fn: scrapeCentralMosqueBham },
     6: { name: 'Quba Islamic Center Birmingham', fn: scrapeQubaIsmalicCenter },
-    7: { name: 'Muslim Students House Birmingham', fn: scrapeMSHUK }
+    7: { name: 'Muslim Students House Birmingham', fn: scrapeMSHUK },
+    8: { name: 'Ar-Rahma Centre Birmingham', fn: scrapeArRahmaCentreBham },
 };
 
 class ScraperManager {

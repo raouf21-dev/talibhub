@@ -332,13 +332,30 @@ const normalizeTime = (timeStr, offsetMinutes = 0) => {
 // Utilitaires de prière
 const prayerUtils = {
     standardizePrayerName: (name) => {
-        const mapping = {
+        if (!name) return null;
+        
+        // Liste explicite des prières autorisées et leurs variations
+        const prayerMappings = {
+            'fajr': 'fajr',
             'zuhr': 'dhuhr',
+            'dhuhr': 'dhuhr',
             'duhr': 'dhuhr',
             'zohar': 'dhuhr',
-            'dhur': 'dhuhr'
+            'dhur': 'dhuhr',
+            'asr': 'asr',
+            'maghrib': 'maghrib',
+            'isha': 'isha'
         };
-        return mapping[name.toLowerCase()] || name.toLowerCase();
+
+        // Exclure explicitement certaines prières
+        const excludedPrayers = ['sunrise', 'sunset', 'shuruq', 'zawaal', 'jumuah'];
+        const normalizedName = name.toLowerCase().trim();
+        
+        if (excludedPrayers.includes(normalizedName)) {
+            return null;
+        }
+
+        return prayerMappings[normalizedName] || null;
     },
 
     validatePrayerTime: (hours, minutes) => {
@@ -366,11 +383,23 @@ const prayerUtils = {
             date: result.date,
             times: {}
         };
-
-        requiredPrayers.forEach(prayer => {
-            normalized.times[prayer] = result.times[prayer] || null;
-        });
-
+    
+        for (const prayer of requiredPrayers) {
+            const time = result.times[prayer];
+            // Vérifie que le temps est valide avant de l'inclure
+            if (time && typeof time === 'string' && /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(time)) {
+                normalized.times[prayer] = time;
+            } else {
+                normalized.times[prayer] = null;
+            }
+        }
+    
+        // Vérification supplémentaire pour s'assurer qu'au moins une prière est valide
+        const hasValidTimes = Object.values(normalized.times).some(time => time !== null);
+        if (!hasValidTimes) {
+            throw new Error('Aucune heure de prière valide trouvée');
+        }
+    
         return normalized;
     }
 };

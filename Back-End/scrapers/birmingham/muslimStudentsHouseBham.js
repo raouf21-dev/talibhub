@@ -1,4 +1,4 @@
-// Back-End/scrapers/birmingham/muslumStudentsHouseBham.js
+// Back-End/scrapers/birmingham/muslimStudentsHouseBham.js
 
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
@@ -64,25 +64,29 @@ const scrapeMSHUK = async () => {
 
    console.log('Extraction des données...');
    const rawData = await page.evaluate(() => {
-     const prayers = {};
-     const prayerItems = document.querySelectorAll('.section-prayer-horizontal-times-item');
-     
-     prayerItems.forEach(item => {
-       const nameElement = item.querySelector('span');
-       const jamaatElement = item.querySelector('div:last-child');
-       
-       if (nameElement && jamaatElement) {
-         const name = nameElement.textContent.trim().toLowerCase();
-         const time = jamaatElement.textContent.trim();
-         
-         if (name && time) {
-           prayers[name] = time;
-         }
-       }
-     });
-     
-     return prayers;
-   });
+    const prayers = {};
+    const prayerItems = document.querySelectorAll('.section-prayer-horizontal-times-item');
+    
+    // Liste explicite des prières à extraire
+    const validPrayers = new Set(['fajr', 'zuhr', 'dhuhr', 'asr', 'maghrib', 'isha']);
+    
+    prayerItems.forEach(item => {
+        const nameElement = item.querySelector('span');
+        const jamaatElement = item.querySelector('div:last-child');
+        
+        if (nameElement && jamaatElement) {
+            const name = nameElement.textContent.trim().toLowerCase();
+            const time = jamaatElement.textContent.trim();
+            
+            // Ne garder que les prières valides
+            if (validPrayers.has(name) && time) {
+                prayers[name] = time;
+            }
+        }
+    });
+    
+    return prayers;
+});
 
    // Normalise les temps et standardise les noms de prière
    const normalizedTimes = {};

@@ -1,3 +1,5 @@
+// Back-End/scrapers/birmingham/arRahmaCentreBham.js
+
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 const { executablePath } = require('puppeteer');
@@ -11,7 +13,7 @@ const {
   errorUtils,
   dateUtils,
   prayerUtils
-} = require('./scrapers/scraperUtils');
+} = require('../scraperUtils');
 
 const stealth = StealthPlugin();
 stealth.enabledEvasions.delete('webgl.vendor');
@@ -19,7 +21,7 @@ stealth.enabledEvasions.delete('webgl.renderer');
 
 puppeteer.use(stealth);
 
-const scrapeArRahmaCentre = async () => {
+const scrapeArRahmaCentreBham = async () => {
   let browser;
   let page;
   
@@ -120,6 +122,4 @@ const scrapeArRahmaCentre = async () => {
   }
 };
 
-scrapeArRahmaCentre();
-
-module.exports = scrapeArRahmaCentre;
+module.exports = scrapeArRahmaCentreBham;
