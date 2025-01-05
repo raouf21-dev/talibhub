@@ -4,49 +4,23 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>TalibTimer</title>
-    <meta
-      name="TalibTimer"
-      content="TalibTimer helps users improve their productivity using the Pomodoro technique, offering customizable timers, detailed statistics, reminders, and task lists for optimal time management."
-    />
-    <link
-      rel="icon"
-      href="/Logo/Original Logo Kili-Isere-resize.png"
-      type="image/x-icon"
-    />
-
+    <meta name="TalibTimer" content="TalibTimer helps users improve their productivity using the Pomodoro technique, offering customizable timers, detailed statistics, reminders, and task lists for optimal time management." />
+    <link rel="icon" href="/Logo/Original Logo Kili-Isere-resize.png" type="image/x-icon" />
+    
     <!-- Stylesheets -->
     <link rel="stylesheet" href="styles.css" />
-
-    <!-- FullCalendar CSS via unpkg.com -->
-    <link
-      href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/main.min.css"
-      rel="stylesheet"
-    />
-
-    <!-- Alternate Language Links for Multilingual SEO -->
-    <link
-      rel="alternate"
-      hreflang="fr"
-      href="https://your-site.com/index-fr.html"
-    />
-    <link
-      rel="alternate"
-      hreflang="en"
-      href="https://your-site.com/index-en.html"
-    />
-
-    <!-- Other styles if necessary -->
-
-    <!-- Required Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
+    
+    <!-- Core Libraries from cdnjs -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
-
-    <!-- Surah memorization charts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-
-    <!-- FullCalendar JS via unpkg.com -->
-    <script src="https://unpkg.com/fullcalendar@6.1.15/index.global.min.js"></script>
+    
+    <!-- FullCalendar from unpkg -->
+    <script src="https://unpkg.com/fullcalendar@6.1.8/index.global.min.js"></script>
+    
+    <!-- SEO -->
+    <link rel="alternate" hreflang="fr" href="https://your-site.com/index-fr.html" />
+    <link rel="alternate" hreflang="en" href="https://your-site.com/index-en.html" />
   </head>
 
   <body>
@@ -736,96 +710,192 @@
     </section>
 
     <section id="statistics" class="page page-no-welcome">
-      <div>
-        <h2>Charts and Reports</h2>
-        <div id="calendar">
-          <!-- FullCalendar will be rendered here -->
-          <p>Calendar here</p>
-        </div>
-        <div class="charts-container">
-          <div class="chart-wrapper">
-            <div class="chart-title">
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <line x1="18" y1="20" x2="18" y2="10"></line>
-                <line x1="12" y1="20" x2="12" y2="4"></line>
-                <line x1="6" y1="20" x2="6" y2="14"></line>
-              </svg>
-              <span style="margin-left: 0.5rem">Daily Chart</span>
-            </div>
-            <canvas id="dailyChart"></canvas>
+      <div class="statistics-container">
+          <!-- Daily Statistics -->
+          <div class="chart-section">
+              <div class="stats-header">
+                  <div class="title-area">
+                      <h2>Daily Statistics</h2>
+                  </div>
+                  <div class="period-navigation" data-period="daily">
+                      <button class="nav-btn prev">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <polyline points="15 18 9 12 15 6"></polyline>
+                          </svg>
+                      </button>
+                      <span id="daily-period" class="period-display"></span>
+                      <button class="nav-btn next">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <polyline points="9 18 15 12 9 6"></polyline>
+                          </svg>
+                      </button>
+                  </div>
+              </div>
+              <div class="chart-content">
+                  <div class="chart-wrapper">
+                      <canvas id="dailyChart"></canvas>
+                  </div>
+                  <div class="task-details-section" id="dailyTaskDetails">
+                      <table class="task-details-table">
+                          <thead>
+                              <tr>
+                                  <th>Tâche</th>
+                                  <th>Temps (min)</th>
+                                  <th>Comptages</th>
+                              </tr>
+                          </thead>
+                          <tbody>
+                          </tbody>
+                      </table>
+                  </div>
+                  <button class="toggle-details-btn">
+                    <span>Voir les détails</span>
+                    <svg width="12" height="12" viewBox="0 0 24 24">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+              </div>
           </div>
-          <div class="chart-wrapper">
-            <div class="chart-title">
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <line x1="18" y1="20" x2="18" y2="10"></line>
-                <line x1="12" y1="20" x2="12" y2="4"></line>
-                <line x1="6" y1="20" x2="6" y2="14"></line>
-              </svg>
-              <span style="margin-left: 0.5rem">Weekly Chart</span>
-            </div>
-            <canvas id="weeklyChart"></canvas>
+  
+          <!-- Weekly Statistics -->
+          <div class="chart-section">
+              <div class="stats-header">
+                  <div class="title-area">
+                      <h2>Weekly Statistics</h2>
+                  </div>
+                  <div class="period-navigation" data-period="weekly">
+                      <button class="nav-btn prev">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <polyline points="15 18 9 12 15 6"></polyline>
+                          </svg>
+                      </button>
+                      <span id="weekly-period" class="period-display"></span>
+                      <button class="nav-btn next">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <polyline points="9 18 15 12 9 6"></polyline>
+                          </svg>
+                      </button>
+                  </div>
+              </div>
+              <div class="chart-content">
+                  <div class="chart-wrapper">
+                      <canvas id="weeklyChart"></canvas>
+                  </div>
+                  <div class="task-details-section" id="weeklyTaskDetails">
+                      <table class="task-details-table">
+                          <thead>
+                              <tr>
+                                  <th>Tâche</th>
+                                  <th>Temps (min)</th>
+                                  <th>Comptages</th>
+                              </tr>
+                          </thead>
+                          <tbody>
+                          </tbody>
+                      </table>
+                  </div>
+                  <button class="toggle-details-btn">
+                    <span>Voir les détails</span>
+                    <svg width="12" height="12" viewBox="0 0 24 24">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+              </div>
           </div>
-          <div class="chart-wrapper">
-            <div class="chart-title">
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <line x1="18" y1="20" x2="18" y2="10"></line>
-                <line x1="12" y1="20" x2="12" y2="4"></line>
-                <line x1="6" y1="20" x2="6" y2="14"></line>
-              </svg>
-              <span style="margin-left: 0.5rem">Monthly Chart</span>
-            </div>
-            <canvas id="monthlyChart"></canvas>
+  
+          <!-- Monthly Statistics -->
+          <div class="chart-section">
+              <div class="stats-header">
+                  <div class="title-area">
+                      <h2>Monthly Statistics</h2>
+                  </div>
+                  <div class="period-navigation" data-period="monthly">
+                      <button class="nav-btn prev">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <polyline points="15 18 9 12 15 6"></polyline>
+                          </svg>
+                      </button>
+                      <span id="monthly-period" class="period-display"></span>
+                      <button class="nav-btn next">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <polyline points="9 18 15 12 9 6"></polyline>
+                          </svg>
+                      </button>
+                  </div>
+              </div>
+              <div class="chart-content">
+                  <div class="chart-wrapper">
+                      <canvas id="monthlyChart"></canvas>
+                  </div>
+                  <div class="task-details-section" id="monthlyTaskDetails">
+                      <table class="task-details-table">
+                          <thead>
+                              <tr>
+                                  <th>Tâche</th>
+                                  <th>Temps (min)</th>
+                                  <th>Comptages</th>
+                              </tr>
+                          </thead>
+                          <tbody>
+                          </tbody>
+                      </table>
+                  </div>
+                  <button class="toggle-details-btn">
+                    <span>Voir les détails</span>
+                    <svg width="12" height="12" viewBox="0 0 24 24">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+              </div>
           </div>
-          <div class="chart-wrapper">
-            <div class="chart-title">
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <line x1="18" y1="20" x2="18" y2="10"></line>
-                <line x1="12" y1="20" x2="12" y2="4"></line>
-                <line x1="6" y1="20" x2="6" y2="14"></line>
-              </svg>
-              <span style="margin-left: 0.5rem">Yearly Chart</span>
-            </div>
-            <canvas id="yearlyChart"></canvas>
+  
+          <!-- Yearly Statistics -->
+          <div class="chart-section">
+              <div class="stats-header">
+                  <div class="title-area">
+                      <h2>Yearly Statistics</h2>
+                  </div>
+                  <div class="period-navigation" data-period="yearly">
+                      <button class="nav-btn prev">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <polyline points="15 18 9 12 15 6"></polyline>
+                          </svg>
+                      </button>
+                      <span id="yearly-period" class="period-display"></span>
+                      <button class="nav-btn next">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <polyline points="9 18 15 12 9 6"></polyline>
+                          </svg>
+                      </button>
+                  </div>
+              </div>
+              <div class="chart-content">
+                  <div class="chart-wrapper">
+                      <canvas id="yearlyChart"></canvas>
+                  </div>
+                  <div class="task-details-section" id="yearlyTaskDetails">
+                      <table class="task-details-table">
+                          <thead>
+                              <tr>
+                                  <th>Tâche</th>
+                                  <th>Temps (min)</th>
+                                  <th>Comptages</th>
+                              </tr>
+                          </thead>
+                          <tbody>
+                          </tbody>
+                      </table>
+                  </div>
+                  <button class="toggle-details-btn">
+                    <span>Voir les détails</span>
+                    <svg width="12" height="12" viewBox="0 0 24 24">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+              </div>
           </div>
-        </div>
       </div>
-    </section>
+  </section>
 
     <section id="todoLists" class="page page-no-welcome">
       <h1>To-Do List</h1>
@@ -1698,7 +1768,7 @@
 
         <div class="aboutus-card" id="aboutus-mission">
           <div class="aboutus-card-header">
-            <h2 class="aboutus-card-title">📚 Our Mission</h2>
+            <h2 class="aboutus-card-title">Our Mission</h2>
           </div>
           <div class="aboutus-card-content">
             <p>
@@ -1713,7 +1783,7 @@
         <div class="aboutus-grid aboutus-grid-cols-2">
           <div class="aboutus-card" id="aboutus-features">
             <div class="aboutus-card-header">
-              <h2 class="aboutus-card-title">🛠️ Our Features</h2>
+              <h2 class="aboutus-card-title">Our Features</h2>
             </div>
             <div class="aboutus-card-content">
               <ul class="aboutus-list">
@@ -1734,7 +1804,7 @@
 
           <div class="aboutus-card" id="aboutus-values">
             <div class="aboutus-card-header">
-              <h2 class="aboutus-card-title">❤️ Our Values</h2>
+              <h2 class="aboutus-card-title">Our Values</h2>
             </div>
             <div class="aboutus-card-content">
               <ul class="aboutus-list">
@@ -1750,7 +1820,7 @@
 
         <div class="aboutus-card" id="aboutus-future">
           <div class="aboutus-card-header">
-            <h2 class="aboutus-card-title">🔮 Our Future</h2>
+            <h2 class="aboutus-card-title">Our Future</h2>
           </div>
           <div class="aboutus-card-content">
             <p>
@@ -1763,7 +1833,7 @@
 
         <div class="aboutus-card" id="aboutus-commitment">
           <div class="aboutus-card-header">
-            <h2 class="aboutus-card-title">🤝 Our Commitment</h2>
+            <h2 class="aboutus-card-title">Our Commitment</h2>
           </div>
           <div class="aboutus-card-content">
             <p>
@@ -1836,5 +1906,6 @@
     <script type="module" src="/Config/apiConfig.js"></script>
     <script type="module" src="dynamicLoader.js"></script>
     <script type="module" src="topnav.js"></script>
+    <script type="module" src="statistics.js"></script>
   </body>
 </html>

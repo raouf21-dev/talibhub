@@ -157,14 +157,18 @@ export function loadInitialPage(pageId) {
                 console.error('Erreur lors du chargement du profil:', error);
             }
         },
-        'statistics': async () => {
-            try {
-                const statsModule = await import('./statistics.js');
-                await statsModule.initializeStatistics();
-            } catch (error) {
-                console.error('Erreur lors du chargement des statistiques:', error);
-            }
-        },
+'statistics': async () => {
+    try {
+        const statsModule = await import('./statistics.js');
+        // Nettoyer avant d'initialiser
+        if (statsModule.cleanupStatistics) {
+            statsModule.cleanupStatistics();
+        }
+        await statsModule.initializeStatistics();
+    } catch (error) {
+        console.error('Erreur lors du chargement des statistiques:', error);
+    }
+},
         'todoLists': async () => {
             try {
                 const tasksModule = await import('./tasks.js');
