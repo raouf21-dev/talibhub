@@ -18,8 +18,19 @@ e7ecef Blanc
   --border-color: #a3cef1;
   --gray-color: #8b8c89;
 
-  /* Fonts */
+  /* Typography */
   --main-font: "Poppins", sans-serif;
+  
+  /* Title Sizes */
+  --h1-size: 2rem;
+  --h2-size: 1.5rem;
+  --h3-size: 1.25rem;
+  --text-size: 1rem;
+  --small-text-size: 0.875rem;
+  
+  /* Line Heights */
+  --title-line-height: 1.4;
+  --text-line-height: 1.6;
 }
 
 * {
@@ -1140,7 +1151,7 @@ input:checked + .slider:before {
 /* En-tête */
 #apprentissage h1 {
   text-align: center;
-  font-size: 2rem;
+  font-size: var(--h1-size);
   color: var(--primary-color);
   margin-bottom: 1rem;
 }
@@ -1375,6 +1386,8 @@ input:checked + .slider:before {
 }
 
 #todoLists h1 {
+  font-size: var(--h1-size);
+  font-family: var(--main-font);
   margin-bottom: 1rem;
   width: 100%;
   text-align: center;
@@ -1547,8 +1560,8 @@ input:checked + .slider:before {
   }
 
   h1 {
-    font-size: 2.25rem;
-  }
+    font-size: var(--h1-size);
+   }
 
   .todo-card-title {
     font-size: 1.5rem;
@@ -1567,6 +1580,11 @@ input:checked + .slider:before {
   padding: 1.5rem;
   box-sizing: border-box;
   transition: margin-left 0.3s ease;
+}
+
+#statistics h1 {
+  font-size: var(--h1-size);
+  text-align: center;
 }
 
 @media (min-width: 1024px) {
@@ -1847,6 +1865,7 @@ input:checked + .slider:before {
 }
 
 #salatSurahSelector h1 {
+  font-size: var(--h1-size);
   text-align: center;
 }
 
@@ -1969,6 +1988,7 @@ input:checked + .slider:before {
 }
 
 #duaTimeCalculator h1 {
+  font-size: var(--h1-size);
   text-align: center;
 }
 
@@ -2437,7 +2457,7 @@ input:checked + .slider:before {
 #profile h1 {
   color: #274c77;
   text-align: center;
-  font-size: 24px;
+  font-size: var(--h1-size);
   margin-bottom: 20px;
 }
 
@@ -2608,7 +2628,7 @@ button[type="submit"]:hover {
 #contactform h1 {
   text-align: center;
   color: var(--primary-color);
-  font-size: 2.5rem;
+  font-size: var(--h1-size);
   margin-bottom: 3rem;
 }
 
@@ -2700,7 +2720,7 @@ button[type="submit"]:hover {
   }
 
   #contactform h1 {
-    font-size: 2rem;
+    font-size: var(--h1-size);
     margin-bottom: 2rem;
   }
 
@@ -2879,7 +2899,7 @@ button[type="submit"]:hover {
 #surahmemorization h1 {
   margin: 1rem 0;
   text-align: center;
-  font-size: 1.5rem;
+  font-size: var(--h1-size);
   color: var(--primary-color);
 }
 
