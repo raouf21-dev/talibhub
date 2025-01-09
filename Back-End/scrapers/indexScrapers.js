@@ -32,9 +32,17 @@ class ScraperManager {
     }
 
     setupScrapers() {
+        console.log('Setting up scrapers...');
+        console.log('Available scrapers:', Object.keys(SCRAPER_CONFIG));
         Object.entries(SCRAPER_CONFIG).forEach(([id, config]) => {
+            console.log(`Setting up scraper ${id}: ${config.name}`);
+            if (!config.fn) {
+                console.error(`Missing function for scraper ${id}: ${config.name}`);
+                return;
+            }
             this.scrapers.set(parseInt(id), this.createRobustScraper(parseInt(id), config));
         });
+        console.log('Scrapers setup complete. Total scrapers:', this.scrapers.size);
     }
 
     createRobustScraper(id, config) {
@@ -80,10 +88,14 @@ class ScraperManager {
     }
 
     async runScraper(mosqueId) {
+        console.log(`Attempting to run scraper for mosque ID ${mosqueId}`);
         const scraper = this.scrapers.get(mosqueId);
         if (!scraper) {
+            console.error(`No scraper found for mosque ID ${mosqueId}. Available scrapers:`, 
+                Array.from(this.scrapers.keys()));
             throw new Error(`No scraper found for mosque ID ${mosqueId}`);
         }
+        console.log(`Found scraper for mosque ID ${mosqueId}, executing...`);
         return scraper();
     }
 
