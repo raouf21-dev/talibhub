@@ -23,7 +23,7 @@ const scrapeMasjidAlFarouq = async () => {
         console.log('Démarrage du scraping Masjid Al-Farouq...');
 
         browser = await puppeteer.launch({
-            headless: true,
+            headless: "new",
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',

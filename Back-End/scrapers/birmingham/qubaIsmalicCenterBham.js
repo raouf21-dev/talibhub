@@ -23,7 +23,7 @@ const scrapeQubaIsmalicCenter = async () => {
         console.log('Démarrage du scraping Quba Islamic Center...');
 
         browser = await puppeteer.launch({
-            headless: true,
+            headless: "new",
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',

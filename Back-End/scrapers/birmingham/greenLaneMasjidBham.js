@@ -33,7 +33,7 @@ const scrapeGreenLaneMasjidBham = async () => {
         console.log('Démarrage du scraping Green Lane Masjid...');
 
         browser = await puppeteer.launch({
-            headless: true,
+            headless: "new",
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',

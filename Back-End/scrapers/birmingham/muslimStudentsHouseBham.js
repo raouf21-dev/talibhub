@@ -49,7 +49,7 @@ const scrapeMSHUK = async () => {
         console.log('Démarrage du scraping MSHUK...');
 
         browser = await puppeteer.launch({
-            headless: true,
+            headless: "new",
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',

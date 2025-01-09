@@ -23,7 +23,7 @@ const scrapeArRahmaCentreBham = async () => {
         console.log('Démarrage du scraping Ar-Rahma Centre...');
 
         browser = await puppeteer.launch({
-            headless: true,
+            headless: "new",
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
