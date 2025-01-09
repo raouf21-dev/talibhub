@@ -1,120 +1,138 @@
 // Back-End/scrapers/walsall/masjidAlfarouqWalsall.js
-
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 const { executablePath } = require('puppeteer');
 const {
- normalizeTime,
- randomDelay,
- getDefaultBrowserConfig,
- setupBasicBrowserPage,
- setupChromiumPath,
- setupResourceInterception,
- safeNavigation,
- errorUtils,
- dateUtils,
- prayerUtils
+    normalizeTime,
+    dateUtils,
+    prayerUtils,
+    userAgents
 } = require('../scraperUtils');
+const humanBehavior = require('../humanBehaviorUtils');
 
-// Configuration StealthPlugin
 const stealth = StealthPlugin();
 stealth.enabledEvasions.delete('webgl.vendor');
 stealth.enabledEvasions.delete('webgl.renderer');
-
 puppeteer.use(stealth);
 
 const scrapeMasjidAlFarouq = async () => {
- let browser;
- try {
-   console.log('Démarrage du scraping Masjid Al-Farouq...');
+    let browser;
+    let page;
 
-   const launchOptions = {
-     ...getDefaultBrowserConfig(),
-     executablePath: await setupChromiumPath()
-   };
+    try {
+        console.log('Démarrage du scraping Masjid Al-Farouq...');
 
-   browser = await puppeteer.launch(launchOptions);
-   const page = await setupBasicBrowserPage(browser);
+        browser = await puppeteer.launch({
+            headless: true,
+            args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage',
+                '--disable-gpu',
+                '--window-size=1920,1080'
+            ],
+            ignoreHTTPSErrors: true,
+            executablePath: await executablePath()
+        });
 
-   await setupResourceInterception(page);
+        page = await browser.newPage();
+        await humanBehavior.setupPageOptimized(page);
+        await page.setViewport({ width: 1920, height: 1080 });
+        const randomUserAgent = userAgents[Math.floor(Math.random() * userAgents.length)];
+        await page.setUserAgent(randomUserAgent);
 
-   console.log('Navigation vers Masjid Al-Farouq...');
-   await page.goto('https://www.masjidalfarouq.org.uk/', {
-     waitUntil: 'domcontentloaded',
-     timeout: 25000
-   });
+        // Optimisation des ressources
+        await page.setRequestInterception(true);
+        page.on('request', request => {
+            const resourceType = request.resourceType();
+            if (['image', 'stylesheet', 'font'].includes(resourceType)) {
+                request.abort();
+            } else {
+                request.continue();
+            }
+        });
 
-   await page.waitForSelector('div.my-5', { timeout: 15000 });
-   await randomDelay(1000, 2000);
+        console.log('Navigation en cours...');
 
-   console.log('Extraction des données...');
-   const data = await page.evaluate(() => {
-     const times = {};
-     const prayerElements = document.querySelectorAll(
-       'div.my-5 div.flex.flex-row.justify-around.items-center.flex-wrap.mt-2 div.flex.flex-col.items-center.max-w-xs.flex'
-     );
+        await page.goto('https://www.masjidalfarouq.org.uk/', {
+            waitUntil: 'domcontentloaded',
+            timeout: 25000
+        });
 
-     prayerElements.forEach((prayerElement) => {
-       const nameElement = prayerElement.querySelector('h3.font-elMessiri.font-medium');
-       const timeElements = prayerElement.querySelectorAll('h4.p-0\\.5.sm\\:p-1.font-medium');
-       const timeElement = timeElements.length >= 2 ? timeElements[1] : null;
+        // Actions parallèles pour l'efficacité
+        await Promise.all([
+            page.waitForSelector('div.my-5', { timeout: 15000 }),
+            humanBehavior.randomDelay(100, 200),
+            humanBehavior.simulateScroll(page)
+        ]);
 
-       if (nameElement && timeElement) {
-         let prayerName = nameElement.textContent.trim().toLowerCase();
-         let time = timeElement.textContent.trim();
+        // Simulation de mouvement de souris
+        await humanBehavior.moveMouseRandomly(page, 'div.my-5');
 
-         const [timeStr, period] = time.split(/\s+/);
-         if (!timeStr) return;
+        console.log('Extraction des données...');
+        const data = await page.evaluate(() => {
+            const times = {};
+            const prayerElements = document.querySelectorAll(
+                'div.my-5 div.flex.flex-row.justify-around.items-center.flex-wrap.mt-2 div.flex.flex-col.items-center.max-w-xs.flex'
+            );
 
-         const [hours, minutes] = timeStr.split(/[:.]/);
-         if (!hours || !minutes) return;
+            prayerElements.forEach((prayerElement) => {
+                const nameElement = prayerElement.querySelector('h3.font-elMessiri.font-medium');
+                const timeElements = prayerElement.querySelectorAll('h4.p-0\\.5.sm\\:p-1.font-medium');
+                const timeElement = timeElements.length >= 2 ? timeElements[1] : null;
 
-         let hour = parseInt(hours);
-         if (isNaN(hour)) return;
-         
-         if (period === 'PM' && hour < 12) hour += 12;
-         if (period === 'AM' && hour === 12) hour = 0;
-         
-         times[prayerName] = `${hour}:${minutes}`;
-       }
-     });
-     
-     return times;
-   });
+                if (nameElement && timeElement) {
+                    let prayerName = nameElement.textContent.trim().toLowerCase();
+                    let time = timeElement.textContent.trim();
+                    
+                    // Garder le format brut pour la normalisation
+                    if (time) {
+                        times[prayerName] = time;
+                    }
+                }
+            });
+            
+            return times;
+        });
 
-   // Normalise les temps et standardise les noms de prière
-   const normalizedTimes = {};
-   for (let [prayer, time] of Object.entries(data)) {
-     prayer = prayerUtils.standardizePrayerName(prayer);
-     const normalizedTime = normalizeTime(time);
-     if (normalizedTime) {
-       normalizedTimes[prayer] = normalizedTime;
-     }
-   }
+        console.log('Données brutes extraites:', data);
 
-   const result = {
-     source: 'Masjid Al-Farouq Walsall',
-     date: dateUtils.getUKDate(),
-     times: normalizedTimes
-   };
+        console.log('Normalisation des données...');
 
-   // Standardise le format de sortie
-   const standardizedResult = prayerUtils.normalizeResult(result);
-   console.log('Données extraites avec succès:', standardizedResult);
-   return standardizedResult;
+        // Normalisation avec prise en compte du type de prière
+        const normalizedTimes = {};
+        for (let [prayer, time] of Object.entries(data)) {
+            prayer = prayerUtils.standardizePrayerName(prayer);
+            if (prayer) {
+                const normalizedTime = normalizeTime(time, prayer);
+                if (normalizedTime) {
+                    normalizedTimes[prayer] = normalizedTime;
+                }
+            }
+        }
 
- } catch (error) {
-   errorUtils.logScrapingError('Masjid Al-Farouq', error);
-   if (browser) {
-     await errorUtils.saveFailedPage(page, 'failed_masjid_alfarouq.html');
-   }
-   throw error;
- } finally {
-   if (browser) {
-     await browser.close();
-     console.log('Navigateur fermé');
-   }
- }
+        const result = {
+            source: 'Masjid Al-Farouq Walsall',
+            date: dateUtils.getUKDate(),
+            times: normalizedTimes
+        };
+
+        const standardizedResult = prayerUtils.normalizeResult(result);
+        console.log('Données normalisées:', standardizedResult);
+        return standardizedResult;
+
+    } catch (error) {
+        console.error('Erreur lors du scraping de Masjid Al-Farouq:', error);
+        if (page) {
+            await page.screenshot({ path: 'failed_masjid_alfarouq.png' });
+        }
+        throw error;
+    } finally {
+        if (browser) {
+            await browser.close();
+            console.log('Navigateur fermé');
+        }
+    }
 };
 
 module.exports = scrapeMasjidAlFarouq;

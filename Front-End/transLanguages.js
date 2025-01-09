@@ -1,51 +1,48 @@
 // transLanguages.js
+import { ChartManager } from './charts.js';
 
 document.addEventListener("DOMContentLoaded", () => {
-  const langButtons = document.querySelectorAll(".lang-btn");
+    // 1. Gérer les clics sur les boutons de langue
+    const langButtons = document.querySelectorAll(".lang-btn");
+    langButtons.forEach((button) => {
+        button.addEventListener("click", (e) => {
+            e.preventDefault();
+            const selectedLang = button.getAttribute("data-lang");
+            localStorage.setItem("userLang", selectedLang);
+            window.location.href = `index-${selectedLang}.html`;
+        });
+    });
 
-  langButtons.forEach((button) => {
-      button.addEventListener("click", (e) => {
-          e.preventDefault();
-          const selectedLang = button.getAttribute("data-lang");
-          
-          // Mettre à jour la langue du document
-          document.documentElement.lang = selectedLang;
-          
-          // Déclencher un événement personnalisé pour le changement de langue
-          const event = new CustomEvent('languageChanged', {
-              detail: { language: selectedLang }
-          });
-          document.dispatchEvent(event);
-          
-          // Enregistrer la préférence
-          localStorage.setItem("userLang", selectedLang);
-          
-          // Rediriger si nécessaire
-          window.location.href = `index-${selectedLang}.html`;
-      });
-  });
-
-    // Vérifier si la préférence de langue est déjà enregistrée
-    const userLangPreference = localStorage.getItem("userLang");
-    const currentPage = window.location.pathname;
-
-    if (
-      !userLangPreference &&
-      (currentPage === "/" || currentPage.endsWith("index.html"))
-    ) {
-      // Si aucune préférence n'est enregistrée, détecter la langue du navigateur
-      const browserLang = navigator.language || navigator.userLanguage;
-      const lang = browserLang.startsWith("fr") ? "fr" : "en";
-
-      // Rediriger vers la page correspondante
-      window.location.href = `index-${lang}.html`;
-
-      // Enregistrer la préférence de langue
-      localStorage.setItem("userLang", lang);
+    // 2. Vérifier la langue du navigateur uniquement si c'est la première visite
+    if (!localStorage.getItem("userLang")) {
+        const browserLang = navigator.language || navigator.userLanguage;
+        const defaultLang = browserLang.startsWith("fr") ? "fr" : "en";
+        localStorage.setItem("userLang", defaultLang);
+        
+        const currentPath = window.location.pathname;
+        if (!currentPath.includes(`index-${defaultLang}.html`)) {
+            window.location.href = `index-${defaultLang}.html`;
+            return;
+        }
     }
-  });
 
-  document.addEventListener('languageChanged', async (event) => {
-    const mosqueTimeManager = new MosqueTimeManager();
-    await mosqueTimeManager.initialize();
+    // 3. Déclencher l'événement de changement de langue pour mettre à jour l'interface
+    const currentLang = localStorage.getItem("userLang");
+    const event = new CustomEvent('languageChanged', {
+        detail: { language: currentLang }
+    });
+    document.dispatchEvent(event);
+});
+
+// Mettre à jour l'interface lors du changement de langue
+document.addEventListener('languageChanged', async (event) => {
+  if (ChartManager) {
+      ChartManager.updateAllChartLabels();
+      ChartManager.updatePeriodTitles();
+  }
+
+  if (typeof MosqueTimeManager !== 'undefined') {
+      const mosqueTimeManager = new MosqueTimeManager();
+      await mosqueTimeManager.initialize();
+  }
 });

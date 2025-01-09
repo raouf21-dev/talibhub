@@ -30,195 +30,181 @@ class StatisticsManager {
         this.initialized = false;
     }
 
+    validateData(data, period) {
+        if (!data?.data || !Array.isArray(data.data)) {
+            console.error(`[Frontend] Format de données invalide pour ${period}`);
+            return [];
+        }
+
+        return data.data.map(item => ({
+            date: item.date,
+            total_time: Number(item.total_time) || 0,
+            total_count: Number(item.total_count) || 0,
+            task_details: Array.isArray(item.task_details) ? item.task_details : []
+        }));
+    }
 
     async fetchStatisticsData(period) {
         try {
+            console.log(`[Frontend] Début fetchStatisticsData pour ${period}`);
             const token = localStorage.getItem('token');
+            
             if (!token) {
-                console.error('Pas de token trouvé');
+                console.error('[Frontend] Pas de token trouvé');
                 return null;
             }
-    
+
+            console.log(`[Frontend] Envoi requête API pour ${period}`);
             const response = await fetch(`/api/statistics/${period}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
             });
-    
+
+            const result = await response.json();
+
             if (!response.ok) {
-                throw new Error(`Erreur HTTP! status: ${response.status}`);
+                throw new Error(result.message || `Erreur HTTP! statut: ${response.status}`);
             }
-    
-            const data = await response.json();
-            console.log(`Données brutes reçues pour ${period}:`, {
-                nombreDonnées: Array.isArray(data) ? data.length : 0,
-                données: data
+
+            const validatedData = this.validateData(result, period);
+            
+            console.log(`[Frontend] Données reçues pour ${period}:`, {
+                nombreDonnées: validatedData.length,
+                données: JSON.stringify(validatedData, null, 2)
             });
-            
-            if (!Array.isArray(data)) {
-                console.error(`Les données reçues pour ${period} ne sont pas un tableau`);
-                return [];
-            }
-            
-            if (data.length > 0) {
-                this.currentData[period] = data;
+
+            if (validatedData.length > 0) {
+                this.currentData[period] = validatedData;
+                console.log(`[Frontend] currentData mis à jour pour ${period}:`, 
+                    JSON.stringify(this.currentData[period], null, 2));
+
+                const sortedData = [...validatedData].sort((a, b) => new Date(b.date) - new Date(a.date));
                 
-                // Trier les données par date
-                const sortedData = [...data].sort((a, b) => new Date(b.date) - new Date(a.date));
-                
-                // Stocker les dates limites
                 this.latestRecords[period] = new Date(sortedData[0].date);
                 this.earliestRecords[period] = new Date(sortedData[sortedData.length - 1].date);
-                
-                console.log(`Limites temporelles pour ${period}:`, {
+
+                console.log(`[Frontend] Limites temporelles pour ${period}:`, {
                     dernièreDate: this.latestRecords[period],
                     premièreDate: this.earliestRecords[period],
                     nombreTotal: sortedData.length
                 });
             }
-            
-            return data;
+
+            return validatedData;
         } catch (error) {
-            console.error(`Erreur lors de la récupération des statistiques ${period}:`, error);
+            this.handleError(error, `fetchStatisticsData(${period})`);
             return [];
         }
     }
 
-
-getDataForCurrentPeriod(period) {
-    const currentDate = this.currentPeriods[period];
-    const data = this.currentData[period];
-
-    if (!data || !data.length) return null;
-
-    console.log(`Traitement ${period}:`, {
-        dateCourante: currentDate,
-        donnéesBrutes: data
-    });
-
-    const isInCurrentPeriod = (dateStr) => {
-        const date = new Date(dateStr);
-        const compareDate = new Date(date);
-        compareDate.setHours(0, 0, 0, 0);
-
-        switch(period) {
-            case 'daily': {
-                const dayStart = new Date(currentDate);
-                dayStart.setHours(0, 0, 0, 0);
-                return compareDate.getTime() === dayStart.getTime();
-            }
-            case 'weekly': {
-                const weekStart = new Date(currentDate);
-                const day = currentDate.getDay() || 7;
-                weekStart.setDate(currentDate.getDate() - day + 1);
-                weekStart.setHours(0, 0, 0, 0);
-
-                const weekEnd = new Date(weekStart);
-                weekEnd.setDate(weekStart.getDate() + 6);
-                weekEnd.setHours(23, 59, 59, 999);
-
-                return compareDate >= weekStart && compareDate <= weekEnd;
-            }
-            case 'monthly': {
-                return compareDate.getMonth() === currentDate.getMonth() &&
-                       compareDate.getFullYear() === currentDate.getFullYear();
-            }
-            case 'yearly': {
-                return compareDate.getFullYear() === currentDate.getFullYear();
-            }
-            default:
-                return false;
+    getDataForCurrentPeriod(period) {
+        console.log(`[Frontend] Début getDataForCurrentPeriod pour ${period}`);
+        const currentDate = new Date(this.currentPeriods[period]);
+        currentDate.setHours(0, 0, 0, 0);
+        const data = this.currentData[period];
+    
+        if (!data || !data.length) {
+            console.log(`[Frontend] Pas de données disponibles pour ${period}`);
+            return null;
         }
-    };
-
-    const filteredData = data.filter(item => isInCurrentPeriod(item.date));
-
-    if (filteredData.length === 0) {
-        console.log(`Aucune donnée pour ${period} à la date ${currentDate}`);
-        return null;
-    }
-
-    // Maintenant gérer les données de la même manière pour toutes les périodes
-    const totalTime = filteredData.reduce((sum, item) => {
-        const time = parseFloat(item.total_time || 0);
-        console.log(`Ajout temps: ${time} au total: ${sum}`);
-        return sum + time;
-    }, 0);
-
-    const totalCount = filteredData.reduce((sum, item) => {
-        const count = parseInt(item.total_count || 0);
-        console.log(`Ajout comptage: ${count} au total: ${sum}`);
-        return sum + count;
-    }, 0);
-
-    // Fusionner les task_details de toutes les entrées filtrées
-    const allTaskDetails = filteredData.reduce((all, item) => {
-        if (item.task_details && Array.isArray(item.task_details)) {
-            return [...all, ...item.task_details];
-        }
-        return all;
-    }, []);
-
-    // Regrouper les tâches et sommer leurs valeurs
-    const taskDetailsMap = new Map();
-    allTaskDetails.forEach(task => {
-        if (!taskDetailsMap.has(task.task_id)) {
-            taskDetailsMap.set(task.task_id, {
-                task_id: task.task_id,
-                name: task.name,
-                total_time: 0,
-                total_count: 0
+    
+        const isInCurrentPeriod = (dateStr) => {
+            const date = new Date(dateStr);
+            date.setHours(0, 0, 0, 0);
+            
+            console.log(`[Frontend] Comparaison de dates pour ${period}:`, {
+                date: date,
+                currentDate: currentDate
             });
+    
+            switch(period) {
+                case 'daily': {
+                    return date.getTime() === currentDate.getTime();
+                }
+                case 'weekly': {
+                    const weekStart = new Date(currentDate);
+                    const day = currentDate.getDay() || 7;
+                    weekStart.setDate(currentDate.getDate() - day + 1);
+                    weekStart.setHours(0, 0, 0, 0);
+    
+                    const weekEnd = new Date(weekStart);
+                    weekEnd.setDate(weekStart.getDate() + 6);
+                    weekEnd.setHours(23, 59, 59, 999);
+    
+                    return date >= weekStart && date <= weekEnd;
+                }
+                case 'monthly': {
+                    return date.getMonth() === currentDate.getMonth() &&
+                           date.getFullYear() === currentDate.getFullYear();
+                }
+                case 'yearly': {
+                    return date.getFullYear() === currentDate.getFullYear();
+                }
+            }
+            return false;
+        };
+    
+        const filteredData = data.filter(item => {
+            const matches = isInCurrentPeriod(item.date);
+            console.log(`[Frontend] Filtrage pour ${item.date}:`, matches);
+            return matches;
+        });
+    
+        if (filteredData.length === 0) {
+            console.log(`[Frontend] Aucune donnée pour ${period} à la date ${currentDate}`);
+            return null;
         }
-        const existingTask = taskDetailsMap.get(task.task_id);
-        existingTask.total_time += parseFloat(task.total_time || 0);
-        existingTask.total_count += parseInt(task.total_count || 0);
-    });
-
-    return {
-        date: currentDate,
-        total_time: totalTime.toString(),
-        total_count: totalCount.toString(),
-        task_details: Array.from(taskDetailsMap.values())
-    };
-}
+    
+        return filteredData.reduce((acc, curr) => {
+            if (!acc) return curr;
+            return {
+                date: curr.date,
+                total_time: Number(acc.total_time) + Number(curr.total_time),
+                total_count: Number(acc.total_count) + Number(curr.total_count),
+                task_details: [...(acc.task_details || []), ...(curr.task_details || [])]
+            };
+        }, null);
+    }
 
     async updatePeriodData(period) {
         try {
+            console.log(`[Frontend] Début updatePeriodData pour ${period}`);
+
             if (!this.currentData[period].length) {
                 await this.fetchStatisticsData(period);
             }
-    
+
             const currentPeriodData = this.getDataForCurrentPeriod(period);
-            
+
             if (currentPeriodData) {
                 const labels = [this.formatPeriodLabel(this.currentPeriods[period], period)];
-                const timeData = [Math.round(parseFloat(currentPeriodData.total_time) / 60)];
-                const countData = [parseInt(currentPeriodData.total_count)];
-    
-                console.log(`Mise à jour du graphique ${period}:`, {
+                const timeData = [Math.round(currentPeriodData.total_time / 60)];
+                const countData = [currentPeriodData.total_count];
+
+                console.log(`[Frontend] Mise à jour du graphique ${period}:`, {
+                    labels,
+                    timeData,
+                    countData,
+                    taskDetails: currentPeriodData.task_details
+                });
+
+                ChartManager.updateChart(
                     period,
                     labels,
                     timeData,
                     countData,
-                    taskDetails: currentPeriodData.task_details || []
-                });
-    
-                ChartManager.updateChart(
-                    period, 
-                    labels, 
-                    timeData, 
-                    countData,
                     currentPeriodData.task_details || []
                 );
             } else {
+                console.log(`[Frontend] Pas de données à afficher pour ${period}`);
                 ChartManager.updateChart(period, ['Pas de données'], [0], [0], []);
             }
-    
+
             this.updatePeriodDisplay(period);
             this.updateNavigationButtons(period);
         } catch (error) {
-            console.error(`Erreur lors de la mise à jour des données ${period}:`, error);
+            this.handleError(error, `updatePeriodData(${period})`);
         }
     }
 
@@ -226,59 +212,40 @@ getDataForCurrentPeriod(period) {
         const currentDate = this.currentPeriods[period];
         const latestRecord = this.latestRecords[period];
         const earliestRecord = this.earliestRecords[period];
-        
+    
         if (!latestRecord || !earliestRecord) return false;
-
-        // Pour la navigation vers l'avant (next)
-        if (direction > 0) {
-            switch(period) {
-                case 'daily':
-                    return currentDate < latestRecord;
-                case 'weekly': {
-                    const currentWeekEnd = new Date(currentDate);
-                    currentWeekEnd.setDate(currentDate.getDate() + 7);
-                    return currentWeekEnd <= latestRecord;
-                }
-                case 'monthly': {
-                    const currentMonthEnd = new Date(currentDate.getFullYear(), currentDate.getMonth() + 2, 0);
-                    return currentMonthEnd <= latestRecord;
-                }
-                case 'yearly': {
-                    const currentYearEnd = new Date(currentDate.getFullYear() + 1, 0, 1);
-                    return currentYearEnd <= latestRecord;
-                }
-            }
-        }
+    
+        const normalizedCurrent = new Date(currentDate);
+        const normalizedLatest = new Date(latestRecord);
+        const normalizedEarliest = new Date(earliestRecord);
         
-        // Pour la navigation vers l'arrière (prev)
-        switch(period) {
-            case 'daily':
-                return currentDate > earliestRecord;
-            case 'weekly': {
-                const currentWeekStart = new Date(currentDate);
-                currentWeekStart.setDate(currentDate.getDate() - 7);
-                return currentWeekStart >= earliestRecord;
-            }
-            case 'monthly': {
-                const currentMonthStart = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
-                return currentMonthStart >= earliestRecord;
-            }
-            case 'yearly': {
-                const currentYearStart = new Date(currentDate.getFullYear() - 1, 0, 1);
-                return currentYearStart >= earliestRecord;
-            }
-        }
+        [normalizedCurrent, normalizedLatest, normalizedEarliest].forEach(date => 
+            date.setHours(0, 0, 0, 0)
+        );
+    
+        console.log(`[Frontend] Vérification navigation pour ${period}:`, {
+            direction,
+            courante: normalizedCurrent,
+            dernière: normalizedLatest,
+            première: normalizedEarliest
+        });
+    
+        return direction > 0 
+            ? normalizedCurrent < normalizedLatest
+            : normalizedCurrent > normalizedEarliest;
     }
 
     setupNavigationListeners() {
         document.querySelectorAll('.period-navigation').forEach(nav => {
             const period = nav.dataset.period;
-            const prevBtn = nav.querySelector('.prev');
-            const nextBtn = nav.querySelector('.next');
-
-            prevBtn.addEventListener('click', () => this.navigatePeriod(period, -1));
-            nextBtn.addEventListener('click', () => this.navigatePeriod(period, 1));
+            nav.querySelector('.prev')?.addEventListener('click', () => 
+                this.navigatePeriod(period, -1)
+            );
+            nav.querySelector('.next')?.addEventListener('click', () => 
+                this.navigatePeriod(period, 1)
+            );
         });
+        console.log('[Frontend] Écouteurs de navigation configurés');
     }
 
     updateNavigationButtons(period) {
@@ -288,56 +255,59 @@ getDataForCurrentPeriod(period) {
         const nextBtn = nav.querySelector('.next');
         const prevBtn = nav.querySelector('.prev');
 
-        nextBtn.disabled = !this.isNavigationAllowed(period, 1);
-        prevBtn.disabled = !this.isNavigationAllowed(period, -1);
+        if (!nextBtn || !prevBtn) return;
 
-        nextBtn.classList.toggle('disabled', nextBtn.disabled);
-        prevBtn.classList.toggle('disabled', prevBtn.disabled);
+        const nextAllowed = this.isNavigationAllowed(period, 1);
+        const prevAllowed = this.isNavigationAllowed(period, -1);
+
+        nextBtn.disabled = !nextAllowed;
+        prevBtn.disabled = !prevAllowed;
+
+        nextBtn.classList.toggle('disabled', !nextAllowed);
+        prevBtn.classList.toggle('disabled', !prevAllowed);
+
+        console.log(`[Frontend] État des boutons de navigation pour ${period}:`, {
+            suivant: nextAllowed ? 'activé' : 'désactivé',
+            précédent: prevAllowed ? 'activé' : 'désactivé'
+        });
     }
 
     navigatePeriod(period, direction) {
+        console.log(`[Frontend] Navigation ${period} direction ${direction}`);
+        
         if (!this.isNavigationAllowed(period, direction)) {
-            console.log(`Navigation bloquée pour ${period} direction ${direction}`);
+            console.log(`[Frontend] Navigation bloquée`);
             return;
         }
-
-        const date = this.currentPeriods[period];
+    
+        const newDate = new Date(this.currentPeriods[period]);
         
         switch(period) {
             case 'daily':
-                date.setDate(date.getDate() + direction);
+                newDate.setDate(newDate.getDate() + direction);
                 break;
             case 'weekly':
-                date.setDate(date.getDate() + direction * 7);
+                newDate.setDate(newDate.getDate() + direction * 7);
                 break;
             case 'monthly':
-                date.setMonth(date.getMonth() + direction);
+                newDate.setMonth(newDate.getMonth() + direction);
                 break;
             case 'yearly':
-                date.setFullYear(date.getFullYear() + direction);
+                newDate.setFullYear(newDate.getFullYear() + direction);
                 break;
         }
-
+    
+        this.currentPeriods[period] = newDate;
         this.updatePeriodDisplay(period);
         this.updatePeriodData(period);
     }
 
-    processStatisticsData(data, period) {
-        if (!data || !data.length) return { labels: [], timeData: [], countData: [] };
-
-        const sortedData = data.sort((a, b) => new Date(b.date) - new Date(a.date));
-        const lastRecord = sortedData[0];
-        
-        return {
-            labels: [this.formatPeriodLabel(lastRecord.date, period)],
-            timeData: [Math.round(parseFloat(lastRecord.total_time) / 60)],
-            countData: [parseInt(lastRecord.total_count)]
-        };
-    }
-
     formatPeriodLabel(dateStr, period) {
         const date = new Date(dateStr);
-        
+        return this.formatDate(date, period);
+    }
+
+    formatDate(date, period) {
         switch(period) {
             case 'daily':
                 return date.toLocaleDateString('fr-FR', {
@@ -372,15 +342,19 @@ getDataForCurrentPeriod(period) {
     updatePeriodDisplay(period) {
         const display = document.getElementById(`${period}-period`);
         if (!display) return;
-        display.textContent = this.formatPeriodLabel(this.currentPeriods[period], period);
+        
+        const formattedDate = this.formatPeriodLabel(this.currentPeriods[period], period);
+        console.log(`[Frontend] Mise à jour affichage période ${period}:`, formattedDate);
+        display.textContent = formattedDate;
     }
 
     setupAutoRefresh() {
-        setInterval(() => {
+        return setInterval(() => {
+            console.log('[Frontend] Rafraîchissement automatique des données');
             ['daily', 'weekly', 'monthly', 'yearly'].forEach(period => 
                 this.updatePeriodData(period)
             );
-        }, 300000);
+        }, 300000); // 5 minutes
     }
 
     cleanup() {
@@ -389,33 +363,38 @@ getDataForCurrentPeriod(period) {
         }
         ChartManager.destroy();
         this.initialized = false;
+        console.log('[Frontend] Nettoyage effectué');
+    }
+
+    handleError(error, context) {
+        console.error(`[Frontend] Erreur dans ${context}:`, error);
+        // Possibilité d'ajouter un système de notification ici
     }
 
     async init() {
-        if (this.initialized) return;
+        if (this.initialized) {
+            console.log('[Frontend] Déjà initialisé');
+            return;
+        }
 
         try {
-            console.log('Initialisation des statistiques...');
+            console.log('[Frontend] Initialisation...');
             
-            // Initialiser les graphiques
             ChartManager.init();
             
-            // Charger les données initiales
             await Promise.all([
-                'daily', 
-                'weekly', 
-                'monthly', 
-                'yearly'
+                'daily', 'weekly', 'monthly', 'yearly'
             ].map(period => this.updatePeriodData(period)));
 
-            // Configurer les écouteurs d'événements
             this.setupNavigationListeners();
             this.refreshInterval = this.setupAutoRefresh();
 
             this.initialized = true;
-            console.log('Initialisation des statistiques terminée');
+            console.log('[Frontend] Initialisation terminée avec succès');
         } catch (error) {
-            console.error('Erreur lors de l\'initialisation des statistiques:', error);
+            this.handleError(error, 'init');
+            this.initialized = false;
+            ChartManager.destroy();
             throw error;
         }
     }
@@ -423,5 +402,23 @@ getDataForCurrentPeriod(period) {
 
 const statisticsManager = new StatisticsManager();
 
-export const initializeStatistics = () => statisticsManager.init();
-export const cleanupStatistics = () => statisticsManager.cleanup();
+export const initializeStatistics = async () => {
+    try {
+        await statisticsManager.init();
+        console.log('[Frontend] Statistiques initialisées');
+    } catch (error) {
+        console.error('[Frontend] Erreur d\'initialisation:', error);
+        throw error;
+    }
+};
+
+export const cleanupStatistics = () => {
+    try {
+        statisticsManager.cleanup();
+        console.log('[Frontend] Nettoyage effectué');
+    } catch (error) {
+        console.error('[Frontend] Erreur de nettoyage:', error);
+    }
+};
+
+export const StatisticsManagerInstance = statisticsManager;

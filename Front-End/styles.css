@@ -1597,7 +1597,6 @@ input:checked + .slider:before {
   flex-direction: column;
   height: auto;
   min-height: 400px;
-  max-height: fit-content;
 }
 
 /* Stats Header */
@@ -1683,19 +1682,31 @@ input:checked + .slider:before {
 
 /* Chart Wrapper */
 .chart-wrapper {
-  flex: 1;
-  min-height: 300px;
+  height: 300px; /* defaultHeight */
+  transition: height 0.3s ease-out;
   position: relative;
   padding: 1rem;
   background-color: white;
 }
 
+
+/* Quand les détails sont visibles */
+.chart-section.details-visible .chart-wrapper {
+  height: 200px; /* Hauteur réduite quand les détails sont visibles */
+}
+
 /* Task Details Section */
 .task-details-section {
-  max-height: 0;
+  height: 0;
   overflow: hidden;
-  transition: max-height 0.3s ease-in-out;
-  background-color: white;
+  opacity: 0;
+  transition: height 0.3s ease-out, opacity 0.3s ease-out;
+}
+
+/* Quand les détails sont visibles */
+.chart-section.details-visible .task-details-section {
+  height: 200px;
+  opacity: 1;
 }
 
 .task-details-section.expanded {
@@ -1726,23 +1737,23 @@ input:checked + .slider:before {
 
 /* Toggle Button */
 .toggle-details-btn {
-  padding: 0.5rem;
-  background-color: var(--secondary-color);
-  color: white;
-  border: none;
   width: 100%;
-  text-align: center;
-  cursor: pointer;
+  padding: 0.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  margin-top: auto;
-  transition: background-color 0.2s ease;
+  background-color: #f0f0f0;
+  border: none;
+  cursor: pointer;
 }
 
 .toggle-details-btn:hover {
   background-color: var(--secondary-color-hover);
+}
+
+.toggle-details-btn svg {
+  transition: transform 0.3s ease-out;
 }
 
 /* Chart Legend & Loading States */

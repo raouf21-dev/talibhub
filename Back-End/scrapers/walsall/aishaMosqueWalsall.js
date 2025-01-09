@@ -1,138 +1,166 @@
 // Back-End/scrapers/walsall/aishaMosqueWalsall.js
-
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 const { executablePath } = require('puppeteer');
 const {
- normalizeTime,
- randomDelay,
- getDefaultBrowserConfig,
- setupBasicBrowserPage,
- setupChromiumPath,
- safeNavigation,
- errorUtils,
- dateUtils,
- prayerUtils
+    normalizeTime,
+    dateUtils,
+    prayerUtils,
+    userAgents
 } = require('../scraperUtils');
+const humanBehavior = require('../humanBehaviorUtils');
 
-// Configuration StealthPlugin
 const stealth = StealthPlugin();
 stealth.enabledEvasions.delete('webgl.vendor');
 stealth.enabledEvasions.delete('webgl.renderer');
-
 puppeteer.use(stealth);
 
 const scrapeAishaMosque = async () => {
- let browser;
- let frame;
- 
- try {
-   console.log('Démarrage du scraping...');
+    let browser;
+    let page;
+    let frame;
 
-   const launchOptions = {
-     ...getDefaultBrowserConfig(),
-     executablePath: await setupChromiumPath()
-   };
+    try {
+        console.log('Démarrage du scraping Aisha Mosque...');
 
-   browser = await puppeteer.launch(launchOptions);
-   const page = await setupBasicBrowserPage(browser);
+        browser = await puppeteer.launch({
+            headless: true,
+            args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage',
+                '--disable-gpu',
+                '--window-size=1920,1080'
+            ],
+            ignoreHTTPSErrors: true,
+            executablePath: await executablePath()
+        });
 
-   console.log('Navigation vers Aisha Mosque...');
-   await page.goto('https://www.aishamosque.org/', {
-     waitUntil: 'networkidle2',
-     timeout: 30000
-   });
-   console.log('Page principale chargée avec succès');
+        page = await browser.newPage();
+        await humanBehavior.setupPageOptimized(page);
+        await page.setViewport({ width: 1920, height: 1080 });
+        const randomUserAgent = userAgents[Math.floor(Math.random() * userAgents.length)];
+        await page.setUserAgent(randomUserAgent);
 
-   // Gestion de l'iframe
-   await page.waitForSelector('iframe', { timeout: 30000 });
-   const frameHandle = await page.$('iframe');
-   frame = await frameHandle.contentFrame();
+        await page.setRequestInterception(true);
+        page.on('request', request => {
+            const resourceType = request.resourceType();
+            if (['image', 'stylesheet', 'font'].includes(resourceType)) {
+                request.abort();
+            } else {
+                request.continue();
+            }
+        });
 
-   if (!frame) {
-     throw new Error("Unable to access iframe content (possibly due to cross-origin restrictions).");
-   }
+        console.log('Navigation en cours...');
 
-   // Attente des sélecteurs dans l'iframe
-   await frame.waitForSelector('.mbx-widget-timetable-nav-date', { timeout: 15000 });
-   await frame.waitForSelector('.styles__Item-sc-1h272ay-1', { timeout: 15000 });
+        await page.goto('https://www.aishamosque.org/', {
+            waitUntil: 'networkidle2',
+            timeout: 30000
+        });
 
-   console.log('Extraction des données...');
-   const times = await frame.evaluate(() => {
-     const prayerTimes = {};
-     const prayerItems = document.querySelectorAll('.styles__Item-sc-1h272ay-1');
+        // Simulation de comportement humain sur la page principale
+        await Promise.all([
+            humanBehavior.randomDelay(100, 200),
+            humanBehavior.simulateScroll(page)
+        ]);
 
-     prayerItems.forEach((item) => {
-       const titleElement = item.querySelector('.title');
-       const timeElement = item.querySelector('.time.mono');
+        console.log('Accès à l\'iframe...');
 
-       if (titleElement && timeElement) {
-         let prayerName = titleElement.textContent.trim().toLowerCase();
-         let timeText = timeElement.textContent.trim();
+        // Gestion de l'iframe
+        await page.waitForSelector('iframe', { timeout: 30000 });
+        const frameHandle = await page.$('iframe');
+        frame = await frameHandle.contentFrame();
 
-         const allowedPrayers = ['fajr', 'zuhr', 'dhuhr', 'asr', 'maghrib', 'isha'];
+        if (!frame) {
+            throw new Error("Impossible d'accéder au contenu de l'iframe (restrictions cross-origin possibles).");
+        }
 
-         if (allowedPrayers.includes(prayerName)) {
-           const regex = /^(\d{1,2})(\d{2})(AM|PM)?$/i;
-           const match = timeText.match(regex);
+        // Attente des sélecteurs dans l'iframe
+        await frame.waitForSelector('.mbx-widget-timetable-nav-date', { timeout: 15000 });
+        await frame.waitForSelector('.styles__Item-sc-1h272ay-1', { timeout: 15000 });
 
-           if (match) {
-             let hours = parseInt(match[1], 10);
-             const minutes = match[2];
-             const period = match[3] ? match[3].toUpperCase() : '';
+        console.log('Extraction des horaires...');
 
-             if (period === 'PM' && hours < 12) hours += 12;
-             if (period === 'AM' && hours === 12) hours = 0;
+        const times = await frame.evaluate(() => {
+            const prayerTimes = {};
+            const prayerItems = document.querySelectorAll('.styles__Item-sc-1h272ay-1');
 
-             prayerTimes[prayerName] = `${hours}:${minutes}`;
-           } else {
-             timeText = timeText.replace(/[^0-9]/g, '');
-             if (timeText.length === 3 || timeText.length === 4) {
-               const hours = parseInt(timeText.slice(0, timeText.length - 2), 10);
-               const minutes = timeText.slice(-2);
-               prayerTimes[prayerName] = `${hours}:${minutes}`;
-             }
-           }
-         }
-       }
-     });
+            prayerItems.forEach((item) => {
+                const titleElement = item.querySelector('.title');
+                const timeElement = item.querySelector('.time.mono');
 
-     return prayerTimes;
-   });
+                if (titleElement && timeElement) {
+                    let prayerName = titleElement.textContent.trim().toLowerCase();
+                    let timeText = timeElement.textContent.trim();
 
-   // Normalise les temps et standardise les noms de prière
-   const normalizedTimes = {};
-   for (let [prayer, time] of Object.entries(times)) {
-     prayer = prayerUtils.standardizePrayerName(prayer);
-     const normalizedTime = normalizeTime(time);
-     if (normalizedTime) {
-       normalizedTimes[prayer] = normalizedTime;
-     }
-   }
+                    const allowedPrayers = ['fajr', 'zuhr', 'dhuhr', 'asr', 'maghrib', 'isha'];
 
-   const result = {
-     source: 'Aisha Mosque Walsall',
-     date: dateUtils.getUKDate(),
-     times: normalizedTimes
-   };
+                    if (allowedPrayers.includes(prayerName)) {
+                        const regex = /^(\d{1,2})(\d{2})(AM|PM)?$/i;
+                        const match = timeText.match(regex);
 
-   // Standardise le format de sortie
-   const standardizedResult = prayerUtils.normalizeResult(result);
-   console.log('Données extraites avec succès:', standardizedResult);
-   return standardizedResult;
+                        if (match) {
+                            let hours = parseInt(match[1], 10);
+                            const minutes = match[2];
+                            const period = match[3] ? match[3].toUpperCase() : '';
 
- } catch (error) {
-   errorUtils.logScrapingError('Aisha Mosque', error);
-   if (browser) {
-     await errorUtils.saveFailedPage(page, 'failed_aisha_mosque.html');
-   }
-   throw error;
- } finally {
-   if (browser) {
-     await browser.close();
-     console.log('Navigateur fermé');
-   }
- }
+                            if (period === 'PM' && hours < 12) hours += 12;
+                            if (period === 'AM' && hours === 12) hours = 0;
+
+                            prayerTimes[prayerName] = `${hours}:${minutes}`;
+                        } else {
+                            timeText = timeText.replace(/[^0-9]/g, '');
+                            if (timeText.length === 3 || timeText.length === 4) {
+                                const hours = parseInt(timeText.slice(0, timeText.length - 2), 10);
+                                const minutes = timeText.slice(-2);
+                                prayerTimes[prayerName] = `${hours}:${minutes}`;
+                            }
+                        }
+                    }
+                }
+            });
+
+            return prayerTimes;
+        });
+
+        console.log('Données brutes extraites:', times);
+
+        console.log('Normalisation des données...');
+
+        // Normalisation des temps
+        const normalizedTimes = {};
+        for (let [prayer, time] of Object.entries(times)) {
+            prayer = prayerUtils.standardizePrayerName(prayer);
+            const normalizedTime = normalizeTime(time);
+            if (normalizedTime) {
+                normalizedTimes[prayer] = normalizedTime;
+            }
+        }
+
+        const result = {
+            source: 'Aisha Mosque Walsall',
+            date: dateUtils.getUKDate(),
+            times: normalizedTimes
+        };
+
+        const standardizedResult = prayerUtils.normalizeResult(result);
+        
+        console.log('Données normalisées:', standardizedResult);
+        return standardizedResult;
+
+    } catch (error) {
+        console.error('Erreur lors du scraping de Aisha Mosque:', error);
+        if (page) {
+            await page.screenshot({ path: 'failed_aisha_mosque.png' });
+        }
+        throw error;
+    } finally {
+        if (browser) {
+            await browser.close();
+            console.log('Navigateur fermé');
+        }
+    }
 };
 
 module.exports = scrapeAishaMosque;

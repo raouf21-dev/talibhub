@@ -65,264 +65,235 @@ const getDefaultHeaders = () => ({
 });
 
 class TimeValidator {
-  static validateTime(timeStr) {
-      if (!timeStr) return null;
-      
-      // Nettoyer la chaîne
-      timeStr = timeStr.trim().toLowerCase();
-      if (timeStr === '--:--' || timeStr === 'n/a' || timeStr === '--') return null;
+    static validateTime(timeStr) {
+        if (!timeStr) return null;
+        
+        // Nettoyer la chaîne
+        timeStr = timeStr.trim().toLowerCase();
+        if (timeStr === '--:--' || timeStr === 'n/a' || timeStr === '--') return null;
 
-      try {
-          // Parser le format AM/PM si présent
-          let hours, minutes;
-          const isPM = timeStr.includes('pm');
-          const isAM = timeStr.includes('am');
-          
-          // Enlever AM/PM et nettoyer
-          timeStr = timeStr.replace(/[ap]m/i, '').trim();
-          
-          // Gérer différents formats de séparation
-          if (timeStr.includes(':')) {
-              [hours, minutes] = timeStr.split(':').map(Number);
-          } else {
-              // Format sans séparateur (e.g., "0730")
-              timeStr = timeStr.padStart(4, '0');
-              hours = parseInt(timeStr.slice(0, 2));
-              minutes = parseInt(timeStr.slice(2));
-          }
+        try {
+            // Parser le format AM/PM si présent
+            let hours, minutes;
+            const isPM = timeStr.includes('pm');
+            const isAM = timeStr.includes('am');
+            
+            // Enlever AM/PM et nettoyer
+            timeStr = timeStr.replace(/[ap]m/i, '').trim();
+            
+            // Gérer différents formats de séparation
+            if (timeStr.includes(':')) {
+                [hours, minutes] = timeStr.split(':').map(Number);
+            } else {
+                // Format sans séparateur (e.g., "0730")
+                timeStr = timeStr.padStart(4, '0');
+                hours = parseInt(timeStr.slice(0, 2));
+                minutes = parseInt(timeStr.slice(2));
+            }
 
-          // Validation de base
-          if (isNaN(hours) || isNaN(minutes)) return null;
-          if (minutes >= 60) return null;
-          
-          // Conversion AM/PM
-          if (isPM && hours < 12) hours += 12;
-          if (isAM && hours === 12) hours = 0;
-          
-          // Validation finale
-          if (hours >= 24) return null;
-          
-          // Formatage
-          return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
-      } catch (error) {
-          console.error('Erreur de validation du temps:', error);
-          return null;
-      }
-  }
+            // Validation de base
+            if (isNaN(hours) || isNaN(minutes)) return null;
+            if (minutes >= 60) return null;
+            
+            // Conversion AM/PM
+            if (isPM && hours < 12) hours += 12;
+            if (isAM && hours === 12) hours = 0;
+            
+            // Validation finale
+            if (hours >= 24) return null;
+            
+            // Formatage
+            return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+        } catch (error) {
+            console.error('Erreur de validation du temps:', error);
+            return null;
+        }
+    }
 
-  static validatePrayerTimes(times) {
-      const prayers = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
-      const validated = {};
-      let hasValidTimes = false;
+    static validatePrayerTimes(times) {
+        const prayers = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
+        const validated = {};
+        let hasValidTimes = false;
 
-      for (const prayer of prayers) {
-          validated[prayer] = this.validateTime(times[prayer]);
-          if (validated[prayer]) hasValidTimes = true;
-      }
+        for (const prayer of prayers) {
+            validated[prayer] = this.validateTime(times[prayer]);
+            if (validated[prayer]) hasValidTimes = true;
+        }
 
-      // Vérifier les heures incohérentes
-      if (validated.fajr && validated.dhuhr && 
-          DateTime.fromFormat(validated.fajr, 'HH:mm') > DateTime.fromFormat(validated.dhuhr, 'HH:mm')) {
-          validated.fajr = null;
-      }
-
-      return hasValidTimes ? validated : null;
-  }
+        return hasValidTimes ? validated : null;
+    }
 }
 
 const browserUtils = {
-  async launch(options = {}) {
-      const defaultConfig = {
-          headless: true,
-          args: [
-              '--no-sandbox',
-              '--disable-setuid-sandbox',
-              '--disable-dev-shm-usage',
-              '--disable-accelerated-2d-canvas',
-              '--disable-gpu',
-              '--window-size=1920,1080',
-          ],
-          ignoreHTTPSErrors: true,
-          defaultViewport: null
-      };
+    async launch(options = {}) {
+        const defaultConfig = {
+            headless: true,
+            args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage',
+                '--disable-accelerated-2d-canvas',
+                '--disable-gpu',
+                '--window-size=1920,1080',
+            ],
+            ignoreHTTPSErrors: true,
+            defaultViewport: null
+        };
 
-      try {
-          const execPath = await setupChromiumPath();
-          const browser = await puppeteer.launch({
-              ...defaultConfig,
-              ...options,
-              executablePath: execPath
-          });
+        try {
+            const execPath = await setupChromiumPath();
+            const browser = await puppeteer.launch({
+                ...defaultConfig,
+                ...options,
+                executablePath: execPath
+            });
 
-          return browser;
-      } catch (error) {
-          console.error('Erreur lors du lancement du navigateur:', error);
-          throw error;
-      }
-  },
+            return browser;
+        } catch (error) {
+            console.error('Erreur lors du lancement du navigateur:', error);
+            throw error;
+        }
+    },
 
-  async createPage(browser) {
-      const page = await browser.newPage();
-      await this.setupPage(page);
-      return page;
-  },
+    async createPage(browser) {
+        const page = await browser.newPage();
+        await this.setupPage(page);
+        return page;
+    },
 
-  async setupPage(page) {
-      // Configuration de base
-      await page.setDefaultNavigationTimeout(30000);
-      await page.setRequestInterception(true);
+    async setupPage(page) {
+        // Définir un user agent aléatoire
+        const randomUserAgent = userAgents[Math.floor(Math.random() * userAgents.length)];
+        await page.setUserAgent(randomUserAgent);
 
-      // Bloquer les ressources inutiles
-      page.on('request', (request) => {
-          const resourceType = request.resourceType();
-          if (['image', 'stylesheet', 'font', 'media'].includes(resourceType)) {
-              request.abort();
-          } else {
-              request.continue();
-          }
-      });
+        // Configuration de base
+        await page.setDefaultNavigationTimeout(30000);
+        await page.setRequestInterception(true);
+        await page.setViewport({ width: 1920, height: 1080 });
+        await page.setExtraHTTPHeaders(getDefaultHeaders());
 
-      // Gérer les erreurs de page
-      page.on('error', error => {
-          console.error('Erreur de page:', error);
-      });
+        // Bloquer les ressources inutiles
+        page.on('request', (request) => {
+            const resourceType = request.resourceType();
+            if (['image', 'stylesheet', 'font', 'media'].includes(resourceType)) {
+                request.abort();
+            } else {
+                request.continue();
+            }
+        });
 
-      // Anti-détection
-      await page.evaluateOnNewDocument(() => {
-          delete Object.getPrototypeOf(navigator).webdriver;
-          window.navigator.chrome = { runtime: {} };
-      });
-  }
+        // Gérer les erreurs de page
+        page.on('error', error => {
+            console.error('Erreur de page:', error);
+        });
+
+        // Anti-détection
+        await page.evaluateOnNewDocument(() => {
+            delete Object.getPrototypeOf(navigator).webdriver;
+            Object.defineProperty(navigator, 'platform', { get: () => 'Win32' });
+            Object.defineProperty(navigator, 'productSub', { get: () => '20100101' });
+            Object.defineProperty(navigator, 'vendor', { get: () => 'Google Inc.' });
+            window.navigator.chrome = { runtime: {} };
+        });
+    }
 };
 
-// Gestion des verrous pour les scrapers
-class ScraperLockManager {
-    constructor() {
-        this._locks = new Map();
-        this._timeouts = new Map();
-        this._retryDelays = new Map();
-    }
+// Navigation sécurisée
+const safeNavigation = async (page, url, options = {}) => {
+    const config = {
+        retries: 2,
+        timeout: 25000,
+        waitUntil: 'networkidle0',
+        ...options
+    };
 
-    async acquireLock(scraperId, timeout = 300000) { // 5 minutes timeout par défaut
-        if (this._locks.get(scraperId)) {
-            const retryCount = (this._retryDelays.get(scraperId) || 0) + 1;
-            this._retryDelays.set(scraperId, retryCount);
-            
-            // Délai exponentiel avec un maximum de 30 secondes
-            const delay = Math.min(Math.pow(2, retryCount) * 1000, 30000);
-            await new Promise(resolve => setTimeout(resolve, delay));
-            
-            return false;
-        }
+    for (let i = 0; i < config.retries; i++) {
+        try {
+            const response = await page.goto(url, {
+                waitUntil: config.waitUntil,
+                timeout: config.timeout
+            });
 
-        this._locks.set(scraperId, true);
-        this._retryDelays.delete(scraperId);
-        
-        // Configure un timeout pour libérer automatiquement le verrou
-        const timeoutId = setTimeout(() => {
-            console.warn(`Lock timeout for scraper ${scraperId}`);
-            this.releaseLock(scraperId);
-        }, timeout);
-        
-        this._timeouts.set(scraperId, timeoutId);
-        
-        return true;
-    }
+            // Vérifier et gérer les erreurs de Cloudflare
+            if (response.status() === 403 || response.status() === 503) {
+                const content = await page.content();
+                if (content.includes('challenge-running') || content.includes('cf-browser-verification')) {
+                    await page.waitForTimeout(5000);
+                    continue;
+                }
+            }
 
-    releaseLock(scraperId) {
-        this._locks.delete(scraperId);
-        
-        const timeoutId = this._timeouts.get(scraperId);
-        if (timeoutId) {
-            clearTimeout(timeoutId);
-            this._timeouts.delete(scraperId);
+            return response;
+        } catch (error) {
+            if (i === config.retries - 1) throw error;
+            await page.waitForTimeout(3000);
         }
     }
-
-    isLocked(scraperId) {
-        return this._locks.has(scraperId);
-    }
-
-    getActiveLocks() {
-        return Array.from(this._locks.keys());
-    }
-}
-
-// Configuration de la page
-const setupBasicBrowserPage = async (browser) => {
-    const page = await browser.newPage();
-    const randomUserAgent = userAgents[Math.floor(Math.random() * userAgents.length)];
-    
-    await page.setDefaultNavigationTimeout(45000);
-    await page.setViewport({ width: 1920, height: 1080 });
-    await page.setUserAgent(randomUserAgent);
-    await page.setExtraHTTPHeaders(getDefaultHeaders());
-    
-    await page.evaluateOnNewDocument(() => {
-        delete Object.getPrototypeOf(navigator).webdriver;
-        Object.defineProperty(navigator, 'platform', { get: () => 'Win32' });
-        Object.defineProperty(navigator, 'productSub', { get: () => '20100101' });
-        Object.defineProperty(navigator, 'vendor', { get: () => 'Google Inc.' });
-        window.navigator.chrome = { runtime: {} };
-    });
-    
-    return page;
 };
 
-// Gestion des ressources
-const setupResourceInterception = async (page) => {
-    await page.setRequestInterception(true);
-    page.on('request', (request) => {
-        const resourceType = request.resourceType();
-        if (['image', 'stylesheet', 'font'].includes(resourceType)) {
-            request.abort();
-        } else {
-            request.continue();
-        }
-    });
-};
-
-// Utilitaires de temps et délais
-const randomDelay = async (min, max) => {
-    const delay = Math.floor(Math.random() * (max - min + 1)) + min;
-    await new Promise(resolve => setTimeout(resolve, delay));
-};
-
-const normalizeTime = (timeStr, offsetMinutes = 0) => {
-    if (!timeStr || timeStr === 'NaN:undefined' || timeStr === '--') return null;
+// Utilitaires de temps
+const normalizeTime = (timeStr, prayerName = null) => {
+    if (!timeStr) return null;
 
     try {
-        const originalStr = timeStr.toLowerCase();
-        const isPM = originalStr.includes('pm');
-        const isAM = originalStr.includes('am');
-        timeStr = timeStr.replace(/[^0-9:]/g, '');
+        // Nettoyer la chaîne
+        timeStr = timeStr.trim().toLowerCase();
+        if (timeStr === '--:--' || timeStr === 'n/a' || timeStr === '--') return null;
 
-        if (!timeStr.includes(':')) {
-            timeStr = timeStr.padStart(4, '0');
-            timeStr = `${timeStr.slice(0, 2)}:${timeStr.slice(2)}`;
-        }
-
-        let [hours, minutes] = timeStr.split(':').map(Number);
+        // Parser le format AM/PM si présent
+        let hours, minutes;
+        const isPM = timeStr.includes('pm');
+        const isAM = timeStr.includes('am');
         
-        // Applique le décalage
-        if (offsetMinutes !== 0) {
-            const date = new Date();
-            date.setHours(hours, minutes + offsetMinutes, 0, 0);
-            hours = date.getHours();
-            minutes = date.getMinutes();
+        // Enlever AM/PM et nettoyer
+        timeStr = timeStr.replace(/[ap]m/i, '').trim();
+        
+        // Gérer différents formats de séparation
+        if (timeStr.includes(':')) {
+            [hours, minutes] = timeStr.split(':').map(Number);
+        } else {
+            // Format sans séparateur (e.g., "0730")
+            timeStr = timeStr.padStart(4, '0');
+            hours = parseInt(timeStr.slice(0, 2));
+            minutes = parseInt(timeStr.slice(2));
         }
 
-        if (!prayerUtils.validatePrayerTime(hours, minutes)) return null;
-
-        if (hours <= 12) {
-            if (isPM && hours < 12) hours += 12;
-            else if (isAM && hours === 12) hours = 0;
-            else if (!isAM && !isPM) {
-                hours = prayerUtils.convertToMilitaryTime(hours, minutes);
+        // Validation de base
+        if (isNaN(hours) || isNaN(minutes)) return null;
+        if (minutes >= 60) return null;
+        
+        // Conversion basée sur la prière et l'heure
+        if (!isPM && !isAM) {
+            if (prayerName === 'fajr') {
+                // Fajr est toujours le matin
+                if (hours >= 12) hours -= 12;
+            }
+            else if (prayerName && ['asr', 'maghrib', 'isha'].includes(prayerName)) {
+                // Ces prières sont toujours l'après-midi/soir
+                if (hours < 12) hours += 12;
+            }
+            else if (hours <= 6) {
+                // Pour les heures très tôt sans indication AM/PM, supposer AM
+                // Ne rien faire, garder l'heure telle quelle
+            }
+            else if (hours >= 7 && hours < 12) {
+                // Pour les heures de la journée, vérifier le contexte
+                if (prayerName && ['dhuhr', 'asr', 'maghrib', 'isha'].includes(prayerName)) {
+                    hours += 12;
+                }
             }
         }
+        else {
+            // Conversion standard AM/PM
+            if (isPM && hours < 12) hours += 12;
+            if (isAM && hours === 12) hours = 0;
+        }
 
-        return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+        // Validation finale
+        if (hours >= 24) return null;
+        
+        // Formatage
+        return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
     } catch (error) {
         console.error('Erreur de normalisation du temps:', error);
         return null;
@@ -334,7 +305,6 @@ const prayerUtils = {
     standardizePrayerName: (name) => {
         if (!name) return null;
         
-        // Liste explicite des prières autorisées et leurs variations
         const prayerMappings = {
             'fajr': 'fajr',
             'zuhr': 'dhuhr',
@@ -347,111 +317,41 @@ const prayerUtils = {
             'isha': 'isha'
         };
 
-        // Exclure explicitement certaines prières
-        const excludedPrayers = ['sunrise', 'sunset', 'shuruq', 'zawaal', 'jumuah'];
-        const normalizedName = name.toLowerCase().trim();
-        
-        if (excludedPrayers.includes(normalizedName)) {
-            return null;
-        }
-
-        return prayerMappings[normalizedName] || null;
-    },
-
-    validatePrayerTime: (hours, minutes) => {
-        return !isNaN(hours) && !isNaN(minutes) &&
-               hours >= 0 && hours <= 23 &&
-               minutes >= 0 && minutes <= 59;
-    },
-
-    convertToMilitaryTime: (hours, minutes) => {
-        switch (hours) {
-            case 2:
-            case 3: return hours + 12; // asr
-            case 4:
-            case 5: return hours + 12; // maghrib
-            case 6:
-            case 7: return minutes === 30 ? hours + 12 : hours; // isha
-            default: return hours;
-        }
+        return prayerMappings[name.toLowerCase().trim()] || null;
     },
 
     normalizeResult: (result) => {
+        if (!result || !result.times) {
+            throw new Error('Format de résultat invalide');
+        }
+
         const requiredPrayers = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
-        const normalized = {
-            source: result.source,
-            date: result.date,
-            times: {}
-        };
-    
+        const normalizedTimes = {};
+
         for (const prayer of requiredPrayers) {
-            const time = result.times[prayer];
-            // Vérifie que le temps est valide avant de l'inclure
-            if (time && typeof time === 'string' && /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(time)) {
-                normalized.times[prayer] = time;
-            } else {
-                normalized.times[prayer] = null;
+            if (result.times[prayer]) {
+                const normalizedTime = normalizeTime(result.times[prayer]);
+                if (normalizedTime) {
+                    normalizedTimes[prayer] = normalizedTime;
+                }
             }
         }
-    
-        // Vérification supplémentaire pour s'assurer qu'au moins une prière est valide
-        const hasValidTimes = Object.values(normalized.times).some(time => time !== null);
+
+        // Vérifier qu'au moins une prière est valide
+        const hasValidTimes = Object.values(normalizedTimes).some(time => time !== null);
         if (!hasValidTimes) {
             throw new Error('Aucune heure de prière valide trouvée');
         }
-    
-        return normalized;
+
+        return {
+            source: result.source,
+            date: result.date,
+            times: normalizedTimes
+        };
     }
 };
 
-// Gestion de Cloudflare
-const cloudflareUtils = {
-    detect: async (page) => {
-        const content = await page.content();
-        return content.includes('challenge-running') ||
-               content.includes('cf-browser-verification');
-    },
-
-    wait: async (page) => {
-        await page.waitForFunction(
-            () => !document.querySelector('#challenge-running') &&
-                  !document.querySelector('#cf-spinner') &&
-                  !document.querySelector('.cf-browser-verification'),
-            { timeout: 15000 }
-        );
-        await randomDelay(1000, 1500);
-    }
-};
-
-// Navigation sécurisée
-const safeNavigation = async (page, url, options = {}) => {
-    const config = {
-        retries: 2,
-        timeout: 25000,
-        waitUntil: 'domcontentloaded',
-        ...options
-    };
-
-    for (let i = 0; i < config.retries; i++) {
-        try {
-            const response = await page.goto(url, {
-                waitUntil: config.waitUntil,
-                timeout: config.timeout
-            });
-
-            if (response.status() === 520 || response.status() === 403) {
-                await cloudflareUtils.wait(page);
-            }
-
-            return response;
-        } catch (error) {
-            if (i === config.retries - 1) throw error;
-            await randomDelay(3000, 5000);
-        }
-    }
-};
-
-// Gestion des erreurs
+// Utilitaires pour les erreurs
 const errorUtils = {
     saveFailedPage: async (page, filename) => {
         try {
@@ -473,53 +373,23 @@ const errorUtils = {
     }
 };
 
-// Date utils
+// Utilitaires de date
 const dateUtils = {
     getUKDateTime: () => DateTime.now().setZone('Europe/London'),
     getUKDate: () => DateTime.now().setZone('Europe/London').toISODate()
 };
 
-// Instance du gestionnaire de verrous
-const scraperLock = new ScraperLockManager();
-
-// Création d'un scraper avec gestion des verrous
-const createScraper = (scraperId, scraperFunction) => {
-    return async () => {
-        try {
-            if (!(await scraperLock.acquireLock(scraperId))) {
-                console.log(`Scraper ${scraperId} is already running`);
-                return null;
-            }
-
-            const result = await scraperFunction();
-            return result;
-
-        } catch (error) {
-            errorUtils.logScrapingError(`Scraper ${scraperId}`, error);
-            throw error;
-
-        } finally {
-            scraperLock.releaseLock(scraperId);
-        }
-    };
-};
-
-// Exports
+// Exporter toutes les utilités
 module.exports = {
-  TimeValidator,
+    TimeValidator,
     browserUtils,
     getDefaultBrowserConfig,
     getDefaultHeaders,
-    setupBasicBrowserPage,
     setupChromiumPath,
-    setupResourceInterception,
-    randomDelay,
+    safeNavigation,
     normalizeTime,
     prayerUtils,
-    cloudflareUtils,
-    safeNavigation,
     errorUtils,
     dateUtils,
-    scraperLock,
-    createScraper
+    userAgents
 };

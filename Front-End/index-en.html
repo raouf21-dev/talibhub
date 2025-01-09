@@ -715,7 +715,7 @@
           <div class="chart-section">
               <div class="stats-header">
                   <div class="title-area">
-                      <h2>Daily Statistics</h2>
+                      <h2 data-action="dailyStats">Daily Statistics</h2>
                   </div>
                   <div class="period-navigation" data-period="daily">
                       <button class="nav-btn prev">
@@ -723,7 +723,7 @@
                               <polyline points="15 18 9 12 15 6"></polyline>
                           </svg>
                       </button>
-                      <span id="daily-period" class="period-display"></span>
+                      <span id="daily-period" class="period-display" data-date="2025-01-06">January 6, 2025</span>
                       <button class="nav-btn next">
                           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                               <polyline points="9 18 15 12 9 6"></polyline>
@@ -739,21 +739,20 @@
                       <table class="task-details-table">
                           <thead>
                               <tr>
-                                  <th>Tâche</th>
-                                  <th>Temps (min)</th>
-                                  <th>Comptages</th>
+                                  <th data-action="task">Task</th>
+                                  <th data-action="timeMinutes">Time (min)</th>
+                                  <th data-action="counts">Counts</th>
                               </tr>
                           </thead>
-                          <tbody>
-                          </tbody>
+                          <tbody></tbody>
                       </table>
                   </div>
                   <button class="toggle-details-btn">
-                    <span>Voir les détails</span>
-                    <svg width="12" height="12" viewBox="0 0 24 24">
-                        <polyline points="6 9 12 15 18 9"></polyline>
-                    </svg>
-                </button>
+                      <span data-action="viewDetails">View details</span>
+                      <svg width="12" height="12" viewBox="0 0 24 24">
+                          <polyline points="6 9 12 15 18 9"></polyline>
+                      </svg>
+                  </button>
               </div>
           </div>
   
@@ -761,7 +760,7 @@
           <div class="chart-section">
               <div class="stats-header">
                   <div class="title-area">
-                      <h2>Weekly Statistics</h2>
+                      <h2 data-action="weeklyStats">Weekly Statistics</h2>
                   </div>
                   <div class="period-navigation" data-period="weekly">
                       <button class="nav-btn prev">
@@ -769,7 +768,7 @@
                               <polyline points="15 18 9 12 15 6"></polyline>
                           </svg>
                       </button>
-                      <span id="weekly-period" class="period-display"></span>
+                      <span id="weekly-period" class="period-display" data-date="2025-01-06">Week of January 6, 2025</span>
                       <button class="nav-btn next">
                           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                               <polyline points="9 18 15 12 9 6"></polyline>
@@ -785,21 +784,20 @@
                       <table class="task-details-table">
                           <thead>
                               <tr>
-                                  <th>Tâche</th>
-                                  <th>Temps (min)</th>
-                                  <th>Comptages</th>
+                                  <th data-action="task">Task</th>
+                                  <th data-action="timeMinutes">Time (min)</th>
+                                  <th data-action="counts">Counts</th>
                               </tr>
                           </thead>
-                          <tbody>
-                          </tbody>
+                          <tbody></tbody>
                       </table>
                   </div>
                   <button class="toggle-details-btn">
-                    <span>Voir les détails</span>
-                    <svg width="12" height="12" viewBox="0 0 24 24">
-                        <polyline points="6 9 12 15 18 9"></polyline>
-                    </svg>
-                </button>
+                      <span data-action="viewDetails">View details</span>
+                      <svg width="12" height="12" viewBox="0 0 24 24">
+                          <polyline points="6 9 12 15 18 9"></polyline>
+                      </svg>
+                  </button>
               </div>
           </div>
   
@@ -807,7 +805,7 @@
           <div class="chart-section">
               <div class="stats-header">
                   <div class="title-area">
-                      <h2>Monthly Statistics</h2>
+                      <h2 data-action="monthlyStats">Monthly Statistics</h2>
                   </div>
                   <div class="period-navigation" data-period="monthly">
                       <button class="nav-btn prev">
@@ -815,7 +813,7 @@
                               <polyline points="15 18 9 12 15 6"></polyline>
                           </svg>
                       </button>
-                      <span id="monthly-period" class="period-display"></span>
+                      <span id="monthly-period" class="period-display" data-date="2025-01-01">January 2025</span>
                       <button class="nav-btn next">
                           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                               <polyline points="9 18 15 12 9 6"></polyline>
@@ -831,21 +829,20 @@
                       <table class="task-details-table">
                           <thead>
                               <tr>
-                                  <th>Tâche</th>
-                                  <th>Temps (min)</th>
-                                  <th>Comptages</th>
+                                  <th data-action="task">Task</th>
+                                  <th data-action="timeMinutes">Time (min)</th>
+                                  <th data-action="counts">Counts</th>
                               </tr>
                           </thead>
-                          <tbody>
-                          </tbody>
+                          <tbody></tbody>
                       </table>
                   </div>
                   <button class="toggle-details-btn">
-                    <span>Voir les détails</span>
-                    <svg width="12" height="12" viewBox="0 0 24 24">
-                        <polyline points="6 9 12 15 18 9"></polyline>
-                    </svg>
-                </button>
+                      <span data-action="viewDetails">View details</span>
+                      <svg width="12" height="12" viewBox="0 0 24 24">
+                          <polyline points="6 9 12 15 18 9"></polyline>
+                      </svg>
+                  </button>
               </div>
           </div>
   
@@ -853,7 +850,7 @@
           <div class="chart-section">
               <div class="stats-header">
                   <div class="title-area">
-                      <h2>Yearly Statistics</h2>
+                      <h2 data-action="yearlyStats">Yearly Statistics</h2>
                   </div>
                   <div class="period-navigation" data-period="yearly">
                       <button class="nav-btn prev">
@@ -861,7 +858,7 @@
                               <polyline points="15 18 9 12 15 6"></polyline>
                           </svg>
                       </button>
-                      <span id="yearly-period" class="period-display"></span>
+                      <span id="yearly-period" class="period-display" data-date="2025-01-01">2025</span>
                       <button class="nav-btn next">
                           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                               <polyline points="9 18 15 12 9 6"></polyline>
@@ -877,21 +874,20 @@
                       <table class="task-details-table">
                           <thead>
                               <tr>
-                                  <th>Tâche</th>
-                                  <th>Temps (min)</th>
-                                  <th>Comptages</th>
+                                  <th data-action="task">Task</th>
+                                  <th data-action="timeMinutes">Time (min)</th>
+                                  <th data-action="counts">Counts</th>
                               </tr>
                           </thead>
-                          <tbody>
-                          </tbody>
+                          <tbody></tbody>
                       </table>
                   </div>
                   <button class="toggle-details-btn">
-                    <span>Voir les détails</span>
-                    <svg width="12" height="12" viewBox="0 0 24 24">
-                        <polyline points="6 9 12 15 18 9"></polyline>
-                    </svg>
-                </button>
+                      <span data-action="viewDetails">View details</span>
+                      <svg width="12" height="12" viewBox="0 0 24 24">
+                          <polyline points="6 9 12 15 18 9"></polyline>
+                      </svg>
+                  </button>
               </div>
           </div>
       </div>
@@ -1907,5 +1903,6 @@
     <script type="module" src="dynamicLoader.js"></script>
     <script type="module" src="topnav.js"></script>
     <script type="module" src="statistics.js"></script>
+    <script type="module" src="charts.js"></script>
   </body>
 </html>

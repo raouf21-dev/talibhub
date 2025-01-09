@@ -1,159 +1,130 @@
-// Back-End/scrapers/birmingham/centralMosqueBham.js
-
+// centralMosqueBham.js
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 const { executablePath } = require('puppeteer');
-const { DateTime } = require('luxon');
-const fs = require('fs');
-const { 
-  normalizeTime, 
-  randomDelay, 
-  getDefaultBrowserConfig, 
-  getDefaultHeaders, 
-  setupBasicBrowserPage 
+const {
+    normalizeTime,
+    dateUtils,
+    prayerUtils,
+    userAgents
 } = require('../scraperUtils');
+const humanBehavior = require('../humanBehaviorUtils');
 
-// Configuration StealthPlugin
 const stealth = StealthPlugin();
 stealth.enabledEvasions.delete('webgl.vendor');
 stealth.enabledEvasions.delete('webgl.renderer');
 puppeteer.use(stealth);
 
-const waitForCloudflare = async (page) => {
-  try {
-    await page.waitForFunction(
-      () => {
-        return !document.querySelector('#challenge-running') &&
-               !document.querySelector('#cf-spinner') &&
-               !document.querySelector('.cf-browser-verification');
-      },
-      { timeout: 15000 }
-    );
-    await randomDelay(1000, 1500);
-  } catch (error) {
-    console.log('Erreur lors de l\'attente Cloudflare:', error.message);
-    throw new Error('Impossible de passer la protection Cloudflare');
-  }
-};
-
 const scrapeCentralMosque = async () => {
-  let browser;
-  try {
-    console.log('Démarrage du scraping...');
-    
-    const launchOptions = {
-      ...getDefaultBrowserConfig(),
-      executablePath: '/snap/bin/chromium',
-    };
+    let browser;
+    let page;
 
     try {
-      if (fs.existsSync('/usr/bin/chromium-browser')) {
-        console.log('Utilisation de Chromium système');
-        launchOptions.executablePath = '/usr/bin/chromium-browser';
-      } else {
-        console.log('Utilisation de Chromium Puppeteer');
-        launchOptions.executablePath = executablePath();
-      }
-    } catch (error) {
-      console.log('Fallback sur Chromium Puppeteer');
-      launchOptions.executablePath = executablePath();
-    }
+        console.log('Démarrage du scraping Central Mosque...');
 
-    browser = await puppeteer.launch(launchOptions);
-    const page = await setupBasicBrowserPage(browser);
-
-    console.log('Navigation vers Central Mosque...');
-
-    let retryCount = 0;
-    const maxRetries = 2;
-
-    while (retryCount < maxRetries) {
-      try {
-        const response = await page.goto('http://centralmosque.org.uk/', {
-          waitUntil: 'domcontentloaded',
-          timeout: 25000
+        browser = await puppeteer.launch({
+            headless: true,
+            args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage',
+                '--disable-gpu',
+                '--window-size=1920,1080'
+            ],
+            ignoreHTTPSErrors: true,
+            executablePath: await executablePath()
         });
 
-        if (response.status() === 520 || response.status() === 403) {
-          console.log(`Statut de réponse ${response.status()}, tentative de contournement Cloudflare...`);
-          await waitForCloudflare(page);
+        page = await browser.newPage();
+        
+        // Configuration anti-détection optimisée
+        await humanBehavior.setupPageOptimized(page);
+        
+        await page.setViewport({ width: 1920, height: 1080 });
+        const randomUserAgent = userAgents[Math.floor(Math.random() * userAgents.length)];
+        await page.setUserAgent(randomUserAgent);
+
+        console.log('Navigation en cours...');
+        
+        await page.goto('http://centralmosque.org.uk/', {
+            waitUntil: 'domcontentloaded',
+            timeout: 25000
+        });
+
+        // Simulation rapide de comportement humain
+        await Promise.all([
+            humanBehavior.randomDelay(100, 200),
+            humanBehavior.simulateScroll(page)
+        ]);
+
+        await page.waitForSelector('.mptt-wrapper-container', {
+            timeout: 15000,
+            visible: true
+        });
+
+        // Simulation de mouvement de souris vers le tableau des prières
+        await humanBehavior.moveMouseRandomly(page, '.mptt-wrapper-container');
+
+        console.log('Extraction des horaires en cours...');
+
+        const data = await page.evaluate(() => {
+            const prayers = {};
+            const prayerElements = document.querySelectorAll('.prayer-time');
+
+            prayerElements.forEach(element => {
+                const titleElement = element.querySelector('.mptt-sec-title');
+                const jamaatElement = element.querySelector('.prayer-jamaat');
+
+                if (titleElement && jamaatElement) {
+                    let title = titleElement.textContent.trim().toLowerCase();
+                    const jamaatTime = jamaatElement.textContent.trim();
+
+                    if (title === 'zuhr') {
+                        title = 'dhuhr';
+                    }
+
+                    prayers[title] = jamaatTime;
+                }
+            });
+
+            return prayers;
+        });
+
+        if (!data || Object.keys(data).length === 0) {
+            throw new Error('Aucun horaire de prière trouvé');
         }
 
-        const content = await page.content();
-        if (content.includes('mptt-wrapper-container')) {
-          console.log('Page chargée avec succès');
-          break;
-        } else {
-          throw new Error('Contenu de la page non valide');
+        console.log('Normalisation des données...');
+
+        const normalizedTimes = {};
+        for (let [prayer, time] of Object.entries(data)) {
+            prayer = prayerUtils.standardizePrayerName(prayer);
+            const normalizedTime = normalizeTime(time);
+            if (normalizedTime) {
+                normalizedTimes[prayer] = normalizedTime;
+            }
         }
-      } catch (error) {
-        retryCount++;
-        console.log(`Tentative ${retryCount}/${maxRetries} échouée:`, error.message);
-        if (retryCount === maxRetries) throw error;
-        await randomDelay(3000, 5000);
-      }
-    }
 
-    console.log('Attente des éléments de prière...');
-    await page.waitForSelector('.mptt-wrapper-container', { 
-      timeout: 15000,
-      visible: true 
-    });
+        const result = {
+            source: 'Central Mosque Birmingham',
+            date: dateUtils.getUKDate(),
+            times: normalizedTimes
+        };
 
-    const ukTime = DateTime.now().setZone('Europe/London');
-    const dateText = ukTime.toISODate();
+        const standardizedResult = prayerUtils.normalizeResult(result);
 
-    console.log('Extraction des données...');
-    const data = await page.evaluate(() => {
-      const prayers = {};
-      const prayerElements = document.querySelectorAll('.prayer-time');
+        console.log('Données extraites avec succès:', standardizedResult);
+        return standardizedResult;
 
-      prayerElements.forEach(element => {
-        const titleElement = element.querySelector('.mptt-sec-title');
-        const jamaatElement = element.querySelector('.prayer-jamaat');
-
-        if (titleElement && jamaatElement) {
-          let title = titleElement.textContent.trim().toLowerCase();
-          const jamaatTime = jamaatElement.textContent.trim();
-
-          if (title === 'zuhr') {
-            title = 'dhuhr';
-          }
-
-          prayers[title] = jamaatTime;
+    } catch (error) {
+        console.error('Erreur lors du scraping de Central Mosque:', error);
+        throw error;
+    } finally {
+        if (browser) {
+            await browser.close();
+            console.log('Navigateur fermé');
         }
-      });
-
-      return prayers;
-    });
-
-    // Normalise tous les temps avant de les renvoyer
-    const normalizedTimes = {};
-    for (const [prayer, time] of Object.entries(data)) {
-      const normalizedTime = normalizeTime(time);
-      if (normalizedTime) {
-        normalizedTimes[prayer] = normalizedTime;
-      }
     }
-
-    const result = {
-      source: 'Central Mosque Birmingham',
-      date: dateText,
-      times: normalizedTimes
-    };
-
-    console.log('Données extraites avec succès:', result);
-    return result;
-
-  } catch (error) {
-    console.error('Erreur détaillée lors du scraping:', error);
-    throw new Error(`Erreur de scraping: ${error.message}`);
-  } finally {
-    if (browser) {
-      await browser.close();
-      console.log('Navigateur fermé');
-    }
-  }
 };
 
 module.exports = scrapeCentralMosque;
