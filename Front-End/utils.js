@@ -1,6 +1,9 @@
 // utils.js
 
 import { authService } from './Services/authService.js';
+import { initializeStatistics, cleanupStatistics } from './statistics.js';
+
+let currentPage = null; // Pour garder trace de la page actuelle
 
 
 window.addEventListener('popstate', (event) => {
@@ -24,12 +27,12 @@ export async function isAuthenticated() {
 
 export async function navigateTo(pageId, addToHistory = true) {
     const publicPages = ['welcomepage'];
-    
+
     // Vérifier l'authentification
     const isUserAuthenticated = await isAuthenticated();
-    
+
     console.log('État authentification:', isUserAuthenticated, 'Page demandée:', pageId);
-    
+
     // Si l'utilisateur n'est pas authentifié et essaie d'accéder à une page protégée
     if (!isUserAuthenticated && !publicPages.includes(pageId)) {
         pageId = 'welcomepage';
@@ -39,12 +42,17 @@ export async function navigateTo(pageId, addToHistory = true) {
         pageId = 'dashboard';
     }
 
+    // Nettoyage de la page statistics si on la quitte
+    if (currentPage === 'statistics' && pageId !== 'statistics') {
+        await cleanupStatistics();
+    }
+
     // Masquer toutes les pages
     document.querySelectorAll('.page').forEach(page => {
         page.style.display = 'none';
         page.classList.remove('active');
     });
-    
+
     // Afficher la page cible
     const targetPage = document.getElementById(pageId);
     if (targetPage) {
@@ -56,6 +64,14 @@ export async function navigateTo(pageId, addToHistory = true) {
     } else {
         console.warn(`Page not found: ${pageId}`);
         return false;
+    }
+
+    // Mettre à jour la page courante
+    currentPage = pageId;
+
+    // Initialiser les statistiques si on arrive sur la page statistics
+    if (pageId === 'statistics') {
+        await initializeStatistics();
     }
 
     updateNavVisibility(pageId);

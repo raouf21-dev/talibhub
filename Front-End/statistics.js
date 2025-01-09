@@ -28,6 +28,7 @@ class StatisticsManager {
             yearly: []
         };
         this.initialized = false;
+        this.refreshInterval = null;
     }
 
     validateData(data, period) {
@@ -349,8 +350,13 @@ class StatisticsManager {
     }
 
     setupAutoRefresh() {
-        return setInterval(() => {
-            console.log('[Frontend] Rafraîchissement automatique des données');
+        // Arrêter l'intervalle existant s'il y en a un
+        if (this.refreshInterval) {
+            clearInterval(this.refreshInterval);
+        }
+        
+        // Créer un nouvel intervalle
+        this.refreshInterval = setInterval(() => {
             ['daily', 'weekly', 'monthly', 'yearly'].forEach(period => 
                 this.updatePeriodData(period)
             );
@@ -358,12 +364,13 @@ class StatisticsManager {
     }
 
     cleanup() {
+        // Arrêter l'auto-refresh
         if (this.refreshInterval) {
             clearInterval(this.refreshInterval);
+            this.refreshInterval = null;
         }
         ChartManager.destroy();
         this.initialized = false;
-        console.log('[Frontend] Nettoyage effectué');
     }
 
     handleError(error, context) {
@@ -372,29 +379,27 @@ class StatisticsManager {
     }
 
     async init() {
-        if (this.initialized) {
-            console.log('[Frontend] Déjà initialisé');
-            return;
-        }
+        if (this.initialized) return;
 
         try {
-            console.log('[Frontend] Initialisation...');
+            console.log('Initialisation des statistiques...');
             
             ChartManager.init();
             
             await Promise.all([
-                'daily', 'weekly', 'monthly', 'yearly'
+                'daily', 
+                'weekly', 
+                'monthly', 
+                'yearly'
             ].map(period => this.updatePeriodData(period)));
 
             this.setupNavigationListeners();
-            this.refreshInterval = this.setupAutoRefresh();
+            this.setupAutoRefresh();  // Démarrer l'auto-refresh
 
             this.initialized = true;
-            console.log('[Frontend] Initialisation terminée avec succès');
+            console.log('Initialisation des statistiques terminée');
         } catch (error) {
-            this.handleError(error, 'init');
-            this.initialized = false;
-            ChartManager.destroy();
+            console.error('Erreur lors de l\'initialisation des statistiques:', error);
             throw error;
         }
     }
