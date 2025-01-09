@@ -32,17 +32,22 @@ class ScraperManager {
     }
 
     setupScrapers() {
-        console.log('Setting up scrapers...');
-        console.log('Available scrapers:', Object.keys(SCRAPER_CONFIG));
-        Object.entries(SCRAPER_CONFIG).forEach(([id, config]) => {
-            console.log(`Setting up scraper ${id}: ${config.name}`);
-            if (!config.fn) {
-                console.error(`Missing function for scraper ${id}: ${config.name}`);
-                return;
-            }
-            this.scrapers.set(parseInt(id), this.createRobustScraper(parseInt(id), config));
-        });
-        console.log('Scrapers setup complete. Total scrapers:', this.scrapers.size);
+        console.log('Initializing scrapers...');
+        try {
+            Object.entries(SCRAPER_CONFIG).forEach(([id, config]) => {
+                console.log(`Attempting to setup scraper ${id}: ${config.name}`);
+                if (typeof config.fn !== 'function') {
+                    console.error(`Invalid scraper function for ID ${id}: ${config.name}`);
+                    console.error('Type:', typeof config.fn);
+                    return;
+                }
+                this.scrapers.set(parseInt(id), this.createRobustScraper(parseInt(id), config));
+                console.log(`Successfully setup scraper ${id}`);
+            });
+        } catch (error) {
+            console.error('Error in setupScrapers:', error);
+        }
+        console.log('Available scrapers:', [...this.scrapers.keys()]);
     }
 
     createRobustScraper(id, config) {
