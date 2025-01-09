@@ -32,36 +32,42 @@ class ScraperManager {
     }
 
     setupScrapers() {
-        console.log('Initializing scrapers...');
-        try {
-            Object.entries(SCRAPER_CONFIG).forEach(([id, config]) => {
-                console.log(`Attempting to setup scraper ${id}: ${config.name}`);
-                if (typeof config.fn !== 'function') {
-                    console.error(`Invalid scraper function for ID ${id}: ${config.name}`);
-                    console.error('Type:', typeof config.fn);
-                    return;
-                }
+        console.log('===== DEBUG: Starting scraper setup =====');
+        Object.entries(SCRAPER_CONFIG).forEach(([id, config]) => {
+            console.log(`DEBUG: Setting up scraper ${id} (${config.name})`);
+            console.log(`DEBUG: Scraper function type:`, typeof config.fn);
+            
+            // Vérifier si la fonction est correctement importée
+            if (!config.fn) {
+                console.error(`ERROR: Scraper function is undefined for ID ${id}`);
+                return;
+            }
+    
+            try {
                 this.scrapers.set(parseInt(id), this.createRobustScraper(parseInt(id), config));
-                console.log(`Successfully setup scraper ${id}`);
-            });
-        } catch (error) {
-            console.error('Error in setupScrapers:', error);
-        }
-        console.log('Available scrapers:', [...this.scrapers.keys()]);
+                console.log(`DEBUG: Successfully set up scraper ${id}`);
+            } catch (error) {
+                console.error(`ERROR setting up scraper ${id}:`, error);
+            }
+        });
+    
+        console.log('DEBUG: Current scrapers map:', [...this.scrapers.keys()]);
+        console.log('===== DEBUG: Scraper setup complete =====');
     }
 
     createRobustScraper(id, config) {
+        console.log(`DEBUG: Creating robust scraper for ID ${id}`);
         return async () => {
             const startTime = Date.now();
             
             try {
                 // Si déjà en cours de scraping, attendre le résultat
                 if (scraperQueue.isProcessing(id)) {
-                    console.log(`Scraper ${id} is already running, waiting for result...`);
+                    console.log(`DEBUG: Scraper ${id} is already running, waiting for result...`);
                     return await scraperQueue.getActiveTask(id);
                 }
-
-                console.log(`Starting scraping for ${config.name} (ID: ${id})`);
+    
+                console.log(`DEBUG: Starting new scrape for ${config.name} (ID: ${id})`);
 
                 // Utiliser la queue pour gérer le scraping
                 const result = await scraperQueue.enqueue(id, async () => {
