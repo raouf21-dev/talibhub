@@ -137,6 +137,6 @@ const scrapeArRahmaCentreBham = async () => {
             console.log('Navigateur fermé');
         }
     }
-};
+}
 
 module.exports = scrapeArRahmaCentreBham;
