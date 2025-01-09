@@ -15,12 +15,6 @@ stealth.enabledEvasions.delete('webgl.vendor');
 stealth.enabledEvasions.delete('webgl.renderer');
 puppeteer.use(stealth);
 
-// Au début du fichier, après les imports
-console.log('DEBUG: arRahmaCentreBham import check:', typeof scrapeArRahmaCentreBham);
-if (typeof scrapeArRahmaCentreBham !== 'function') {
-    console.error('ERROR: arRahmaCentreBham is not a function:', scrapeArRahmaCentreBham);
-}
-
 const scrapeArRahmaCentreBham = async () => {
     let browser;
     let page;

@@ -2,6 +2,7 @@
 const { TimeValidator, browserUtils } = require('./scraperUtils');
 const scraperQueue = require('./scraperQueue');
 
+// Imports des scrapers
 const scrapeAishaMosque = require("./walsall/aishaMosqueWalsall");
 const scrapeMasjidAlFarouq = require("./walsall/masjidAlfarouqWalsall");
 const scrapeMasjidAbuBakrWalsall = require("./walsall/masjidAbuBakrWalsall");
@@ -10,6 +11,12 @@ const scrapeCentralMosqueBham = require("./birmingham/centralMosqueBham");
 const scrapeQubaIsmalicCenter = require("./birmingham/qubaIsmalicCenterBham");
 const scrapeMSHUK = require("./birmingham/muslimStudentsHouseBham");
 const scrapeArRahmaCentreBham = require("./birmingham/arRahmaCentreBham");
+
+// Debug logs pour vérifier les imports
+console.log('===== DEBUG: Checking imports =====');
+console.log('arRahmaCentreBham:', typeof scrapeArRahmaCentreBham);
+console.log('centralMosqueBham:', typeof scrapeCentralMosqueBham);
+console.log('===== END DEBUG =====');
 
 // Configuration des scrapers
 const SCRAPER_CONFIG = {
