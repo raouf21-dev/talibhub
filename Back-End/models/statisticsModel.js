@@ -1,240 +1,265 @@
 const pool = require('../config/db');
 
-// Time interval constants
-const TIME_INTERVALS = {
-    DAILY: "INTERVAL '2 weeks'",
-    WEEKLY: "INTERVAL '2 months'",
-    MONTHLY: "INTERVAL '1 year'",
-    YEARLY: "INTERVAL '2 years'"
-};
-
-const getDailyStats = async (userId) => {
+async function getDailyStats(userId) {
     const query = `
-        WITH daily_totals AS (
+        WITH RECURSIVE dates AS (
+            -- Génère les 7 derniers jours
             SELECT 
-                DATE(s.created_at) as date,
-                SUM(s.total_work_time + s.stopwatch_time + s.timer_time) as total_time,
-                SUM(s.counter_value) as total_count
+                generate_series(
+                    CURRENT_DATE::date,
+                    (CURRENT_DATE - INTERVAL '6 days')::date,
+                    '-1 day'::interval
+                )::date AS date
+        ),
+        daily_totals AS (
+            -- Calcule les totaux par jour
+            SELECT
+                date(s.created_at)::date AS session_date,
+                SUM(COALESCE(s.total_work_time, 0) + 
+                    COALESCE(s.timer_time, 0) + 
+                    COALESCE(s.stopwatch_time, 0)) AS total_time,
+                SUM(COALESCE(s.counter_value, 0)) AS total_count
             FROM sessions s
             WHERE s.user_id = $1
-            AND created_at >= DATE_TRUNC('day', CURRENT_DATE - ${TIME_INTERVALS.DAILY})
-            AND created_at <= CURRENT_DATE
-            GROUP BY DATE(s.created_at)
+                AND s.created_at >= (CURRENT_DATE - INTERVAL '6 days')
+                AND s.created_at < (CURRENT_DATE + INTERVAL '1 day')
+            GROUP BY date(s.created_at)::date
         ),
         task_stats AS (
-            SELECT 
-                DATE(s.created_at) as date,
-                t.id,
+            -- Calcule les statistiques par tâche
+            SELECT
+                date(s.created_at)::date AS session_date,
+                t.id AS task_id,
                 t.name,
-                SUM(s.total_work_time + s.stopwatch_time + s.timer_time) as task_total_time,
-                SUM(s.counter_value) as task_total_count
+                SUM(COALESCE(s.total_work_time, 0) + 
+                    COALESCE(s.timer_time, 0) + 
+                    COALESCE(s.stopwatch_time, 0)) AS task_total_time,
+                SUM(COALESCE(s.counter_value, 0)) AS task_total_count
             FROM sessions s
             LEFT JOIN tasks t ON s.task_id = t.id
             WHERE s.user_id = $1
-            AND created_at >= DATE_TRUNC('day', CURRENT_DATE - ${TIME_INTERVALS.DAILY})
-            AND created_at <= CURRENT_DATE
-            GROUP BY DATE(s.created_at), t.id, t.name
+                AND s.created_at >= (CURRENT_DATE - INTERVAL '6 days')
+                AND s.created_at < (CURRENT_DATE + INTERVAL '1 day')
+            GROUP BY date(s.created_at)::date, t.id, t.name
         )
-        SELECT 
-            dt.*,
+        SELECT
+            dates.date,
+            COALESCE(dt.total_time, 0) AS total_time,
+            COALESCE(dt.total_count, 0) AS total_count,
             COALESCE(
-                json_agg(
-                    json_build_object(
-                        'task_id', ts.id,
+                (
+                    SELECT json_agg(json_build_object(
+                        'task_id', ts.task_id,
                         'name', ts.name,
                         'total_time', ts.task_total_time,
                         'total_count', ts.task_total_count
-                    )
-                ) FILTER (WHERE ts.id IS NOT NULL AND ts.date = dt.date),
+                    ))
+                    FROM task_stats ts
+                    WHERE ts.session_date = dates.date
+                ), 
                 '[]'
-            ) as task_details
-        FROM daily_totals dt
-        LEFT JOIN task_stats ts ON dt.date = ts.date
-        GROUP BY dt.date, dt.total_time, dt.total_count
-        ORDER BY dt.date DESC;
+            ) AS task_details
+        FROM dates
+        LEFT JOIN daily_totals dt ON dt.session_date = dates.date
+        ORDER BY dates.date DESC;
     `;
-    
-    try {
-        console.log('Executing daily stats query for user:', userId);
-        const result = await pool.query(query, [userId]);
-        console.log('Daily stats results:', result.rows.length, 'rows found');
-        return result.rows;
-    } catch (error) {
-        console.error('Error in getDailyStats:', error);
-        throw error;
-    }
-};
+    const result = await pool.query(query, [userId]);
+    return result.rows;
+}
 
-const getWeeklyStats = async (userId) => {
+async function getWeeklyStats(userId) {
     const query = `
-        WITH weekly_totals AS (
-            SELECT 
-                DATE_TRUNC('week', s.created_at) as date,
-                SUM(s.total_work_time + s.stopwatch_time + s.timer_time) as total_time,
-                SUM(s.counter_value) as total_count
+        WITH RECURSIVE weeks AS (
+            -- Génère les 4 dernières semaines
+            SELECT generate_series(
+                DATE_TRUNC('week', CURRENT_DATE)::date,
+                (DATE_TRUNC('week', CURRENT_DATE) - INTERVAL '3 weeks')::date,
+                '-1 week'::interval
+            )::date AS week_start
+        ),
+        weekly_totals AS (
+            -- Calcule les totaux par semaine
+            SELECT
+                DATE_TRUNC('week', s.created_at)::date AS session_week,
+                SUM(COALESCE(s.total_work_time, 0) + 
+                    COALESCE(s.timer_time, 0) + 
+                    COALESCE(s.stopwatch_time, 0)) AS total_time,
+                SUM(COALESCE(s.counter_value, 0)) AS total_count
             FROM sessions s
             WHERE s.user_id = $1
-            AND created_at >= DATE_TRUNC('week', CURRENT_DATE - ${TIME_INTERVALS.WEEKLY})
-            AND created_at <= CURRENT_DATE
-            GROUP BY DATE_TRUNC('week', s.created_at)
+                AND s.created_at >= (DATE_TRUNC('week', CURRENT_DATE) - INTERVAL '3 weeks')
+                AND s.created_at < (DATE_TRUNC('week', CURRENT_DATE) + INTERVAL '1 week')
+            GROUP BY DATE_TRUNC('week', s.created_at)::date
         ),
         task_stats AS (
-            SELECT 
-                DATE_TRUNC('week', s.created_at) as date,
-                t.id,
+            -- Calcule les statistiques par tâche
+            SELECT
+                DATE_TRUNC('week', s.created_at)::date AS session_week,
+                t.id AS task_id,
                 t.name,
-                SUM(s.total_work_time + s.stopwatch_time + s.timer_time) as task_total_time,
-                SUM(s.counter_value) as task_total_count
+                SUM(COALESCE(s.total_work_time, 0) + 
+                    COALESCE(s.timer_time, 0) + 
+                    COALESCE(s.stopwatch_time, 0)) AS task_total_time,
+                SUM(COALESCE(s.counter_value, 0)) AS task_total_count
             FROM sessions s
             LEFT JOIN tasks t ON s.task_id = t.id
             WHERE s.user_id = $1
-            AND created_at >= DATE_TRUNC('week', CURRENT_DATE - ${TIME_INTERVALS.WEEKLY})
-            AND created_at <= CURRENT_DATE
-            GROUP BY DATE_TRUNC('week', s.created_at), t.id, t.name
+                AND s.created_at >= (DATE_TRUNC('week', CURRENT_DATE) - INTERVAL '3 weeks')
+                AND s.created_at < (DATE_TRUNC('week', CURRENT_DATE) + INTERVAL '1 week')
+            GROUP BY DATE_TRUNC('week', s.created_at)::date, t.id, t.name
         )
-        SELECT 
-            wt.*,
+        SELECT
+            weeks.week_start AS date,
+            COALESCE(wt.total_time, 0) AS total_time,
+            COALESCE(wt.total_count, 0) AS total_count,
             COALESCE(
-                json_agg(
-                    json_build_object(
-                        'task_id', ts.id,
+                (
+                    SELECT json_agg(json_build_object(
+                        'task_id', ts.task_id,
                         'name', ts.name,
                         'total_time', ts.task_total_time,
                         'total_count', ts.task_total_count
-                    )
-                ) FILTER (WHERE ts.id IS NOT NULL AND ts.date = wt.date),
+                    ))
+                    FROM task_stats ts
+                    WHERE ts.session_week = weeks.week_start
+                ),
                 '[]'
-            ) as task_details
-        FROM weekly_totals wt
-        LEFT JOIN task_stats ts ON wt.date = ts.date
-        GROUP BY wt.date, wt.total_time, wt.total_count
-        ORDER BY wt.date DESC;
+            ) AS task_details
+        FROM weeks
+        LEFT JOIN weekly_totals wt ON wt.session_week = weeks.week_start
+        ORDER BY weeks.week_start DESC;
     `;
-    
-    try {
-        console.log('Executing weekly stats query for user:', userId);
-        const result = await pool.query(query, [userId]);
-        console.log('Weekly stats results:', result.rows.length, 'rows found');
-        return result.rows;
-    } catch (error) {
-        console.error('Error in getWeeklyStats:', error);
-        throw error;
-    }
-};
+    const result = await pool.query(query, [userId]);
+    return result.rows;
+}
 
-const getMonthlyStats = async (userId) => {
+async function getMonthlyStats(userId) {
     const query = `
-        WITH monthly_totals AS (
-            SELECT 
-                DATE_TRUNC('month', s.created_at) as date,
-                SUM(s.total_work_time + s.stopwatch_time + s.timer_time) as total_time,
-                SUM(s.counter_value) as total_count
+        WITH RECURSIVE months AS (
+            -- Génère les 12 derniers mois
+            SELECT generate_series(
+                DATE_TRUNC('month', CURRENT_DATE)::date,
+                (DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '11 months')::date,
+                '-1 month'::interval
+            )::date AS month_start
+        ),
+        monthly_totals AS (
+            -- Calcule les totaux par mois
+            SELECT
+                DATE_TRUNC('month', s.created_at)::date AS session_month,
+                SUM(COALESCE(s.total_work_time, 0) + 
+                    COALESCE(s.timer_time, 0) + 
+                    COALESCE(s.stopwatch_time, 0)) AS total_time,
+                SUM(COALESCE(s.counter_value, 0)) AS total_count
             FROM sessions s
             WHERE s.user_id = $1
-            AND created_at >= DATE_TRUNC('month', CURRENT_DATE - ${TIME_INTERVALS.MONTHLY})
-            AND created_at <= CURRENT_DATE
-            GROUP BY DATE_TRUNC('month', s.created_at)
+                AND s.created_at >= (DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '11 months')
+                AND s.created_at < (DATE_TRUNC('month', CURRENT_DATE) + INTERVAL '1 month')
+            GROUP BY DATE_TRUNC('month', s.created_at)::date
         ),
         task_stats AS (
-            SELECT 
-                DATE_TRUNC('month', s.created_at) as date,
-                t.id,
+            -- Calcule les statistiques par tâche
+            SELECT
+                DATE_TRUNC('month', s.created_at)::date AS session_month,
+                t.id AS task_id,
                 t.name,
-                SUM(s.total_work_time + s.stopwatch_time + s.timer_time) as task_total_time,
-                SUM(s.counter_value) as task_total_count
+                SUM(COALESCE(s.total_work_time, 0) + 
+                    COALESCE(s.timer_time, 0) + 
+                    COALESCE(s.stopwatch_time, 0)) AS task_total_time,
+                SUM(COALESCE(s.counter_value, 0)) AS task_total_count
             FROM sessions s
             LEFT JOIN tasks t ON s.task_id = t.id
             WHERE s.user_id = $1
-            AND created_at >= DATE_TRUNC('month', CURRENT_DATE - ${TIME_INTERVALS.MONTHLY})
-            AND created_at <= CURRENT_DATE
-            GROUP BY DATE_TRUNC('month', s.created_at), t.id, t.name
+                AND s.created_at >= (DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '11 months')
+                AND s.created_at < (DATE_TRUNC('month', CURRENT_DATE) + INTERVAL '1 month')
+            GROUP BY DATE_TRUNC('month', s.created_at)::date, t.id, t.name
         )
-        SELECT 
-            mt.*,
+        SELECT
+            months.month_start AS date,
+            COALESCE(mt.total_time, 0) AS total_time,
+            COALESCE(mt.total_count, 0) AS total_count,
             COALESCE(
-                json_agg(
-                    json_build_object(
-                        'task_id', ts.id,
+                (
+                    SELECT json_agg(json_build_object(
+                        'task_id', ts.task_id,
                         'name', ts.name,
                         'total_time', ts.task_total_time,
                         'total_count', ts.task_total_count
-                    )
-                ) FILTER (WHERE ts.id IS NOT NULL AND ts.date = mt.date),
+                    ))
+                    FROM task_stats ts
+                    WHERE ts.session_month = months.month_start
+                ),
                 '[]'
-            ) as task_details
-        FROM monthly_totals mt
-        LEFT JOIN task_stats ts ON mt.date = ts.date
-        GROUP BY mt.date, mt.total_time, mt.total_count
-        ORDER BY mt.date DESC;
+            ) AS task_details
+        FROM months
+        LEFT JOIN monthly_totals mt ON mt.session_month = months.month_start
+        ORDER BY months.month_start DESC;
     `;
-    
-    try {
-        console.log('Executing monthly stats query for user:', userId);
-        const result = await pool.query(query, [userId]);
-        console.log('Monthly stats results:', result.rows.length, 'rows found');
-        return result.rows;
-    } catch (error) {
-        console.error('Error in getMonthlyStats:', error);
-        throw error;
-    }
-};
+    const result = await pool.query(query, [userId]);
+    return result.rows;
+}
 
-const getYearlyStats = async (userId) => {
+async function getYearlyStats(userId) {
     const query = `
-        WITH yearly_totals AS (
-            SELECT 
-                DATE_TRUNC('year', s.created_at) as date,
-                SUM(s.total_work_time + s.stopwatch_time + s.timer_time) as total_time,
-                SUM(s.counter_value) as total_count
+        WITH current_year AS (
+            -- Année courante uniquement
+            SELECT DATE_TRUNC('year', CURRENT_DATE)::date AS year_start
+        ),
+        yearly_totals AS (
+            -- Calcule les totaux pour l'année
+            SELECT
+                DATE_TRUNC('year', s.created_at)::date AS session_year,
+                SUM(COALESCE(s.total_work_time, 0) + 
+                    COALESCE(s.timer_time, 0) + 
+                    COALESCE(s.stopwatch_time, 0)) AS total_time,
+                SUM(COALESCE(s.counter_value, 0)) AS total_count
             FROM sessions s
             WHERE s.user_id = $1
-            AND created_at >= DATE_TRUNC('year', CURRENT_DATE - ${TIME_INTERVALS.YEARLY})
-            AND created_at <= CURRENT_DATE
-            GROUP BY DATE_TRUNC('year', s.created_at)
+                AND s.created_at >= DATE_TRUNC('year', CURRENT_DATE)
+                AND s.created_at < (DATE_TRUNC('year', CURRENT_DATE) + INTERVAL '1 year')
+            GROUP BY DATE_TRUNC('year', s.created_at)::date
         ),
         task_stats AS (
-            SELECT 
-                DATE_TRUNC('year', s.created_at) as date,
-                t.id,
+            -- Calcule les statistiques par tâche
+            SELECT
+                DATE_TRUNC('year', s.created_at)::date AS session_year,
+                t.id AS task_id,
                 t.name,
-                SUM(s.total_work_time + s.stopwatch_time + s.timer_time) as task_total_time,
-                SUM(s.counter_value) as task_total_count
+                SUM(COALESCE(s.total_work_time, 0) + 
+                    COALESCE(s.timer_time, 0) + 
+                    COALESCE(s.stopwatch_time, 0)) AS task_total_time,
+                SUM(COALESCE(s.counter_value, 0)) AS task_total_count
             FROM sessions s
             LEFT JOIN tasks t ON s.task_id = t.id
             WHERE s.user_id = $1
-            AND created_at >= DATE_TRUNC('year', CURRENT_DATE - ${TIME_INTERVALS.YEARLY})
-            AND created_at <= CURRENT_DATE
-            GROUP BY DATE_TRUNC('year', s.created_at), t.id, t.name
+                AND s.created_at >= DATE_TRUNC('year', CURRENT_DATE)
+                AND s.created_at < (DATE_TRUNC('year', CURRENT_DATE) + INTERVAL '1 year')
+            GROUP BY DATE_TRUNC('year', s.created_at)::date, t.id, t.name
         )
-        SELECT 
-            yt.*,
+        SELECT
+            cy.year_start AS date,
+            COALESCE(yt.total_time, 0) AS total_time,
+            COALESCE(yt.total_count, 0) AS total_count,
             COALESCE(
-                json_agg(
-                    json_build_object(
-                        'task_id', ts.id,
+                (
+                    SELECT json_agg(json_build_object(
+                        'task_id', ts.task_id,
                         'name', ts.name,
                         'total_time', ts.task_total_time,
                         'total_count', ts.task_total_count
-                    )
-                ) FILTER (WHERE ts.id IS NOT NULL AND ts.date = yt.date),
+                    ))
+                    FROM task_stats ts
+                    WHERE ts.session_year = cy.year_start
+                ),
                 '[]'
-            ) as task_details
-        FROM yearly_totals yt
-        LEFT JOIN task_stats ts ON yt.date = ts.date
-        GROUP BY yt.date, yt.total_time, yt.total_count
-        ORDER BY yt.date DESC;
+            ) AS task_details
+        FROM current_year cy
+        LEFT JOIN yearly_totals yt ON yt.session_year = cy.year_start
+        ORDER BY cy.year_start DESC;
     `;
-    
-    try {
-        console.log('Executing yearly stats query for user:', userId);
-        const result = await pool.query(query, [userId]);
-        console.log('Yearly stats results:', result.rows.length, 'rows found');
-        return result.rows;
-    } catch (error) {
-        console.error('Error in getYearlyStats:', error);
-        throw error;
-    }
-};
+    const result = await pool.query(query, [userId]);
+    return result.rows;
+}
 
 module.exports = {
     getDailyStats,

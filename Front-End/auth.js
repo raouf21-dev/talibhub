@@ -2,23 +2,31 @@
 import { switchTab, initializeTabToggle, navigateTo } from "./utils.js";
 import { BotTracker } from "./bot-tracker.js";
 import CaptchaHandler from './captcha.js';
-import { apiClient } from './Config/apiConfig.js';
 import { api } from './dynamicLoader.js';
 import TermsHandler from './terms.js';
+import { notificationService } from './Services/notificationService.js';
+import { authService } from './Services/authService.js'; 
+import { countriesCache } from './Services/Caches/cacheCountries.js';  // Cache global pour les pays
 
+// Flag global pour empêcher une double initialisation du champ "pays"
+let isCountryInputInitialized = false;
 
+// Instances globales
 const botTracker = new BotTracker();
 const captchaHandler = new CaptchaHandler();
-let termsHandler; 
+let termsHandler;
 
+/* =========================
+   INITIALISATION DE L'AUTH
+   ========================= */
 function initializeAuth() {
     initializeAuthForms();
     initializeTabToggle();
-    initializeCountryInput();
-    termsHandler = new TermsHandler()
-
+    initializeCountryInput(); // Appelé une seule fois grâce au flag
+    termsHandler = new TermsHandler();
 }
 
+/* ------------------ Initialisation des formulaires d’authentification ------------------ */
 function initializeAuthForms() {
     const getStartedBtn = document.getElementById("welcomepage-getStartedBtn");
     if (getStartedBtn) {
@@ -38,12 +46,13 @@ function initializeAuthForms() {
     initializeEmailValidation();
 }
 
+/* ------------------ Validation de l’email (et du confirmEmail) ------------------ */
 function initializeEmailValidation() {
     const emailInput = document.getElementById("welcomepage-email");
     const confirmEmailInput = document.getElementById("welcomepage-confirmEmail");
 
     if (!emailInput || !confirmEmailInput) {
-        console.error("Les champs email ne sont pas trouvés");
+        // Champs e-mail introuvables
         return;
     }
 
@@ -57,8 +66,10 @@ function initializeEmailValidation() {
         }
 
         if (email !== confirmEmail) {
-            confirmEmailInput.setCustomValidity("Les adresses e-mail ne correspondent pas");
+            // Emails non concordants
+            notificationService.show('auth.email.mismatch', 'warning');
             confirmEmailInput.style.borderColor = "red";
+            confirmEmailInput.setCustomValidity("Les adresses e-mail ne correspondent pas");
         } else {
             confirmEmailInput.setCustomValidity("");
             confirmEmailInput.style.borderColor = "green";
@@ -71,6 +82,7 @@ function initializeEmailValidation() {
     confirmEmailInput.addEventListener("input", validateEmails);
 }
 
+/* ------------------ Affichage des formulaires d’authentification ------------------ */
 function showAuthForms() {
     console.log("showAuthForms called");
     const authForms = document.getElementById("welcomepage-auth-forms");
@@ -90,24 +102,29 @@ function showAuthForms() {
     }
 }
 
+/* ------------------ Gestion de l’inscription (sign-up) ------------------ */
 async function handleSignup(event) {
     event.preventDefault();
 
     try {
         // Vérification des CGU
         if (!termsHandler.isAccepted()) {
-            alert("Veuillez accepter les Conditions Générales d'Utilisation");
+            notificationService.show('auth.terms.required', 'warning');
             return;
         }
 
         // Vérification du CAPTCHA
         const isCaptchaValid = await captchaHandler.verify();
         if (!isCaptchaValid) {
-            alert("Veuillez valider le captcha");
+            notificationService.show('auth.captcha.required', 'warning');
             return;
         }
 
+        // Message de validation en cours
+        notificationService.show('auth.form.validating', 'info');
+
         const metrics = botTracker.getMetrics();
+
         const formData = {
             username: document.getElementById("welcomepage-username").value.trim(),
             firstName: document.getElementById("welcomepage-firstName").value.trim(),
@@ -122,87 +139,119 @@ async function handleSignup(event) {
             metrics: metrics,
         };
 
-        // Validation des champs
+        // Vérification des champs obligatoires
         if (!formData.username || !formData.email || !formData.password) {
-            throw new Error("Veuillez remplir tous les champs obligatoires");
+            notificationService.show('auth.required.fields', 'warning');
+            return;
         }
 
+        // Vérification du mot de passe
+        const passwordValidation = validatePassword(formData.password);
+        if (!passwordValidation.isValid) {
+            notificationService.show(passwordValidation.errors.join('\n'), 'warning');
+            return;
+        }
+
+        // Vérification de concordance d'email
         if (formData.email !== formData.confirmEmail) {
-            throw new Error("Les adresses email ne correspondent pas");
+            notificationService.show('auth.email.mismatch', 'warning');
+            return;
         }
 
-        // Utilisation du nouveau service API avec loader
-        const response = await api.post('/auth/register', formData);
+        // Appel API pour inscription
+        const response = await authService.register(formData);
         
-        // Vérification et stockage du token
         if (response && response.token) {
-            api.updateToken(response.token);
-            alert("Inscription réussie!");
+            // Déclencher l'événement login
+            window.dispatchEvent(new Event('login'));
+            notificationService.show('auth.signup.success', 'success');
             
-            // Redirection vers le dashboard avec délai
             setTimeout(() => {
                 navigateTo('dashboard');
-            }, 1000);
+            }, 1500);
         } else {
-            throw new Error("Erreur lors de l'inscription : token non reçu");
+            throw new Error("Token non reçu");
         }
 
     } catch (error) {
         console.error("Erreur:", error);
-        alert(error.message || "Une erreur est survenue lors de l'inscription");
+        notificationService.show('auth.signup.error', 'error', 0);
     }
 
     botTracker.reset();
 }
 
+function validatePassword(password) {
+    const minLength = 6;
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+    
+    const errors = [];
+    
+    if (password.length < minLength) {
+        errors.push("Le mot de passe doit contenir au moins 6 caractères");
+    }
+    if (!hasUpperCase) {
+        errors.push("Le mot de passe doit contenir au moins une majuscule");
+    }
+    if (!hasSpecialChar) {
+        errors.push("Le mot de passe doit contenir au moins un caractère spécial");
+    }
+    
+    return {
+        isValid: errors.length === 0,
+        errors: errors
+    };
+}
+
+/* ------------------ Gestion de la connexion (sign-in) ------------------ */
 async function handleSignin(event) {
     event.preventDefault();
     
     try {
-        const credentials = {
-            email: document.getElementById("welcomepage-signin-email").value,
-            password: document.getElementById("welcomepage-signin-password").value
-        };
+        const email = document.getElementById("welcomepage-signin-email").value;
+        const password = document.getElementById("welcomepage-signin-password").value;
 
-        // Utilisation du nouveau service API avec loader
-        const response = await api.post('/auth/login', credentials);
+        const response = await authService.login(email, password);
         if (response && response.token) {
-            api.updateToken(response.token);
-            console.log("Connexion réussie, redirection vers le tableau de bord");
-            setTimeout(() => navigateTo("dashboard"), 1000);
+            // Déclencher l'événement login
+            window.dispatchEvent(new Event('login'));
+            notificationService.show('auth.signin.success', 'success');
+            setTimeout(() => navigateTo("dashboard"), 1500);
         } else {
-            throw new Error("Token de connexion non reçu");
+            throw new Error("Token non reçu");
         }
     } catch (error) {
-        console.error("Erreur détaillée:", error);
-        alert("Erreur lors de la connexion : " + error.message);
+        console.error("Erreur de connexion:", error);
+        notificationService.show('auth.signin.error', 'error', 0);
     }
 }
 
+/* ------------------ Initialisation du champ "pays" (country) ------------------ */
 function initializeCountryInput() {
+    // Vérifie si l'initialisation a déjà été faite
+    if (isCountryInputInitialized) return;
+    isCountryInputInitialized = true;
+
     const countryInput = document.querySelector("#welcomepage-country");
     const countryList = document.querySelector("#country-list");
 
-    if (!countryInput || !countryList) {
-        console.error("Les éléments de pays n'ont pas été trouvés");
-        return;
-    }
+    if (!countryInput || !countryList) return;
 
     let currentLanguage = document.documentElement.lang || 'fr';
     let countries = [];
     let filteredCountries = [];
-    const countryCache = {};
 
     async function loadCountries(lang) {
-        try {
-            if (!countryCache[lang]) {
+        try {            
+            if (!countriesCache[lang]) {
                 const response = await api.get(`/data/countries_${lang}.json`);
-                countryCache[lang] = response;
+                countriesCache[lang] = response;
             }
-            countries = countryCache[lang];
+            countries = countriesCache[lang];
             filteredCountries = [...countries];
             displayCountries(countries);
-        } catch (error) {
+                    } catch (error) {
             console.error('Erreur de chargement des pays:', error);
             countries = [];
             filteredCountries = [];
@@ -218,6 +267,7 @@ function initializeCountryInput() {
             noResult.textContent = currentLanguage === "fr" ? "Aucun pays trouvé" : "No country found";
             noResult.classList.add("country-item");
             countryList.appendChild(noResult);
+            notificationService.show('auth.country.notfound', 'warning');
             return;
         }
 
@@ -271,4 +321,9 @@ function initializeCountryInput() {
     loadCountries(currentLanguage);
 }
 
+// Export des fonctions principales
 export { initializeAuth, handleSignup };
+export default {
+    initializeAuth,
+    handleSignup
+};

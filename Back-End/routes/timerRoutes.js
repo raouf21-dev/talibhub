@@ -1,19 +1,12 @@
+// routes/timerRoutes.js
 const express = require("express");
 const router = express.Router();
 const { authenticateToken } = require('../middlewares/authenticateToken');
 const timerController = require("../controllers/timerController");
 
-// Sauvegarder l'état du timer
-router.post("/saveState", authenticateToken, timerController.saveTimerState);
-
-// Charger l'état du timer
+// Routes timer
 router.get("/loadState", authenticateToken, timerController.loadTimerState);
-
-// Ajouter une tâche complétée
-router.post(
-  "/completedTasks",
-  authenticateToken,
-  timerController.addCompletedTask
-);
+router.post("/saveState", authenticateToken, timerController.saveTimerState);
+router.post("/completedTasks", authenticateToken, timerController.addCompletedTask);
 
 module.exports = router;

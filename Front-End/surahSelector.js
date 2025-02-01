@@ -2,48 +2,9 @@
 
 import { navigateTo } from './utils.js';
 import { api } from './dynamicLoader.js';
+import { notificationService } from './Services/notificationService.js';
 
-function initializeSurahSelector() {
-    const surahSelectorSection = document.getElementById('salatSurahSelector');
-    if (surahSelectorSection) {
-        surahSelectorSection.addEventListener('click', function(event) {
-            const target = event.target.closest('[data-action]');
-            if (target) {
-                const action = target.getAttribute('data-action');
-                switch(action) {
-                    case 'toggle-recitation-history':
-                        toggleRecitationHistory();
-                        break;
-                    case 'save-known-sourates':
-                        saveKnownSourates();
-                        break;
-                    case 'select-random-sourates':
-                        selectRandomSourates();
-                        break;
-                    default:
-                        console.warn('Action inconnue :', action);
-                }
-            }
-        });
-
-        (async () => {
-            try {
-                await loadAllSourates();
-                await loadKnownSourates();
-                const recitationData = await loadRecitationInfo();
-                generateSourateList();
-                updateKnownSouratesCount();
-                updateRecitationInfo(recitationData);
-            } catch (error) {
-                console.error('Erreur lors de l\'initialisation de l\'application:', error);
-            }
-        })();
-
-    } else {
-        console.error('Élément #salatSurahSelector non trouvé dans le DOM.');
-    }
-}
-
+// --- Variables globales ---
 const sourates = [];
 let knownSourates = [];
 let recitationCycles = 0;
@@ -53,32 +14,108 @@ let isHistoryVisible = false;
 let isSelecting = false; 
 let cachedKnownSourates = null;
 
+// Flag d'initialisation pour éviter les doublons d'écouteurs et d'appels
+let surahSelectorInitialized = false;
+
+/**
+ * Point d'entrée principal pour initialiser le sélecteur de sourates.
+ * L'initialisation ne se fait qu'une seule fois.
+ */
+function initializeSurahSelector() {
+    if (surahSelectorInitialized) {
+        console.log('SurahSelector déjà initialisé.');
+        return;
+    }
+    const surahSelectorSection = document.getElementById('salatSurahSelector');
+    if (surahSelectorSection) {
+        // Attache un unique handler pour les clics
+        surahSelectorSection.addEventListener('click', handleSectionClick);
+        surahSelectorInitialized = true;
+        // Lancement de l'initialisation de l'application
+        initializeApplication();
+    } else {
+        console.error('Élément #salatSurahSelector non trouvé dans le DOM.');
+    }
+}
+
+/**
+ * Gestionnaire global des clics sur la section.
+ */
+function handleSectionClick(event) {
+    const target = event.target.closest('[data-action]');
+    if (target) {
+        const action = target.getAttribute('data-action');
+        switch(action) {
+            case 'toggle-recitation-history':
+                toggleRecitationHistory();
+                break;
+            case 'save-known-sourates':
+                saveKnownSourates();
+                break;
+            case 'select-random-sourates':
+                selectRandomSourates();
+                break;
+            default:
+                console.warn('Action inconnue :', action);
+        }
+    }
+}
+
+/**
+ * Initialisation asynchrone de l'application :
+ * chargement des sourates, des sourates connues, des statistiques, et mise à jour de l'UI.
+ */
+async function initializeApplication() {
+    try {
+        await loadAllSourates();
+        await loadKnownSourates();
+        const recitationData = await loadRecitationInfo();
+        generateSourateList();
+        updateKnownSouratesCount();
+        updateRecitationInfo(recitationData);
+    } catch (error) {
+        console.error('Erreur lors de l\'initialisation:', error);
+        notificationService.show('surah.load_error', 'error', 0);
+    }
+}
+
+/**
+ * Chargement de toutes les sourates depuis l'API.
+ */
 async function loadAllSourates() {
     try {
         const data = await api.get('/sourates');
         sourates.length = 0;
         sourates.push(...data);
-        console.log('Sourates chargées:', sourates.length);
     } catch (error) {
-        console.error('Erreur lors du chargement des sourates:', error.message);
+        console.error('Erreur lors du chargement des sourates:', error);
+        notificationService.show('surah.load_error', 'error', 0);
         throw error;
     }
 }
 
+/**
+ * Chargement des sourates connues depuis l'API (avec sauvegarde en localStorage en cas d'erreur).
+ */
 async function loadKnownSourates() {
     try {
         const data = await api.get('/sourates/known');
+        // On conserve uniquement les numéros valides
         knownSourates = data.filter(s => s && s.sourate_number).map(s => s.sourate_number);
         localStorage.setItem('knownSourates', JSON.stringify(knownSourates));
-        console.log('Sourates connues chargées:', knownSourates);
     } catch (error) {
         console.error('Erreur lors du chargement des sourates connues:', error);
+        // En cas d’échec, on tente de récupérer la liste depuis le localStorage
         knownSourates = JSON.parse(localStorage.getItem('knownSourates') || '[]');
-        console.log('Utilisation des sourates connues du localStorage:', knownSourates);
+        notificationService.show('surah.load_error', 'error', 0);
     }
 }
 
+/**
+ * Sauvegarde des sourates cochées comme sourates connues.
+ */
 async function saveKnownSourates() {
+    // On récupère la liste des cases cochées
     const selectedSourates = Array.from(new Set(
         Array.from(document.querySelectorAll('#sourateList input[type="checkbox"]'))
             .filter(checkbox => checkbox.checked)
@@ -87,15 +124,19 @@ async function saveKnownSourates() {
 
     try {
         await api.post('/sourates/known', { sourates: selectedSourates });
-        console.log('Sourates connues sauvegardées avec succès');
         knownSourates = selectedSourates;
         localStorage.setItem('knownSourates', JSON.stringify(knownSourates));
         updateKnownSouratesCount();
+        notificationService.show('surah.saved', 'success');
     } catch (error) {
         console.error('Erreur lors de la sauvegarde des sourates connues:', error);
+        notificationService.show('surah.save_error', 'error', 0);
     }
 }
 
+/**
+ * Génération dynamique de la liste des sourates à cocher.
+ */
 function generateSourateList() {
     console.log('Début de la génération de la liste des sourates');
     const sourateList = document.getElementById('sourateList');
@@ -106,6 +147,7 @@ function generateSourateList() {
     
     sourateList.innerHTML = '';
 
+    // On parcourt la liste des sourates à l'envers (si besoin de cet ordre)
     for (let i = sourates.length - 1; i >= 0; i--) {
         const sourate = sourates[i];
         const checkbox = document.createElement('input');
@@ -131,6 +173,9 @@ function generateSourateList() {
     console.log('Fin de la génération de la liste des sourates');
 }
 
+/**
+ * Mise à jour du compteur de sourates connues dans l'interface.
+ */
 function updateKnownSouratesCount() {
     const countElement = document.getElementById('knownSouratesCount');
     if (countElement) {
@@ -138,6 +183,9 @@ function updateKnownSouratesCount() {
     }
 }
 
+/**
+ * Chargement des informations de récitation (stats) depuis l'API.
+ */
 async function loadRecitationInfo() {
     try {
         console.log('Début du chargement des informations de récitation');
@@ -155,63 +203,51 @@ async function loadRecitationInfo() {
     }
 }
 
-async function getKnownSouratesOnce() {
-    if (cachedKnownSourates) {
-        return cachedKnownSourates;
-    }
-    const data = await api.get('/sourates/known');
-    cachedKnownSourates = data;
-    return data;
-}
-
+/**
+ * Sélection aléatoire de sourates à réciter.
+ */
 async function selectRandomSourates() {
     if (isSelecting) {
-        console.log('Sélection déjà en cours, requête ignorée');
+        notificationService.show('surah.selection_in_progress', 'warning');
         return;
     }
     
     isSelecting = true;
     
     try {
-        // 1. Obtenir les sourates connues (avec cache)
         const knownSouratesData = await getKnownSouratesOnce();
-        console.log('Sourates connues récupérées:', knownSouratesData);
 
+        // Vérification : il faut au moins une sourate connue
         if (!knownSouratesData || knownSouratesData.length < 1) {
-            throw new Error('Veuillez sélectionner au moins une sourate connue pour la récitation.');
+            notificationService.show('surah.select_one', 'warning');
+            return;
         }
 
-        // 2. Obtenir les sourates non récitées
+        // Récupérer les sourates non encore récitées
         const notRecitedSourates = await getNotRecitedSourates();
-        console.log('Sourates non récitées:', notRecitedSourates);
 
-        // Si nous n'avons qu'une seule sourate non récitée
+        // Cas particulier : il ne reste plus qu’une sourate non récitée
         if (notRecitedSourates.length === 1) {
             const lastSourate = notRecitedSourates[0];
-            // Utiliser la même sourate pour les deux rakas
             updateUIWithSelectedSourates(lastSourate, lastSourate);
             
-            // Enregistrer la dernière récitation
             const recitationResult = await api.post('/sourates/recitations', {
                 firstSourate: lastSourate.number,
                 secondSourate: lastSourate.number
             });
-            console.log('Dernière sourate récitée:', recitationResult);
 
-            // Mettre à jour les statistiques
             await getRecitationStats();
 
             if (recitationResult.cycleCompleted) {
-                alert('Félicitations ! Vous avez complété un cycle de récitation !');
+                notificationService.show('surah.cycle_complete', 'success');
             }
             return;
         }
 
+        // Si toutes les sourates ont été récitées, démarrer un nouveau cycle
         let selectableSourates = [...notRecitedSourates];
-
-        // 3. Si pas de sourates non récitées, recommencer un nouveau cycle
         if (selectableSourates.length === 0) {
-            console.log('Toutes les sourates ont été récitées, début d\'un nouveau cycle');
+            notificationService.show('surah.new_cycle', 'info');
             const allKnownSourateNumbers = knownSouratesData.map(s => s.sourate_number);
             const allKnownSouratesData = await api.post('/sourates/by-numbers', { 
                 sourateNumbers: allKnownSourateNumbers 
@@ -219,28 +255,24 @@ async function selectRandomSourates() {
             selectableSourates = allKnownSouratesData;
         }
 
-        // 4. Sélection aléatoire
+        // Pioche de 2 sourates distinctes (ou identiques si aucune autre option)
         const [firstSourate, secondSourate] = selectTwoRandomSourates(selectableSourates);
-        console.log('Sourates sélectionnées:', { firstSourate, secondSourate });
-
-        // 5. Mise à jour de l'interface
         updateUIWithSelectedSourates(firstSourate, secondSourate);
 
-        // 6. Enregistrer la récitation
+        // Enregistrement de la récitation
         const recitationResult = await api.post('/sourates/recitations', {
             firstSourate: firstSourate.number,
             secondSourate: secondSourate.number
         });
-        console.log('Résultat de la récitation:', recitationResult);
 
-        // 7. Mettre à jour les statistiques immédiatement après l'enregistrement
+        // Mise à jour des stats
         const stats = await api.get('/sourates/recitations/stats');
-        console.log('Nouvelles statistiques:', stats);
         updateRecitationInfo(stats);
+        notificationService.show('surah.selected', 'success');
 
+        // Si un cycle est complété, afficher un message et mettre à jour les stats après délai
         if (recitationResult.cycleCompleted) {
-            alert('Félicitations ! Vous avez complété un cycle de récitation !');
-            // Forcer le rechargement des statistiques après la complétion du cycle
+            notificationService.show('surah.cycle_complete', 'success');
             setTimeout(async () => {
                 const updatedStats = await api.get('/sourates/recitations/stats');
                 updateRecitationInfo(updatedStats);
@@ -249,20 +281,25 @@ async function selectRandomSourates() {
 
     } catch (error) {
         console.error('Erreur dans selectRandomSourates:', error);
-        alert(error.message || 'Une erreur est survenue lors de la sélection des sourates');
+        notificationService.show('surah.selection_error', 'error', 0);
     } finally {
         isSelecting = false;
+        // Invalider le cache après 5 secondes
         setTimeout(() => {
             cachedKnownSourates = null;
         }, 5000);
     }
 }
 
+/**
+ * Sélectionne deux sourates aléatoires distinctes (ou identiques si nécessaire).
+ */
 function selectTwoRandomSourates(sourates) {
     const shuffledSourates = [...sourates].sort(() => Math.random() - 0.5);
     let firstSourate = shuffledSourates[0];
     let secondSourate = shuffledSourates.find(s => s.number !== firstSourate.number) || firstSourate;
 
+    // On s’assure que la première sourate a un numéro inférieur à la deuxième
     if (firstSourate.number > secondSourate.number) {
         [firstSourate, secondSourate] = [secondSourate, firstSourate];
     }
@@ -270,6 +307,9 @@ function selectTwoRandomSourates(sourates) {
     return [firstSourate, secondSourate];
 }
 
+/**
+ * Mise à jour de l'interface avec les sourates sélectionnées.
+ */
 function updateUIWithSelectedSourates(firstSourate, secondSourate) {
     const firstRakaElement = document.getElementById('firstRaka');
     const secondRakaElement = document.getElementById('secondRaka');
@@ -283,11 +323,29 @@ function updateUIWithSelectedSourates(firstSourate, secondSourate) {
     }
 }
 
+/**
+ * Récupération (avec cache) des sourates connues.
+ */
+async function getKnownSouratesOnce() {
+    if (cachedKnownSourates) {
+        return cachedKnownSourates;
+    }
+    const data = await api.get('/sourates/known');
+    cachedKnownSourates = data;
+    return data;
+}
+
+/**
+ * Récupération des sourates non encore récitées.
+ */
 async function getNotRecitedSourates() {
     const notRecitedSourates = await api.get('/sourates/recitations/not-recited');
     return notRecitedSourates;
 }
 
+/**
+ * Affiche ou masque l'historique des récitations.
+ */
 async function toggleRecitationHistory() {
     const historySection = document.getElementById('recitationHistory');
     isHistoryVisible = !isHistoryVisible;
@@ -299,7 +357,7 @@ async function toggleRecitationHistory() {
             historySection.style.display = 'block';
         } catch (error) {
             console.error('Erreur lors du chargement de l\'historique:', error);
-            alert('Erreur lors du chargement de l\'historique de récitation');
+            notificationService.show('surah.history_error', 'error', 0);
             isHistoryVisible = false;
         }
     } else {
@@ -307,6 +365,9 @@ async function toggleRecitationHistory() {
     }
 }
 
+/**
+ * Affichage de l'historique récupéré.
+ */
 function displayRecitationHistory(history) {
     const historyContainer = document.getElementById('recitationHistory');
     historyContainer.innerHTML = '';
@@ -324,6 +385,9 @@ function displayRecitationHistory(history) {
     }
 }
 
+/**
+ * Récupère les statistiques de récitation et met à jour l'interface.
+ */
 async function getRecitationStats() {
     try {
         const stats = await api.get('/sourates/recitations/stats');
@@ -331,10 +395,13 @@ async function getRecitationStats() {
         updateRecitationInfo(stats);
     } catch (error) {
         console.error('Erreur:', error);
-        alert(error.message);
+        notificationService.show('surah.load_error', 'error', 0);
     }
 }
 
+/**
+ * Mise à jour des informations de récitation (cycles & progression) dans l'interface.
+ */
 function updateRecitationInfo(data) {
     const cyclesElement = document.getElementById('recitationCyclesCount');
     const progressElement = document.getElementById('recitationProgress');
@@ -344,21 +411,19 @@ function updateRecitationInfo(data) {
         return;
     }
 
-    console.log('Mise à jour des informations de récitation avec:', data);
-
+    // Mise à jour des cycles
     if (cyclesElement) {
         const cycles = data.complete_cycles || data.cycles || 0;
         cyclesElement.innerHTML = `Cycles de récitation complets : <strong>${cycles}</strong>`;
     }
 
+    // Mise à jour de la progression
     if (progressElement) {
         const recited = data.recited_at_least_once || 0;
         const total = data.total_known || 0;
         progressElement.innerHTML = `Progrès : <strong>${recited} / ${total}</strong> sourates récitées`;
-        
-        // Log pour débogage
-        console.log(`Mise à jour du progrès : ${recited}/${total}`);
     }
 }
 
+// --- Export de la fonction d'initialisation principale ---
 export { initializeSurahSelector };

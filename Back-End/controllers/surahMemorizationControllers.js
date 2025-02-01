@@ -8,6 +8,7 @@ const {
   getKnownSurahs,
 } = require('../models/surahMemorizationModel');
 
+// Récupérer toutes les sourates
 const getSurahs = async (req, res) => {
   const userId = req.user.id;
   try {
@@ -19,6 +20,7 @@ const getSurahs = async (req, res) => {
   }
 };
 
+// Mettre à jour le niveau de mémorisation d'une sourate
 const updateSurah = async (req, res) => {
   const userId = req.user.id;
   const surahNumber = parseInt(req.params.number, 10);
@@ -33,6 +35,26 @@ const updateSurah = async (req, res) => {
   }
 };
 
+// Mettre à jour le statut "connu" d'une sourate
+const updateSurahKnownStatus = async (req, res) => {
+  const userId = req.user.id;
+  const surahNumber = parseInt(req.params.number, 10);
+  const { isKnown } = req.body;
+
+  try {
+    if (isKnown) {
+      await saveKnownSurahs(userId, [surahNumber]);
+    } else {
+      await saveKnownSurahs(userId, []);
+    }
+    res.json({ message: 'Surah known status updated successfully' });
+  } catch (error) {
+    console.error('Error updating surah known status:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+// Récupérer l'historique de révision
 const getHistory = async (req, res) => {
   const userId = req.user.id;
   try {
@@ -44,6 +66,7 @@ const getHistory = async (req, res) => {
   }
 };
 
+// Effacer l'historique de révision
 const clearHistory = async (req, res) => {
   const userId = req.user.id;
   try {
@@ -55,6 +78,7 @@ const clearHistory = async (req, res) => {
   }
 };
 
+// Sauvegarder les sourates connues
 const saveKnownSurahsController = async (req, res) => {
   const userId = req.user.id;
   const { sourates } = req.body; // Un tableau de numéros de sourates
@@ -68,6 +92,7 @@ const saveKnownSurahsController = async (req, res) => {
   }
 };
 
+// Récupérer les sourates connues
 const getKnownSurahsController = async (req, res) => {
   const userId = req.user.id;
   try {
@@ -83,6 +108,7 @@ const getKnownSurahsController = async (req, res) => {
 module.exports = {
   getSurahs,
   updateSurah,
+  updateSurahKnownStatus,
   getHistory,
   clearHistory,
   saveKnownSurahs: saveKnownSurahsController,

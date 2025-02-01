@@ -1,18 +1,24 @@
+// surahMemorization.js
+
 import { api } from './dynamicLoader.js';
+import { notificationService } from './Services/notificationService.js';
 
 // Variables globales
+let allSurahs = [];
+let surahsInRevision = [];
 let surahs = [];
 let currentSurahIndex = 0;
 let revisionHistory = [];
 let progressChart = null;
 let performanceChart = null;
+let surahsToRevise = [];   
 
 // Constantes
 const levelColors = {
     'Strong': 'rgb(34, 197, 94)',    // Vert
-    'Good': 'rgb(59, 130, 246)',      // Bleu
-    'Moderate': 'rgb(234, 179, 8)',   // Jaune
-    'Weak': 'rgb(239, 68, 68)'        // Rouge
+    'Good': 'rgb(59, 130, 246)',     // Bleu
+    'Moderate': 'rgb(234, 179, 8)',  // Jaune
+    'Weak': 'rgb(239, 68, 68)'       // Rouge
 };
 
 // Références DOM
@@ -36,7 +42,7 @@ const exportBtn = document.getElementById('surahmemorization-export');
 const clearHistoryBtn = document.getElementById('surahmemorization-clear');
 const saveButton = document.getElementById('surahmemorization-save');
 
-// Fonctions utilitaires
+/* ------------------ Fonctions utilitaires ------------------ */
 function formatDate(dateString) {
     if (!dateString) return 'N/A';
     const date = new Date(dateString);
@@ -60,7 +66,7 @@ function getLevelClass(level) {
     return `surahmemorization-level-${level.toLowerCase()}`;
 }
 
-// Fonctions principales
+/* ------------------ Fonction de chargement des sourates ------------------ */
 async function loadSurahs() {
     try {
         const data = await api.get('/surah-memorization/surahs');
@@ -72,15 +78,16 @@ async function loadSurahs() {
             lastRevisionDate: surah.lastRevisionDate || null,
             isSelected: surah.isKnown
         }));
-
         renderSurahList();
         updateSelectedCount();
+        renderCurrentSurah(); 
     } catch (error) {
         console.error('Error loading surahs:', error);
-        alert('Une erreur s\'est produite lors du chargement des sourates.');
+        notificationService.show('surah.load.error', 'error', 0);
     }
 }
 
+/* ------------------ Rendu de la liste des sourates ------------------ */
 function renderSurahList() {
     let container = document.getElementById('surahmemorization-list-container');
     if (!container) {
@@ -126,38 +133,36 @@ function renderSurahList() {
             </div>
         `;
 
+        // On met à jour la logique de la checkbox pour utiliser notificationService
         const checkbox = surahItem.querySelector('input');
-        checkbox.addEventListener('change', async (e) => {
-            surah.isSelected = e.target.checked;
-            updateSelectedCount();
-
-            try {
-                await api.put(`/surah-memorization/surahs/${surah.number}`, {
-                    isKnown: surah.isSelected
-                });
-                console.log(`Surah ${surah.number} updated to ${surah.isSelected ? 'known' : 'unknown'}.`);
-            } catch (error) {
-                console.error(`Erreur lors de la mise à jour de la sourate ${surah.number}:`, error);
-                alert(`Une erreur s'est produite lors de la mise à jour de la sourate ${surah.number}.`);
-                surah.isSelected = !surah.isSelected;
-                checkbox.checked = surah.isSelected;
-                updateSelectedCount();
-            }
-        });
+        updateSurahCheckbox(surah, checkbox);
 
         surahList.appendChild(surahItem);
     });
 }
 
+/* ------------------ Mise à jour du checkbox d'une sourate ------------------ */
+function updateSurahCheckbox(surah, checkbox) {
+    checkbox.addEventListener('change', (e) => {
+        surah.isSelected = e.target.checked;
+        updateSelectedCount();
+        // Plus d'appel API ici
+    });
+}
+
+
+/* ------------------ Mise à jour du compteur de sourates sélectionnées ------------------ */
 function updateSelectedCount() {
     const selectedCount = surahs.filter(surah => surah.isSelected).length;
-    selectedCountSpan.textContent = `${selectedCount} surahs selected`;
+    selectedCountSpan.textContent = `${selectedCount} surahs selected`; // Template string corrigé
     startRevisionBtn.disabled = selectedCount === 0;
 }
 
+/* ------------------ Rendu de la liste filtrée ------------------ */
 function renderFilteredSurahList(filteredSurahs) {
     if (!surahList) return;
     surahList.innerHTML = '';
+    
     filteredSurahs.forEach(surah => {
         const surahItem = document.createElement('div');
         surahItem.className = 'surahmemorization-item';
@@ -180,42 +185,37 @@ function renderFilteredSurahList(filteredSurahs) {
         `;
 
         const checkbox = surahItem.querySelector('input');
-        checkbox.addEventListener('change', async (e) => {
-            surah.isSelected = e.target.checked;
-            updateSelectedCount();
-
-            try {
-                await api.put(`/surah-memorization/surahs/${surah.number}`, {
-                    isKnown: surah.isSelected
-                });
-            } catch (error) {
-                console.error(`Erreur lors de la mise à jour de la sourate ${surah.number}:`, error);
-                alert(`Une erreur s'est produite lors de la mise à jour de la sourate ${surah.number}.`);
-                surah.isSelected = !surah.isSelected;
-                checkbox.checked = surah.isSelected;
-                updateSelectedCount();
-            }
-        });
+        updateSurahCheckbox(surah, checkbox);
 
         surahList.appendChild(surahItem);
     });
 }
 
+/* ------------------ Rendu de la sourate en cours ------------------ */
 function renderCurrentSurah() {
-    const currentSurah = surahs[currentSurahIndex];
+    // On prend la sourate courante dans le tableau réduit
+    const currentSurah = surahsInRevision[currentSurahIndex];
+    if (!currentSurah) return; // Sécurité si index hors limites
+
     currentSurahTitle.textContent = currentSurah.name;
-    surahProgress.textContent = `Sourate ${currentSurahIndex + 1} sur ${surahs.length}`;
-    surahText.textContent = currentSurah.text;
+
+    // Mise à jour du texte, reset du bouton Show/Hide
+    surahText.textContent = currentSurah.arabic;
     surahText.style.display = 'none';
     toggleTextBtn.innerHTML = '<span class="icon">👁</span> Show Text';
 
-    const progressPercentage = ((currentSurahIndex + 1) / surahs.length) * 100;
+    // Exemple : "Surah 1 of 3"
+    surahProgress.textContent = `Surah ${currentSurahIndex + 1} of ${surahsInRevision.length}`;
+
+    // Barre de progression
+    const progressPercentage = ((currentSurahIndex + 1) / surahsInRevision.length) * 100;
     progressBarFill.style.width = `${progressPercentage}%`;
 }
 
+
+/* ------------------ Rendu des graphiques (historique/performance) ------------------ */
 async function renderHistoryCharts() {
     const ctx = document.getElementById('surahmemorization-performance-chart')?.getContext('2d');
-    
     if (!ctx) return;
 
     try {
@@ -269,7 +269,6 @@ async function renderHistoryCharts() {
                                         const value = data.datasets[0].data[i];
                                         const total = data.datasets[0].data.reduce((acc, val) => acc + val, 0);
                                         const percentage = ((value / total) * 100).toFixed(1);
-                                        
                                         return {
                                             text: `${label}: ${percentage}% (${value})`,
                                             fillStyle: data.datasets[0].backgroundColor[i],
@@ -287,24 +286,19 @@ async function renderHistoryCharts() {
                     title: {
                         display: true,
                         text: '',
-                        padding: {
-                            top: 10,
-                            bottom: 30
-                        },
-                        font: {
-                            size: 18,
-                            weight: 'bold'
-                        }
+                        padding: { top: 10, bottom: 30 },
+                        font: { size: 18, weight: 'bold' }
                     }
                 }
             }
         });
     } catch (error) {
         console.error('Error loading history:', error);
-        alert('Une erreur s\'est produite lors du chargement de l\'historique.');
+        notificationService.show('surah.history.load.error', 'error', 0);
     }
 }
 
+/* ------------------ Rendu du tableau de l'historique ------------------ */
 async function renderHistoryTable() {
     if (!historyTable) return;
     
@@ -326,47 +320,86 @@ async function renderHistoryTable() {
         });
     } catch (error) {
         console.error('Error loading history:', error);
-        alert('Une erreur s\'est produite lors du chargement du tableau d\'historique.');
+        notificationService.show('surah.history.load.error', 'error', 0);
     }
 }
 
+/* ------------------ Initialisation du module de mémorisation ------------------ */
 function initSurahMemorization() {
     document.getElementById('surahmemorization-select').style.display = 'block';
-    document.getElementById('surahmemorization-revise').style.display = 'none';
     document.getElementById('surahmemorization-history').style.display = 'none';
     loadSurahs();
 }
 
-// Event Listeners
+/* ------------------ Gestion des événements (navigation) ------------------ */
 navButtons.forEach(button => {
     button.addEventListener('click', () => {
-        const targetSection = button.dataset.target;
-        sections.forEach(section => {
-            section.style.display = section.id === `surahmemorization-${targetSection}` ? 'block' : 'none';
-        });
-        if (targetSection === 'history') {
-            renderHistoryCharts();
-            renderHistoryTable();
-        }
+      const targetSection = button.dataset.target;
+      
+      sections.forEach(section => {
+        section.style.display = (section.id === `surahmemorization-${targetSection}`)
+          ? 'block'
+          : 'none';
+      });
+  
+      if (targetSection === 'revise') {
+        onReviseTabClicked();
+      }
+      else if (targetSection === 'history') {
+        renderHistoryCharts();
+        renderHistoryTable();
+      }
     });
-});
-
+  });
+  
+  function onReviseTabClicked() {
+    // 1) On récupère la langue
+    const currentLang = localStorage.getItem('userLang') || 'fr';
+  
+    // 2) Vérifier si la révision a été démarrée
+    if (!surahsInRevision || surahsInRevision.length === 0) {
+      // Texte en fonction de la langue
+      if (currentLang === 'fr') {
+        currentSurahTitle.textContent = "Veuillez d'abord démarrer une session de révision dans la partie \"Select Surah\".";
+      } else {
+        currentSurahTitle.textContent = "Please start a revision session in the 'Select Surah' section first.";
+      }
+  
+      // Désactiver les boutons
+      evaluationButtons.forEach(btn => btn.disabled = true);
+      toggleTextBtn.disabled = true;
+  
+      // Vider ou masquer le texte
+      surahText.style.display = 'none';
+      progressBarFill.style.width = '0%';
+  
+    } else {
+      // Session de révision démarrée : activer les boutons
+      evaluationButtons.forEach(btn => btn.disabled = false);
+      toggleTextBtn.disabled = false;
+  
+      // Afficher la sourate en cours
+      renderCurrentSurah();
+    }
+  }
+/* ------------------ Bouton de sauvegarde ------------------ */
 saveButton?.addEventListener('click', async () => {
     const selectedSurahs = surahs.filter(surah => surah.isSelected).map(surah => surah.number);
     if (selectedSurahs.length === 0) {
-        alert('Veuillez sélectionner au moins une sourate à enregistrer.');
+        notificationService.show('surah.memorization.save', 'warning');
         return;
     }
 
     try {
+        // Seul endroit où on enregistre les sourates dans la base de données
         await api.post('/surah-memorization/known', { sourates: selectedSurahs });
-        alert('Sourates connues enregistrées avec succès.');
+        notificationService.show('surah.memorization.saved', 'success');
     } catch (error) {
-        console.error('Erreur lors de l\'enregistrement des sourates connues:', error);
-        alert('Une erreur s\'est produite lors de l\'enregistrement des sourates connues.');
+        console.error('Error saving known surahs:', error);
+        notificationService.show('surah.save.error', 'error', 0);
     }
 });
-
+/* ------------------ Recherche (filtrage par nom / numéro) ------------------ */
 searchInput?.addEventListener('input', (e) => {
     const searchTerm = e.target.value.toLowerCase();
     const filteredSurahs = surahs.filter(surah =>
@@ -376,6 +409,7 @@ searchInput?.addEventListener('input', (e) => {
     renderFilteredSurahList(filteredSurahs);
 });
 
+/* ------------------ Filtrage avancé (niveau, ordre alphabétique, etc.) ------------------ */
 filterSelect?.addEventListener('change', (e) => {
     const filterValue = e.target.value;
     let filteredSurahs = [...surahs];
@@ -397,41 +431,29 @@ filterSelect?.addEventListener('change', (e) => {
     renderFilteredSurahList(filteredSurahs);
 });
 
-toggleAllBtn?.addEventListener('click', async () => {
-    const allSelected = surahs.every(surah => surah.isSelected);
-    for (const surah of surahs) {
-        surah.isSelected = !allSelected;
-        try {
-            await api.put(`/surah-memorization/surahs/${surah.number}`, {
-                isKnown: surah.isSelected
-            });
-        } catch (error) {
-            console.error(`Erreur lors de la mise à jour de la sourate ${surah.number}:`, error);
-            alert(`Une erreur s'est produite lors de la mise à jour de la sourate ${surah.number}.`);
-            surah.isSelected = !surah.isSelected;
-        }
-    }
-    renderSurahList();
-    updateSelectedCount();
-});
 
+/* ------------------ Bouton pour démarrer la révision ------------------ */
 startRevisionBtn?.addEventListener('click', () => {
-    const selectedSurahs = surahs.filter(surah => surah.isSelected);
+    const selectedSurahs = surahs.filter(s => s.isSelected);
     if (selectedSurahs.length === 0) {
-        alert('Veuillez sélectionner au moins une sourate à réviser.');
-        return;
+      notificationService.show('Aucune sourate sélectionnée.', 'error');
+      return;
     }
-
-    const shuffledSurahs = shuffleArray(selectedSurahs.slice());
+  
+    // On remplit la liste de révision
+    surahsInRevision = [...selectedSurahs];
     currentSurahIndex = 0;
-    surahs = shuffledSurahs;
-
+  
+    // On peut même, si on veut, basculer directement vers la partie "Revise"
     document.getElementById('surahmemorization-revise').style.display = 'block';
     document.getElementById('surahmemorization-select').style.display = 'none';
-
+    
+    // Et on affiche la première sourate
     renderCurrentSurah();
-});
+  });
+  
 
+/* ------------------ Bouton pour afficher/masquer le texte de la sourate ------------------ */
 toggleTextBtn?.addEventListener('click', () => {
     if (surahText.style.display === 'none') {
         surahText.style.display = 'block';
@@ -442,41 +464,59 @@ toggleTextBtn?.addEventListener('click', () => {
     }
 });
 
+/* ------------------ Évaluation (boutons Strong, Good, etc.) ------------------ */
 evaluationButtons.forEach(button => {
     button.addEventListener('click', async () => {
-        const level = button.dataset.level;
-        const currentSurah = surahs[currentSurahIndex];
-        currentSurah.memorizationLevel = level;
-        currentSurah.lastRevisionDate = new Date().toISOString().split('T')[0];
-        revisionHistory.push({
-            ...currentSurah,
-            revisionDate: currentSurah.lastRevisionDate
+      const level = button.dataset.level;
+      const currentSurah = surahsInRevision[currentSurahIndex];
+      const currentLang = localStorage.getItem('userLang') || 'fr'; // Récupérer la langue courante
+  
+      try {
+        // 1) Mettre à jour la sourate dans la BD
+        await api.post(`/surah-memorization/surahs/${currentSurah.number}`, {
+          memorizationLevel: level,
+          lastRevisionDate: new Date().toISOString().split('T')[0]
         });
-
-        try {
-            await api.post(`/surah-memorization/surahs/${currentSurah.number}`, {
-                memorizationLevel: level,
-                lastRevisionDate: currentSurah.lastRevisionDate
-            });
-        } catch (error) {
-            console.error('Error updating surah:', error);
-            alert('Une erreur s\'est produite lors de la mise à jour de la sourate.');
-            return;
-        }
-
-        if (currentSurahIndex < surahs.length - 1) {
-            currentSurahIndex++;
-            renderCurrentSurah();
+  
+        // 2) Vérifier s'il reste des sourates à réviser
+        if (currentSurahIndex < surahsInRevision.length - 1) {
+          currentSurahIndex++;
+          renderCurrentSurah();
         } else {
-            alert('Révision terminée !');
-            document.getElementById('surahmemorization-revise').style.display = 'none';
-            document.getElementById('surahmemorization-history').style.display = 'block';
-            renderHistoryCharts();
-            renderHistoryTable();
+          // --------------------------------------
+          // FIN DE LA SESSION DE RÉVISION
+          // --------------------------------------
+  
+          // Notification de fin (en utilisant translations.js si vous voulez)
+          notificationService.show('surah.revision.complete', 'success');
+  
+          // Désactiver les boutons d’évaluation et le bouton "Show/Hide Text"
+          evaluationButtons.forEach(btn => btn.disabled = true);
+          toggleTextBtn.disabled = true;
+  
+          // Message de félicitations selon la langue
+          if (currentLang === 'fr') {
+            currentSurahTitle.textContent = "Félicitations, session terminée !";
+          } else {
+            currentSurahTitle.textContent = "Congratulations, you have finished your revision session!";
+          }
+  
+          // Vider ou masquer le texte de la sourate
+          surahText.textContent = '';
+          surahText.style.display = 'none';
+  
+          // Mettre la barre de progression à 100%
+          progressBarFill.style.width = '100%';
         }
+      } catch (error) {
+        console.error('Error updating surah:', error);
+        notificationService.show('surah.update.error', 'error', 0);
+      }
     });
-});
+  });
 
+
+/* ------------------ Filtrage de l'historique ------------------ */
 historyFilter?.addEventListener('change', (e) => {
     const filter = e.target.value.toLowerCase();
     const rows = historyTable.querySelectorAll('tr');
@@ -486,6 +526,7 @@ historyFilter?.addEventListener('change', (e) => {
     });
 });
 
+/* ------------------ Export de l'historique (CSV) ------------------ */
 exportBtn?.addEventListener('click', async () => {
     try {
         const data = await api.get('/surah-memorization/history');
@@ -493,7 +534,9 @@ exportBtn?.addEventListener('click', async () => {
 
         const csvContent = "data:text/csv;charset=utf-8,"
             + "Surah Name,Number,Revision Date,Level,Next Revision\n"
-            + historyData.map(entry => `${entry.name},${entry.number},${entry.lastRevisionDate},${entry.memorizationLevel || 'N/A'},${entry.nextRevisionDate || 'N/A'}`).join("\n");
+            + historyData.map(entry => 
+                `${entry.name},${entry.number},${entry.lastRevisionDate},${entry.memorizationLevel || 'N/A'},${entry.nextRevisionDate || 'N/A'}`
+            ).join("\n");
 
         const encodedUri = encodeURI(csvContent);
         const link = document.createElement("a");
@@ -502,25 +545,30 @@ exportBtn?.addEventListener('click', async () => {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+
+        notificationService.show('surah.export.success', 'success');
     } catch (error) {
         console.error('Error exporting data:', error);
-        alert('Une erreur s\'est produite lors de l\'exportation des données.');
+        notificationService.show('surah.export.error', 'error', 0);
     }
 });
 
+/* ------------------ Suppression de l'historique ------------------ */
 clearHistoryBtn?.addEventListener('click', async () => {
-    if (confirm('Êtes-vous sûr de vouloir effacer tout l\'historique de révision ? Cette action est irréversible.')) {
+    const confirmed = await notificationService.confirm('surah.history.clear');
+    if (confirmed) {
         try {
             await api.delete('/surah-memorization/history');
             revisionHistory = [];
             renderHistoryTable();
             renderHistoryCharts();
-            alert('Historique réinitialisé avec succès.');
+            notificationService.show('surah.history.cleared', 'success');
         } catch (error) {
             console.error('Error clearing history:', error);
-            alert('Une erreur s\'est produite lors de la réinitialisation de l\'historique.');
+            notificationService.show('surah.history.clear.error', 'error', 0);
         }
     }
 });
 
+/* ------------------ Export de la fonction d'initialisation ------------------ */
 export { initSurahMemorization };

@@ -1,7 +1,12 @@
-// charts.js
+/**
+ * charts.js
+ * Manages chart display and task details visualization with internationalization support
+ * @module ChartManager
+ */
+
 let chartInstances = {};
 
-// Translations object
+// Translations object for internationalization
 const translations = {
     fr: {
         workTime: 'Temps de Travail (minutes)',
@@ -31,7 +36,9 @@ const translations = {
         november: 'novembre',
         december: 'décembre',
         week: 'Semaine du',
-        noDataAvailable: 'Aucune donnée disponible'
+        noDataAvailable: 'Aucune donnée disponible',
+        invalidDate: 'Date invalide',
+        dataError: 'Erreur de chargement des données'
     },
     en: {
         workTime: 'Working Time (minutes)',
@@ -61,77 +68,15 @@ const translations = {
         november: 'November',
         december: 'December',
         week: 'Week of',
-        noDataAvailable: 'No data available'
+        noDataAvailable: 'No data available',
+        invalidDate: 'Invalid date',
+        dataError: 'Data loading error'
     }
 };
 
-function translateChartLabels(labels) {
-    const currentLang = getCurrentLanguage();
-    return labels.map(label => {
-        // Si c'est une date
-        if (typeof label === 'string' && 
-           (label.includes('janvier') || 
-            label.includes('Semaine du') || 
-            label.includes('January') || 
-            label.includes('Week of'))) {
-            
-            // Extraire la date
-            const dateParts = label.split(' ');
-            let year = dateParts[dateParts.length - 1];
-            let day;
-            
-            if (label.includes('Semaine du') || label.includes('Week of')) {
-                day = dateParts[2];
-            } else {
-                day = dateParts[0];
-            }
-
-            // Créer un objet Date
-            const date = new Date(`${year}-01-${day}`);
-
-            // Formater selon le type de label
-            if (label.includes('Semaine du') || label.includes('Week of')) {
-                return formatWeekPeriod(date);
-            } else {
-                return formatDate(date);
-            }
-        }
-        return label;
-    });
-}
-
-function getCurrentLanguage() {
-    const currentPath = window.location.pathname;
-    const storedLang = localStorage.getItem('userLang');
-    
-    console.log('Current path:', currentPath);
-    console.log('Stored language:', storedLang);
-    console.log('Browser language:', navigator.language);
-    
-    if (currentPath.includes('index-fr.html') || currentPath.includes('/fr/')) {
-        console.log('Language detected from path: fr');
-        return 'fr';
-    }
-    if (currentPath.includes('index-en.html') || currentPath.includes('/en/')) {
-        console.log('Language detected from path: en');
-        return 'en';
-    }
-    
-    if (storedLang === 'fr' || storedLang === 'en') {
-        console.log('Language detected from localStorage:', storedLang);
-        return storedLang;
-    }
-    
-    const defaultLang = (navigator.language || navigator.userLanguage).startsWith('fr') ? 'fr' : 'en';
-    console.log('Default language selected:', defaultLang);
-    return defaultLang;
-}
-
-function getTranslation(key) {
-    const currentLang = getCurrentLanguage();
-    return translations[currentLang][key] || key;
-}
-
+/**
+ * Chart visual configuration settings
+ */
 const chartConfig = {
     colors: {
         time: {
@@ -149,73 +94,227 @@ const chartConfig = {
     }
 };
 
-function getMonthKey(monthIndex) {
-    const months = ['january', 'february', 'march', 'april', 'may', 'june', 
-                   'july', 'august', 'september', 'october', 'november', 'december'];
-    return months[monthIndex];
+/**
+ * Validates if the date object is valid
+ * @param {Date} date - Date to validate
+ * @returns {boolean} True if date is valid
+ */
+function isValidDate(date) {
+    return date instanceof Date && !isNaN(date.getTime());
 }
 
-function formatDate(date) {
+/**
+ * Gets the current language based on various factors
+ * @returns {string} Current language code ('fr' or 'en')
+ */
+function getCurrentLanguage() {
+    const currentPath = window.location.pathname;
+    const storedLang = localStorage.getItem('userLang');
+    
+    if (currentPath.includes('index-fr.html') || currentPath.includes('/fr/')) {
+        return 'fr';
+    }
+    if (currentPath.includes('index-en.html') || currentPath.includes('/en/')) {
+        return 'en';
+    }
+    
+    if (storedLang === 'fr' || storedLang === 'en') {
+        return storedLang;
+    }
+    
+    return (navigator.language || navigator.userLanguage).startsWith('fr') ? 'fr' : 'en';
+}
+
+/**
+ * Gets translation for a specific key
+ * @param {string} key - Translation key
+ * @returns {string} Translated text or key if translation not found
+ */
+function getTranslation(key) {
+    if (!key) return translations[getCurrentLanguage()].noDataAvailable;
     const currentLang = getCurrentLanguage();
-    console.log('formatDate - Language:', currentLang);
-    console.log('formatDate - Input date:', date);
-    
-    const day = date.getDate();
+    return translations[currentLang][key] || key;
+}
+
+/**
+ * Gets month key from index
+ * @param {number} monthIndex - Month index (0-11)
+ * @returns {string|null} Month key or null if invalid
+ */
+function getMonthKey(monthIndex) {
+    const months = [
+        'january', 'february', 'march', 'april', 'may', 'june',
+        'july', 'august', 'september', 'october', 'november', 'december'
+    ];
+    return monthIndex >= 0 && monthIndex < 12 ? months[monthIndex] : null;
+}
+
+/**
+ * Safely gets month index from a date object
+ * @param {Date} date - Date object
+ * @returns {number} Month index (0-11) or -1 if invalid
+ */
+function safeGetMonth(date) {
+    if (!isValidDate(date)) return -1;
     const month = date.getMonth();
-    const year = date.getFullYear();
+    return month >= 0 && month <= 11 ? month : -1;
+}
+
+/**
+ * Fonction de parsing de date avec gestion multi-formats
+ * @param {string} dateStr - Date string à parser
+ * @returns {Date|null} Objet Date ou null si invalide
+ */
+function safeParseDate(dateStr) {
+    try {
+        // Gestion multi-formats de date
+        const parsed = new Date(dateStr);
+        if (isValidDate(parsed)) return parsed;
+        
+        // Fallback pour les formats localisés (séparation par /, - ou espace)
+        const parts = dateStr.split(/[\/\- ]/);
+        if (parts.length === 3) {
+            const [day, month, year] = parts;
+            const fallback = new Date(`${year}-${month}-${day}`);
+            return isValidDate(fallback) ? fallback : null;
+        }
+    } catch (error) {
+        console.error('safeParseDate error:', error);
+    }
+    return null;
+}
+
+/**
+ * Formats a date according to current language
+ * @param {Date} date - Date to format
+ * @returns {string} Formatted date string
+ */
+function formatDate(date) {
+    if (!isValidDate(date)) {
+        console.warn('Invalid date passed to formatDate:', date);
+        return getTranslation('invalidDate');
+    }
+
+    const currentLang = getCurrentLanguage();
+    const day = date.getDate();
+    const monthIndex = safeGetMonth(date);
     
-    // Get month translation
-    const monthKey = getMonthKey(month);
-    console.log('formatDate - Month key:', monthKey);
+    if (monthIndex === -1) {
+        console.warn('Invalid month index in formatDate:', monthIndex);
+        return getTranslation('invalidDate');
+    }
+    
+    const year = date.getFullYear();
+    const monthKey = getMonthKey(monthIndex);
+    
+    if (!monthKey) {
+        console.warn('Invalid monthKey in formatDate:', monthKey);
+        return getTranslation('invalidDate');
+    }
     
     const monthName = getTranslation(monthKey);
-    console.log('formatDate - Translated month:', monthName);
     
-    let result = '';
+    if (!monthName) {
+        console.warn('Translation not found for monthKey:', monthKey);
+        return getTranslation('invalidDate');
+    }
+
     if (currentLang === 'fr') {
-        result = `${day} ${monthName.toLowerCase()} ${year}`;
+        return `${day} ${monthName.toLowerCase()} ${year}`;
     } else {
         const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
-        result = `${capitalizedMonth} ${day}, ${year}`;
+        return `${capitalizedMonth} ${day}, ${year}`;
     }
-    
-    console.log('formatDate - Final result:', result);
-    return result;
 }
 
+/**
+ * Formats month and year
+ * @param {Date} date - Date to format
+ * @returns {string} Formatted month and year
+ */
 function formatMonthYear(date) {
-    const currentLang = getCurrentLanguage();
-    const month = date.getMonth();
-    const year = date.getFullYear();
-    const monthName = getTranslation(getMonthKey(month));
-    
-    if (currentLang === 'fr') {
-        return `${monthName.toLowerCase()} ${year}`;
-    } else {
-        return `${monthName.charAt(0).toUpperCase() + monthName.slice(1)} ${year}`;
+    if (!isValidDate(date)) {
+        console.warn('Invalid date passed to formatMonthYear:', date);
+        return getTranslation('invalidDate');
     }
-}
 
-function formatWeekPeriod(date) {
+    const monthIndex = safeGetMonth(date);
+    if (monthIndex === -1) {
+        return getTranslation('invalidDate');
+    }
+
+    const monthKey = getMonthKey(monthIndex);
+    if (!monthKey) {
+        return getTranslation('invalidDate');
+    }
+
     const currentLang = getCurrentLanguage();
-    console.log('formatWeekPeriod - Language:', currentLang);
-    console.log('formatWeekPeriod - Input date:', date);
+    const monthName = getTranslation(monthKey);
+    const year = date.getFullYear();
     
-    // Format date first
-    const formattedDate = formatDate(date);
-    console.log('formatWeekPeriod - Formatted date:', formattedDate);
-    
-    // Get translation for 'week'
-    const weekText = getTranslation('week');
-    console.log('formatWeekPeriod - Week text:', weekText);
-    
-    // Combine them
-    const result = `${weekText} ${formattedDate}`;
-    console.log('formatWeekPeriod - Final result:', result);
-    
-    return result;
+    return currentLang === 'fr' 
+        ? `${monthName.toLowerCase()} ${year}`
+        : `${monthName.charAt(0).toUpperCase() + monthName.slice(1)} ${year}`;
 }
 
+/**
+ * Formats week period
+ * @param {Date} date - Date to format
+ * @returns {string} Formatted week period
+ */
+function formatWeekPeriod(date) {
+    if (!isValidDate(date)) {
+        console.warn('Invalid date passed to formatWeekPeriod:', date);
+        return getTranslation('invalidDate');
+    }
+
+    const formattedDate = formatDate(date);
+    if (formattedDate === getTranslation('invalidDate')) {
+        return getTranslation('invalidDate');
+    }
+
+    const weekText = getTranslation('week');
+    return `${weekText} ${formattedDate}`;
+}
+
+/**
+ * Translates chart labels
+ * @param {Array<string>} labels - Labels to translate
+ * @returns {Array<string>} Translated labels
+ */
+function translateChartLabels(labels) {
+    if (!Array.isArray(labels)) return [getTranslation('noDataAvailable')];
+
+    return labels.map(label => {
+        if (typeof label !== 'string') return label;
+
+        // Handle week format
+        if (label.includes('Semaine du') || label.includes('Week of')) {
+            const date = safeParseDate(label);
+            return date ? formatWeekPeriod(date) : label;
+        }
+
+        // Handle ISO date format
+        if (label.match(/\d{4}(-|\/)\d{2}(-|\/)\d{2}/)) {
+            const date = safeParseDate(label);
+            return date ? formatDate(date) : label;
+        }
+
+        // Handle month-year format
+        if (label.match(/[A-Za-zÀ-ÿ]+\s+\d{4}/)) {
+            const date = safeParseDate(label);
+            return date ? formatMonthYear(date) : label;
+        }
+
+        return label;
+    });
+}
+
+/**
+ * Creates chart configuration
+ * @param {string} [type='bar'] - Chart type
+ * @returns {Object} Chart configuration
+ */
 function createChartConfig(type = 'bar') {
     return {
         type,
@@ -278,82 +377,51 @@ function createChartConfig(type = 'bar') {
     };
 }
 
-function updateChartData(period, labels, timeData, countData) {
-    const chart = chartInstances[period];
-    if (!chart) {
-        console.error(`No chart found for period ${period}`);
-        return;
-    }
-
-    // Ajout de la traduction des labels ici
-    const formattedLabels = labels.map(label => {
-        if (label.includes('-')) {
-            const date = new Date(label);
-            const formattedDate = formatDate(date);
-            return getCurrentLanguage() === 'fr' ? 
-                   formattedDate.toLowerCase() : 
-                   formattedDate;
-        }
-        return label;
-    });
-
-    chart.data.labels = formattedLabels;
-    chart.data.datasets[0].data = timeData;
-    chart.data.datasets[1].data = countData;
-    chart.update('active');
+/**
+ * Nouvelle fonction de gestion du fuseau horaire
+ * @returns {string} Le fuseau horaire de l'utilisateur
+ */
+function getUserTimezone() {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone;
 }
 
-function destroyCharts() {
-    Object.values(chartInstances).forEach(chart => {
-        if (chart) chart.destroy();
-    });
-    chartInstances = {};
-}
-
-function handleResize() {
-    Object.values(chartInstances).forEach(chart => {
-        if (chart?.canvas) chart.resize();
-    });
-}
-
-function initializeChart(period) {
-    const canvas = document.getElementById(`${period}Chart`);
-    if (!canvas) {
-        console.error(`Canvas not found for ${period}`);
-        return null;
-    }
-
-    const ctx = canvas.getContext('2d');
-    const chart = new Chart(ctx, createChartConfig());
-    console.log(`Chart initialized for ${period}`);
-    return chart;
-}
-
+/**
+ * Main ChartManager module
+ */
 export const ChartManager = {
     init() {
         if (typeof Chart === 'undefined') {
             throw new Error('Chart.js is not loaded!');
         }
 
-        destroyCharts();
+        this.destroy();
         ['daily', 'weekly', 'monthly', 'yearly'].forEach(period => {
-            chartInstances[period] = initializeChart(period);
+            const canvas = document.getElementById(`${period}Chart`);
+            if (canvas) {
+                const ctx = canvas.getContext('2d');
+                chartInstances[period] = new Chart(ctx, createChartConfig());
+            }
         });
 
-        this.setupTaskDetailsToggle();
+        this.setupEventListeners();
         this.updateAllChartLabels();
         this.updatePeriodTitles();
         
-        window.addEventListener('resize', handleResize);
-        document.addEventListener('languageChanged', (event) => {
+        return chartInstances;
+    },
+
+    setupEventListeners() {
+        window.addEventListener('resize', () => {
+            Object.values(chartInstances).forEach(chart => {
+                if (chart?.canvas) chart.resize();
+            });
+        });
+
+        document.addEventListener('languageChanged', () => {
             this.updateAllChartLabels();
             this.updatePeriodTitles();
         });
 
-        return chartInstances;
-    },
-
-    setupTaskDetailsToggle() {
         document.querySelectorAll('.toggle-details-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const chartSection = e.target.closest('.chart-section');
@@ -363,138 +431,169 @@ export const ChartManager = {
         });
     },
 
-    updateAllChartLabels() {
-        // Mettre à jour les textes avec data-action
-        document.querySelectorAll('[data-action]').forEach(element => {
-            const key = element.getAttribute('data-action');
-            if (translations[getCurrentLanguage()][key]) {
-                element.textContent = getTranslation(key);
-            }
-        });
+    updateChart(period, labels, timeData, countData, taskDetails = []) {
+        const chart = chartInstances[period];
+        if (!chart) {
+            console.error(`No chart found for period ${period}`);
+            return;
+        }
 
-        // Mettre à jour les graphiques
-        Object.entries(chartInstances).forEach(([period, chart]) => {
-            if (chart) {
-                chart.data.datasets[0].label = getTranslation('workTime');
-                chart.data.datasets[1].label = getTranslation('countNumber');
-                
-                chart.options.scales['y-time'].title.text = getTranslation('time');
-                chart.options.scales['y-count'].title.text = getTranslation('counts');
-                
-                // Reformater les labels de date si nécessaire
-                if (chart.data.labels.length > 0) {
-                    chart.data.labels = chart.data.labels.map(label => {
-                        if (label.includes('-') || label.includes('/')) {
-                            const date = new Date(label);
-                            return formatDate(date);
-                        }
-                        return label;
-                    });
+        try {
+            const translatedLabels = translateChartLabels(labels);
+            
+            chart.data.labels = translatedLabels;
+            chart.data.datasets[0].data = timeData;
+            chart.data.datasets[1].data = countData;
+            chart.update('active');
+
+            const tbody = document.querySelector(`#${period}TaskDetails table tbody`);
+            if (tbody) {
+                if (taskDetails && taskDetails.length > 0) {
+                    tbody.innerHTML = taskDetails.map(task => `
+                        <tr>
+                            <td>${task.name || getTranslation('unnamed')}</td>
+                            <td>${Math.round(parseFloat(task.total_time) / 60)}</td>
+                            <td>${task.total_count}</td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="3" class="text-center">
+                                ${getTranslation('noDataAvailable')}
+                            </td>
+                        </tr>`;
                 }
-                
-                chart.update('none');
             }
-        });
+
+            this.updatePeriodTitles();
+        } catch (error) {
+            console.error('Error updating chart:', error);
+            if (chart) {
+                chart.data.labels = [getTranslation('noDataAvailable')];
+                chart.data.datasets[0].data = [0];
+                chart.data.datasets[1].data = [0];
+                chart.update('active');
+            }
+        }
+    },
+
+    updateAllChartLabels() {
+        try {
+            document.querySelectorAll('[data-action]').forEach(element => {
+                const key = element.getAttribute('data-action');
+                if (translations[getCurrentLanguage()][key]) {
+                    element.textContent = getTranslation(key);
+                }
+            });
+
+            Object.entries(chartInstances).forEach(([period, chart]) => {
+                if (chart) {
+                    chart.data.datasets[0].label = getTranslation('workTime');
+                    chart.data.datasets[1].label = getTranslation('countNumber');
+                    
+                    chart.options.scales['y-time'].title.text = getTranslation('time');
+                    chart.options.scales['y-count'].title.text = getTranslation('counts');
+                    
+                    if (chart.data.labels.length > 0) {
+                        chart.data.labels = translateChartLabels(chart.data.labels);
+                    }
+                    
+                    chart.update('none');
+                }
+            });
+        } catch (error) {
+            console.error('Error updating chart labels:', error);
+        }
     },
 
     toggleTaskDetails(chartSection, period) {
-        const isExpanded = chartSection.classList.toggle('details-visible');
-        
-        const button = chartSection.querySelector('.toggle-details-btn');
-        const buttonText = button.querySelector('span');
-        const buttonIcon = button.querySelector('svg');
-        
-        buttonText.textContent = isExpanded ? 
-            getTranslation('hideDetails') : 
-            getTranslation('viewDetails');
-        buttonIcon.style.transform = isExpanded ? 'rotate(180deg)' : 'rotate(0)';
-        
-        const chartWrapper = chartSection.querySelector('.chart-wrapper');
-        void chartWrapper.offsetWidth;
-        
-        setTimeout(() => {
-            const chart = chartInstances[period];
-            if (chart) {
-                chart.resize();
-                chart.update('none');
-            }
-        }, 300);
-    },
-
-    updateChart(period, labels, timeData, countData, taskDetails = []) {
-        const chart = chartInstances[period];
-        if (!chart) return;
-    
-        // Traduire les labels
-        const translatedLabels = translateChartLabels(labels);
-        
-        chart.data.labels = translatedLabels;
-        chart.data.datasets[0].data = timeData;
-        chart.data.datasets[1].data = countData;
-        chart.update('active');
-    
-        const tbody = document.querySelector(`#${period}TaskDetails table tbody`);
-        if (tbody) {
-            if (taskDetails && taskDetails.length > 0) {
-                tbody.innerHTML = taskDetails.map(task => `
-                    <tr>
-                        <td>${task.name || getTranslation('unnamed')}</td>
-                        <td>${Math.round(parseFloat(task.total_time) / 60)}</td>
-                        <td>${task.total_count}</td>
-                    </tr>
-                `).join('');
-            } else {
-                tbody.innerHTML = `<tr><td colspan="3" class="text-center">${getTranslation('noDataAvailable')}</td></tr>`;
-            }
+        try {
+            const isExpanded = chartSection.classList.toggle('details-visible');
+            
+            const button = chartSection.querySelector('.toggle-details-btn');
+            const buttonText = button.querySelector('span');
+            const buttonIcon = button.querySelector('svg');
+            
+            buttonText.textContent = isExpanded ? 
+                getTranslation('hideDetails') : 
+                getTranslation('viewDetails');
+            
+            buttonIcon.style.transform = isExpanded ? 'rotate(180deg)' : 'rotate(0)';
+            
+            const chartWrapper = chartSection.querySelector('.chart-wrapper');
+            void chartWrapper.offsetWidth; // Force reflow
+            
+            setTimeout(() => {
+                const chart = chartInstances[period];
+                if (chart) {
+                    chart.resize();
+                    chart.update('none');
+                }
+            }, 300);
+        } catch (error) {
+            console.error('Error toggling task details:', error);
         }
-    
-        // Force la mise à jour des titres
-        this.updatePeriodTitles();
     },
 
     updatePeriodTitles() {
-        console.log('Updating period titles...');
-        const periodDisplays = document.querySelectorAll('.period-display');
-        periodDisplays.forEach(display => {
-            const dateAttr = display.getAttribute('data-date');
-            console.log('Processing display element:', {
-                dateAttr,
-                currentText: display.textContent
-            });
-            
-            if (dateAttr) {
-                const date = new Date(dateAttr);
-                const period = display.closest('.period-navigation').dataset.period;
+        try {
+            const periodDisplays = document.querySelectorAll('.period-display');
+            periodDisplays.forEach(display => {
+                const dateAttr = display.getAttribute('data-date');
                 
-                console.log('Processing date for period:', {
-                    date,
-                    period,
-                    currentLanguage: getCurrentLanguage()
-                });
-                
-                let newText;
-                switch(period) {
-                    case 'weekly':
-                        newText = formatWeekPeriod(date);
-                        break;
-                    case 'monthly':
-                        newText = formatMonthYear(date);
-                        break;
-                    case 'yearly':
-                        newText = date.getFullYear().toString();
-                        break;
-                    default:
-                        newText = formatDate(date);
+                if (dateAttr) {
+                    const date = safeParseDate(dateAttr);
+                    if (!date) {
+                        display.textContent = getTranslation('invalidDate');
+                        return;
+                    }
+
+                    const period = display.closest('.period-navigation')?.dataset.period;
+                    if (!period) return;
+
+                    let newText;
+                    switch(period) {
+                        case 'weekly':
+                            newText = formatWeekPeriod(date);
+                            break;
+                        case 'monthly':
+                            newText = formatMonthYear(date);
+                            break;
+                        case 'yearly':
+                            newText = date.getFullYear().toString();
+                            break;
+                        default:
+                            newText = formatDate(date);
+                    }
+                    
+                    display.textContent = newText;
                 }
-                
-                console.log('Updated text:', newText);
-                display.textContent = newText;
-            }
-        });
+            });
+        } catch (error) {
+            console.error('Error updating period titles:', error);
+        }
     },
 
     destroy() {
-        destroyCharts();
-        window.removeEventListener('resize', handleResize);
+        try {
+            Object.values(chartInstances).forEach(chart => {
+                if (chart) chart.destroy();
+            });
+            chartInstances = {};
+            
+            window.removeEventListener('resize', () => {
+                Object.values(chartInstances).forEach(chart => {
+                    if (chart?.canvas) chart.resize();
+                });
+            });
+            
+            document.removeEventListener('languageChanged', () => {
+                this.updateAllChartLabels();
+                this.updatePeriodTitles();
+            });
+        } catch (error) {
+            console.error('Error destroying charts:', error);
+        }
     }
 };

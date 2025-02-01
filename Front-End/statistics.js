@@ -1,429 +1,325 @@
-// statistics.js
 import { ChartManager } from './charts.js';
 
 class StatisticsManager {
-    constructor() {
-        this.currentPeriods = {
-            daily: new Date(),
-            weekly: new Date(),
-            monthly: new Date(),
-            yearly: new Date()
-        };
-        this.latestRecords = {
-            daily: null,
-            weekly: null,
-            monthly: null,
-            yearly: null
-        };
-        this.earliestRecords = {
-            daily: null,
-            weekly: null,
-            monthly: null,
-            yearly: null
-        };
-        this.currentData = {
-            daily: [],
-            weekly: [],
-            monthly: [],
-            yearly: []
-        };
-        this.initialized = false;
-        this.refreshInterval = null;
+  constructor() {
+    console.debug('[StatisticsManager] constructor: Initializing...');
+    // Le cache contiendra uniquement les enregistrements existants
+    this.cache = {
+      daily: { dates: [], dataMap: new Map(), lastFetch: null },
+      weekly: { dates: [], dataMap: new Map(), lastFetch: null },
+      monthly: { dates: [], dataMap: new Map(), lastFetch: null },
+      yearly: { dates: [], dataMap: new Map(), lastFetch: null }
+    };
+
+    // Pour chaque période, l’index courant dans le tableau des enregistrements
+    // (index 0 = le plus récent)
+    this.currentPeriodIndex = {
+      daily: 0,
+      weekly: 0,
+      monthly: 0,
+      yearly: 0
+    };
+
+    // Périodes gérées
+    this.periods = ['daily', 'weekly', 'monthly', 'yearly'];
+    // Nombre maximum d'enregistrements à afficher pour chaque période
+    this.periodLimits = {
+      daily: 7,
+      weekly: 4,
+      monthly: 12,
+      yearly: 2
+    };
+  }
+
+  async fetchAndCacheData(period) {
+    console.debug(`[StatisticsManager] fetchAndCacheData(${period}): Start fetching data...`);
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.error('[StatisticsManager] No token found.');
+        return false;
+      }
+
+      const response = await fetch(`/api/statistics/${period}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.debug(`[StatisticsManager] fetchAndCacheData(${period}): Response received:`, result);
+
+      if (result.status === 'success' && Array.isArray(result.data)) {
+        this.updateCache(period, result.data);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error(`[StatisticsManager] Error in fetchAndCacheData(${period}):`, error);
+      return false;
     }
+  }
 
-    validateData(data, period) {
-        if (!data?.data || !Array.isArray(data.data)) {
-            console.error(`[Frontend] Format de données invalide pour ${period}`);
-            return [];
+  /**
+   * Met à jour le cache pour une période donnée en utilisant uniquement
+   * les enregistrements existants renvoyés par la base.
+   * Les données sont triées par date décroissante (le plus récent en premier)
+   * et limitées au maximum défini (7 pour daily, 4 pour weekly, etc.).
+   */
+  updateCache(period, data) {
+    console.debug(`[StatisticsManager] updateCache(${period}): Updating cache with server data:`, data);
+    const cache = this.cache[period];
+    cache.dates = [];
+    cache.dataMap.clear();
+
+    // Tri décroissant : le plus récent en premier
+    const sortedData = data.sort((a, b) => new Date(b.date) - new Date(a.date));
+    const maxRecords = this.periodLimits[period];
+    // Limiter aux enregistrements existants (au maximum maxRecords)
+    const limitedData = sortedData.slice(0, maxRecords);
+    console.debug(`[StatisticsManager] updateCache(${period}): Limited data:`, limitedData);
+
+    limitedData.forEach(record => {
+      // On crée une clé de la forme "YYYY-MM-DD" pour chaque enregistrement
+      const dateKey = this.formatKey(new Date(record.date));
+      cache.dates.push(dateKey);
+      cache.dataMap.set(dateKey, record);
+    });
+
+    cache.lastFetch = Date.now();
+    console.debug(
+      `[StatisticsManager] updateCache(${period}): Cache updated. Total dates: ${cache.dates.length}, Records: ${cache.dataMap.size}`
+    );
+  }
+
+  // Retourne une chaîne "YYYY-MM-DD" pour une date donnée
+  formatKey(date) {
+    const year = date.getFullYear();
+    const month = ('0' + (date.getMonth() + 1)).slice(-2);
+    const day = ('0' + date.getDate()).slice(-2);
+    return `${year}-${month}-${day}`;
+  }
+
+  getCurrentDateForPeriod(period) {
+    const cache = this.cache[period];
+    const index = this.currentPeriodIndex[period];
+    console.debug(`[StatisticsManager] getCurrentDateForPeriod(${period}): Current index: ${index}, Date: ${cache.dates[index]}`);
+    return cache.dates[index];
+  }
+
+  getDataForDate(period, dateKey) {
+    return this.cache[period].dataMap.get(dateKey);
+  }
+
+  async updatePeriodData(period) {
+    console.debug(`[StatisticsManager] updatePeriodData(${period}): Updating period data...`);
+    try {
+      // Si aucun enregistrement n'est présent, on récupère les données depuis le serveur
+      if (this.cache[period].dates.length === 0) {
+        console.debug(`[StatisticsManager] updatePeriodData(${period}): Cache empty, fetching data...`);
+        if (!(await this.fetchAndCacheData(period))) {
+          throw new Error('Unable to load data');
         }
-
-        return data.data.map(item => ({
-            date: item.date,
-            total_time: Number(item.total_time) || 0,
-            total_count: Number(item.total_count) || 0,
-            task_details: Array.isArray(item.task_details) ? item.task_details : []
-        }));
+      }
+      const currentDateKey = this.getCurrentDateForPeriod(period);
+      if (!currentDateKey) {
+        throw new Error('Invalid date');
+      }
+      const record = this.getDataForDate(period, currentDateKey);
+      console.debug(`[StatisticsManager] updatePeriodData(${period}): Record for ${currentDateKey}:`, record);
+      this.displayRecord(period, record);
+      this.updateNavigationButtons(period);
+    } catch (error) {
+      console.error(`[StatisticsManager] updatePeriodData(${period}) Error:`, error);
+      ChartManager.updateChart(period, ['Erreur de chargement'], [0], [0], []);
     }
+  }
 
-    async fetchStatisticsData(period) {
-        try {
-            console.log(`[Frontend] Début fetchStatisticsData pour ${period}`);
-            const token = localStorage.getItem('token');
-            
-            if (!token) {
-                console.error('[Frontend] Pas de token trouvé');
-                return null;
-            }
-
-            console.log(`[Frontend] Envoi requête API pour ${period}`);
-            const response = await fetch(`/api/statistics/${period}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            const result = await response.json();
-
-            if (!response.ok) {
-                throw new Error(result.message || `Erreur HTTP! statut: ${response.status}`);
-            }
-
-            const validatedData = this.validateData(result, period);
-            
-            console.log(`[Frontend] Données reçues pour ${period}:`, {
-                nombreDonnées: validatedData.length,
-                données: JSON.stringify(validatedData, null, 2)
-            });
-
-            if (validatedData.length > 0) {
-                this.currentData[period] = validatedData;
-                console.log(`[Frontend] currentData mis à jour pour ${period}:`, 
-                    JSON.stringify(this.currentData[period], null, 2));
-
-                const sortedData = [...validatedData].sort((a, b) => new Date(b.date) - new Date(a.date));
-                
-                this.latestRecords[period] = new Date(sortedData[0].date);
-                this.earliestRecords[period] = new Date(sortedData[sortedData.length - 1].date);
-
-                console.log(`[Frontend] Limites temporelles pour ${period}:`, {
-                    dernièreDate: this.latestRecords[period],
-                    premièreDate: this.earliestRecords[period],
-                    nombreTotal: sortedData.length
-                });
-            }
-
-            return validatedData;
-        } catch (error) {
-            this.handleError(error, `fetchStatisticsData(${period})`);
-            return [];
-        }
-    }
-
-    getDataForCurrentPeriod(period) {
-        console.log(`[Frontend] Début getDataForCurrentPeriod pour ${period}`);
-        const currentDate = new Date(this.currentPeriods[period]);
-        currentDate.setHours(0, 0, 0, 0);
-        const data = this.currentData[period];
-    
-        if (!data || !data.length) {
-            console.log(`[Frontend] Pas de données disponibles pour ${period}`);
-            return null;
-        }
-    
-        const isInCurrentPeriod = (dateStr) => {
-            const date = new Date(dateStr);
-            date.setHours(0, 0, 0, 0);
-            
-            console.log(`[Frontend] Comparaison de dates pour ${period}:`, {
-                date: date,
-                currentDate: currentDate
-            });
-    
-            switch(period) {
-                case 'daily': {
-                    return date.getTime() === currentDate.getTime();
-                }
-                case 'weekly': {
-                    const weekStart = new Date(currentDate);
-                    const day = currentDate.getDay() || 7;
-                    weekStart.setDate(currentDate.getDate() - day + 1);
-                    weekStart.setHours(0, 0, 0, 0);
-    
-                    const weekEnd = new Date(weekStart);
-                    weekEnd.setDate(weekStart.getDate() + 6);
-                    weekEnd.setHours(23, 59, 59, 999);
-    
-                    return date >= weekStart && date <= weekEnd;
-                }
-                case 'monthly': {
-                    return date.getMonth() === currentDate.getMonth() &&
-                           date.getFullYear() === currentDate.getFullYear();
-                }
-                case 'yearly': {
-                    return date.getFullYear() === currentDate.getFullYear();
-                }
-            }
-            return false;
-        };
-    
-        const filteredData = data.filter(item => {
-            const matches = isInCurrentPeriod(item.date);
-            console.log(`[Frontend] Filtrage pour ${item.date}:`, matches);
-            return matches;
-        });
-    
-        if (filteredData.length === 0) {
-            console.log(`[Frontend] Aucune donnée pour ${period} à la date ${currentDate}`);
-            return null;
-        }
-    
-        return filteredData.reduce((acc, curr) => {
-            if (!acc) return curr;
-            return {
-                date: curr.date,
-                total_time: Number(acc.total_time) + Number(curr.total_time),
-                total_count: Number(acc.total_count) + Number(curr.total_count),
-                task_details: [...(acc.task_details || []), ...(curr.task_details || [])]
-            };
-        }, null);
-    }
-
-    async updatePeriodData(period) {
-        try {
-            console.log(`[Frontend] Début updatePeriodData pour ${period}`);
-
-            if (!this.currentData[period].length) {
-                await this.fetchStatisticsData(period);
-            }
-
-            const currentPeriodData = this.getDataForCurrentPeriod(period);
-
-            if (currentPeriodData) {
-                const labels = [this.formatPeriodLabel(this.currentPeriods[period], period)];
-                const timeData = [Math.round(currentPeriodData.total_time / 60)];
-                const countData = [currentPeriodData.total_count];
-
-                console.log(`[Frontend] Mise à jour du graphique ${period}:`, {
-                    labels,
-                    timeData,
-                    countData,
-                    taskDetails: currentPeriodData.task_details
-                });
-
-                ChartManager.updateChart(
-                    period,
-                    labels,
-                    timeData,
-                    countData,
-                    currentPeriodData.task_details || []
-                );
-            } else {
-                console.log(`[Frontend] Pas de données à afficher pour ${period}`);
-                ChartManager.updateChart(period, ['Pas de données'], [0], [0], []);
-            }
-
-            this.updatePeriodDisplay(period);
-            this.updateNavigationButtons(period);
-        } catch (error) {
-            this.handleError(error, `updatePeriodData(${period})`);
-        }
-    }
-
-    isNavigationAllowed(period, direction) {
-        const currentDate = this.currentPeriods[period];
-        const latestRecord = this.latestRecords[period];
-        const earliestRecord = this.earliestRecords[period];
-    
-        if (!latestRecord || !earliestRecord) return false;
-    
-        const normalizedCurrent = new Date(currentDate);
-        const normalizedLatest = new Date(latestRecord);
-        const normalizedEarliest = new Date(earliestRecord);
-        
-        [normalizedCurrent, normalizedLatest, normalizedEarliest].forEach(date => 
-            date.setHours(0, 0, 0, 0)
+  /**
+   * Navigation avec les boutons prev/next.
+   * Pour l’option utilisée ici (index 0 = enregistrement le plus récent) :
+   * - Bouton "prev" (+1) : aller vers un enregistrement plus ancien.
+   * - Bouton "next" (-1) : revenir vers un enregistrement plus récent.
+   */
+  navigatePeriod(period, direction) {
+    try {
+      const cache = this.cache[period];
+      const newIndex = this.currentPeriodIndex[period] + direction;
+      if (newIndex < 0 || newIndex >= cache.dates.length) {
+        console.debug(
+          `[StatisticsManager] navigatePeriod(${period}): Navigation out of bounds. newIndex=${newIndex}, valid range=0-${cache.dates.length - 1}`
         );
-    
-        console.log(`[Frontend] Vérification navigation pour ${period}:`, {
-            direction,
-            courante: normalizedCurrent,
-            dernière: normalizedLatest,
-            première: normalizedEarliest
+        return;
+      }
+      console.debug(
+        `[StatisticsManager] navigatePeriod(${period}): Navigating from index ${this.currentPeriodIndex[period]} to ${newIndex}`
+      );
+      this.currentPeriodIndex[period] = newIndex;
+      this.updatePeriodData(period);
+    } catch (error) {
+      console.error(`[StatisticsManager] navigatePeriod(${period}) Error:`, error);
+    }
+  }
+
+  /**
+   * Affiche l'enregistrement correspondant à la période en cours.
+   * Pour daily, le format sera par exemple "vendredi 31 janvier 2025".
+   * Pour weekly, on affiche la date de début de la semaine sous la forme "Week of January 27, 2025".
+   */
+  displayRecord(period, record) {
+    try {
+      if (!record || !record.date) {
+        throw new Error('Invalid record');
+      }
+      const dateObj = new Date(record.date);
+      const label = this.formatDate(dateObj, period);
+      const timeMinutes = Math.round((record.total_time || 0) / 60);
+      const count = record.total_count || 0;
+      const tasks = record.task_details || [];
+      ChartManager.updateChart(period, [label], [timeMinutes], [count], tasks);
+
+      const span = document.getElementById(`${period}-period`);
+      if (span) {
+        span.textContent = label;
+        span.setAttribute('data-date', record.date);
+      }
+      console.debug(`[StatisticsManager] displayRecord(${period}): Displaying record for ${record.date}`);
+    } catch (error) {
+      console.error(`[StatisticsManager] displayRecord(${period}) Error:`, error);
+      ChartManager.updateChart(period, ["Erreur d'affichage"], [0], [0], []);
+    }
+  }
+
+  /**
+   * Formatte une date selon la période :
+   * - daily : "vendredi 31 janvier 2025"
+   * - weekly : "Week of January 27, 2025"
+   * - monthly : "janvier 2025" (en français)
+   * - yearly : "2025"
+   */
+  formatDate(date, period) {
+    try {
+      if (!(date instanceof Date) || isNaN(date.getTime())) {
+        throw new Error('Invalid date');
+      }
+      switch (period) {
+        case 'daily':
+          return date.toLocaleDateString('fr-FR', {
+            weekday: 'long',
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+          });
+        case 'weekly':
+          // Affichage en anglais pour la semaine, par exemple "Week of January 27, 2025"
+          return `Week of ${date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`;
+        case 'monthly':
+          return date.toLocaleString('fr-FR', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+        case 'yearly':
+          return date.getUTCFullYear().toString();
+        default:
+          return date.toLocaleDateString('fr-FR');
+      }
+    } catch (error) {
+      console.error(`[StatisticsManager] formatDate Error for period ${period}:`, error);
+      return 'Date invalide';
+    }
+  }
+
+  /**
+   * Met à jour l'état des boutons de navigation.
+   * - Si currentPeriodIndex === 0 (le plus récent), désactive le bouton "next".
+   * - Si currentPeriodIndex === maxIndex (le plus ancien), désactive le bouton "prev".
+   */
+  updateNavigationButtons(period) {
+    try {
+      const nav = document.querySelector(`[data-period="${period}"]`);
+      if (!nav) return;
+
+      const prevBtn = nav.querySelector('.prev');
+      const nextBtn = nav.querySelector('.next');
+      const currentIndex = this.currentPeriodIndex[period];
+      const maxIndex = this.cache[period].dates.length - 1;
+
+      if (prevBtn) {
+        prevBtn.disabled = currentIndex >= maxIndex;
+      }
+      if (nextBtn) {
+        nextBtn.disabled = currentIndex <= 0;
+      }
+      console.debug(
+        `[StatisticsManager] updateNavigationButtons(${period}): currentIndex=${currentIndex}, maxIndex=${maxIndex}, prevBtn.disabled=${prevBtn.disabled}, nextBtn.disabled=${nextBtn.disabled}`
+      );
+    } catch (error) {
+      console.error(`[StatisticsManager] updateNavigationButtons(${period}) Error:`, error);
+    }
+  }
+
+  setupListeners() {
+    try {
+      console.debug('[StatisticsManager] setupListeners: Setting up navigation buttons...');
+      document.querySelectorAll('.period-navigation').forEach((nav) => {
+        const period = nav.dataset.period;
+        nav.querySelector('.prev')?.addEventListener('click', () => {
+          console.debug(`[StatisticsManager] setupListeners: ${period} prev button clicked.`);
+          this.navigatePeriod(period, +1);
         });
-    
-        return direction > 0 
-            ? normalizedCurrent < normalizedLatest
-            : normalizedCurrent > normalizedEarliest;
-    }
-
-    setupNavigationListeners() {
-        document.querySelectorAll('.period-navigation').forEach(nav => {
-            const period = nav.dataset.period;
-            nav.querySelector('.prev')?.addEventListener('click', () => 
-                this.navigatePeriod(period, -1)
-            );
-            nav.querySelector('.next')?.addEventListener('click', () => 
-                this.navigatePeriod(period, 1)
-            );
+        nav.querySelector('.next')?.addEventListener('click', () => {
+          console.debug(`[StatisticsManager] setupListeners: ${period} next button clicked.`);
+          this.navigatePeriod(period, -1);
         });
-        console.log('[Frontend] Écouteurs de navigation configurés');
+      });
+    } catch (error) {
+      console.error('[StatisticsManager] setupListeners Error:', error);
     }
+  }
 
-    updateNavigationButtons(period) {
-        const nav = document.querySelector(`[data-period="${period}"]`);
-        if (!nav) return;
-
-        const nextBtn = nav.querySelector('.next');
-        const prevBtn = nav.querySelector('.prev');
-
-        if (!nextBtn || !prevBtn) return;
-
-        const nextAllowed = this.isNavigationAllowed(period, 1);
-        const prevAllowed = this.isNavigationAllowed(period, -1);
-
-        nextBtn.disabled = !nextAllowed;
-        prevBtn.disabled = !prevAllowed;
-
-        nextBtn.classList.toggle('disabled', !nextAllowed);
-        prevBtn.classList.toggle('disabled', !prevAllowed);
-
-        console.log(`[Frontend] État des boutons de navigation pour ${period}:`, {
-            suivant: nextAllowed ? 'activé' : 'désactivé',
-            précédent: prevAllowed ? 'activé' : 'désactivé'
-        });
+  async init() {
+    try {
+      console.debug('[StatisticsManager] init: Starting initialization...');
+      ChartManager.init();
+      this.setupListeners();
+      // Pour chaque période, on récupère et affiche les enregistrements existants
+      for (const period of this.periods) {
+        console.debug(`[StatisticsManager] init: Fetching and updating data for period "${period}"`);
+        await this.fetchAndCacheData(period);
+        await this.updatePeriodData(period);
+      }
+      console.debug('[StatisticsManager] init: Initialization complete.');
+    } catch (error) {
+      console.error('[StatisticsManager] init Error:', error);
     }
+  }
 
-    navigatePeriod(period, direction) {
-        console.log(`[Frontend] Navigation ${period} direction ${direction}`);
-        
-        if (!this.isNavigationAllowed(period, direction)) {
-            console.log(`[Frontend] Navigation bloquée`);
-            return;
-        }
-    
-        const newDate = new Date(this.currentPeriods[period]);
-        
-        switch(period) {
-            case 'daily':
-                newDate.setDate(newDate.getDate() + direction);
-                break;
-            case 'weekly':
-                newDate.setDate(newDate.getDate() + direction * 7);
-                break;
-            case 'monthly':
-                newDate.setMonth(newDate.getMonth() + direction);
-                break;
-            case 'yearly':
-                newDate.setFullYear(newDate.getFullYear() + direction);
-                break;
-        }
-    
-        this.currentPeriods[period] = newDate;
-        this.updatePeriodDisplay(period);
-        this.updatePeriodData(period);
+  cleanup() {
+    try {
+      console.debug('[StatisticsManager] cleanup: Cleaning up...');
+      this.periods.forEach((period) => {
+        this.cache[period].dates = [];
+        this.cache[period].dataMap.clear();
+        this.cache[period].lastFetch = null;
+      });
+      ChartManager.destroy();
+    } catch (error) {
+      console.error('[StatisticsManager] cleanup Error:', error);
     }
-
-    formatPeriodLabel(dateStr, period) {
-        const date = new Date(dateStr);
-        return this.formatDate(date, period);
-    }
-
-    formatDate(date, period) {
-        switch(period) {
-            case 'daily':
-                return date.toLocaleDateString('fr-FR', {
-                    day: 'numeric',
-                    month: 'long',
-                    year: 'numeric'
-                });
-            case 'weekly': {
-                const monday = new Date(date);
-                const dayOfWeek = monday.getDay() || 7;
-                monday.setDate(monday.getDate() - dayOfWeek + 1);
-                return `Semaine du ${monday.toLocaleDateString('fr-FR', {
-                    day: 'numeric',
-                    month: 'long',
-                    year: 'numeric'
-                })}`;
-            }
-            case 'monthly':
-                return date.toLocaleDateString('fr-FR', {
-                    month: 'long',
-                    year: 'numeric'
-                });
-            case 'yearly':
-                return date.toLocaleDateString('fr-FR', {
-                    year: 'numeric'
-                });
-            default:
-                return date.toLocaleDateString('fr-FR');
-        }
-    }
-
-    updatePeriodDisplay(period) {
-        const display = document.getElementById(`${period}-period`);
-        if (!display) return;
-        
-        const formattedDate = this.formatPeriodLabel(this.currentPeriods[period], period);
-        console.log(`[Frontend] Mise à jour affichage période ${period}:`, formattedDate);
-        display.textContent = formattedDate;
-    }
-
-    setupAutoRefresh() {
-        // Arrêter l'intervalle existant s'il y en a un
-        if (this.refreshInterval) {
-            clearInterval(this.refreshInterval);
-        }
-        
-        // Créer un nouvel intervalle
-        this.refreshInterval = setInterval(() => {
-            ['daily', 'weekly', 'monthly', 'yearly'].forEach(period => 
-                this.updatePeriodData(period)
-            );
-        }, 300000); // 5 minutes
-    }
-
-    cleanup() {
-        // Arrêter l'auto-refresh
-        if (this.refreshInterval) {
-            clearInterval(this.refreshInterval);
-            this.refreshInterval = null;
-        }
-        ChartManager.destroy();
-        this.initialized = false;
-    }
-
-    handleError(error, context) {
-        console.error(`[Frontend] Erreur dans ${context}:`, error);
-        // Possibilité d'ajouter un système de notification ici
-    }
-
-    async init() {
-        if (this.initialized) return;
-
-        try {
-            console.log('Initialisation des statistiques...');
-            
-            ChartManager.init();
-            
-            await Promise.all([
-                'daily', 
-                'weekly', 
-                'monthly', 
-                'yearly'
-            ].map(period => this.updatePeriodData(period)));
-
-            this.setupNavigationListeners();
-            this.setupAutoRefresh();  // Démarrer l'auto-refresh
-
-            this.initialized = true;
-            console.log('Initialisation des statistiques terminée');
-        } catch (error) {
-            console.error('Erreur lors de l\'initialisation des statistiques:', error);
-            throw error;
-        }
-    }
+  }
 }
 
 const statisticsManager = new StatisticsManager();
 
-export const initializeStatistics = async () => {
-    try {
-        await statisticsManager.init();
-        console.log('[Frontend] Statistiques initialisées');
-    } catch (error) {
-        console.error('[Frontend] Erreur d\'initialisation:', error);
-        throw error;
-    }
-};
+export async function initializeStatistics() {
+  console.debug('[initializeStatistics] Starting initialization of statistics...');
+  await statisticsManager.init();
+  console.debug('[initializeStatistics] Initialization complete.');
+}
 
-export const cleanupStatistics = () => {
-    try {
-        statisticsManager.cleanup();
-        console.log('[Frontend] Nettoyage effectué');
-    } catch (error) {
-        console.error('[Frontend] Erreur de nettoyage:', error);
-    }
-};
+export function cleanupStatistics() {
+  console.debug('[cleanupStatistics] Starting cleanup of statistics...');
+  statisticsManager.cleanup();
+  console.debug('[cleanupStatistics] Cleanup complete.');
+}
 
-export const StatisticsManagerInstance = statisticsManager;
+export { statisticsManager };

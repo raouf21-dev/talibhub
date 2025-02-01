@@ -12,6 +12,11 @@ CREATE TABLE users (
     country VARCHAR(100)
 );
 
+ALTER TABLE users ADD COLUMN reset_password_token VARCHAR(255);
+ALTER TABLE users ADD COLUMN reset_password_expires TIMESTAMP;
+
+----------------------------
+
 CREATE TABLE tasks (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -273,3 +278,20 @@ CREATE TABLE prayer_times (
 -- Index pour améliorer les performances des requêtes sur prayer_times
 CREATE INDEX idx_prayer_times_mosque_date ON prayer_times (mosque_id, date);
 
+Table : surah_memorization
+Colonnes :
+id SERIAL PRIMARY KEY
+user_id INTEGER UNIQUE
+surah_number INTEGER UNIQUE
+memorization_level VARCHAR(20)
+last_revision_date DATE DEFAULT CURRENT_DATE
+next_revision_date DATE
+is_known BOOLEAN DEFAULT true
+Contraintes :
+unique_user_surah UNIQUE (user_id, surah_number)
+surah_memorization_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users (id) ON UPDATE NO ACTION ON DELETE CASCADE
+surah_memorization_surah_number_fkey FOREIGN KEY (surah_number) REFERENCES public.sourates (number) ON UPDATE NO ACTION ON DELETE CASCADE
+surah_memorization_pkey PRIMARY KEY (id)
+Indexes :
+UNIQUE INDEX surah_memorization_pkey USING BTREE (id)
+UNIQUE INDEX unique_user_surah USING BTREE (user_id, surah_number)

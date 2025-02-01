@@ -90,3 +90,4 @@ function getIcon(type) {
 
 // Exportation des fonctions nécessaires
 export { initializeNotifications };
+

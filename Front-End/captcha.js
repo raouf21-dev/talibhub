@@ -1,5 +1,3 @@
-// captcha.js
-
 class CaptchaHandler {
     constructor() {
         this.currentCaptchaId = null;
@@ -11,16 +9,33 @@ class CaptchaHandler {
         this.captchaInput = document.getElementById('captchaAnswer');
         this.messageElement = document.getElementById('captchaMessage');
 
+        // Simplification de la validation pour n'autoriser que les chiffres
+        if (this.captchaInput) {
+            // Bloc les lettres lors de la saisie
+            this.captchaInput.addEventListener('keypress', (event) => {
+                if (/[a-zA-Z]/.test(event.key)) {
+                    event.preventDefault();
+                    return false;
+                }
+            });
+
+            // Nettoyage supplémentaire pour enlever les lettres si collées
+            this.captchaInput.addEventListener('paste', (event) => {
+                event.preventDefault();
+                const pastedText = (event.clipboardData || window.clipboardData).getData('text');
+                const cleanValue = pastedText.replace(/[a-zA-Z]/g, '');
+                this.captchaInput.value = cleanValue;
+            });
+        }
+
         if (this.refreshButton) {
             this.refreshButton.addEventListener('click', () => this.refreshCaptcha());
         }
 
-        // Initialiser le CAPTCHA au chargement du formulaire d'inscription
         document.querySelector('[data-tab="signup"]')?.addEventListener('click', () => {
             this.refreshCaptcha();
         });
 
-        // Si le formulaire d'inscription est déjà visible
         if (document.getElementById('welcomepage-signupTab')?.classList.contains('active')) {
             this.refreshCaptcha();
         }
@@ -70,7 +85,7 @@ class CaptchaHandler {
             this.messageElement.textContent = result.message;
             this.messageElement.className = `captcha-message ${result.valid ? 'success' : 'error'}`;
 
-            if (!result.valid && (result.message === 'CAPTCHA expiré ou invalide' || 
+            if (!result.valid && (result.message === 'CAPTCHA expiré ou invalide' ||
                 result.message === 'Trop de tentatives')) {
                 this.refreshCaptcha();
             }
@@ -85,5 +100,4 @@ class CaptchaHandler {
     }
 }
 
-// Ajouter cette ligne à la fin du fichier pour exporter la classe
 export default CaptchaHandler;

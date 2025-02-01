@@ -11,6 +11,29 @@ async function initializeTopNav() {
     const logoutBtn = document.getElementById('logoutBtn');
     const langButtons = document.querySelectorAll('.lang-btn');
 
+    // Fonction pour mettre à jour le nom d'utilisateur
+    async function updateUsername() {
+        try {
+            const user = await authService.getProfile();
+            const usernameDisplay = document.getElementById('username-display');
+            if (usernameDisplay && user.username) {
+                usernameDisplay.textContent = user.username;
+            }
+        } catch (error) {
+            console.error('Erreur lors du chargement du pseudo:', error);
+        }
+    }
+
+    // Mettre à jour le nom d'utilisateur initialement si l'utilisateur est connecté
+    if (authService.isAuthenticated()) {
+        await updateUsername();
+    }
+
+    // Écouter l'événement login pour mettre à jour le nom
+    window.addEventListener('login', async () => {
+        await updateUsername();
+    });
+
     // Toggle dropdown du profil
     if (profileButton) {
         profileButton.addEventListener('click', (e) => {
@@ -95,17 +118,6 @@ async function initializeTopNav() {
             }
         });
     });
-
-    // Charger et afficher le pseudo de l'utilisateur
-    try {
-        const user = await api.get('/auth/profile');
-        const usernameDisplay = document.getElementById('username-display');
-        if (usernameDisplay && user.username) {
-            usernameDisplay.textContent = user.username;
-        }
-    } catch (error) {
-        console.error('Erreur lors du chargement du pseudo:', error);
-    }
 
     // Gestionnaire des raccourcis clavier
     document.addEventListener('keydown', (e) => {

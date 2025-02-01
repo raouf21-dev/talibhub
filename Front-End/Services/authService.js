@@ -75,6 +75,16 @@ class AuthService {
     getToken() {
         return localStorage.getItem('token');
     }
+
+    async getProfile() {
+        try {
+            const response = await apiClient.get(API_CONFIG.endpoints.auth.profile);
+            return response;
+        } catch (error) {
+            console.error('Erreur lors de la récupération du profil:', error);
+            throw error;
+        }
+    }
 }
 
 export const authService = new AuthService();

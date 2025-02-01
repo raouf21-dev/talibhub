@@ -181,10 +181,10 @@ body {
   border: none;
   margin-top: 50px;
   padding: 1rem 2rem;
-  font-size: 1.65rem;
+  font-size: 1.75rem;
   cursor: pointer;
   border-radius: 15px;
-  transition: background-color 0.3s ease;
+  animation: pulse 2s infinite ease-in-out;
 }
 
 .welcomepage-btn:hover {
@@ -428,6 +428,7 @@ body {
   font-size: 1rem;
 }
 
+
 @media (max-width: 1200px) {
   .welcomepage-auth-forms {
     max-width: 85vw;
@@ -507,12 +508,7 @@ body {
   }
 
   .welcomepage-btn {
-    margin-top: 25px;
-    padding: 0.5rem 1rem;
-    font-size: 1.5rem;
-    cursor: pointer;
-    border-radius: 15px;
-    animation: pulse 2s infinite ease-in-out;
+    font-size: 1.25rem;
   }
 
   @keyframes pulse {
@@ -646,31 +642,40 @@ body {
 }
 
 
-/*Top Nav*/
-
-/* Top Navigation Bar */
+/* ===================== */
+/*      TOP NAV BAR      */
+/* ===================== */
 .top-nav {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 0.5rem 1rem;
+  justify-content: space-between;  /* Espace gauche/droite */
+  
   background-color: var(--card-background);
   border-bottom: 1px solid var(--border-color);
+  padding: 0.5rem 1rem;
+  
+  /* Positionnement fixe en haut */
   position: fixed;
   top: 0;
+  left: 0;
   right: 0;
-  left: 0; /* Changé de 250px à 0 pour prendre toute la largeur */
   height: 60px;
-  z-index: 99; /* Baissé pour passer sous la sidebar qui devrait être à 100 */
+  z-index: 99;
 }
 
-.top-nav-hidden {
-  display: none;
+/* Blocs gauche et droit */
+.nav-left,
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem; /* Espace horizontal entre les éléments du bloc */
 }
 
-/* Hamburger Button */
+/* ===================== */
+/*    HAMBURGER BTN      */
+/* ===================== */
 .hamburger-btn {
-  display: none;
+  display: block;         
   background: none;
   border: none;
   font-size: 1.25rem;
@@ -679,21 +684,60 @@ body {
   line-height: 1;
 }
 
-/* App Branding/Logo */
+/* ===================== */
+/*       BRANDING        */
+/* ===================== */
 .app-branding h1 {
+  margin: 0;
   font-size: 1.5rem;
   color: var(--primary-color);
-  margin: 0;
 }
 
-/* Profile Section */
+/* ===================== */
+/*     CLOCHE NOTIF      */
+/* ===================== */
+.notifications-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none; 
+}
+
+.notifications-icon {
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  color: var(--primary-color);
+}
+
+/* Animation cloche sur hover */
+#notificationBell:hover .notifications-icon {
+  animation: ring 0.5s ease-in-out;
+}
+
+@keyframes ring {
+  0%   { transform: rotate(0); }
+  10%  { transform: rotate(15deg); }
+  20%  { transform: rotate(-10deg); }
+  30%  { transform: rotate(10deg); }
+  40%  { transform: rotate(-10deg); }
+  50%  { transform: rotate(5deg); }
+  60%  { transform: rotate(-5deg); }
+  70%  { transform: rotate(3deg); }
+  80%  { transform: rotate(-3deg); }
+  90%  { transform: rotate(2deg); }
+  100% { transform: rotate(0); }
+}
+
+/* ===================== */
+/*   PROFILE SECTION     */
+/* ===================== */
 .profile-section {
-  position: relative;
+  position: relative; 
   display: flex;
   align-items: center;
 }
 
-/* Profile Button */
 .profile-button {
   display: flex;
   align-items: center;
@@ -710,11 +754,11 @@ body {
   font-size: 0.75rem;
 }
 
-/* Dropdown Menu */
+/* Dropdown */
 .profile-dropdown {
   position: absolute;
   top: 100%;
-  right: 0;
+  right: 0;  
   background: var(--card-background);
   border: 1px solid var(--border-color);
   border-radius: 0.5rem;
@@ -728,7 +772,6 @@ body {
   display: block;
 }
 
-/* Dropdown Items */
 .dropdown-item {
   padding: 0.75rem 1rem;
   display: flex;
@@ -742,13 +785,12 @@ body {
   background-color: var(--background-color);
 }
 
-/* Dropdown Divider */
 .dropdown-divider {
   border-top: 1px solid var(--border-color);
   margin: 0.5rem 0;
 }
 
-/* Theme Toggle */
+/* Switch du thème, etc. */
 .theme-toggle {
   display: flex;
   align-items: center;
@@ -756,53 +798,42 @@ body {
   width: 100%;
 }
 
-/* Switch for Theme Toggle */
 .switch {
   position: relative;
   display: inline-block;
   width: 48px;
   height: 24px;
 }
-
 .switch input {
   opacity: 0;
   width: 0;
   height: 0;
 }
-
 .slider {
   position: absolute;
   cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  top: 0; left: 0; right: 0; bottom: 0;
   background-color: var(--gray-color);
   transition: .4s;
   border-radius: 24px;
 }
-
 .slider:before {
   position: absolute;
   content: "";
-  height: 18px;
-  width: 18px;
-  left: 3px;
-  bottom: 3px;
-  background-color: white;
+  height: 18px; width: 18px;
+  left: 3px; bottom: 3px;
+  background-color: #fff;
   transition: .4s;
   border-radius: 50%;
 }
-
 input:checked + .slider {
   background-color: var(--primary-color);
 }
-
 input:checked + .slider:before {
   transform: translateX(24px);
 }
 
-/* Language Selector */
+/* Sélecteur de langue */
 .language-selector {
   display: flex;
   justify-content: center;
@@ -816,39 +847,21 @@ input:checked + .slider:before {
   cursor: pointer;
   padding: 0.25rem;
 }
-
 .lang-btn:hover {
   transform: scale(1.1);
 }
 
-/* Responsive Design */
-@media (max-width: 1024px) {
-  .top-nav {
-    left: 0;
-    padding-left: 4rem;
-  }
-
-  .hamburger-btn {
-    display: block;
-    position: fixed;
-    left: 1rem;
-  }
-}
-
+/* Exemple Responsive */
 @media (max-width: 640px) {
   .app-branding h1 {
-    font-size: 1.25rem;
+    font-size: 1.35rem;
   }
-
   .profile-button {
     padding: 0.5rem;
   }
-
-  .profile-dropdown {
-    right: -1rem;
-    min-width: 180px;
-  }
 }
+
+
 
 /* Barre de navigation latérale */
 
@@ -968,7 +981,7 @@ input:checked + .slider:before {
 @media (max-width: 1024px) {
   .top-nav {
     left: 0;
-    padding-left: 4rem;
+    padding-left: 0.5rem;
   }
 
   .sidebar {
@@ -1325,6 +1338,50 @@ input:checked + .slider:before {
   margin: 1rem 0;
 }
 
+.timer-settings {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  background: var(--secondary-color);
+  border-radius: 8px;
+}
+
+.timer-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.timer-input-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.timer-input {
+  width: 70px;
+  padding: 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background: var(--background-color);
+  color: var(--text-color);
+  font-size: 1rem;
+  text-align: center;
+}
+
+.timer-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(var(--primary-color-rgb), 0.2);
+}
+
+.timer-input-suffix {
+  color: var(--text-color-light);
+  font-size: 0.9rem;
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
   #apprentissage {
@@ -1460,7 +1517,7 @@ input:checked + .slider:before {
   padding: 0.5rem;
   background-color: #e7ecef;
   border-radius: 0.5rem;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.25rem;
 }
 
 .todo-item-left {
@@ -1539,6 +1596,66 @@ input:checked + .slider:before {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border-width: 0;
+}
+
+/*----*/
+
+.todo-card-header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.tasks-counter {
+    font-size: var(--small-text-size);
+    margin-left: 0.5rem;
+    color: var(--card-background);
+}
+
+.todo-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.select-all-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--card-background);
+    cursor: pointer;
+}
+
+.select-all-label {
+    font-size: var(--small-text-size);
+}
+
+.todo-delete-selected-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: #ff4444;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.todo-delete-selected-btn:not([disabled]) {
+    opacity: 1;
+}
+
+.todo-delete-selected-btn:not([disabled]):hover {
+    background-color: #ff0000;
+}
+
+.todo-delete-selected-btn[disabled] {
+    cursor: not-allowed;
 }
 
 /* Responsive Design */
@@ -2524,7 +2641,7 @@ input[type="password"],
 select {
   width: 100%;
   padding: 8px;
-  margin-bottom: 15px;
+  margin-bottom: 0;
   border: 1px solid #ccc;
   border-radius: 4px;
   font-size: 14px;
@@ -3177,8 +3294,7 @@ button[type="submit"]:hover {
 .chart-container {
   background: white;
   border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 24px;
+  border-radius: 16px;
   width: 100%;
   height: 500px;
   display: flex;
@@ -3190,9 +3306,10 @@ button[type="submit"]:hover {
   font-size: 1.25rem;
   font-weight: 600;
   color: var(--card-background);
+  background-color: var(--secondary-color);
   text-align: center;
   margin-bottom: 20px;
-  padding-bottom: 12px;
+  padding: 12px 0;
   border-bottom: 1px solid #e5e7eb;
 }
 
@@ -3465,42 +3582,98 @@ button[type="submit"]:hover {
   background-color: var(--card-background);
   border-radius: 8px;
   padding: 20px;
+  margin-top: 1rem;
   margin-bottom: 16px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
- 
+
+/* Styles de base pour mosque-header */
 .mosque-header {
   display: flex;
-  align-items: flex-start;
   margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #eaeaea;
+  width: 100%;
 }
- 
+
+/* Styles spécifiques pour All Mosques */
+#mosquetime-all-mosques .mosque-header {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+#mosquetime-all-mosques .mosque-image {
+  flex-shrink: 0;
+}
+
+#mosquetime-all-mosques .mosque-info {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+#mosquetime-all-mosques .mosque-name {
+  margin: 0 0 4px 0;
+}
+
+#mosquetime-all-mosques .mosque-address {
+  margin: 0;
+  font-size: 14px;
+  color: #666;
+  font-style: italic;
+}
+
+/* Styles spécifiques pour Single Mosque */
+#mosquetime-single-mosque .mosque-header {
+  align-items: flex-start;
+}
+
+#mosquetime-single-mosque .mosque-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+#mosquetime-single-mosque .mosque-image {
+  margin-right: 12px;
+}
+
 .mosque-image {
-  width: 60px;
-  height: 60px;
-  border-radius: 4px;
-  margin-right: 15px;
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
   background-color: var(--background-color);
+  flex-shrink: 0;
 }
- 
+
 .mosque-name {
   font-size: 18px;
   color: var(--text-color);
   font-weight: 600;
-  margin: 0;
+  line-height: 1.2;
 }
- 
-.prayer-times-grid,
+
+.mosque-address {
+  font-size: 14px;
+  color: #666;
+  font-style: italic;
+  line-height: 1.4;
+}
+
+.prayer-times-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
 .additional-times-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 15px;
-}
- 
-.additional-times-grid {
-  margin-top: 15px;
-  padding-top: 15px;
-  border-top: 1px solid var(--border-color);
+  gap: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #eaeaea;
 }
  
 .prayer-item {
@@ -3536,7 +3709,17 @@ button[type="submit"]:hover {
   margin-top: 20px;
   text-align: center;
 }
- 
+
+/* Styles spécifiques pour Single Mosque */
+#mosquetime-single-mosque .mosquetime-mosque-card {
+  margin-top: 16px;
+}
+
+#mosquetime-mosque-select {
+  margin-bottom: 16px;
+}
+
+/* Media Queries */
 @media (max-width: 1024px) {
   #mosquetime {
     margin-left: auto;
@@ -3560,16 +3743,14 @@ button[type="submit"]:hover {
   }
 
   .mosquetime-title {
-    margin: 0;
     font-size: 19px;
   }
    
   .mosquetime-subtitle {
-    margin: 5px 0 0;
     font-size: 12px;
   }
 
-  #mosquetime-city-date{
+  #mosquetime-city-date {
     font-size: 16px;
   }
 }
@@ -3613,23 +3794,23 @@ button[type="submit"]:hover {
   }
 
   .mosquetime-content {
-    padding: 10px; /* Réduire le padding du content container */
+    padding: 10px;
   }
 
   .mosquetime-mosque-card {
-    padding: 15px; /* Réduire le padding de la carte */
-    margin-left: -10px; /* Compensation pour le padding du content */
+    padding: 15px;
+    margin-left: -10px;
     margin-right: -10px;
-    width: calc(100% + 20px); /* Ajuster la largeur en tenant compte des marges négatives */
+    width: calc(100% + 20px);
   }
 
   .mosquetime-card {
-    width: 100%; /* Assurer que la carte prend toute la largeur disponible */
+    width: 100%;
     margin: 0;
   }
 
   #mosquetime {
-    width: 100%; /* Assurer que le conteneur principal prend toute la largeur */
-    padding: 0 10px; /* Ajouter un petit padding sur les côtés */
+    width: 100%;
+    padding: 0 10px;
   }
 }

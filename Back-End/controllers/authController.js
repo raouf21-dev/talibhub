@@ -4,6 +4,8 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const transporter = require('../config/nodemailer');
 const { cookieManager } = require('../middlewares/cookieManager');
+const crypto = require('crypto');
+const path = require('path');
 
 exports.register = async (req, res) => {
     console.log("Données reçues:", req.body);
@@ -177,7 +179,6 @@ exports.verify = async (req, res) => {
     }
 };
 
-// Les autres méthodes restent inchangées (getProfile, changePassword)
 exports.getProfile = async (req, res) => {
     try {
         const userId = req.user.id;
@@ -227,12 +228,130 @@ exports.changePassword = async (req, res) => {
     }
 };
 
+/* ============================
+   Fonctions pour la réinitialisation du mot de passe
+   ============================ */
+
+/**
+ * Demande de réinitialisation : génère un token, met à jour l’utilisateur et envoie un email
+ */
+exports.forgotPassword = async (req, res) => {
+    const { email } = req.body;
+    try {
+        const user = await userModel.getUserByEmail(email);
+        // Pour des raisons de sécurité, renvoyer toujours le même message
+        if (!user) {
+            return res.status(200).json({ message: "Si l'adresse existe, un email de réinitialisation vous a été envoyé." });
+        }
+
+        // Générer un token aléatoire
+        crypto.randomBytes(20, async (err, buffer) => {
+            if (err) {
+                console.error("Erreur lors de la génération du token:", err);
+                return res.status(500).json({ error: "Erreur serveur" });
+            }
+            const token = buffer.toString('hex');
+            const expires = new Date(Date.now() + 3600000); // 1 heure
+
+            // Mettre à jour l’utilisateur avec le token et sa date d’expiration
+            await userModel.setResetToken(user.id, token, expires);
+
+            // Construire l'URL de réinitialisation
+            const resetURL = `${req.protocol}://${req.get('host')}/api/auth/reset-password/${token}`;
+
+            // Préparer l’email
+            const mailOptions = {
+                to: email,
+                from: process.env.EMAIL_USER,
+                subject: 'Réinitialisation de votre mot de passe',
+                text: `Vous recevez cet email car vous (ou quelqu’un d’autre) avez demandé la réinitialisation du mot de passe de votre compte.\n\n` +
+                      `Cliquez sur le lien suivant pour réinitialiser votre mot de passe :\n\n` +
+                      `${resetURL}\n\n` +
+                      `Ce lien expirera dans 1 heure.\n\n` +
+                      `Si vous n’avez pas demandé cela, merci d’ignorer cet email.`
+            };
+
+            transporter.sendMail(mailOptions, (err) => {
+                if (err) {
+                  console.error('Erreur lors de l\'envoi de l\'email:', err);
+                  return res.status(500).json({ error: 'Erreur lors de l\'envoi de l\'email' });
+                }
+                res.status(200).json({ message: "Si l'adresse existe, un email de réinitialisation vous a été envoyé." });
+              });
+        });
+    } catch (error) {
+        console.error("Erreur dans forgotPassword:", error);
+        res.status(500).json({ error: "Erreur serveur" });
+    }
+};
+
+/**
+ * Affiche un formulaire HTML simple pour réinitialiser le mot de passe
+ */
+exports.getResetPassword = async (req, res) => {
+    const { token } = req.params;
+    try {
+        const user = await userModel.getUserByResetToken(token);
+        if (!user) {
+            return res.status(400).send("Le token est invalide ou a expiré.");
+        }
+        // Redirige vers le fichier HTML séparé avec le token en query string
+        res.redirect(`/reset-password.html?token=${token}`);
+    } catch (error) {
+        console.error("Erreur dans getResetPassword:", error);
+        res.status(500).send("Erreur serveur");
+    }
+};
+
+/**
+ * Traite la soumission du nouveau mot de passe :
+ * - Vérifie le token
+ * - Met à jour le mot de passe (en le hachant)
+ * - Efface le token et la date d’expiration
+ */
+exports.resetPassword = async (req, res) => {
+    const { token } = req.params;
+    const { password, confirm } = req.body;
+    try {
+        if (password !== confirm) {
+            return res.status(400).json({ error: 'Les mots de passe ne correspondent pas.' });
+        }
+        const user = await userModel.getUserByResetToken(token);
+        if (!user) {
+            return res.status(400).json({ error: 'Le token est invalide ou a expiré.' });
+        }
+        const hashedPassword = await bcrypt.hash(password, 10);
+        await userModel.updateUserPassword(user.id, hashedPassword);
+        // Effacer le token et la date d'expiration
+        await userModel.clearResetToken(user.id);
+
+        // Optionnel : envoyer un email de confirmation
+        const mailOptions = {
+            to: user.email,
+            from: process.env.EMAIL_USER,
+            subject: 'Votre mot de passe a été modifié',
+            text: `Bonjour,\n\nCeci est une confirmation que le mot de passe de votre compte ${user.email} a été modifié.\n`
+        };
+
+        transporter.sendMail(mailOptions, (err) => {
+            if (err) console.error('Erreur lors de l\'envoi de l\'email de confirmation:', err);
+        });
+        res.status(200).json({ message: 'Votre mot de passe a été mis à jour avec succès.' });
+    } catch (error) {
+        console.error("Erreur dans resetPassword:", error);
+        res.status(500).json({ error: 'Erreur serveur' });
+    }
+};
+
 module.exports = {
-    login: exports.login,
     register: exports.register,
+    login: exports.login,
     refreshToken: exports.refreshToken,
     logout: exports.logout,
+    verify: exports.verify,
     getProfile: exports.getProfile,
     changePassword: exports.changePassword,
-    verify: exports.verify
+    forgotPassword: exports.forgotPassword,
+    getResetPassword: exports.getResetPassword,
+    resetPassword: exports.resetPassword
 };
