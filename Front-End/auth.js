@@ -5,7 +5,7 @@ import CaptchaHandler from './captcha.js';
 import { api } from './dynamicLoader.js';
 import TermsHandler from './terms.js';
 import { notificationService } from './Services/notificationService.js';
-import { authService } from './Services/authService.js'; 
+import { authService } from './Services/authService.js';
 import { countriesCache } from './Services/Caches/cacheCountries.js';  // Cache global pour les pays
 
 // Flag global pour empêcher une double initialisation du champ "pays"
@@ -84,11 +84,11 @@ function initializeEmailValidation() {
 
 /* ------------------ Affichage des formulaires d’authentification ------------------ */
 function showAuthForms() {
-    console.log("showAuthForms called");
     const authForms = document.getElementById("welcomepage-auth-forms");
     const getStartedBtn = document.getElementById("welcomepage-getStartedBtn");
 
     if (authForms && getStartedBtn) {
+        // Masquer le bouton Get Started et afficher les formulaires
         getStartedBtn.style.display = "none";
         authForms.classList.remove("hidden");
         authForms.style.display = "block";
@@ -98,6 +98,8 @@ function showAuthForms() {
             authForms.classList.add("visible");
         }, 10);
 
+        // Forcer l'affichage de l'onglet "Sign In" (ou "Sign Up" selon votre choix) en synchronisant les onglets
+        // Par exemple, ici on choisit d'activer "signin" :
         switchTab("signin");
     }
 }
@@ -209,15 +211,17 @@ async function handleSignin(event) {
     event.preventDefault();
     
     try {
-        const email = document.getElementById("welcomepage-signin-email").value;
-        const password = document.getElementById("welcomepage-signin-password").value;
+        const email = document.getElementById("welcomepage-signin-email").value.trim();
+        const password = document.getElementById("welcomepage-signin-password").value.trim();
 
         const response = await authService.login(email, password);
         if (response && response.token) {
             // Déclencher l'événement login
             window.dispatchEvent(new Event('login'));
             notificationService.show('auth.signin.success', 'success');
-            setTimeout(() => navigateTo("dashboard"), 1500);
+            setTimeout(() => {
+                navigateTo("dashboard");
+            }, 1500);
         } else {
             throw new Error("Token non reçu");
         }
@@ -251,7 +255,7 @@ function initializeCountryInput() {
             countries = countriesCache[lang];
             filteredCountries = [...countries];
             displayCountries(countries);
-                    } catch (error) {
+        } catch (error) {
             console.error('Erreur de chargement des pays:', error);
             countries = [];
             filteredCountries = [];

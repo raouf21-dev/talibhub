@@ -9,7 +9,7 @@
     <title>TalibTimer</title>
     <meta
       name="TalibTimer"
-      content="TalibTimer helps users improve their productivity using the Pomodoro technique, offering customizable timers, detailed statistics, reminders, and task lists for optimal time management."
+      content="TalibTimer helps users improve their productivity using the Pomodoro technique, offering customisable timers, detailed statistics, reminders, and task lists for optimal time management."
     />
     <link
       rel="icon"
@@ -46,7 +46,7 @@
 
   <body>
     <nav class="top-nav">
-      <!-- Gauche : Hamburger + Logo -->
+      <!-- Left: Hamburger + Logo -->
       <div class="nav-left">
         <div class="hamburger-btn" id="hamburgerBtn">☰</div>
         <div class="app-branding">
@@ -54,14 +54,14 @@
         </div>
       </div>
 
-      <!-- Droite : Cloche + Profil -->
+      <!-- Right: Bell + Profile -->
       <div class="nav-right">
         <a
           href="#"
           id="notificationBell"
           class="notifications-link"
           data-destination="notifications"
-          title="Voir les notifications"
+          title="View notifications"
         >
           <i data-feather="bell" class="notifications-icon"></i>
         </a>
@@ -72,7 +72,7 @@
             <i class="profile-icon">▼</i>
           </button>
 
-          <!-- Menu déroulant du profil -->
+          <!-- Profile dropdown menu -->
           <div id="profile-dropdown" class="profile-dropdown">
             <a href="#" class="dropdown-item" data-destination="profile"
               >Profile</a
@@ -88,7 +88,7 @@
             >
             <div class="dropdown-divider"></div>
 
-            <!-- Basculer le thème -->
+            <!-- Toggle theme -->
             <div class="dropdown-item">
               <div class="theme-toggle">
                 <span>Theme</span>
@@ -99,7 +99,7 @@
               </div>
             </div>
 
-            <!-- Sélecteur de langue -->
+            <!-- Language selector -->
             <div class="dropdown-item">
               <div class="language-selector">
                 <button class="lang-btn" data-lang="fr">🇫🇷</button>
@@ -135,7 +135,7 @@
             </li>
             <li>
               <a href="#" class="nav-link" data-destination="apprentissage"
-                >TalibTimer</a
+                >Talib Timer</a
               >
               <ul class="subnav">
                 <li>
@@ -157,7 +157,7 @@
             </li>
             <li>
               <a href="#" class="nav-link" data-destination="surahmemorization"
-                >Surah Memorization</a
+                >Surah Memorisation</a
               >
             </li>
             <li>
@@ -166,7 +166,7 @@
               >
             </li>
             <li class="nav-list-divider"></li>
-            <!-- Pour séparer visuellement -->
+            <!-- For visual separation -->
           </ul>
         </nav>
       </aside>
@@ -177,7 +177,7 @@
         <h1>TalibHub(Beta)</h1>
         <!-- Language Selector -->
         <section class="language-selector">
-          <button class="lang-btn" data-lang="fr" title="Français">🇫🇷</button>
+          <button class="lang-btn" data-lang="fr" title="French">🇫🇷</button>
           <button class="lang-btn" data-lang="en" title="English">🇬🇧</button>
         </section>
       </header>
@@ -202,12 +202,12 @@
               </button>
             </div>
             <div
-              class="welcomepage-tab-content active"
+              class="welcomepage-tab-content"
               id="welcomepage-signupTab"
             >
               <form id="welcomepage-signupForm">
                 <h3>Sign Up</h3>
-                <!-- Champ honeypot caché -->
+                <!-- Hidden honeypot field -->
                 <div
                   style="
                     opacity: 0;
@@ -230,7 +230,7 @@
                   />
                 </div>
 
-                <!-- Champ caché pour le timing -->
+                <!-- Hidden field for timing -->
                 <input type="hidden" id="form-start-time" value="" />
                 <div class="form-grid">
                   <div class="welcomepage-form-group">
@@ -365,7 +365,7 @@
                 </button>
               </form>
             </div>
-            <div class="welcomepage-tab-content" id="welcomepage-signinTab">
+            <div class="welcomepage-tab-content active" id="welcomepage-signinTab">
               <form id="welcomepage-signinForm">
                 <h3>Sign In</h3>
                 <div class="form-grid">
@@ -401,16 +401,16 @@
           <h2>Our Main Features</h2>
           <div class="welcomepage-features-grid">
             <div class="welcomepage-feature-card">
-              <h3>TalibTimer</h3>
-              <p>Optimize your study and practice sessions</p>
+              <h3>Talib Timer</h3>
+              <p>Optimise your study and practice sessions</p>
             </div>
             <div class="welcomepage-feature-card">
-              <h3>SurahSelector</h3>
+              <h3>Surah Selector</h3>
               <p>Diversify your prayer recitations</p>
             </div>
             <div class="welcomepage-feature-card">
-              <h3>Surah Memorization</h3>
-              <p>Maintain your memorization with spaced repetition</p>
+              <h3>Surah Memorisation</h3>
+              <p>Maintain your memorisation with spaced repetition</p>
             </div>
             <div class="welcomepage-feature-card">
               <h3>Dua Time Calculator</h3>
@@ -432,7 +432,7 @@
           <p>
             At TalibHub, we believe that technology can enrich and facilitate
             the practice of Islam. Our platform combines practical features with
-            an intuitive interface to create a unique and personalized
+            an intuitive interface to create a unique and personalised
             experience for each user.
           </p>
         </div>
@@ -448,7 +448,7 @@
               </p>
             </div>
             <div class="welcomepage-why-choose-card">
-              <h3>Personalization</h3>
+              <h3>Personalisation</h3>
               <p>
                 Our platform adapts to your lifestyle and personal goals in
                 religious practice.
@@ -528,9 +528,9 @@
           <div class="dashboard-card" data-destination="surahmemorization">
             <img
               src="./Icones/DashboardIcones/brain_icone1.svg"
-              alt="Surah Memorization Icon"
+              alt="Surah Memorisation Icon"
             />
-            <h2>Surah Memorization</h2>
+            <h2>Surah Memorisation</h2>
           </div>
           <div class="dashboard-card" data-destination="duaTimeCalculator">
             <img
@@ -544,7 +544,7 @@
               src="./Icones/DashboardIcones/clock_icone1.svg"
               alt="Clock Icon"
             />
-            <h2>TalibTimer</h2>
+            <h2>Talib Timer</h2>
           </div>
         </div>
       </main>
@@ -1117,7 +1117,7 @@
     </section>
 
     <section id="surahmemorization" class="page page-no-welcome">
-      <h1>Surah memorization</h1>
+      <h1>Surah Memorisation</h1>
 
       <div id="quran-app-container">
         <!-- Navigation -->
@@ -1162,7 +1162,7 @@
               class="surahmemorization-select"
             >
               <option value="default">Default</option>
-              <option value="memorization">By Memorization Level</option>
+              <option value="memorization">By Memorisation Level</option>
               <option value="alphabetical">Alphabetical Order</option>
               <option value="numerical">Numerical Order</option>
             </select>
@@ -1172,7 +1172,7 @@
           <div id="surahmemorization-list-container">
             <div class="surahmemorization-headers">
               <div class="header-left">
-                <span>Sourates</span>
+                <span>Surahs</span>
               </div>
               <div class="header-center">
                 <span>Level</span>
@@ -1246,7 +1246,7 @@
                 </div>
                 -->
           <h2 style="text-align: center; margin-top: 20px">
-            How do you rate your memorization of this surah?
+            How do you rate your memorisation of this surah?
           </h2>
           <div id="surahmemorization-evaluation">
             <button class="surahmemorization-eval-btn" data-level="Strong">
@@ -1276,18 +1276,18 @@
               id="surahmemorization-history-filter"
               class="surahmemorization-select"
             >
-              <option value="all">Tous les niveaux</option>
-              <option value="strong">Fort</option>
-              <option value="good">Bon</option>
-              <option value="moderate">Moyen</option>
-              <option value="weak">Faible</option>
+              <option value="all">All levels</option>
+              <option value="strong">Strong</option>
+              <option value="good">Good</option>
+              <option value="moderate">Moderate</option>
+              <option value="weak">Weak</option>
             </select>
           </div>
 
           <!-- Charts -->
           <div class="surahmemorization-charts">
             <div class="chart-container">
-              <h3 class="chart-title">Distribution of Memorization Levels</h3>
+              <h3 class="chart-title">Distribution of Memorisation Levels</h3>
               <div class="chart-area">
                 <canvas id="surahmemorization-performance-chart"></canvas>
               </div>
@@ -1897,11 +1897,11 @@
             <div class="aboutus-card-content">
               <ul class="aboutus-list">
                 <li>
-                  TalibTimer: Study time management with Pomodoro technique,
+                  Talib Timer: Study time management with Pomodoro technique,
                   stopwatch, and counter
                 </li>
-                <li>SurahSelector: Diversify your prayer surahs</li>
-                <li>Surah Memorization: Maintain surah memorization</li>
+                <li>Surah Selector: Diversify your prayer surahs</li>
+                <li>Surah Memorisation: Maintain surah memorisation</li>
                 <li>
                   Dua Time Calculator: Calculate the last third of the night for
                   invocations
@@ -2069,7 +2069,7 @@
     <script type="module" src="charts.js"></script>
 
     <script>
-      // À la fin de ton <body> :
+      // At the end of your <body>:
       feather.replace();
     </script>
   </body>

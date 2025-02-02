@@ -48,7 +48,7 @@ app.use(express.urlencoded({ extended: true }));
 if (process.env.NODE_ENV === 'development') {
     app.use((req, res, next) => {
         console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
-        console.log('Body:', req.body);
+        /*console.log('Body:', req.body);*/
         next();
     });
 }

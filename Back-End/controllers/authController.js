@@ -5,10 +5,8 @@ const jwt = require('jsonwebtoken');
 const transporter = require('../config/nodemailer');
 const { cookieManager } = require('../middlewares/cookieManager');
 const crypto = require('crypto');
-const path = require('path');
 
 exports.register = async (req, res) => {
-    console.log("Données reçues:", req.body);
     const { username, password, email, firstName, lastName, age, gender, country } = req.body;
 
     if (!username || !password || !email || !firstName || !lastName || !age || !gender || !country) {
@@ -194,8 +192,6 @@ exports.getProfile = async (req, res) => {
             age: user.age,
             gender: user.gender
         };
-
-        console.log('User profile being sent:', userProfile);
         res.status(200).json(userProfile);
     } catch (error) {
         console.error('Error in getProfile:', error);
@@ -273,11 +269,11 @@ exports.forgotPassword = async (req, res) => {
 
             transporter.sendMail(mailOptions, (err) => {
                 if (err) {
-                  console.error('Erreur lors de l\'envoi de l\'email:', err);
-                  return res.status(500).json({ error: 'Erreur lors de l\'envoi de l\'email' });
+                    console.error("Erreur lors de l'envoi de l'email:", err);
+                    return res.status(500).json({ error: "Erreur lors de l'envoi de l'email" });
                 }
                 res.status(200).json({ message: "Si l'adresse existe, un email de réinitialisation vous a été envoyé." });
-              });
+            });
         });
     } catch (error) {
         console.error("Erreur dans forgotPassword:", error);
@@ -334,7 +330,7 @@ exports.resetPassword = async (req, res) => {
         };
 
         transporter.sendMail(mailOptions, (err) => {
-            if (err) console.error('Erreur lors de l\'envoi de l\'email de confirmation:', err);
+            if (err) console.error("Erreur lors de l'envoi de l'email de confirmation:", err);
         });
         res.status(200).json({ message: 'Votre mot de passe a été mis à jour avec succès.' });
     } catch (error) {

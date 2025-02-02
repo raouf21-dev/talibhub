@@ -76,5 +76,5 @@ module.exports = {
     updateUserPassword,
     setResetToken,
     getUserByResetToken,
-    clearResetToken,
+    clearResetToken
 };

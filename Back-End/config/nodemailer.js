@@ -2,12 +2,12 @@
 const nodemailer = require('nodemailer');
 
 const transporter = nodemailer.createTransport({
-  host: 'in-v3.mailjet.com',
-  port: 587,
-  secure: false, // Utilise STARTTLS, ce qui est recommandé sur le port 587
+  host: process.env.MAILERSEND_SMTP_SERVER, // par ex. "smtp.mailersend.net"
+  port: Number(process.env.MAILERSEND_SMTP_PORT), // par ex. 587
+  secure: Number(process.env.MAILERSEND_SMTP_PORT) === 465, // true pour le port 465, sinon false
   auth: {
-    user: process.env.MAILJET_API_KEY,    // Votre clé API Mailjet
-    pass: process.env.MAILJET_API_SECRET   // Votre secret API Mailjet
+    user: process.env.MAILERSEND_SMTP_USERNAME, // votre identifiant SMTP
+    pass: process.env.MAILERSEND_SMTP_PASSWORD  // votre mot de passe SMTP
   }
 });
 
