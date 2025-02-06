@@ -11,11 +11,15 @@ const scrapeCentralMosqueBham = require("./birmingham/centralMosqueBham");
 const scrapeQubaIsmalicCenter = require("./birmingham/qubaIsmalicCenterBham");
 const scrapeMSHUK = require("./birmingham/muslimStudentsHouseBham");
 const scrapeArRahmaCentreBham = require("./birmingham/arRahmaCentreBham");
+const scrapeMasjidUmarBham = require("./birmingham/masjidUmarBham");
+const scrapeAmanahMasjid = require("./birmingham/amanahMasjidBham");
+const scrapeSparkbrookMasjid = require("./birmingham/sparkbrookMasjidBham");
+const scrapeMasjidEHamza = require("./birmingham/masjidEHamzaBham");
+
 
 // Debug logs pour vérifier les imports
 console.log('===== DEBUG: Checking imports =====');
-console.log('arRahmaCentreBham:', typeof scrapeArRahmaCentreBham);
-console.log('centralMosqueBham:', typeof scrapeCentralMosqueBham);
+console.log('Masjid Umar Bham:', typeof scrapeMasjidUmarBham);
 console.log('===== END DEBUG =====');
 
 // Configuration des scrapers
@@ -27,7 +31,11 @@ const SCRAPER_CONFIG = {
     5: { name: 'Central Mosque Birmingham', fn: scrapeCentralMosqueBham },
     6: { name: 'Quba Islamic Center Birmingham', fn: scrapeQubaIsmalicCenter },
     7: { name: 'Muslim Students House Birmingham', fn: scrapeMSHUK },
-    8: { name: 'Ar-Rahma Centre Birmingham', fn: scrapeArRahmaCentreBham }
+    8: { name: 'Ar-Rahma Centre Birmingham', fn: scrapeArRahmaCentreBham },
+    9: { name: 'Masjid Umar Birmingham', fn: scrapeMasjidUmarBham },
+    10: { name: 'Amanah Masjid Birmingham', fn: scrapeAmanahMasjid },
+    11: { name: 'Sparkbrook Masjid Birmingham', fn: scrapeSparkbrookMasjid },
+    12: { name: 'Masjid E Hamza Birmingham', fn: scrapeMasjidEHamza },
 };
 
 class ScraperManager {

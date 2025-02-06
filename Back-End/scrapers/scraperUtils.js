@@ -249,8 +249,8 @@ const normalizeTime = (timeStr, prayerName = null) => {
         timeStr = timeStr.replace(/[ap]m/i, '').trim();
         
         // Gérer différents formats de séparation
-        if (timeStr.includes(':')) {
-            [hours, minutes] = timeStr.split(':').map(Number);
+        if (timeStr.includes(':') || timeStr.includes('.')) {
+            [hours, minutes] = timeStr.split(/[:.]/g).map(Number);
         } else {
             // Format sans séparateur (e.g., "0730")
             timeStr = timeStr.padStart(4, '0');
