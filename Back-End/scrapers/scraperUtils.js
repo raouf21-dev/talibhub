@@ -302,7 +302,8 @@ const prayerUtils = {
             'dhur': 'dhuhr',
             'asr': 'asr',
             'maghrib': 'maghrib',
-            'isha': 'isha'
+            'isha': 'isha',
+            'esha': 'isha'
         };
 
         return prayerMappings[name.toLowerCase().trim()] || null;
@@ -320,7 +321,8 @@ const prayerUtils = {
         // Normalisation des prières obligatoires
         for (const prayer of requiredPrayers) {
             if (result.times[prayer]) {
-                const normalizedTime = normalizeTime(result.times[prayer]);
+                // Passer le nom de la prière en second paramètre
+                const normalizedTime = normalizeTime(result.times[prayer], prayer);
                 if (normalizedTime) {
                     normalizedTimes[prayer] = normalizedTime;
                 }
@@ -330,7 +332,8 @@ const prayerUtils = {
         // Ajout des prières optionnelles si elles existent
         for (const prayer of optionalPrayers) {
             if (result.times[prayer]) {
-                const normalizedTime = normalizeTime(result.times[prayer]);
+                // Passer le nom de la prière en second paramètre
+                const normalizedTime = normalizeTime(result.times[prayer], prayer);
                 if (normalizedTime) {
                     normalizedTimes[prayer] = normalizedTime;
                 }
