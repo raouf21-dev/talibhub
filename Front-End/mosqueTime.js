@@ -33,7 +33,14 @@ export class MosqueTimeManager {
         this.setupEventListeners();
         await this.loadCities();
         await this.loadLastSelectedCity();
-    }
+    // Set "All Mosques" tab as default
+    this.switchTab('all');
+        
+    // Update UI to reflect the default tab
+    document.querySelectorAll('.mosquetime-tab').forEach(tab => {
+        tab.classList.toggle('active', tab.dataset.tab === 'all');
+    });
+}
 
     // --- Initialisation du datePicker ---
     initializeDatePicker() {
@@ -473,9 +480,9 @@ export class MosqueTimeManager {
         } else {
             singleMosqueTab.style.display = 'none';
             allMosquesTab.style.display = 'block';
+            // Update the all mosques view when switching to it
+            this.updateAllMosques();
         }
-    
-        // Pas de rechargement des données pour éviter des appels superflus
     }
 
     // --- Configuration des écouteurs d'événements DOM ---

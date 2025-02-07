@@ -236,63 +236,51 @@ const normalizeTime = (timeStr, prayerName = null) => {
     if (!timeStr) return null;
 
     try {
-        // Nettoyer la chaîne
         timeStr = timeStr.trim().toLowerCase();
         if (timeStr === '--:--' || timeStr === 'n/a' || timeStr === '--') return null;
 
-        // Parser le format AM/PM si présent
         let hours, minutes;
         const isPM = timeStr.includes('pm');
         const isAM = timeStr.includes('am');
         
-        // Enlever AM/PM et nettoyer
         timeStr = timeStr.replace(/[ap]m/i, '').trim();
         
-        // Gérer différents formats de séparation
         if (timeStr.includes(':') || timeStr.includes('.')) {
             [hours, minutes] = timeStr.split(/[:.]/g).map(Number);
         } else {
-            // Format sans séparateur (e.g., "0730")
             timeStr = timeStr.padStart(4, '0');
             hours = parseInt(timeStr.slice(0, 2));
             minutes = parseInt(timeStr.slice(2));
         }
 
-        // Validation de base
-        if (isNaN(hours) || isNaN(minutes)) return null;
-        if (minutes >= 60) return null;
-        
-        // Conversion basée sur la prière et l'heure
+        if (isNaN(hours) || isNaN(minutes) || minutes >= 60) return null;
+
+        // Règles de conversion spécifiques aux prières
         if (!isPM && !isAM) {
-            if (prayerName === 'fajr') {
-                // Fajr est toujours le matin
-                if (hours >= 12) hours -= 12;
+            switch(prayerName) {
+                case 'fajr':
+                    // Fajr est toujours AM
+                    if (hours === 12) hours = 0;
+                    break;
+                case 'dhuhr':
+                    // Dhuhr est l'après-midi
+                    if (hours !== 12) hours += 12;
+                    break;
+                case 'asr':
+                case 'maghrib':
+                case 'isha':
+                    // Ces prières sont toujours PM
+                    if (hours < 12) hours += 12;
+                    break;
             }
-            else if (prayerName && ['asr', 'maghrib', 'isha'].includes(prayerName)) {
-                // Ces prières sont toujours l'après-midi/soir
-                if (hours < 12) hours += 12;
-            }
-            else if (hours <= 6) {
-                // Pour les heures très tôt sans indication AM/PM, supposer AM
-                // Ne rien faire, garder l'heure telle quelle
-            }
-            else if (hours >= 7 && hours < 12) {
-                // Pour les heures de la journée, vérifier le contexte
-                if (prayerName && ['dhuhr', 'asr', 'maghrib', 'isha'].includes(prayerName)) {
-                    hours += 12;
-                }
-            }
-        }
-        else {
+        } else {
             // Conversion standard AM/PM
             if (isPM && hours < 12) hours += 12;
             if (isAM && hours === 12) hours = 0;
         }
 
-        // Validation finale
         if (hours >= 24) return null;
         
-        // Formatage
         return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
     } catch (error) {
         console.error('Erreur de normalisation du temps:', error);
@@ -324,10 +312,12 @@ const prayerUtils = {
         if (!result || !result.times) {
             throw new Error('Format de résultat invalide');
         }
-
+    
         const requiredPrayers = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
+        const optionalPrayers = ['jumuah1', 'jumuah2', 'jumuah3'];
         const normalizedTimes = {};
-
+    
+        // Normalisation des prières obligatoires
         for (const prayer of requiredPrayers) {
             if (result.times[prayer]) {
                 const normalizedTime = normalizeTime(result.times[prayer]);
@@ -336,13 +326,23 @@ const prayerUtils = {
                 }
             }
         }
-
+    
+        // Ajout des prières optionnelles si elles existent
+        for (const prayer of optionalPrayers) {
+            if (result.times[prayer]) {
+                const normalizedTime = normalizeTime(result.times[prayer]);
+                if (normalizedTime) {
+                    normalizedTimes[prayer] = normalizedTime;
+                }
+            }
+        }
+    
         // Vérifier qu'au moins une prière est valide
         const hasValidTimes = Object.values(normalizedTimes).some(time => time !== null);
         if (!hasValidTimes) {
             throw new Error('Aucune heure de prière valide trouvée');
         }
-
+    
         return {
             source: result.source,
             date: result.date,

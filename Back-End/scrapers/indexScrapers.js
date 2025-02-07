@@ -15,12 +15,17 @@ const scrapeMasjidUmarBham = require("./birmingham/masjidUmarBham");
 const scrapeAmanahMasjid = require("./birmingham/amanahMasjidBham");
 const scrapeSparkbrookMasjid = require("./birmingham/sparkbrookMasjidBham");
 const scrapeMasjidEHamza = require("./birmingham/masjidEHamzaBham");
+const scrapeMasjidSulayman = require("./birmingham/masjidSulaymanBham");
+const scrapeEsaIbnMaryama = require("./birmingham/masjidEsaIbnMaryamaBham");
+const scrapeHallGreenMosque = require("./birmingham/hallGreenMosqueBham");
+const scrapeKingsHeathMosque = require("./birmingham/kingsHeathMosqueBham");
+const scrapeBournvilleMasjid = require("./birmingham/bournvilleMasjidBham");
+
 
 
 // Debug logs pour vérifier les imports
-console.log('===== DEBUG: Checking imports =====');
-console.log('Masjid Umar Bham:', typeof scrapeMasjidUmarBham);
-console.log('===== END DEBUG =====');
+//console.log('===== DEBUG: Checking imports =====');
+//console.log('===== END DEBUG =====');
 
 // Configuration des scrapers
 const SCRAPER_CONFIG = {
@@ -36,6 +41,12 @@ const SCRAPER_CONFIG = {
     10: { name: 'Amanah Masjid Birmingham', fn: scrapeAmanahMasjid },
     11: { name: 'Sparkbrook Masjid Birmingham', fn: scrapeSparkbrookMasjid },
     12: { name: 'Masjid E Hamza Birmingham', fn: scrapeMasjidEHamza },
+    13: { name: 'Sulayman bin Dawud Birmingham', fn: scrapeMasjidSulayman },
+    14: { name: 'Masjid Esa ibn Maryama Birmingham', fn: scrapeEsaIbnMaryama },
+    15: { name: 'Hall Green Mosque Birmingham', fn: scrapeHallGreenMosque },
+    16: { name: 'Kings Heath Mosque Birmingham',fn: scrapeKingsHeathMosque },
+    17: { name: 'Bournville Masjid and Community Centre Birmingham', fn: scrapeBournvilleMasjid }
+    
 };
 
 class ScraperManager {
@@ -86,6 +97,7 @@ class ScraperManager {
 
                 // Utiliser la queue pour gérer le scraping
                 const result = await scraperQueue.enqueue(id, async () => {
+                    console.log(`DEBUG: Executing scraper for ID ${id}, function:`, config.fn.name);
                     const rawResult = await config.fn();
                     
                     if (!rawResult || !rawResult.times) {

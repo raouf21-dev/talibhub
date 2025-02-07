@@ -151,13 +151,13 @@ const scrapeMSHUK = async () => {
 
         // Standardisation des noms de prière et normalisation initiale des temps
         const normalizedTimes = {};
-        for (let [prayer, time] of Object.entries(rawData)) {
-            prayer = prayerUtils.standardizePrayerName(prayer);
-            const normalizedTime = normalizeTime(time);
-            if (normalizedTime) {
-                normalizedTimes[prayer] = normalizedTime;
-            }
-        }
+for (let [prayer, time] of Object.entries(rawData)) {
+    prayer = prayerUtils.standardizePrayerName(prayer);
+    const normalizedTime = normalizeTime(time, prayer); // Ajout du paramètre prayer
+    if (normalizedTime) {
+        normalizedTimes[prayer] = normalizedTime;
+    }
+}
 
         // Création du résultat intermédiaire
         const result = {

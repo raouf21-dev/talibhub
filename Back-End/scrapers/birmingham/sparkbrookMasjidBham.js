@@ -101,15 +101,15 @@ const scrapeSparkbrookMasjid = async () => {
 
         // Normalisation des temps
         const normalizedTimes = {};
-        for (let [prayer, time] of Object.entries(rawTimes)) {
-            prayer = prayerUtils.standardizePrayerName(prayer);
-            if (prayer) {
-                const normalizedTime = normalizeTime(time);
-                if (normalizedTime) {
-                    normalizedTimes[prayer] = normalizedTime;
-                }
-            }
+for (let [prayer, time] of Object.entries(rawTimes)) {
+    prayer = prayerUtils.standardizePrayerName(prayer);
+    if (prayer) {
+        const normalizedTime = normalizeTime(time, prayer); // Ajout du paramètre prayer
+        if (normalizedTime) {
+            normalizedTimes[prayer] = normalizedTime;
         }
+    }
+}
 
         const result = {
             source: 'Sparkbrook Masjid Birmingham',
