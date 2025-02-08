@@ -1,12 +1,36 @@
-// terms.js
 class TermsHandler {
     constructor() {
-        this.termsLink = document.getElementById('terms-link');
+        try {
+            // Mise à jour des sélecteurs pour correspondre à la structure HTML
+            this.termsLink = document.querySelector('.terms-link');
+            this.termsCheckbox = document.getElementById('welcomepage-terms');
+            this.submitButton = document.querySelector('#welcomepage-signupForm button[type="submit"]');
+            this.termsWindow = null;
+
+            if (!this.termsLink || !this.termsCheckbox || !this.submitButton) {
+                console.warn('Les éléments des CGU ne sont pas encore chargés dans le DOM');
+                document.addEventListener('DOMContentLoaded', () => {
+                    this.initializeAfterDOM();
+                });
+            } else {
+                this.initialize();
+            }
+        } catch (error) {
+            console.error('Erreur lors de l\'initialisation de TermsHandler:', error);
+        }
+    }
+
+    initializeAfterDOM() {
+        // Réessayer de récupérer les éléments avec les bons sélecteurs
+        this.termsLink = document.querySelector('.terms-link');
         this.termsCheckbox = document.getElementById('welcomepage-terms');
         this.submitButton = document.querySelector('#welcomepage-signupForm button[type="submit"]');
-        this.termsWindow = null;
-        
-        this.initialize();
+
+        if (this.validateElements()) {
+            this.initialize();
+        } else {
+            console.error('Les éléments des CGU sont toujours manquants après le chargement du DOM');
+        }
     }
 
     initialize() {
@@ -15,15 +39,25 @@ class TermsHandler {
             return;
         }
 
-        // Désactiver le bouton initialement
-        this.submitButton.disabled = true;
-        this.submitButton.classList.remove('enabled');
+        // Vérifier l'état initial de la checkbox
+        const isChecked = this.termsCheckbox.checked;
+        this.submitButton.disabled = !isChecked;
+        this.submitButton.classList.toggle('enabled', isChecked);
 
         this.setupEventListeners();
     }
 
     validateElements() {
-        return this.termsLink && this.termsCheckbox && this.submitButton;
+        const missing = [];
+        if (!this.termsLink) missing.push('terms-link');
+        if (!this.termsCheckbox) missing.push('welcomepage-terms');
+        if (!this.submitButton) missing.push('submit button');
+
+        if (missing.length > 0) {
+            console.warn(`Éléments manquants: ${missing.join(', ')}`);
+            return false;
+        }
+        return true;
     }
 
     setupEventListeners() {
@@ -34,13 +68,26 @@ class TermsHandler {
         this.termsCheckbox.addEventListener('change', () => this.handleCheckboxChange());
 
         // Validation avant soumission du formulaire
-        document.getElementById('welcomepage-signupForm').addEventListener('submit', (e) => this.handleFormSubmit(e));
+        const form = document.getElementById('welcomepage-signupForm');
+        if (form) {
+            form.addEventListener('submit', (e) => this.handleFormSubmit(e));
+        } else {
+            console.warn('Formulaire d\'inscription non trouvé');
+        }
     }
 
     handleCheckboxChange() {
         const isChecked = this.termsCheckbox.checked;
         this.submitButton.disabled = !isChecked;
-        this.submitButton.classList.toggle('enabled', isChecked);
+        
+        // Ajout/suppression de classes pour le style
+        if (isChecked) {
+            this.submitButton.classList.add('enabled');
+            this.submitButton.classList.remove('disabled');
+        } else {
+            this.submitButton.classList.remove('enabled');
+            this.submitButton.classList.add('disabled');
+        }
     }
 
     handleFormSubmit(e) {
@@ -54,14 +101,14 @@ class TermsHandler {
         e.preventDefault();
         
         // Définir les dimensions et position de la fenêtre
-        const width = 800;
-        const height = 600;
+        const width = Math.min(800, window.innerWidth - 40);
+        const height = Math.min(600, window.innerHeight - 40);
         const left = (window.innerWidth - width) / 2 + window.screenX;
         const top = (window.innerHeight - height) / 2 + window.screenY;
 
         // Ouvrir une nouvelle fenêtre avec les CGU
         this.termsWindow = window.open(
-            '/terms.html',  // URL mise à jour pour pointer directement vers le fichier HTML
+            '/terms.html',
             'CGU - BlueticksWeb',
             `width=${width},
              height=${height},
@@ -83,11 +130,9 @@ class TermsHandler {
         }, 1000);
     }
 
-    // Méthode publique pour vérifier si les CGU sont acceptées
     isAccepted() {
-        return this.termsCheckbox.checked;
+        return this.termsCheckbox?.checked || false;
     }
 }
 
-// Export de la classe pour l'utiliser dans auth.js
 export default TermsHandler;
