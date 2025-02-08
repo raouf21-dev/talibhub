@@ -1,11 +1,10 @@
 // middlewares/cookieManager.js
-
 const cookieOptions = {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     maxAge: 24 * 60 * 60 * 1000,
-    domain: process.env.NODE_ENV === 'production' ? '45.133.178.159' : 'localhost'
+    domain: process.env.NODE_ENV === 'production' ? 'talibhub.com' : 'localhost'
 };
 
 const cookieManager = {
@@ -20,7 +19,6 @@ const cookieManager = {
         });
     },
 
-    // Nouvelle méthode pour gérer la ville sélectionnée
     setSelectedCity(res, city) {
         res.cookie('selected_city', city, {
             ...cookieOptions,

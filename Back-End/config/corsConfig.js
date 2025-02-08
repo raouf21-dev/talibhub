@@ -1,36 +1,56 @@
-// config/corsConfig.js
-
-const allowedOrigins = {
-    development: [
-        'http://45.133.178.159',
-        'http://45.133.178.159:4000',
-        'http://localhost:4000',
-        'http://localhost:3000',
-        'http://127.0.0.1:4000',
-    ],
-    production: [
-        'http://45.133.178.159',
-        'http://45.133.178.159:4000',
-        process.env.FRONTEND_URL,
-        // autres domaines de production si nécessaire
-    ]
+// middlewares/cookieManager.js
+const cookieOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 24 * 60 * 60 * 1000,
+    domain: process.env.NODE_ENV === 'production' ? 'talibhub.com' : 'localhost'
 };
 
-const corsOptions = {
-    origin: function(origin, callback) {
-        const allowed = allowedOrigins[process.env.NODE_ENV || 'development'];
+const cookieManager = {
+    setAuthCookies(res, token) {
+        // Cookie HTTP-only pour la sécurité
+        res.cookie('auth_token', token, cookieOptions);
         
-        if (!origin || allowed.indexOf(origin) !== -1) {
-            callback(null, true);
-        } else {
-            callback(new Error('Non autorisé par CORS'));
-        }
+        // Cookie accessible en JavaScript pour la vérification côté client
+        res.cookie('auth', 'true', {
+            ...cookieOptions,
+            httpOnly: false
+        });
     },
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    exposedHeaders: ['set-cookie'],
-    maxAge: 86400 // 24 heures
+
+    setSelectedCity(res, city) {
+        res.cookie('selected_city', city, {
+            ...cookieOptions,
+            httpOnly: false // Permettre l'accès côté client
+        });
+    },
+
+    clearAuthCookies(res) {
+        res.clearCookie('auth_token', { path: '/' });
+        res.clearCookie('auth', { path: '/' });
+    },
+
+    clearSelectedCity(res) {
+        res.clearCookie('selected_city', { path: '/' });
+    },
+
+    getAuthToken(req) {
+        return req.cookies.auth_token || req.headers.authorization?.split(' ')[1];
+    },
+
+    getSelectedCity(req) {
+        return req.cookies.selected_city;
+    }
 };
 
-module.exports = corsOptions;
+// Middleware pour attacher les méthodes de gestion des cookies à l'objet response
+const attachCookieManager = (req, res, next) => {
+    res.cookieManager = cookieManager;
+    next();
+};
+
+module.exports = {
+    cookieManager,
+    attachCookieManager
+};
