@@ -22,19 +22,52 @@ app.use(helmet({
     contentSecurityPolicy: {
         directives: {
             defaultSrc: ["'self'"],
-            scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://unpkg.com", "https://cdnjs.cloudflare.com"],
-            styleSrc: ["'self'", "'unsafe-inline'", "https://unpkg.com", "https://cdnjs.cloudflare.com"],
+            scriptSrc: [
+                "'self'", 
+                "'unsafe-inline'", 
+                "'unsafe-eval'", 
+                "https://unpkg.com", 
+                "https://cdnjs.cloudflare.com",
+                "https://www.talibhub.com",
+                "http://www.talibhub.com"
+            ],
+            styleSrc: [
+                "'self'", 
+                "'unsafe-inline'", 
+                "https://unpkg.com", 
+                "https://cdnjs.cloudflare.com",
+                "https://www.talibhub.com",
+                "http://www.talibhub.com"
+            ],
             imgSrc: ["'self'", "data:", "https:"],
-            connectSrc: ["'self'", "https://api.example.com", "https://api.aladhan.com"],
-            fontSrc: ["'self'", "https://cdnjs.cloudflare.com", "data:"], // Ajout de "data:" ici
+            connectSrc: [
+                "'self'", 
+                "https://api.example.com", 
+                "https://api.aladhan.com",
+                "https://www.talibhub.com",
+                "http://www.talibhub.com",
+                "https://talibhub.com",
+                "http://talibhub.com"
+            ],
+            fontSrc: [
+                "'self'", 
+                "https://cdnjs.cloudflare.com", 
+                "data:",
+                "https://www.talibhub.com",
+                "http://www.talibhub.com"
+            ],
             objectSrc: ["'none'"],
             mediaSrc: ["'self'"],
-            frameSrc: ["'self'"],
+            frameSrc: [
+                "'self'",
+                "https://www.talibhub.com",
+                "http://www.talibhub.com"
+            ],
         },
     },
     crossOriginEmbedderPolicy: false,
     crossOriginResourcePolicy: { policy: "cross-origin" }
-}));
+}));;
 
 app.use(cors(corsOptions));
 
