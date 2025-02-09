@@ -1,16 +1,9 @@
 // server.js
-
 const path = require('path');
-
-// Définir une valeur par défaut si NODE_ENV n'est pas définie
-const nodeEnv = process.env.NODE_ENV || 'development';
-
-// Construire le chemin du fichier .env en fonction de l'environnement
-const envFile = path.join(__dirname, `.env.${nodeEnv}`);
-require('dotenv').config({ path: envFile });
+require('dotenv').config({ path: path.join(__dirname, '.env') }); // Modifié ici
 
 // Debug des variables d'environnement
-console.log('Variables d\'environnement chargées depuis', envFile, ':', {
+console.log('Variables d\'environnement chargées:', {
     NODE_ENV: process.env.NODE_ENV,
     PORT: process.env.PORT,
     DB_CONFIG: {

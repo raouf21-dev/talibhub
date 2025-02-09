@@ -9,6 +9,9 @@ const corsOptions = require('./config/corsConfig');
 const cookieParser = require('cookie-parser');
 const { attachCookieManager } = require('./middlewares/cookieManager');
 
+
+require('dotenv').config();
+
 // Création de l'application Express
 const app = express();
 
