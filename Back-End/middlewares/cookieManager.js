@@ -1,15 +1,13 @@
 // middlewares/cookieManager.js
 
-// Fonction pour obtenir le domaine en fonction de l'environnement
 const getDomain = () => {
     if (process.env.NODE_ENV === 'production') {
-        return '.talibhub.com';
+        // Domaine racine pour le partage entre sous-domaines
+        return 'talibhub.com';
     }
-    // En développement, ne pas définir de domaine pour localhost
     return undefined;
 };
 
-// Configuration de base des cookies
 const getCookieOptions = () => {
     const options = {
         httpOnly: true,
@@ -46,7 +44,7 @@ const cookieManager = {
             ...getCookieOptions(),
             path: '/'
         };
-
+        
         res.clearCookie('auth_token', options);
         res.clearCookie('auth', options);
     },
