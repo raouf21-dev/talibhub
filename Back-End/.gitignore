@@ -1,0 +1,40 @@
+# Environnement
+.env
+# Environnement
+.env
+
+# Dependencies
+#node_modules/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store

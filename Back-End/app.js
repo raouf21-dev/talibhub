@@ -78,10 +78,24 @@ app.use(bodyParser.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true }));
 
 // Logger pour le développement
+// Logger pour le développement
 if (process.env.NODE_ENV === 'development') {
     app.use((req, res, next) => {
+        const sanitizedBody = { ...req.body };
+        
+        // Masquer les données sensibles
+        if (sanitizedBody.password) sanitizedBody.password = '[MASQUÉ]';
+        if (sanitizedBody.confirmPassword) sanitizedBody.confirmPassword = '[MASQUÉ]';
+        if (sanitizedBody.currentPassword) sanitizedBody.currentPassword = '[MASQUÉ]';
+        if (sanitizedBody.newPassword) sanitizedBody.newPassword = '[MASQUÉ]';
+        
         console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
-        /*console.log('Body:', req.body);*/
+        
+        // Ne logger le body que s'il contient des données
+        if (Object.keys(sanitizedBody).length > 0) {
+            console.log('Body:', sanitizedBody);
+        }
+        
         next();
     });
 }
