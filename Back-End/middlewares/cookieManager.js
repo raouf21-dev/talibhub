@@ -9,6 +9,7 @@ const getDomain = () => {
     return undefined;
 };
 
+// Configuration de base des cookies
 const getCookieOptions = () => {
     const options = {
         httpOnly: true,
@@ -41,22 +42,40 @@ const cookieManager = {
     },
 
     clearAuthCookies(res) {
-        const options = getCookieOptions();
-        const clearOptions = {
-            ...options,
+        const options = {
+            ...getCookieOptions(),
             path: '/'
         };
 
-        res.clearCookie('auth_token', clearOptions);
-        res.clearCookie('auth', clearOptions);
+        res.clearCookie('auth_token', options);
+        res.clearCookie('auth', options);
+    },
+
+    setSelectedCity(res, city) {
+        const options = {
+            ...getCookieOptions(),
+            httpOnly: false
+        };
+        res.cookie('selected_city', city, options);
+    },
+
+    clearSelectedCity(res) {
+        const options = {
+            ...getCookieOptions(),
+            path: '/'
+        };
+        res.clearCookie('selected_city', options);
     },
 
     getAuthToken(req) {
         return req.cookies.auth_token || req.headers.authorization?.split(' ')[1];
+    },
+
+    getSelectedCity(req) {
+        return req.cookies.selected_city;
     }
 };
 
-// Middleware pour attacher les méthodes de gestion des cookies à l'objet response
 const attachCookieManager = (req, res, next) => {
     res.cookieManager = cookieManager;
     next();
