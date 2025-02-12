@@ -1,5 +1,3 @@
-// apiConfig.js
-
 import { ENV } from './constants.js';
 
 export const langConfig = {
@@ -96,44 +94,41 @@ export const API_CONFIG = {
         },
     },
     version: 'v1'
- };
+};
 
- export const apiClient = {
+export const apiClient = {
     async request(endpoint, options = {}) {
         const url = new URL(`${API_CONFIG.baseUrl}${endpoint}`);
-        const defaultHeaders = {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-        };
-    
-        const token = localStorage.getItem('token');
-        // Ne pas ajouter le header Authorization si pas de token
-        if (token) {
-            defaultHeaders['Authorization'] = `Bearer ${token}`;
-        } else if (endpoint === API_CONFIG.endpoints.auth.verify) {
-            // Si c'est une vérification d'auth sans token, retourner directement false
-            return { success: false };
-        }
-    
-        try {
-            const response = await fetch(url, {
-                ...options,
-                headers: {
-                    ...defaultHeaders,
-                    ...options.headers,
-                },
-                credentials: 'include',
-            });
-    
-            const data = await response.json();
-    
-            if (!response.ok) {
-                throw new Error(data.message || 'Une erreur est survenue');
+        const defaultOptions = {
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
             }
-    
-            return data;
+        };
+
+        const token = localStorage.getItem('token');
+        if (token) {
+            defaultOptions.headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        const finalOptions = {
+            ...defaultOptions,
+            ...options,
+            headers: {
+                ...defaultOptions.headers,
+                ...options.headers
+            }
+        };
+
+        try {
+            const response = await fetch(url, finalOptions);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return await response.json();
         } catch (error) {
-            console.error(`Erreur API (${endpoint}):`, error);
+            console.error(`API Error (${endpoint}):`, error);
             throw error;
         }
     },
