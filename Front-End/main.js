@@ -36,7 +36,7 @@ async function checkAuthStatus() {
 async function initializeApp() {
   console.log("Initialisation de l'application");
 
-  // Déterminer la langue et la définir dans le document (le choix de la langue se fait dans transLanguages.js)
+  // Détermine la langue et la définit dans le document.
   const userLang = localStorage.getItem("userLang") || navigator.language.split('-')[0];
   document.documentElement.lang = userLang;
 
@@ -45,9 +45,8 @@ async function initializeApp() {
   initializeNavigation();
   initializeTopNav();
 
-  // Récupérer la page actuelle depuis l'URL
+  // Récupère la page actuelle depuis l'URL
   let currentPath = window.location.pathname.substring(1);
-  // Si l'URL correspond à un fichier (ex: index-en.html ou index-fr.html), on redirige vers la page par défaut
   if (currentPath.endsWith(".html") || !currentPath) {
     currentPath = "welcomepage";
   }
@@ -63,13 +62,15 @@ async function initializeApp() {
     await navigateTo("welcomepage");
     await initializeAuth();
   }
-
-  // Gestionnaire de déconnexion
-  window.addEventListener("logout", () => {
-    localStorage.removeItem("token");
-    navigateTo("welcomepage");
-  });
 }
+
+// Gestion globale de l'événement "logout" : 
+// Lorsqu'un logout est déclenché (par exemple via une réponse 401),
+// on supprime le token et redirige l'utilisateur vers la page de connexion.
+window.addEventListener("logout", () => {
+  localStorage.removeItem("token");
+  navigateTo("welcomepage");
+});
 
 /**
  * Gère la navigation via les boutons "retour/avant" du navigateur.
