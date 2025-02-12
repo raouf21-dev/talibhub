@@ -1,7 +1,10 @@
-// mosqueTimesRoutes.js
 const express = require("express");
 const { authenticateToken } = require('../middlewares/authenticateToken');
+const { attachCookieManager } = require('../middlewares/cookieManager');
 const router = express.Router();
+
+// Attache le middleware cookieManager pour toutes les routes de ce routeur
+router.use(attachCookieManager);
 
 // Créer une fonction helper pour wrapper les routes avec authenticateToken
 const auth = (handler) => [authenticateToken, handler];
@@ -25,8 +28,8 @@ router.get("/user/selected-city", auth(require("../controllers/mosqueTimesContro
 
 // Route pour les horaires de prière par ville et date
 router.get(
-    "/cities/:city/date/:date/prayer-times",
-    auth(require("../controllers/mosqueTimesController").getPrayerTimesForCityAndDate)
+  "/cities/:city/date/:date/prayer-times",
+  auth(require("../controllers/mosqueTimesController").getPrayerTimesForCityAndDate)
 );
 
 // Route générique pour les horaires de prière
