@@ -99,46 +99,41 @@ export const API_CONFIG = {
 };
 
 export const apiClient = {
-  async request(endpoint, options = {}) {
-    const url = new URL(`${API_CONFIG.baseUrl}${endpoint}`);
-    const defaultHeaders = {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json'
-    };
+    async request(endpoint, options = {}) {
+        const url = new URL(`${API_CONFIG.baseUrl}${endpoint}`);
+        const defaultOptions = {
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        };
 
-    // Récupération du token depuis localStorage (utilisé dans Authorization si présent)
-    const token = localStorage.getItem('token');
-    if (token) {
-      defaultHeaders['Authorization'] = `Bearer ${token}`;
-    } else if (endpoint === API_CONFIG.endpoints.auth.verify) {
-      return { success: false };
-    }
+        const token = localStorage.getItem('token');
+        if (token) {
+            defaultOptions.headers['Authorization'] = `Bearer ${token}`;
+        }
 
-    try {
-      const response = await fetch(url, {
-        ...options,
-        headers: { ...defaultHeaders, ...options.headers },
-        credentials: 'include'
-      });
-      
-      // Si le statut HTTP est 401, déclencher la déconnexion
-      if (response.status === 401) {
-        // Déclenche un événement global "logout" qui sera intercepté pour rediriger l'utilisateur
-        window.dispatchEvent(new Event('logout'));
-      }
+        const finalOptions = {
+            ...defaultOptions,
+            ...options,
+            headers: {
+                ...defaultOptions.headers,
+                ...options.headers
+            }
+        };
 
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.message || 'Une erreur est survenue');
-      }
-      
-      return data;
-    } catch (error) {
-      console.error(`Erreur API (${endpoint}):`, error);
-      throw error;
-    }
-  },
+        try {
+            const response = await fetch(url, finalOptions);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return await response.json();
+        } catch (error) {
+            console.error(`API Error (${endpoint}):`, error);
+            throw error;
+        }
+    },
 
   get(endpoint) {
     return this.request(endpoint);
