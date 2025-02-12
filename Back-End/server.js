@@ -1,6 +1,8 @@
 // server.js
 const path = require('path');
-require('dotenv').config({ path: path.join(__dirname, '.env') }); // Modifié ici
+const envFile = `.env.${process.env.NODE_ENV || 'development'}`;
+require('dotenv').config({ path: path.join(__dirname, envFile) });
+
 
 // Debug des variables d'environnement
 console.log('Variables d\'environnement chargées:', {
