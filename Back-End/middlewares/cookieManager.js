@@ -1,85 +1,60 @@
 // middlewares/cookieManager.js
 
-const getDomain = () => {
-    if (process.env.NODE_ENV === 'production') {
-        // Domaine racine pour le partage entre sous-domaines
-        return 'talibhub.com';
-    }
-    return undefined;
-};
-
+// Fonction qui retourne les options des cookies sans définir explicitement le domaine
 const getCookieOptions = () => {
-    const options = {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 24 * 60 * 60 * 1000 // 24 heures
+    return {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production', // En production, les cookies seront envoyés uniquement via HTTPS
+      sameSite: 'lax',
+      maxAge: 24 * 60 * 60 * 1000 // 24 heures
     };
-
-    // Ajouter le domaine uniquement en production
-    const domain = getDomain();
-    if (domain) {
-        options.domain = domain;
-    }
-
-    return options;
-};
-
-const cookieManager = {
+  };
+  
+  const cookieManager = {
+    // Définit le cookie d'authentification (HTTP-only) et un cookie accessible en JS (pour la vérification côté client)
     setAuthCookies(res, token) {
-        const options = getCookieOptions();
-        
-        // Cookie HTTP-only pour la sécurité
-        res.cookie('auth_token', token, options);
-        
-        // Cookie accessible en JavaScript pour la vérification côté client
-        res.cookie('auth', 'true', {
-            ...options,
-            httpOnly: false
-        });
+      const options = getCookieOptions();
+      res.cookie('auth_token', token, options);
+      res.cookie('auth', 'true', { ...options, httpOnly: false });
     },
-
+  
+    // Efface les cookies d'authentification
     clearAuthCookies(res) {
-        const options = {
-            ...getCookieOptions(),
-            path: '/'
-        };
-        
-        res.clearCookie('auth_token', options);
-        res.clearCookie('auth', options);
+      res.clearCookie('auth_token', { path: '/' });
+      res.clearCookie('auth', { path: '/' });
     },
-
-    setSelectedCity(res, city) {
-        const options = {
-            ...getCookieOptions(),
-            httpOnly: false
-        };
-        res.cookie('selected_city', city, options);
-    },
-
-    clearSelectedCity(res) {
-        const options = {
-            ...getCookieOptions(),
-            path: '/'
-        };
-        res.clearCookie('selected_city', options);
-    },
-
+  
+    // Récupère le token d'authentification depuis les cookies ou le header Authorization
     getAuthToken(req) {
-        return req.cookies.auth_token || req.headers.authorization?.split(' ')[1];
+      return req.cookies.auth_token || (req.headers.authorization ? req.headers.authorization.split(' ')[1] : null);
     },
-
+  
+    // *** Ajout des fonctions pour gérer la ville sélectionnée ***
+  
+    // Définit le cookie "selected_city" (non HTTP-only, pour être accessible côté client)
+    setSelectedCity(res, city) {
+      const options = { ...getCookieOptions(), httpOnly: false };
+      res.cookie('selected_city', city, options);
+    },
+  
+    // Efface le cookie "selected_city"
+    clearSelectedCity(res) {
+      res.clearCookie('selected_city', { path: '/' });
+    },
+  
+    // Récupère le cookie "selected_city"
     getSelectedCity(req) {
-        return req.cookies.selected_city;
+      return req.cookies.selected_city;
     }
-};
-
-const attachCookieManager = (req, res, next) => {
+  };
+  
+  const attachCookieManager = (req, res, next) => {
     res.cookieManager = cookieManager;
     next();
-};
-
-module.exports = {
+  };
+  
+  module.exports = {
     cookieManager,
     attachCookieManager
-};
+  };
+  
