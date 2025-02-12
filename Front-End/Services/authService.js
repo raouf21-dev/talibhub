@@ -36,7 +36,7 @@ class AuthService {
      */
     async login(email, password) {
         try {
-            const response = await apiClient.post('/api/auth/login', {
+            const response = await apiClient.post('/auth/login', {
                 email,
                 password
             }, {
@@ -66,7 +66,7 @@ class AuthService {
      */
     async register(userData) {
         try {
-            const response = await apiClient.post('/api/auth/register', userData, {
+            const response = await apiClient.post('/auth/register', userData, {
                 ...defaultConfig,
                 withCredentials: true
             });
@@ -96,7 +96,7 @@ class AuthService {
                 return false;
             }
 
-            const response = await apiClient.get('/api/auth/verify', {
+            const response = await apiClient.get('/auth/verify', {
                 ...defaultConfig,
                 headers: {
                     ...defaultConfig.headers,
@@ -120,7 +120,7 @@ class AuthService {
      */
     async logout() {
         try {
-            await apiClient.post('/api/auth/logout', {}, {
+            await apiClient.post('/auth/logout', {}, {
                 ...defaultConfig,
                 withCredentials: true
             });
@@ -153,7 +153,7 @@ class AuthService {
      */
     async getProfile() {
         try {
-            const response = await apiClient.get('/api/auth/profile', {
+            const response = await apiClient.get('/auth/profile', {
                 ...defaultConfig,
                 headers: {
                     ...defaultConfig.headers,
@@ -175,7 +175,7 @@ class AuthService {
      */
     async updateProfile(profileData) {
         try {
-            const response = await apiClient.put('/api/auth/profile', profileData, {
+            const response = await apiClient.put('/auth/profile', profileData, {
                 ...defaultConfig,
                 headers: {
                     ...defaultConfig.headers,
@@ -197,7 +197,7 @@ class AuthService {
      */
     async requestPasswordReset(email) {
         try {
-            return await apiClient.post('/api/auth/request-reset', { email }, defaultConfig);
+            return await apiClient.post('/auth/request-reset', { email }, defaultConfig);
         } catch (error) {
             console.error('Erreur lors de la demande de réinitialisation:', error);
             throw error;
@@ -212,7 +212,7 @@ class AuthService {
      */
     async resetPassword(token, newPassword) {
         try {
-            return await apiClient.post('/api/auth/reset-password', {
+            return await apiClient.post('/auth/reset-password', {
                 token,
                 newPassword
             }, defaultConfig);
