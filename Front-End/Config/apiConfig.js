@@ -41,12 +41,9 @@ export const API_CONFIG = {
     baseUrl: (() => {
         const env = getEnvironment();
         if (env === ENV.PROD) {
-            // En production, on veut que l'URL soit https://talibhub.com/api
-            return 'https://talibhub.com/api';
+            return 'https://www.talibhub.com/api';  // Toujours utiliser www en production
         } else {
-            // En développement, on utilise l'URL locale
-            const baseUrl = window.location.origin;
-            return `${baseUrl}${API_ROUTES[env]}`;
+            return `${window.location.origin}${API_ROUTES[env]}`;
         }
     })(),
   endpoints: {
