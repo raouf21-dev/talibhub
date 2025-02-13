@@ -127,17 +127,17 @@ const captchaRoutes = require('./routes/captchaRoutes');
 const duaTimeRoutes = require('./routes/duaTimeRoutes');
 
 // Routes API
-app.use('/auth', authRoutes);
-app.use('/tasks', tasksRoutes);
-app.use('/timer', timerRoutes);
-app.use('/counter', counterRoutes);
-app.use('/session', sessionRoutes);
-app.use('/sourates', sourateRoutes);
-app.use('/statistics', statisticsRoutes);
-app.use('/mosque-times', mosqueTimesRoutes);
-app.use('/surah-memorization', surahMemorizationRoutes);
-app.use('/captcha', captchaRoutes);
-app.use('/dua-time', duaTimeRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/tasks', tasksRoutes);
+app.use('/api/timer', timerRoutes);
+app.use('/api/counter', counterRoutes);
+app.use('/api/session', sessionRoutes);
+app.use('/api/sourates', sourateRoutes);
+app.use('/api/statistics', statisticsRoutes);
+app.use('/api/mosque-times', mosqueTimesRoutes);
+app.use('/api/surah-memorization', surahMemorizationRoutes);
+app.use('/api/captcha', captchaRoutes);
+app.use('/api/dua-time', duaTimeRoutes);
 
 // Routes statiques
 app.use('/api/data', express.static(path.join(__dirname, 'data')));
