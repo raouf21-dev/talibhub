@@ -5,17 +5,15 @@ import { notificationService } from './Services/notificationService.js';
 import CacheService from './Services/Caches/cacheMosqueTime.js';
 import { getMidnightTimestamp } from './Services/Caches/cacheMosqueTime.js';
 
-export class MosqueTimeManager {
+class MosqueTimeManager {
     constructor() {
         this.currentMosques = [];
         this.sortOrder = 'asc';
         this.selectedCity = '';
-        this.lastDate = null; // Pour mémoriser la date utilisée lors de la dernière récupération
+        this.lastDate = null;
 
-        // Événement déclenché quand la langue change
         document.addEventListener('languageChanged', (event) => {
             this.updateDateDisplay();
-            // Mise à jour du select des mosquées avec les données déjà chargées
             this.populateMosqueSelect(this.currentMosques);
             const mosqueSelect = document.getElementById('mosquetime-mosque-select');
             if (mosqueSelect && !mosqueSelect.value) {
@@ -26,21 +24,22 @@ export class MosqueTimeManager {
 
     // --- Point d'entrée principal ---
     async initialize() {
-        console.log('Initializing mosqueTime module');
-        this.initializeDatePicker();
-        this.updateDateDisplay();
-        await this.checkAndUpdateData();
-        this.setupEventListeners();
-        await this.loadCities();
-        await this.loadLastSelectedCity();
-    // Set "All Mosques" tab as default
-    this.switchTab('all');
-        
-    // Update UI to reflect the default tab
-    document.querySelectorAll('.mosquetime-tab').forEach(tab => {
-        tab.classList.toggle('active', tab.dataset.tab === 'all');
-    });
-}
+        try {
+            console.log('Initializing mosqueTime module');
+            this.initializeDatePicker();
+            this.updateDateDisplay();
+            await this.checkAndUpdateData();
+            this.setupEventListeners();
+            await this.loadCities();
+            await this.loadLastSelectedCity();
+            this.switchTab('all');
+        } catch (error) {
+            if (error.message.includes('token')) {
+                window.location.href = '/login';
+            }
+            console.error('Erreur d\'initialisation:', error);
+        }
+    }
 
     // --- Initialisation du datePicker ---
     initializeDatePicker() {
@@ -594,5 +593,7 @@ export class MosqueTimeManager {
 }
 
 // --- Instance de MosqueTimeManager & fonction d'initialisation ---
-const mosqueTimeManager = new MosqueTimeManager();
-export const initializeMosqueTime = () => mosqueTimeManager.initialize();
+export function initializeMosqueTime() {
+    const mosqueTimeManager = new MosqueTimeManager();
+    return mosqueTimeManager.initialize();
+}

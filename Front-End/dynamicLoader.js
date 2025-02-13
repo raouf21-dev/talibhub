@@ -91,14 +91,53 @@ class ApiService {
 
     getHeaders() {
         const headers = {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
         };
         
-        if (this.token) {
-            headers.Authorization = `Bearer ${this.token}`;
+        // Récupérer le token depuis localStorage
+        const token = localStorage.getItem('token');
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
         }
         
         return headers;
+    }
+    
+    async request(endpoint, options = {}) {
+        const url = endpoint.startsWith('http') ? endpoint : `${this.baseUrl}${endpoint}`;
+        
+        const config = {
+            ...options,
+            credentials: 'include', // Important pour inclure les cookies
+            headers: {
+                ...this.getHeaders(),
+                ...(options.headers || {})
+            }
+        };
+    
+        try {
+            loader.show();
+            const response = await fetch(url, config);
+            
+            if (response.status === 401) {
+                // Rediriger vers la page de connexion
+                window.location.href = '/login';
+                return;
+            }
+            
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+            }
+            
+            return await response.json();
+        } catch (error) {
+            console.error(`API Error (${endpoint}):`, error);
+            throw error;
+        } finally {
+            loader.hide();
+        }
     }
 
     async request(endpoint, options = {}) {
