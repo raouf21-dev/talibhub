@@ -257,20 +257,25 @@ const normalizeTime = (timeStr, prayerName = null) => {
 
         // Règles de conversion spécifiques aux prières
         if (!isPM && !isAM) {
+            if (hours >= 24) return null;
+
+            // Ne pas modifier les heures si elles sont déjà dans le bon format 24h
             switch(prayerName) {
                 case 'fajr':
                     // Fajr est toujours AM
                     if (hours === 12) hours = 0;
                     break;
                 case 'dhuhr':
-                    // Dhuhr est l'après-midi
-                    if (hours !== 12) hours += 12;
+                    // Pour dhuhr, accepter à la fois le format 12h et 24h
+                    // Ne pas modifier si déjà en format 24h (13:00)
+                    if (hours < 12 && hours !== 0) hours += 12;
                     break;
                 case 'asr':
                 case 'maghrib':
                 case 'isha':
-                    // Ces prières sont toujours PM
-                    if (hours < 12) hours += 12;
+                    // Pour les prières de l'après-midi/soir
+                    // Ne pas modifier si déjà en format 24h
+                    if (hours < 12 && hours !== 0) hours += 12;
                     break;
             }
         } else {
@@ -278,8 +283,6 @@ const normalizeTime = (timeStr, prayerName = null) => {
             if (isPM && hours < 12) hours += 12;
             if (isAM && hours === 12) hours = 0;
         }
-
-        if (hours >= 24) return null;
         
         return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
     } catch (error) {

@@ -23,6 +23,7 @@ const scrapeBournvilleMasjid = require("./birmingham/bournvilleMasjidBham");
 const scrapeMasjidAsSunnah = require("./birmingham/masjidAs-SunnahAn-NabawiyyahBham");
 const scrapeMasjidEUsman = require("./walsall/masjidAlAqsaWalsall");
 const scrapeMasjidAlAqsaWalsall = require("./walsall/masjidAlAqsaWalsall");
+const scrapeJameMasjid = require("./birmingham/jameMasjidBham");
 
 
 
@@ -51,7 +52,8 @@ const SCRAPER_CONFIG = {
     17: { name: 'Bournville Masjid and Community Centre Birmingham', fn: scrapeBournvilleMasjid },
     18: { name: 'Masjid As-Sunnah An-Nabawiyyah Birmingham', fn: scrapeMasjidAsSunnah },
     19: { name: 'Masjid-e-Usman Birmingham', fn: scrapeMasjidEUsman },
-    19: { name: 'Masjid Al-Aqsa Walsall', fn: scrapeMasjidAlAqsaWalsall },
+    20: { name: 'Masjid Al-Aqsa Walsall', fn: scrapeMasjidAlAqsaWalsall },
+    21: { name: 'Jame Masjid Birmingham', fn: scrapeJameMasjid },
     
 };
 
