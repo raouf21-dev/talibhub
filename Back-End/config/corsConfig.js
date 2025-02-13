@@ -4,8 +4,7 @@ const allowedOrigins = {
     development: [
         'http://localhost:4000',
         'http://localhost:3000',
-        'http://127.0.0.1:4000',
-        'http://127.0.0.1:3000'
+        'http://127.0.0.1:4000'
     ],
     production: [
         'https://talibhub.com',
@@ -18,14 +17,9 @@ const corsOptions = {
         const allowed = allowedOrigins[process.env.NODE_ENV || 'development'];
         
         // En développement, permettre les requêtes sans origine
-        if (!origin && process.env.NODE_ENV === 'development') {
-            return callback(null, true);
-        }
-
-        if (allowed.includes(origin)) {
+        if ((!origin && process.env.NODE_ENV === 'development') || allowed.includes(origin)) {
             callback(null, true);
         } else {
-            console.warn(`Origine rejetée par CORS: ${origin}`);
             callback(new Error('Non autorisé par CORS'));
         }
     },
