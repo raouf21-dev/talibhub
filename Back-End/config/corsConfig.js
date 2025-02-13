@@ -1,5 +1,3 @@
-// config/corsConfig.js
-
 const allowedOrigins = {
     development: [
         'http://localhost:4000',
@@ -21,16 +19,22 @@ const corsOptions = {
         
         // En production
         const allowed = allowedOrigins.production;
-        if (!origin || allowed.includes(origin)) {
-            callback(null, true);
+        
+        // Permettre les requêtes sans origine (comme Postman) en développement
+        if (!origin && process.env.NODE_ENV === 'development') {
+            return callback(null, true);
+        }
+
+        if (allowed.includes(origin)) {
+            callback(null, origin);  // Important : renvoyer l'origine exacte, pas juste true
         } else {
             console.warn(`Origine rejetée par CORS: ${origin}`);
-            callback(new Error('Non autorisé par CORS'));
+            callback(new Error(`Origine non autorisée: ${origin}`));
         }
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Origin'],
     exposedHeaders: ['Set-Cookie'],
     maxAge: 86400
 };
