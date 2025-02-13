@@ -71,7 +71,13 @@ app.use(helmet({
 
 app.use(cors(corsOptions));
 
-app.use(cookieParser());
+// Vérifier la présence du cookie secret
+if (!process.env.COOKIE_SECRET) {
+    throw new Error('COOKIE_SECRET must be defined in environment variables');
+}
+
+// Utiliser cookie-parser avec le secret
+app.use(cookieParser(process.env.COOKIE_SECRET));
 
 // Configuration des parsers
 app.use(bodyParser.json({ limit: '10kb' }));
