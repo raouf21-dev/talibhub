@@ -14,18 +14,23 @@ const allowedOrigins = {
 
 const corsOptions = {
     origin: function(origin, callback) {
-        const allowed = allowedOrigins[process.env.NODE_ENV || 'development'];
+        // En développement
+        if (process.env.NODE_ENV === 'development') {
+            return callback(null, true);
+        }
         
-        // En développement, permettre les requêtes sans origine
-        if ((!origin && process.env.NODE_ENV === 'development') || allowed.includes(origin)) {
+        // En production
+        const allowed = allowedOrigins.production;
+        if (!origin || allowed.includes(origin)) {
             callback(null, true);
         } else {
+            console.warn(`Origine rejetée par CORS: ${origin}`);
             callback(new Error('Non autorisé par CORS'));
         }
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
     exposedHeaders: ['Set-Cookie'],
     maxAge: 86400
 };
