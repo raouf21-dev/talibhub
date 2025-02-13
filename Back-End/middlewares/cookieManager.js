@@ -12,7 +12,7 @@ const getCookieOptions = () => {
     if (process.env.NODE_ENV === 'production') {
         return {
             ...baseOptions,
-            domain: 'talibhub.com',
+            domain: '.talibhub.com',
             secure: true
         };
     }

@@ -2,37 +2,36 @@ const express = require("express");
 const { authenticateToken } = require('../middlewares/authenticateToken');
 const { attachCookieManager } = require('../middlewares/cookieManager');
 const router = express.Router();
+const mosqueTimesController = require("../controllers/mosqueTimesController");
 
-// Attache le middleware cookieManager pour toutes les routes de ce routeur
+// Middlewares globaux pour ce routeur
 router.use(attachCookieManager);
 
-// Créer une fonction helper pour wrapper les routes avec authenticateToken
+// Helper pour l'authentification
 const auth = (handler) => [authenticateToken, handler];
 
-// Routes spécifiques - Scraping
-router.post("/scrape", auth(require("../controllers/mosqueTimesController").manualScrape));
-router.post("/scrape-all", auth(require("../controllers/mosqueTimesController").scrapeAllCities));
-router.post("/scrape/:city", auth(require("../controllers/mosqueTimesController").scrapeByCity));
+// Routes publiques (sans authentification)
+router.get("/exists/:date", mosqueTimesController.checkDataExists);
+router.get("/cities/search", mosqueTimesController.searchCities);
 
-// Routes de recherche et listage
-router.get("/all", auth(require("../controllers/mosqueTimesController").getAllMosques));
-router.get("/cities/search", auth(require("../controllers/mosqueTimesController").searchCities));
-router.get("/cities/:city/mosques", auth(require("../controllers/mosqueTimesController").getMosquesByCity));
-router.get("/search", auth(require("../controllers/mosqueTimesController").searchMosques));
-router.post("/add", auth(require("../controllers/mosqueTimesController").addMosque));
-router.get("/exists/:date", auth(require("../controllers/mosqueTimesController").checkDataExists));
+// Routes qui nécessitent une authentification
+router.post("/scrape", auth(mosqueTimesController.manualScrape));
+router.post("/scrape-all", auth(mosqueTimesController.scrapeAllCities));
+router.post("/scrape/:city", auth(mosqueTimesController.scrapeByCity));
+router.get("/all", auth(mosqueTimesController.getAllMosques));
+router.get("/cities/:city/mosques", auth(mosqueTimesController.getMosquesByCity));
+router.get("/search", auth(mosqueTimesController.searchMosques));
+router.post("/add", auth(mosqueTimesController.addMosque));
 
 // Routes pour les préférences utilisateur
-router.post("/user/selected-city", auth(require("../controllers/mosqueTimesController").setSelectedCity));
-router.get("/user/selected-city", auth(require("../controllers/mosqueTimesController").getSelectedCity));
+router.post("/user/selected-city", auth(mosqueTimesController.setSelectedCity));
+router.get("/user/selected-city", auth(mosqueTimesController.getSelectedCity));
 
-// Route pour les horaires de prière par ville et date
+// Routes pour les horaires de prière
 router.get(
-  "/cities/:city/date/:date/prayer-times",
-  auth(require("../controllers/mosqueTimesController").getPrayerTimesForCityAndDate)
+    "/cities/:city/date/:date/prayer-times",
+    auth(mosqueTimesController.getPrayerTimesForCityAndDate)
 );
-
-// Route générique pour les horaires de prière
-router.get("/:mosqueId/:date", auth(require("../controllers/mosqueTimesController").getPrayerTimes));
+router.get("/:mosqueId/:date", auth(mosqueTimesController.getPrayerTimes));
 
 module.exports = router;
