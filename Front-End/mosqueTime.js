@@ -54,28 +54,47 @@ class MosqueTimeManager {
     async checkAndUpdateData() {
         try {
             const date = new Date().toISOString().split('T')[0];
+            console.log('Checking data for date:', date);  // Debug log
+            
             const dataExists = await api.get(`/mosque-times/exists/${date}`);
+            console.log('Data exists response:', dataExists);  // Debug log
             
             if (!dataExists.exists) {
-                // Informer l'utilisateur que les données sont en cours de mise à jour
+                console.log('No data found, starting scraping');  // Debug log
                 notificationService.show('mosque.data.updating', 'info');
                 await this.triggerScrapingForAllCities();
                 notificationService.show('mosque.data.updated', 'success');
             }
         } catch (error) {
             console.error('Erreur lors de la vérification des données:', error);
-            notificationService.show('mosque.data.error', 'error', 0);
+            // Si l'erreur est "Prayer times not found", on devrait lancer le scraping
+            if (error.message.includes('Prayer times not found')) {
+                console.log('Starting scraping after error');  // Debug log
+                try {
+                    notificationService.show('mosque.data.updating', 'info');
+                    await this.triggerScrapingForAllCities();
+                    notificationService.show('mosque.data.updated', 'success');
+                } catch (scrapingError) {
+                    console.error('Erreur lors du scraping:', scrapingError);
+                    notificationService.show('mosque.scrape.error', 'error', 0);
+                }
+            } else {
+                notificationService.show('mosque.data.error', 'error', 0);
+            }
         }
     }
 
     // --- Déclencher le scraping pour toutes les villes ---
     async triggerScrapingForAllCities() {
         try {
+            console.log('Starting scraping for all cities');  // Debug log
             const data = await api.post('/mosque-times/scrape-all');
             console.log('Scraping completed:', data.message);
+            return data;
         } catch (error) {
             console.error('Erreur lors du scraping:', error);
             notificationService.show('mosque.scrape.error', 'error', 0);
+            throw error;  // Propager l'erreur pour une meilleure gestion
         }
     }
 
