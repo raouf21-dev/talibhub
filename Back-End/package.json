@@ -8,8 +8,7 @@
         "dev": "NODE_ENV=development nodemon server.js",
         "dev:windows": "set NODE_ENV=development&& nodemon server.js",
         "test": "jest",
-        "lint": "eslint .",
-        "puppeteer-install": "node node_modules/puppeteer/install.js"
+        "lint": "eslint ."
     },
     "dependencies": {
         "bcrypt": "^5.1.0",
@@ -22,7 +21,6 @@
         "jsonwebtoken": "^9.0.0",
         "pg": "^8.11.0",
         "puppeteer": "^22.0.0",
-        "puppeteer-core": "^22.0.0",
         "cheerio": "^1.0.0-rc.12",
         "axios": "^1.6.0"
     },
