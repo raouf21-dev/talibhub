@@ -127,7 +127,7 @@ app.use((req, res, next) => {
 // Configuration des types MIME pour les fichiers JavaScript
 app.use((req, res, next) => {
   if (req.path.endsWith(".js")) {
-    res.setHeader("Content-Type", "application/javascript");
+    res.setHeader("Content-Type", "application/javascript; charset=utf-8");
   }
   next();
 });
@@ -144,67 +144,45 @@ app.get("/favicon.ico", (req, res) => {
   }
 });
 
-// Modifier cette route pour qu'elle serve le bon contenu
-app.get("/config/constants.js", (req, res) => {
-  // Vérifier si le fichier existe d'abord
+// Routes de redirection pour les fichiers JavaScript
+app.get(["/constants.js", "/config/constants.js"], (req, res) => {
   const filePath = path.join(__dirname, "../Front-End/config/constants.js");
   if (fs.existsSync(filePath)) {
     fs.readFile(filePath, "utf8", (err, data) => {
       if (err) {
         return res.status(500).send("Erreur lors de la lecture du fichier");
       }
-
-      // Ajouter les exports nécessaires
-      res.setHeader("Content-Type", "application/javascript");
-      res.send(`
-        ${data}
-        // Ajout des exports manquants
+      res.type("application/javascript").send(`${data}
         export const constants = window.constants || {};
-        export default constants;
-      `);
+        export default constants;`);
     });
   } else {
     res.status(404).send("Fichier non trouvé");
   }
 });
 
-// Modifier cette route pour qu'elle serve le bon contenu
-app.get("/services/notifications/translatNotifications.js", (req, res) => {
-  // Vérifier si le fichier existe d'abord
-  const filePath = path.join(
-    __dirname,
-    "../Front-End/services/notifications/translatNotifications.js"
-  );
-  if (fs.existsSync(filePath)) {
-    fs.readFile(filePath, "utf8", (err, data) => {
-      if (err) {
-        return res.status(500).send("Erreur lors de la lecture du fichier");
-      }
-
-      // Ajouter les exports nécessaires
-      res.setHeader("Content-Type", "application/javascript");
-      res.send(`
-        ${data}
-        // Ajout des exports manquants
-        export const notifications = window.notifications || {};
-        export default notifications;
-      `);
-    });
-  } else {
-    res.status(404).send("Fichier non trouvé");
+app.get(
+  [
+    "/translations/notifications.js",
+    "/services/notifications/translatNotifications.js",
+  ],
+  (req, res) => {
+    const filePath = path.join(
+      __dirname,
+      "../Front-End/services/notifications/translatNotifications.js"
+    );
+    if (fs.existsSync(filePath)) {
+      fs.readFile(filePath, "utf8", (err, data) => {
+        if (err) {
+          return res.status(500).send("Erreur lors de la lecture du fichier");
+        }
+        res.type("application/javascript").send(data);
+      });
+    } else {
+      res.status(404).send("Fichier non trouvé");
+    }
   }
-});
-
-// Ajouter ces routes pour gérer les imports incorrects
-app.get("/constants.js", (req, res) => {
-  // Rediriger vers le bon emplacement
-  res.redirect("/config/constants.js");
-});
-
-app.get("/translations/notifications.js", (req, res) => {
-  // Rediriger vers le bon emplacement
-  res.redirect("/services/notifications/translatNotifications.js");
-});
+);
 
 // Corriger les routes pour les fichiers proxy
 app.get("/config/config/constants.js", (req, res) => {
@@ -253,8 +231,8 @@ const langConfig = {
   SUPPORTED_LANGS: ["fr", "en"],
 };
 
-// Après les middlewares de sécurité et avant les routes API
-// Ajouter cette ligne pour servir les fichiers statiques
+// Configuration pour servir les fichiers statiques
+app.use("/assets", express.static(path.join(__dirname, "../Front-End/assets")));
 app.use(express.static(path.join(__dirname, "../Front-End")));
 
 // Puis plus bas, modifier la route SPA pour qu'elle ne s'applique qu'aux routes non-fichiers
