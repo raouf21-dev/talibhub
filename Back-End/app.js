@@ -1,173 +1,314 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const cors = require('cors');
-const path = require('path');
-const helmet = require('helmet');
-const corsOptions = require('./config/corsConfig');
-const cookieParser = require('cookie-parser');
-const { attachCookieManager } = require('./middlewares/cookieManager');
+const express = require("express");
+const bodyParser = require("body-parser");
+const cors = require("cors");
+const path = require("path");
+const helmet = require("helmet");
+const corsOptions = require("./config/corsConfig");
+const cookieParser = require("cookie-parser");
+const { attachCookieManager } = require("./middlewares/cookieManager");
+const fs = require("fs");
 
-require('dotenv').config({
-    path: path.join(__dirname, `.env.${process.env.NODE_ENV || 'development'}`)
+require("dotenv").config({
+  path: path.join(__dirname, `.env.${process.env.NODE_ENV || "development"}`),
 });
 
 const app = express();
-const isProd = process.env.NODE_ENV === 'production';
+const isProd = process.env.NODE_ENV === "production";
 
 // Vérifier et configurer le cookie secret
 if (!process.env.COOKIE_SECRET) {
-    if (isProd) {
-        throw new Error('COOKIE_SECRET must be defined in environment variables');
-    } else {
-        process.env.COOKIE_SECRET = 'dev_cookie_secret_' + Math.random().toString(36).slice(2);
-        console.warn('⚠️  WARNING: Using auto-generated COOKIE_SECRET in development');
-    }
+  if (isProd) {
+    throw new Error("COOKIE_SECRET must be defined in environment variables");
+  } else {
+    process.env.COOKIE_SECRET =
+      "dev_cookie_secret_" + Math.random().toString(36).slice(2);
+    console.warn(
+      "⚠️  WARNING: Using auto-generated COOKIE_SECRET in development"
+    );
+  }
 }
 
-app.use(attachCookieManager);
-
 // Configuration de Helmet
-app.use(helmet({
+app.use(
+  helmet({
     contentSecurityPolicy: {
-        directives: {
-            defaultSrc: ["'self'"],
-            scriptSrc: [
-                "'self'", 
-                "'unsafe-inline'", 
-                "'unsafe-eval'", 
-                "https://unpkg.com", 
-                "https://cdnjs.cloudflare.com",
-                "https://www.talibhub.com",
-                "http://www.talibhub.com",
-                ...(isProd ? [] : ["http://localhost:*"])
-            ],
-            styleSrc: [
-                "'self'", 
-                "'unsafe-inline'", 
-                "https://unpkg.com", 
-                "https://cdnjs.cloudflare.com",
-                "https://www.talibhub.com",
-                "http://www.talibhub.com"
-            ],
-            imgSrc: ["'self'", "data:", "https:"],
-            connectSrc: [
-                "'self'", 
-                "https://api.example.com", 
-                "https://api.aladhan.com",
-                "https://www.talibhub.com",
-                "http://www.talibhub.com",
-                "https://talibhub.com",
-                "http://talibhub.com",
-                ...(isProd ? [] : ["http://localhost:*", "ws://localhost:*"])
-            ],
-            fontSrc: [
-                "'self'", 
-                "https://cdnjs.cloudflare.com", 
-                "data:",
-                "https://www.talibhub.com",
-                "http://www.talibhub.com"
-            ],
-            objectSrc: ["'none'"],
-            mediaSrc: ["'self'"],
-            frameSrc: [
-                "'self'",
-                "https://www.talibhub.com",
-                "http://www.talibhub.com"
-            ],
-        },
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: [
+          "'self'",
+          "'unsafe-inline'",
+          "'unsafe-eval'",
+          "https://unpkg.com",
+          "https://cdnjs.cloudflare.com",
+          "https://www.talibhub.com",
+          "http://www.talibhub.com",
+          ...(isProd ? [] : ["http://localhost:*"]),
+        ],
+        styleSrc: [
+          "'self'",
+          "'unsafe-inline'",
+          "https://unpkg.com",
+          "https://cdnjs.cloudflare.com",
+          "https://www.talibhub.com",
+          "http://www.talibhub.com",
+        ],
+        imgSrc: ["'self'", "data:", "https:"],
+        connectSrc: [
+          "'self'",
+          "https://api.example.com",
+          "https://api.aladhan.com",
+          "https://www.talibhub.com",
+          "http://www.talibhub.com",
+          "https://talibhub.com",
+          "http://talibhub.com",
+          ...(isProd ? [] : ["http://localhost:*", "ws://localhost:*"]),
+        ],
+        fontSrc: [
+          "'self'",
+          "https://cdnjs.cloudflare.com",
+          "data:",
+          "https://www.talibhub.com",
+          "http://www.talibhub.com",
+        ],
+        objectSrc: ["'none'"],
+        mediaSrc: ["'self'"],
+        frameSrc: [
+          "'self'",
+          "https://www.talibhub.com",
+          "http://www.talibhub.com",
+        ],
+      },
     },
     crossOriginEmbedderPolicy: false,
-    crossOriginResourcePolicy: { policy: "cross-origin" }
-}));
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+  })
+);
 
 app.use(cors(corsOptions));
 app.use(cookieParser(process.env.COOKIE_SECRET));
-app.use(bodyParser.json({ limit: '10kb' }));
+app.use(attachCookieManager);
+
+app.use(bodyParser.json({ limit: "10kb" }));
 app.use(express.urlencoded({ extended: true }));
 
 // Logger de développement
 if (!isProd) {
-    app.use((req, res, next) => {
-        const sanitizedBody = { ...req.body };
-        ['password', 'confirmPassword', 'currentPassword', 'newPassword'].forEach(field => {
-            if (sanitizedBody[field]) sanitizedBody[field] = '[MASQUÉ]';
-        });
-        
-        console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
-        console.log('Cookies:', req.cookies);
-        if (Object.keys(sanitizedBody).length > 0) {
-            console.log('Body:', sanitizedBody);
-        }
-        next();
-    });
+  app.use((req, res, next) => {
+    const sanitizedBody = { ...req.body };
+    ["password", "confirmPassword", "currentPassword", "newPassword"].forEach(
+      (field) => {
+        if (sanitizedBody[field]) sanitizedBody[field] = "[MASQUÉ]";
+      }
+    );
+
+    console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+    console.log("Cookies:", req.cookies);
+    if (Object.keys(sanitizedBody).length > 0) {
+      console.log("Body:", sanitizedBody);
+    }
+    next();
+  });
 }
 
 // En-têtes de sécurité
 app.use((req, res, next) => {
-    res.setHeader('X-Content-Type-Options', 'nosniff');
-    res.setHeader('X-Frame-Options', 'DENY');
-    res.setHeader('X-XSS-Protection', '1; mode=block');
-    if (isProd) {
-        res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
-    }
-    next();
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "DENY");
+  res.setHeader("X-XSS-Protection", "1; mode=block");
+  if (isProd) {
+    res.setHeader(
+      "Strict-Transport-Security",
+      "max-age=31536000; includeSubDomains"
+    );
+  }
+  next();
 });
 
+// Configuration des types MIME pour les fichiers JavaScript
+app.use((req, res, next) => {
+  if (req.path.endsWith(".js")) {
+    res.setHeader("Content-Type", "application/javascript");
+  }
+  next();
+});
+
+// Modifier la route pour le favicon
+app.get("/favicon.ico", (req, res) => {
+  // Vérifier si le fichier existe avant de l'envoyer
+  const faviconPath = path.join(__dirname, "../Front-End/favicon.ico");
+  if (fs.existsSync(faviconPath)) {
+    res.sendFile(faviconPath);
+  } else {
+    // Envoyer une réponse 204 (No Content) si le fichier n'existe pas
+    res.status(204).end();
+  }
+});
+
+// Modifier cette route pour qu'elle serve le bon contenu
+app.get("/config/constants.js", (req, res) => {
+  // Vérifier si le fichier existe d'abord
+  const filePath = path.join(__dirname, "../Front-End/config/constants.js");
+  if (fs.existsSync(filePath)) {
+    fs.readFile(filePath, "utf8", (err, data) => {
+      if (err) {
+        return res.status(500).send("Erreur lors de la lecture du fichier");
+      }
+
+      // Ajouter les exports nécessaires
+      res.setHeader("Content-Type", "application/javascript");
+      res.send(`
+        ${data}
+        // Ajout des exports manquants
+        export const constants = window.constants || {};
+        export default constants;
+      `);
+    });
+  } else {
+    res.status(404).send("Fichier non trouvé");
+  }
+});
+
+// Modifier cette route pour qu'elle serve le bon contenu
+app.get("/services/notifications/translatNotifications.js", (req, res) => {
+  // Vérifier si le fichier existe d'abord
+  const filePath = path.join(
+    __dirname,
+    "../Front-End/services/notifications/translatNotifications.js"
+  );
+  if (fs.existsSync(filePath)) {
+    fs.readFile(filePath, "utf8", (err, data) => {
+      if (err) {
+        return res.status(500).send("Erreur lors de la lecture du fichier");
+      }
+
+      // Ajouter les exports nécessaires
+      res.setHeader("Content-Type", "application/javascript");
+      res.send(`
+        ${data}
+        // Ajout des exports manquants
+        export const notifications = window.notifications || {};
+        export default notifications;
+      `);
+    });
+  } else {
+    res.status(404).send("Fichier non trouvé");
+  }
+});
+
+// Ajouter ces routes pour gérer les imports incorrects
+app.get("/constants.js", (req, res) => {
+  // Rediriger vers le bon emplacement
+  res.redirect("/config/constants.js");
+});
+
+app.get("/translations/notifications.js", (req, res) => {
+  // Rediriger vers le bon emplacement
+  res.redirect("/services/notifications/translatNotifications.js");
+});
+
+// Corriger les routes pour les fichiers proxy
+app.get("/config/config/constants.js", (req, res) => {
+  res.redirect("/config/constants.js");
+});
+
+app.get(
+  "/services/services/notifications/translatNotifications.js",
+  (req, res) => {
+    res.redirect("/services/notifications/translatNotifications.js");
+  }
+);
+
 // Import des routes
-const authRoutes = require('./routes/authRoutes');
-const tasksRoutes = require('./routes/tasksRoutes');
-const timerRoutes = require('./routes/timerRoutes');
-const counterRoutes = require('./routes/counterRoutes');
-const sessionRoutes = require('./routes/sessionRoutes');
-const sourateRoutes = require('./routes/souratesRoutes');
-const statisticsRoutes = require('./routes/statisticsRoutes');
-const mosqueTimesRoutes = require('./routes/mosqueTimesRoutes');
-const surahMemorizationRoutes = require('./routes/surahMemorizationRoutes');
-const captchaRoutes = require('./routes/captchaRoutes');
-const duaTimeRoutes = require('./routes/duaTimeRoutes');
+const authRoutes = require("./routes/authRoutes");
+const tasksRoutes = require("./routes/tasksRoutes");
+const timerRoutes = require("./routes/timerRoutes");
+const counterRoutes = require("./routes/counterRoutes");
+const sessionRoutes = require("./routes/sessionRoutes");
+const sourateRoutes = require("./routes/souratesRoutes");
+const statisticsRoutes = require("./routes/statisticsRoutes");
+const mosqueTimesRoutes = require("./routes/mosqueTimesRoutes");
+const surahMemorizationRoutes = require("./routes/surahMemorizationRoutes");
+const captchaRoutes = require("./routes/captchaRoutes");
+const duaTimeRoutes = require("./routes/duaTimeRoutes");
 
 // Routes API
-app.use('/api/auth', authRoutes);
-app.use('/api/tasks', tasksRoutes);
-app.use('/api/timer', timerRoutes);
-app.use('/api/counter', counterRoutes);
-app.use('/api/session', sessionRoutes);
-app.use('/api/sourates', sourateRoutes);
-app.use('/api/statistics', statisticsRoutes);
-app.use('/api/mosque-times', mosqueTimesRoutes);
-app.use('/api/surah-memorization', surahMemorizationRoutes);
-app.use('/api/captcha', captchaRoutes);
-app.use('/api/dua-time', duaTimeRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/tasks", tasksRoutes);
+app.use("/api/timer", timerRoutes);
+app.use("/api/counter", counterRoutes);
+app.use("/api/session", sessionRoutes);
+app.use("/api/sourates", sourateRoutes);
+app.use("/api/statistics", statisticsRoutes);
+app.use("/api/mosque-times", mosqueTimesRoutes);
+app.use("/api/surah-memorization", surahMemorizationRoutes);
+app.use("/api/captcha", captchaRoutes);
+app.use("/api/dua-time", duaTimeRoutes);
 
 // Routes statiques
-app.use('/api/data', express.static(path.join(__dirname, 'data')));
-app.use(express.static(path.join(__dirname, '../Front-End')));
+app.use("/api/data", express.static(path.join(__dirname, "data")));
 
 // Configuration des langues
 const langConfig = {
-    DEFAULT_LANG: 'fr',
-    SUPPORTED_LANGS: ['fr', 'en']
+  DEFAULT_LANG: "fr",
+  SUPPORTED_LANGS: ["fr", "en"],
 };
 
-// Route SPA
-app.get('*', (req, res, next) => {
-    if (req.url.startsWith('/api')) return next();
-    const userLang = req.acceptsLanguages(langConfig.SUPPORTED_LANGS) || langConfig.DEFAULT_LANG;
-    res.sendFile(path.join(__dirname, `../Front-End/index-${userLang}.html`));
+// Après les middlewares de sécurité et avant les routes API
+// Ajouter cette ligne pour servir les fichiers statiques
+app.use(express.static(path.join(__dirname, "../Front-End")));
+
+// Puis plus bas, modifier la route SPA pour qu'elle ne s'applique qu'aux routes non-fichiers
+app.get("*", (req, res, next) => {
+  // Ne pas traiter les requêtes API
+  if (req.url.startsWith("/api")) return next();
+
+  // Ne pas traiter les requêtes pour des fichiers statiques (avec extension)
+  if (req.url.includes(".")) return next();
+
+  // Déterminer la langue de l'utilisateur
+  const userLang =
+    req.acceptsLanguages(langConfig.SUPPORTED_LANGS) || langConfig.DEFAULT_LANG;
+
+  // Envoyer le fichier HTML correspondant
+  res.sendFile(path.join(__dirname, `../Front-End/index-${userLang}.html`));
+});
+
+app.get("/services/state/state.js", (req, res, next) => {
+  // Vérifier si le fichier existe d'abord
+  const filePath = path.join(__dirname, "../Front-End/services/state/state.js");
+  if (fs.existsSync(filePath)) {
+    // Si le fichier existe, on le lit
+    fs.readFile(filePath, "utf8", (err, data) => {
+      if (err) {
+        return next(); // Passer au middleware suivant en cas d'erreur
+      }
+
+      // Ajouter l'export nommé appState
+      res.setHeader("Content-Type", "application/javascript");
+      res.send(`
+        ${data}
+        // Ajout de l'export nommé appState
+        export const appState = AppState;
+      `);
+    });
+  } else {
+    // Si le fichier n'existe pas, passer au middleware suivant
+    next();
+  }
 });
 
 // Gestion des erreurs
 app.use((err, req, res, next) => {
-    console.error('Erreur:', err);
-    const error = isProd 
-        ? { message: 'Une erreur est survenue' }
-        : { message: err.message, stack: err.stack };
-    res.status(err.status || 500).json({ success: false, error });
+  console.error("Erreur:", err);
+  const error = isProd
+    ? { message: "Une erreur est survenue" }
+    : { message: err.message, stack: err.stack };
+  res.status(err.status || 500).json({ success: false, error });
 });
 
 // Routes non trouvées
 app.use((req, res) => {
-    res.status(404).json({ success: false, message: 'Route non trouvée' });
+  res.status(404).json({ success: false, message: "Route non trouvée" });
 });
 
 module.exports = app;

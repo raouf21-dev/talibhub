@@ -1,6 +1,7 @@
 # Environnement
 .env
-
+.env.development
+.env.production
 # Dependencies
 #node_modules/
 
