@@ -11,14 +11,9 @@
       name="TalibTimer"
       content="TalibTimer aide les utilisateurs à améliorer leur productivité grâce à la technique Pomodoro, offrant des minuteurs personnalisables, des statistiques détaillées, des rappels et des listes de tâches pour une gestion optimale du temps."
     />
-    <link
-      rel="icon"
-      href="/Logo/Original Logo Kili-Isere-resize.png"
-      type="image/x-icon"
-    />
 
     <!-- Feuilles de style principales -->
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="/styles.css" />  
 
     <!-- Bibliothèques principales depuis cdnjs -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
@@ -507,14 +502,14 @@
         <div class="dashboard-card-grid">
           <div class="dashboard-card" data-destination="mosquetime">
             <img
-              src="./Icones/DashboardIcones/mosque_icone1.svg"
+              src="./assets/icons/DashboardIcones/mosque_icone1.svg"
               alt="Icône Mosquée"
             />
             <h2>Horaires de Prière à la Mosquée</h2>
           </div>
           <div class="dashboard-card" data-destination="salatSurahSelector">
             <img
-              src="./Icones/DashboardIcones/carpet_icone1.svg"
+              src="./assets/icons/DashboardIcones/carpet_icone1.svg"
               alt="Icône Tapis"
             />
             <h2>Sélecteur de Sourate</h2>
@@ -522,21 +517,21 @@
 
           <div class="dashboard-card" data-destination="surahmemorization">
             <img
-              src="./Icones/DashboardIcones/brain_icone1.svg"
+              src="./assets/icons/DashboardIcones/brain_icone1.svg"
               alt="Icône Mémorisation des Sourates"
             />
             <h2>Mémorisation des Sourates</h2>
           </div>
           <div class="dashboard-card" data-destination="duaTimeCalculator">
             <img
-              src="./Icones/DashboardIcones/hands_prayer_icon1.svg"
+              src="./assets/icons/DashboardIcones/hands_prayer_icon1.svg"
               alt="Icône Doua"
             />
             <h2>Temps de Doua</h2>
           </div>
           <div class="dashboard-card" data-destination="apprentissage">
             <img
-              src="./Icones/DashboardIcones/clock_icone1.svg"
+              src="./assets/icons/DashboardIcones/clock_icone1.svg"
               alt="Icône Horloge"
             />
             <h2>TalibTimer</h2>
@@ -590,7 +585,7 @@
                 data-action="toggle-timer"
               >
                 <img
-                  src="./Icones/ButtonsIcone/Start_icone.png"
+                  src="./assets/icons/ButtonsIcone/Start_icone.png"
                   alt="Icône Démarrer"
                 />
               </button>
@@ -600,7 +595,7 @@
                 data-action="reset-timer"
               >
                 <img
-                  src="./Icones/ButtonsIcone/Restart_icone.png"
+                  src="./assets/icons/ButtonsIcone/Restart_icone.png"
                   alt="Icône Redémarrer"
                 />
               </button>
@@ -610,7 +605,7 @@
                 data-action="save-session-data"
               >
                 <img
-                  src="./Icones/ButtonsIcone/Save_icone.png"
+                  src="./assets/icons/ButtonsIcone/Save_icone.png"
                   alt="Icône Enregistrer"
                 />
               </button>
@@ -630,7 +625,7 @@
                 data-action="toggle-stopwatch"
               >
                 <img
-                  src="./Icones/ButtonsIcone/Start_icone.png"
+                  src="./assets/icons/ButtonsIcone/Start_icone.png"
                   alt="Icône Démarrer"
                 />
               </button>
@@ -640,7 +635,7 @@
                 data-action="reset-stopwatch"
               >
                 <img
-                  src="./Icones/ButtonsIcone/Restart_icone.png"
+                  src="./assets/icons/ButtonsIcone/Restart_icone.png"
                   alt="Icône Redémarrer"
                 />
               </button>
@@ -650,7 +645,7 @@
                 data-action="save-session-data"
               >
                 <img
-                  src="./Icones/ButtonsIcone/Save_icone.png"
+                  src="./assets/icons/ButtonsIcone/Save_icone.png"
                   alt="Icône Enregistrer"
                 />
               </button>
@@ -694,7 +689,7 @@
                 data-action="save-session-data"
               >
                 <img
-                  src="./Icones/ButtonsIcone/Save_icone.png"
+                  src="./assets/icons/ButtonsIcone/Save_icone.png"
                   alt="Icône Enregistrer"
                 />
               </button>
@@ -752,7 +747,7 @@
                 data-action="save-session-data"
               >
                 <img
-                  src="./Icones/ButtonsIcone/Save_icone.png"
+                  src="./assets/icons/ButtonsIcone/Save_icone.png"
                   alt="Icône Enregistrer"
                 />
               </button>
@@ -2041,25 +2036,36 @@
     </section>
 
     <script type="module" src="main.js"></script>
-    <script type="module" src="auth.js"></script>
-    <script type="module" src="navigation.js"></script>
-    <script type="module" src="profile.js"></script>
-    <script type="module" src="tasks.js"></script>
-    <script type="module" src="timer.js"></script>
-    <script type="module" src="surahSelector.js"></script>
-    <script type="module" src="duaTimeCalculator.js"></script>
-    <script type="module" src="mosqueTime.js"></script>
-    <script type="module" src="surahMemorization.js"></script>
-    <script type="module" src="notifications.js"></script>
-    <script type="module" src="utils.js"></script>
-    <script type="module" src="transLanguages.js"></script>
-    <script type="module" src="bot-tracker.js"></script>
-    <script type="module" src="captcha.js"></script>
-    <script type="module" src="/Config/apiConfig.js"></script>
-    <script type="module" src="dynamicLoader.js"></script>
-    <script type="module" src="topnav.js"></script>
-    <script type="module" src="terms.js"></script>
-    <script type="module" src="charts.js"></script>
-    <script type="module" src="welcomepage.js"></script>
+    <script type="module" src="services/auth/authService.js"></script>
+    <script type="module" src="components/navigation/navigation.js"></script>
+    <script type="module" src="components/user/profile.js"></script>
+    <script type="module" src="components/timer/tasks.js"></script>
+    <script type="module" src="components/timer/timer.js"></script>
+    <script type="module" src="components/quran/surahSelector.js"></script>
+    <script type="module" src="components/prayer/duaTimeCalculator.js"></script>
+    <script type="module" src="components/prayer/mosqueTime.js"></script>
+    <script type="module" src="components/quran/surahMemorization.js"></script>
+    <script type="module" src="components/notifications/notifications.js"></script>
+    <script type="module" src="utils/utils.js"></script>
+    <script type="module" src="utils/transLanguages.js"></script>
+    <script type="module" src="components/auth/botTracker.js"></script>
+    <script type="module" src="components/auth/captcha.js"></script>
+    <script type="module" src="config/apiConfig.js"></script>
+    <script type="module" src="services/api/dynamicLoader.js"></script>
+    <script type="module" src="components/navigation/topnav.js"></script>
+    <script type="module" src="components/statistics/statistics.js"></script>
+    <script type="module" src="components/statistics/charts.js"></script>
+    <script type="module" src="components/welcome/welcomePage.js"></script>
+    <script type="module" src="services/state/state.js"></script>
+    <script type="module" src="config/constants.js"></script>
+    <script type="module" src="services/notifications/translatNotifications.js"></script>
+    <script type="module" src="services/cache/cacheService.js"></script>
+    <script type="module" src="services/cache/cacheCountries.js"></script>
+    <script type="module" src="components/auth/terms.js"></script>
+
+    <script>
+      // At the end of your <body>:
+      feather.replace();
+    </script>
   </body>
 </html>

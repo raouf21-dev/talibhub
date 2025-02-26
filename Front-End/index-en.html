@@ -11,14 +11,10 @@
       name="TalibTimer"
       content="TalibTimer helps users improve their productivity using the Pomodoro technique, offering customisable timers, detailed statistics, reminders, and task lists for optimal time management."
     />
-    <link
-      rel="icon"
-      href="/Logo/Original Logo Kili-Isere-resize.png"
-      type="image/x-icon"
-    />
 
     <!-- Stylesheets -->
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="/styles.css" />
+
 
     <!-- Core Libraries from cdnjs -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
@@ -201,10 +197,7 @@
                 Sign In
               </button>
             </div>
-            <div
-              class="welcomepage-tab-content"
-              id="welcomepage-signupTab"
-            >
+            <div class="welcomepage-tab-content" id="welcomepage-signupTab">
               <form id="welcomepage-signupForm">
                 <h3>Sign Up</h3>
                 <!-- Hidden honeypot field -->
@@ -365,7 +358,10 @@
                 </button>
               </form>
             </div>
-            <div class="welcomepage-tab-content active" id="welcomepage-signinTab">
+            <div
+              class="welcomepage-tab-content active"
+              id="welcomepage-signinTab"
+            >
               <form id="welcomepage-signinForm">
                 <h3>Sign In</h3>
                 <div class="form-grid">
@@ -513,35 +509,35 @@
         <div class="dashboard-card-grid">
           <div class="dashboard-card" data-destination="mosquetime">
             <img
-              src="./Icones/DashboardIcones/mosque_icone1.svg"
+              src="./assets/icons/DashboardIcones/mosque_icone1.svg"
               alt="Mosque Icon"
             />
             <h2>Salat Mosque Time</h2>
           </div>
           <div class="dashboard-card" data-destination="salatSurahSelector">
             <img
-              src="./Icones/DashboardIcones/carpet_icone1.svg"
+              src="./assets/icons/DashboardIcones/carpet_icone1.svg"
               alt="Carpet Icon"
             />
             <h2>Surah Selector</h2>
           </div>
           <div class="dashboard-card" data-destination="surahmemorization">
             <img
-              src="./Icones/DashboardIcones/brain_icone1.svg"
+              src="./assets/icons/DashboardIcones/brain_icone1.svg"
               alt="Surah Memorisation Icon"
             />
             <h2>Surah Memorisation</h2>
           </div>
           <div class="dashboard-card" data-destination="duaTimeCalculator">
             <img
-              src="./Icones/DashboardIcones/hands_prayer_icon1.svg"
+              src="./assets/icons/DashboardIcones/hands_prayer_icon1.svg"
               alt="Dua Icon"
             />
             <h2>Dua Time</h2>
           </div>
           <div class="dashboard-card" data-destination="apprentissage">
             <img
-              src="./Icones/DashboardIcones/clock_icone1.svg"
+              src="./assets/icons/DashboardIcones/clock_icone1.svg"
               alt="Clock Icon"
             />
             <h2>Talib Timer</h2>
@@ -595,7 +591,7 @@
                 data-action="toggle-timer"
               >
                 <img
-                  src="./Icones/ButtonsIcone/Start_icone.png"
+                  src="./assets/icons/ButtonsIcone/Start_icone.png"
                   alt="Start icon"
                 />
               </button>
@@ -605,7 +601,7 @@
                 data-action="reset-timer"
               >
                 <img
-                  src="./Icones/ButtonsIcone/Restart_icone.png"
+                  src="./assets/icons/ButtonsIcone/Restart_icone.png"
                   alt="Restart icon"
                 />
               </button>
@@ -615,7 +611,7 @@
                 data-action="save-session-data"
               >
                 <img
-                  src="./Icones/ButtonsIcone/Save_icone.png"
+                  src="./assets/icons/ButtonsIcone/Save_icone.png"
                   alt="Save icon"
                 />
               </button>
@@ -635,7 +631,7 @@
                 data-action="toggle-stopwatch"
               >
                 <img
-                  src="./Icones/ButtonsIcone/Start_icone.png"
+                  src="./assets/icons/ButtonsIcone/Start_icone.png"
                   alt="Start Icon"
                 />
               </button>
@@ -645,7 +641,7 @@
                 data-action="reset-stopwatch"
               >
                 <img
-                  src="./Icones/ButtonsIcone/Restart_icone.png"
+                  src="./assets/icons/ButtonsIcone/Restart_icone.png"
                   alt="Restart Icon"
                 />
               </button>
@@ -655,7 +651,7 @@
                 data-action="save-session-data"
               >
                 <img
-                  src="./Icones/ButtonsIcone/Save_icone.png"
+                  src="./assets/icons/ButtonsIcone/Save_icone.png"
                   alt="Save Icon"
                 />
               </button>
@@ -698,7 +694,7 @@
                 data-action="save-session-data"
               >
                 <img
-                  src="./Icones/ButtonsIcone/Save_icone.png"
+                  src="./assets/icons/ButtonsIcone/Save_icone.png"
                   alt="Save Icon"
                 />
               </button>
@@ -756,7 +752,7 @@
                 data-action="save-session-data"
               >
                 <img
-                  src="./Icones/ButtonsIcone/Save_icone.png"
+                  src="./assets/icons/ButtonsIcone/Save_icone.png"
                   alt="Save Icon"
                 />
               </button>
@@ -790,11 +786,7 @@
                   <polyline points="15 18 9 12 15 6"></polyline>
                 </svg>
               </button>
-              <span
-                id="daily-period"
-                class="period-display"
-                ></span
-              >
+              <span id="daily-period" class="period-display"></span>
               <button class="nav-btn next">
                 <svg
                   width="20"
@@ -857,11 +849,7 @@
                   <polyline points="15 18 9 12 15 6"></polyline>
                 </svg>
               </button>
-              <span
-                id="weekly-period"
-                class="period-display"
-                ></span
-              >
+              <span id="weekly-period" class="period-display"></span>
               <button class="nav-btn next">
                 <svg
                   width="20"
@@ -924,11 +912,7 @@
                   <polyline points="15 18 9 12 15 6"></polyline>
                 </svg>
               </button>
-              <span
-                id="monthly-period"
-                class="period-display"
-                ></span
-              >
+              <span id="monthly-period" class="period-display"></span>
               <button class="nav-btn next">
                 <svg
                   width="20"
@@ -991,11 +975,7 @@
                   <polyline points="15 18 9 12 15 6"></polyline>
                 </svg>
               </button>
-              <span
-                id="yearly-period"
-                class="period-display"
-                ></span
-              >
+              <span id="yearly-period" class="period-display"></span>
               <button class="nav-btn next">
                 <svg
                   width="20"
@@ -2048,28 +2028,32 @@
     </section>
 
     <script type="module" src="main.js"></script>
-    <script type="module" src="auth.js"></script>
-    <script type="module" src="navigation.js"></script>
-    <script type="module" src="profile.js"></script>
-    <script type="module" src="tasks.js"></script>
-    <script type="module" src="timer.js"></script>
-    <script type="module" src="surahSelector.js"></script>
-    <script type="module" src="duaTimeCalculator.js"></script>
-    <script type="module" src="mosqueTime.js"></script>
-    <script type="module" src="surahMemorization.js"></script>
-    <script type="module" src="notifications.js"></script>
-    <script type="module" src="utils.js"></script>
-    <script type="module" src="transLanguages.js"></script>
-    <script type="module" src="bot-tracker.js"></script>
-    <script type="module" src="captcha.js"></script>
-    <script type="module" src="/Config/apiConfig.js"></script>
-    <script type="module" src="dynamicLoader.js"></script>
-    <script type="module" src="topnav.js"></script>
-    <script type="module" src="statistics.js"></script>
-    <script type="module" src="charts.js"></script>
-    <script type="module" src="welcomepage.js"></script>
-
-
+    <script type="module" src="services/auth/authService.js"></script>
+    <script type="module" src="components/navigation/navigation.js"></script>
+    <script type="module" src="components/user/profile.js"></script>
+    <script type="module" src="components/timer/tasks.js"></script>
+    <script type="module" src="components/timer/timer.js"></script>
+    <script type="module" src="components/quran/surahSelector.js"></script>
+    <script type="module" src="components/prayer/duaTimeCalculator.js"></script>
+    <script type="module" src="components/prayer/mosqueTime.js"></script>
+    <script type="module" src="components/quran/surahMemorization.js"></script>
+    <script type="module" src="components/notifications/notifications.js"></script>
+    <script type="module" src="utils/utils.js"></script>
+    <script type="module" src="utils/transLanguages.js"></script>
+    <script type="module" src="components/auth/botTracker.js"></script>
+    <script type="module" src="components/auth/captcha.js"></script>
+    <script type="module" src="config/apiConfig.js"></script>
+    <script type="module" src="services/api/dynamicLoader.js"></script>
+    <script type="module" src="components/navigation/topnav.js"></script>
+    <script type="module" src="components/statistics/statistics.js"></script>
+    <script type="module" src="components/statistics/charts.js"></script>
+    <script type="module" src="components/welcome/welcomePage.js"></script>
+    <script type="module" src="services/state/state.js"></script>
+    <script type="module" src="config/constants.js"></script>
+    <script type="module" src="services/notifications/translatNotifications.js"></script>
+    <script type="module" src="services/cache/cacheService.js"></script>
+    <script type="module" src="services/cache/cacheCountries.js"></script>
+    <script type="module" src="components/auth/terms.js"></script>
     <script>
       // At the end of your <body>:
       feather.replace();

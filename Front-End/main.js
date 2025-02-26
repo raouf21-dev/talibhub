@@ -1,8 +1,35 @@
-import { initializeAuth } from "./auth.js";
-import { initializeNavigation } from "./navigation.js";
-import { initializeUtils, navigateTo, updateNavVisibility } from "./utils.js";
-import { initializeTopNav } from "./topnav.js";
-import { langConfig } from "./Config/apiConfig.js";
+// Imports corrects pour main.js
+import { initializeAuth } from "./components/auth/auth.js";
+import { initializeNavigation } from "./components/navigation/navigation.js";
+import { initializeWelcomepage } from "./components/welcome/welcomePage.js";
+import { initializeNotifications } from "./components/notifications/notifications.js";
+import { initializeTimer } from "./components/timer/timer.js";
+import { initializeSurahSelector } from "./components/quran/surahSelector.js";
+import { initializeMosqueTime } from "./components/prayer/mosqueTime.js";
+import { initializeStatistics } from "./components/statistics/statistics.js";
+import { initializeUtils, updateNavVisibility } from "./utils/utils.js";
+import { initializeTopNav } from "./components/navigation/topnav.js";
+import { langConfig } from "./config/apiConfig.js";
+
+// Importation des services
+import { authService } from "./services/auth/authService.js";
+import { notificationService } from "./services/notifications/notificationService.js";
+import { api } from "./services/api/dynamicLoader.js";
+import AppState from "../../services/state/state.js";
+import CacheService from "./services/cache/cacheService.js";
+import { constants } from "./config/constants.js"; // Chemin correct
+
+// Importation des composants
+import { initializeDuaTimeCalculator } from "./components/prayer/duaTimeCalculator.js";
+import { ChartManager } from "./components/statistics/charts.js";
+import { initializeDashboard } from "./components/navigation/dashboard.js";
+
+// Importation des utilitaires
+import { navigateTo, switchTab } from "./utils/utils.js";
+import { translations } from "./services/notifications/translatNotifications.js";
+
+// Si vous avez déplacé profile.js dans components/user
+import { initializeProfile } from "./components/user/profile.js";
 
 /**
  * Vérifie l'authentification de l'utilisateur en consultant le token stocké.
@@ -37,7 +64,8 @@ async function initializeApp() {
   console.log("Initialisation de l'application");
 
   // Détermine la langue et la définit dans le document.
-  const userLang = localStorage.getItem("userLang") || navigator.language.split('-')[0];
+  const userLang =
+    localStorage.getItem("userLang") || navigator.language.split("-")[0];
   document.documentElement.lang = userLang;
 
   // Initialisations communes
@@ -62,9 +90,35 @@ async function initializeApp() {
     await navigateTo("welcomepage");
     await initializeAuth();
   }
+
+  // Initialisation des composants
+  initializeDuaTimeCalculator();
+  initializeDashboard();
+
+  // Initialisation des graphiques si la page contient des éléments de graphique
+  if (document.querySelector('[id$="Chart"]')) {
+    ChartManager.init();
+  }
+
+  // Gestion des événements de navigation
+  document.querySelectorAll("[data-destination]").forEach((element) => {
+    element.addEventListener("click", (e) => {
+      const destination = e.currentTarget.dataset.destination;
+      if (destination) {
+        navigateTo(destination);
+      }
+    });
+  });
+
+  // Gestion de la déconnexion
+  document.getElementById("logoutBtn")?.addEventListener("click", async (e) => {
+    e.preventDefault();
+    await authService.logout();
+    window.location.reload();
+  });
 }
 
-// Gestion globale de l'événement "logout" : 
+// Gestion globale de l'événement "logout" :
 // Lorsqu'un logout est déclenché (par exemple via une réponse 401),
 // on supprime le token et redirige l'utilisateur vers la page de connexion.
 window.addEventListener("logout", () => {
@@ -77,7 +131,7 @@ window.addEventListener("logout", () => {
  */
 window.addEventListener("popstate", async (event) => {
   let targetPage =
-    (event.state && event.state.pageId)
+    event.state && event.state.pageId
       ? event.state.pageId
       : window.location.pathname.substring(1);
   if (targetPage.endsWith(".html") || !targetPage) {
@@ -100,4 +154,5 @@ window.addEventListener("error", (event) => {
   console.error("Erreur globale:", event.error);
 });
 
-export { initializeApp };
+// Exportation pour utilisation dans d'autres fichiers si nécessaire
+export { authService, notificationService, api, CacheService };

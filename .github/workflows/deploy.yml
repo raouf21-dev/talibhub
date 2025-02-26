@@ -13,6 +13,12 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3 
 
+      # Nouvelle étape pour créer les fichiers .env
+      - name: Create Environment Files
+        run: |
+          echo "${{ secrets.ENV_PRODUCTION }}" > .env.production
+          echo "${{ secrets.ENV_DEVELOPMENT }}" > .env.development
+
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.5.0
         with:
