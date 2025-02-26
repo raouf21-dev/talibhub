@@ -5,7 +5,6 @@ import { notificationService } from "../../services/notifications/notificationSe
 import CacheService, {
   getMidnightTimestamp,
 } from "../../services/cache/cacheMosqueTime.js";
-import { constants } from "../../config/constants.js";
 
 class MosqueTimeManager {
   constructor() {

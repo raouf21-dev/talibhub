@@ -17,7 +17,7 @@ import { notificationService } from "./services/notifications/notificationServic
 import { api } from "./services/api/dynamicLoader.js";
 import AppState from "../../services/state/state.js";
 import CacheService from "./services/cache/cacheService.js";
-import { constants } from "./config/constants.js"; // Chemin correct
+
 
 // Importation des composants
 import { initializeDuaTimeCalculator } from "./components/prayer/duaTimeCalculator.js";

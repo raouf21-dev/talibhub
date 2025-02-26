@@ -1,4 +1,4 @@
-// Config/constants.js
+// config/constants.js
 
 export const ENV = {
     DEV: 'development',

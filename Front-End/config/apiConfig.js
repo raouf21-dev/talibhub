@@ -1,5 +1,5 @@
-// Config/apiConfig.js
-import { ENV } from '../constants.js';
+// config/apiConfig.js
+import { ENV } from './constants.js'
 
 export const langConfig = {
   DEFAULT_LANG: 'fr',

@@ -132,6 +132,12 @@ app.use((req, res, next) => {
   next();
 });
 
+// Assurez-vous que vos routes statiques sont configurées correctement
+app.use("/assets", express.static(path.join(__dirname, "../Front-End/assets")));
+app.use("/config", express.static(path.join(__dirname, "../Front-End/config")));
+app.use("/services", express.static(path.join(__dirname, "../Front-End/services")));
+app.use(express.static(path.join(__dirname, "../Front-End")));
+
 // Modifier la route pour le favicon
 app.get("/favicon.ico", (req, res) => {
   // Vérifier si le fichier existe avant de l'envoyer
@@ -143,58 +149,6 @@ app.get("/favicon.ico", (req, res) => {
     res.status(204).end();
   }
 });
-
-// Routes de redirection pour les fichiers JavaScript
-app.get(["/constants.js", "/config/constants.js"], (req, res) => {
-  const filePath = path.join(__dirname, "../Front-End/config/constants.js");
-  if (fs.existsSync(filePath)) {
-    fs.readFile(filePath, "utf8", (err, data) => {
-      if (err) {
-        return res.status(500).send("Erreur lors de la lecture du fichier");
-      }
-      res.type("application/javascript").send(`${data}
-        export const constants = window.constants || {};
-        export default constants;`);
-    });
-  } else {
-    res.status(404).send("Fichier non trouvé");
-  }
-});
-
-app.get(
-  [
-    "/translations/notifications.js",
-    "/services/notifications/translatNotifications.js",
-  ],
-  (req, res) => {
-    const filePath = path.join(
-      __dirname,
-      "../Front-End/services/notifications/translatNotifications.js"
-    );
-    if (fs.existsSync(filePath)) {
-      fs.readFile(filePath, "utf8", (err, data) => {
-        if (err) {
-          return res.status(500).send("Erreur lors de la lecture du fichier");
-        }
-        res.type("application/javascript").send(data);
-      });
-    } else {
-      res.status(404).send("Fichier non trouvé");
-    }
-  }
-);
-
-// Corriger les routes pour les fichiers proxy
-app.get("/config/config/constants.js", (req, res) => {
-  res.redirect("/config/constants.js");
-});
-
-app.get(
-  "/services/services/notifications/translatNotifications.js",
-  (req, res) => {
-    res.redirect("/services/notifications/translatNotifications.js");
-  }
-);
 
 // Import des routes
 const authRoutes = require("./routes/authRoutes");

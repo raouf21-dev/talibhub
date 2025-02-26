@@ -1,5 +1,5 @@
 // notificationService.js
-import { translations } from '../../translations/notifications.js';
+import { translations } from './translatNotifications.js';
 
 class NotificationService {
     constructor() {
