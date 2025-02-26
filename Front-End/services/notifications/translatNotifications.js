@@ -1,6 +1,7 @@
 //translatNotifications.js
 
-export const translations = {
+// Définition des traductions
+const translations = {
   fr: {
     notifications: {
       success: {
@@ -415,3 +416,7 @@ export const translations = {
     },
   },
 };
+
+// Export à la fois par défaut et nommé
+export { translations };
+export default translations;
