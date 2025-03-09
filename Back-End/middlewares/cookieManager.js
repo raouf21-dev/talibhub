@@ -83,6 +83,20 @@ const cookieManager = {
   getSelectedCity(req) {
     return req.cookies.selected_city;
   },
+
+  setPublicCookie(res, name, value) {
+    const options = {
+      ...getCookieOptions(),
+      httpOnly: false,
+      signed: false,
+      maxAge: 24 * 60 * 60 * 1000, // 24 heures
+    };
+    res.cookie(name, value, options);
+  },
+
+  getPublicCookie(req, name) {
+    return req.cookies[name];
+  },
 };
 
 const attachCookieManager = (req, res, next) => {

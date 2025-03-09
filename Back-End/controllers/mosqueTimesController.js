@@ -332,6 +332,78 @@ class MosqueTimesController {
       res.status(500).json({ message: "Erreur serveur" });
     }
   }
+
+  async reportMissingData(req, res) {
+    try {
+      const { date } = req.params;
+      const { source } = req.body;
+
+      console.log(
+        `Données manquantes signalées pour la date ${date} depuis ${source}`
+      );
+
+      // Répondre immédiatement au client
+      res.status(200).json({
+        success: true,
+        message: "Merci de nous avoir signalé des données manquantes",
+      });
+
+      // Lancer le scraping en arrière-plan sans bloquer la réponse
+      if (source === "welcome-page") {
+        console.log(
+          "Déclenchement du scraping en arrière-plan suite à un signalement"
+        );
+
+        // Utiliser la méthode existante pour le scraping, mais sans attendre la réponse
+        (async () => {
+          try {
+            console.log("Début du scraping pour toutes les villes");
+
+            // Correction: Lier explicitement le contexte 'this' à la méthode
+            await this.scrapeAllCitiesBackground.bind(this)();
+
+            // Alternative: Appeler directement la méthode avec le bon contexte
+            // await this.scrapeAllCitiesBackground();
+
+            console.log("Scraping en arrière-plan terminé avec succès");
+          } catch (backgroundError) {
+            console.error(
+              "Erreur lors du scraping en arrière-plan:",
+              backgroundError
+            );
+          }
+        })();
+      }
+    } catch (error) {
+      console.error("Erreur lors du signalement de données manquantes:", error);
+      return res.status(500).json({
+        success: false,
+        message: "Une erreur est survenue lors du traitement de votre demande",
+      });
+    }
+  }
+
+  // Nouvelle méthode qui exécute scrapeAllCities sans envoyer de réponse HTTP
+  async scrapeAllCitiesBackground() {
+    try {
+      const cities = await mosqueTimesModel.getAllCities();
+      for (const city of cities) {
+        const mosques = await mosqueTimesModel.getMosquesByCity(city);
+        const data = await this.scrapingService.scrapeCity(city, mosques);
+        for (const item of data) {
+          await mosqueTimesModel.savePrayerTimes(
+            item.mosqueId,
+            item.date,
+            item.times
+          );
+        }
+      }
+      return true;
+    } catch (error) {
+      console.error("Erreur lors du scraping en arrière-plan :", error);
+      return false;
+    }
+  }
 }
 
 // Créer une instance du contrôleur
@@ -353,4 +425,5 @@ module.exports = {
     controller.getPrayerTimesForCityAndDate.bind(controller),
   setSelectedCity: controller.setSelectedCity.bind(controller),
   getSelectedCity: controller.getSelectedCity.bind(controller),
+  reportMissingData: controller.reportMissingData.bind(controller),
 };
