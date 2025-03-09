@@ -102,6 +102,9 @@ const translations = {
           "Les nouveaux mots de passe ne correspondent pas",
         "profile.password.weak":
           "Le mot de passe doit contenir au moins 8 caractères, une majuscule, un chiffre et un caractère spécial",
+
+        "mosque.scrape.partial_error":
+          "Certaines mosquées n'ont pas pu être mises à jour",
       },
 
       info: {
@@ -189,6 +192,8 @@ const translations = {
         "profile.update.error": "Erreur lors de la mise à jour du profil",
         "profile.password.error": "Erreur lors du changement de mot de passe",
         "profile.password.incorrect": "Mot de passe actuel incorrect",
+
+        "mosque.scrape.error": "Erreur lors de la mise à jour des horaires",
       },
 
       confirm: {
@@ -310,6 +315,9 @@ const translations = {
         "profile.password.mismatch": "New passwords do not match",
         "profile.password.weak":
           "Password must contain at least 8 characters, one uppercase letter, one number and one special character",
+
+        "mosque.scrape.partial_error":
+          "Certaines mosquées n'ont pas pu être mises à jour",
       },
 
       info: {
@@ -390,6 +398,8 @@ const translations = {
         "profile.update.error": "Error updating profile",
         "profile.password.error": "Error changing password",
         "profile.password.incorrect": "Current password is incorrect",
+
+        "mosque.scrape.error": "Erreur lors de la mise à jour des horaires",
       },
 
       confirm: {

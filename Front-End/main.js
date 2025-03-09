@@ -18,7 +18,6 @@ import { api } from "./services/api/dynamicLoader.js";
 import AppState from "../../services/state/state.js";
 import CacheService from "./services/cache/cacheService.js";
 
-
 // Importation des composants
 import { initializeDuaTimeCalculator } from "./components/prayer/duaTimeCalculator.js";
 import { ChartManager } from "./components/statistics/charts.js";

@@ -20,14 +20,14 @@ e7ecef Blanc
 
   /* Typography */
   --main-font: "Poppins", sans-serif;
-  
+
   /* Title Sizes */
   --h1-size: 2rem;
   --h2-size: 1.5rem;
   --h3-size: 1.25rem;
   --text-size: 1rem;
   --small-text-size: 0.875rem;
-  
+
   /* Line Heights */
   --title-line-height: 1.4;
   --text-line-height: 1.6;
@@ -428,7 +428,6 @@ body {
   font-size: 1rem;
 }
 
-
 @media (max-width: 1200px) {
   .welcomepage-auth-forms {
     max-width: 85vw;
@@ -484,91 +483,6 @@ body {
   display: none;
 }
 
-@media (max-width: 480px) {
-  .welcomepage-header {
-    padding: 0.25rem;
-  }
-
-  .language-selector .lang-btn {
-    font-size: 2.5em;
-    padding: 5px;
-  }
-
-  .welcomepage-hero h2 {
-    font-size: 1.5rem;
-  }
-
-  .welcomepage-container {
-    width: 95vw;
-  }
-
-  .welcomepage-hero p {
-    font-size: 1rem;
-    margin-bottom: 1rem;
-  }
-
-  .welcomepage-auth-forms {
-    margin: -2rem auto 2rem auto;
-  }
-
-  .welcomepage-btn {
-    font-size: 1.25rem;
-  }
-
-  @keyframes pulse {
-    0% {
-      transform: scale(1);
-    }
-    50% {
-      transform: scale(1.1);
-    }
-    100% {
-      transform: scale(1);
-    }
-  }
-
-  .welcomepage-hero {
-    margin-bottom: 2.5rem;
-  }
-
-  .welcomepage-features h2,
-  .welcomepage-vision h2,
-  .welcomepage-why-choose h2,
-  .welcomepage-commitment h2 {
-    font-size: 1.5rem;
-  }
-
-  .welcomepage-feature-card h3,
-  .welcomepage-why-choose-card h3 {
-    font-size: 1.2rem;
-    margin-bottom: 0.5rem;
-  }
-
-  .welcomepage-feature-card p,
-  .welcomepage-why-choose-card p {
-    font-size: 1rem;
-  }
-
-  .welcomepage-vision p,
-  .welcomepage-commitment p,
-  .welcomepage-commitment li {
-    margin-bottom: 0.5rem;
-    font-size: 1rem;
-  }
-
-  .welcomepage-features,
-  .welcomepage-vision,
-  .welcomepage-why-choose,
-  .welcomepage-commitment {
-    margin-bottom: 3rem;
-  }
-
-  .welcomepage-footer {
-    padding: 1rem;
-    font-size: 1rem;
-  }
-}
-
 /*terms*/
 .terms-group {
   grid-column: 1 / -1;
@@ -605,7 +519,7 @@ body {
 }
 
 .terms-checkbox-container input[type="checkbox"]:checked::after {
-  content: '✓';
+  content: "✓";
   position: absolute;
   color: white;
   font-size: 14px;
@@ -645,19 +559,18 @@ body {
   cursor: pointer;
 }
 
-
 /* ===================== */
 /*      TOP NAV BAR      */
 /* ===================== */
 .top-nav {
   display: flex;
   align-items: center;
-  justify-content: space-between;  /* Espace gauche/droite */
-  
+  justify-content: space-between; /* Espace gauche/droite */
+
   background-color: var(--card-background);
   border-bottom: 1px solid var(--border-color);
   padding: 0.5rem 1rem;
-  
+
   /* Positionnement fixe en haut */
   position: fixed;
   top: 0;
@@ -679,7 +592,7 @@ body {
 /*    HAMBURGER BTN      */
 /* ===================== */
 .hamburger-btn {
-  display: block;         
+  display: block;
   background: none;
   border: none;
   font-size: 1.25rem;
@@ -704,7 +617,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  text-decoration: none; 
+  text-decoration: none;
 }
 
 .notifications-icon {
@@ -720,24 +633,46 @@ body {
 }
 
 @keyframes ring {
-  0%   { transform: rotate(0); }
-  10%  { transform: rotate(15deg); }
-  20%  { transform: rotate(-10deg); }
-  30%  { transform: rotate(10deg); }
-  40%  { transform: rotate(-10deg); }
-  50%  { transform: rotate(5deg); }
-  60%  { transform: rotate(-5deg); }
-  70%  { transform: rotate(3deg); }
-  80%  { transform: rotate(-3deg); }
-  90%  { transform: rotate(2deg); }
-  100% { transform: rotate(0); }
+  0% {
+    transform: rotate(0);
+  }
+  10% {
+    transform: rotate(15deg);
+  }
+  20% {
+    transform: rotate(-10deg);
+  }
+  30% {
+    transform: rotate(10deg);
+  }
+  40% {
+    transform: rotate(-10deg);
+  }
+  50% {
+    transform: rotate(5deg);
+  }
+  60% {
+    transform: rotate(-5deg);
+  }
+  70% {
+    transform: rotate(3deg);
+  }
+  80% {
+    transform: rotate(-3deg);
+  }
+  90% {
+    transform: rotate(2deg);
+  }
+  100% {
+    transform: rotate(0);
+  }
 }
 
 /* ===================== */
 /*   PROFILE SECTION     */
 /* ===================== */
 .profile-section {
-  position: relative; 
+  position: relative;
   display: flex;
   align-items: center;
 }
@@ -762,12 +697,12 @@ body {
 .profile-dropdown {
   position: absolute;
   top: 100%;
-  right: 0;  
+  right: 0;
   background: var(--card-background);
   border: 1px solid var(--border-color);
   border-radius: 0.5rem;
   min-width: 200px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   display: none;
   margin-top: 0.5rem;
 }
@@ -816,18 +751,23 @@ body {
 .slider {
   position: absolute;
   cursor: pointer;
-  top: 0; left: 0; right: 0; bottom: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background-color: var(--gray-color);
-  transition: .4s;
+  transition: 0.4s;
   border-radius: 24px;
 }
 .slider:before {
   position: absolute;
   content: "";
-  height: 18px; width: 18px;
-  left: 3px; bottom: 3px;
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
   background-color: #fff;
-  transition: .4s;
+  transition: 0.4s;
   border-radius: 50%;
 }
 input:checked + .slider {
@@ -865,8 +805,6 @@ input:checked + .slider:before {
   }
 }
 
-
-
 /* Barre de navigation latérale */
 
 .sidebar {
@@ -876,7 +814,7 @@ input:checked + .slider:before {
   width: 250px;
   height: 100vh;
   position: fixed;
-  top: 0;   
+  top: 0;
   left: 0;
   overflow-y: auto;
   transition: transform 0.3s ease-in-out;
@@ -1130,7 +1068,7 @@ input:checked + .slider:before {
 
 @media (max-width: 768px) {
   .dashboard-card h2 {
-    font-size: 0.90rem;
+    font-size: 0.9rem;
     font-weight: 600;
     color: #274c77;
   }
@@ -1143,7 +1081,7 @@ input:checked + .slider:before {
   }
 
   .dashboard-card h2 {
-    font-size: 0.70rem;
+    font-size: 0.7rem;
     font-weight: 600;
     color: #274c77;
   }
@@ -1280,7 +1218,7 @@ input:checked + .slider:before {
 /*Boutons de sauvegarde*/
 #save-button-session {
   margin-left: 1.5vw;
-  background-color:#6096ba;
+  background-color: #6096ba;
 }
 
 /* Bouton nouvelle session */
@@ -1391,7 +1329,7 @@ input:checked + .slider:before {
   #apprentissage {
     margin-left: 0;
   }
-  
+
   .timers-container:nth-of-type(2) {
     grid-template-columns: 1fr;
   }
@@ -1605,61 +1543,61 @@ input:checked + .slider:before {
 /*----*/
 
 .todo-card-header-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
 .tasks-counter {
-    font-size: var(--small-text-size);
-    margin-left: 0.5rem;
-    color: var(--card-background);
+  font-size: var(--small-text-size);
+  margin-left: 0.5rem;
+  color: var(--card-background);
 }
 
 .todo-header-actions {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
 .select-all-container {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: var(--card-background);
-    cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--card-background);
+  cursor: pointer;
 }
 
 .select-all-label {
-    font-size: var(--small-text-size);
+  font-size: var(--small-text-size);
 }
 
 .todo-delete-selected-btn {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    background-color: #ff4444;
-    color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 0.25rem;
-    cursor: pointer;
-    opacity: 0.7;
-    transition: opacity 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: #ff4444;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.2s;
 }
 
 .todo-delete-selected-btn:not([disabled]) {
-    opacity: 1;
+  opacity: 1;
 }
 
 .todo-delete-selected-btn:not([disabled]):hover {
-    background-color: #ff0000;
+  background-color: #ff0000;
 }
 
 .todo-delete-selected-btn[disabled] {
-    cursor: not-allowed;
+  cursor: not-allowed;
 }
 
 /* Responsive Design */
@@ -1682,7 +1620,7 @@ input:checked + .slider:before {
 
   h1 {
     font-size: var(--h1-size);
-   }
+  }
 
   .todo-card-title {
     font-size: 1.5rem;
@@ -1710,8 +1648,8 @@ input:checked + .slider:before {
 
 @media (min-width: 1024px) {
   .page#statistics {
-      margin-left: 250px;
-      padding: 2rem;
+    margin-left: 250px;
+    padding: 2rem;
   }
 }
 
@@ -1828,7 +1766,6 @@ input:checked + .slider:before {
   background-color: white;
 }
 
-
 /* Quand les détails sont visibles */
 .chart-section.details-visible .chart-wrapper {
   height: 200px; /* Hauteur réduite quand les détails sont visibles */
@@ -1920,57 +1857,57 @@ input:checked + .slider:before {
 /* Responsive Adjustments */
 @media (max-width: 1200px) {
   .statistics-container {
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1rem;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
   }
 
   .chart-wrapper {
-      min-height: 250px;
+    min-height: 250px;
   }
 }
 
 @media (max-width: 768px) {
   .statistics-container {
-      grid-template-columns: 1fr;
-      gap: 1rem;
+    grid-template-columns: 1fr;
+    gap: 1rem;
   }
 
   .page#statistics {
-      padding: 1rem;
+    padding: 1rem;
   }
 
   .chart-wrapper {
-      min-height: 300px;
+    min-height: 300px;
   }
 }
 
 @media (max-width: 480px) {
   .page#statistics {
-      padding: 0.5rem;
+    padding: 0.5rem;
   }
 
   .stats-header {
-      padding: 0.5rem;
-      flex-direction: column;
-      gap: 0.5rem;
+    padding: 0.5rem;
+    flex-direction: column;
+    gap: 0.5rem;
   }
 
   .period-navigation {
-      width: 100%;
-      justify-content: space-between;
+    width: 100%;
+    justify-content: space-between;
   }
 
   .title-area h2 {
-      font-size: 1rem;
+    font-size: 1rem;
   }
 
   .chart-wrapper {
-      min-height: 250px;
-      padding: 0.75rem;
+    min-height: 250px;
+    padding: 0.75rem;
   }
 
   .task-details-section.expanded {
-      max-height: 300px;
+    max-height: 300px;
   }
 }
 
@@ -2058,7 +1995,9 @@ input:checked + .slider:before {
   margin-top: 1rem;
 }
 
-#knownSouratesCount, #recitationCyclesCount, #recitationProgress,
+#knownSouratesCount,
+#recitationCyclesCount,
+#recitationProgress,
 .surahselector-card p {
   font-size: 1.25rem;
 }
@@ -2943,7 +2882,7 @@ button[type="submit"]:hover {
     margin-left: 250px;
     width: calc(100% - 250px);
   }
-  
+
   .aboutus-wrapper {
     padding: 2rem;
     max-width: 1200px;
@@ -2952,7 +2891,7 @@ button[type="submit"]:hover {
   .aboutus-grid-cols-2 {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   .aboutus-grid-cols-4 {
     grid-template-columns: repeat(4, 1fr);
   }
@@ -2968,7 +2907,7 @@ button[type="submit"]:hover {
   .aboutus-wrapper {
     padding: 1.5rem;
   }
-  
+
   .aboutus-title {
     font-size: 2rem;
   }
@@ -2988,23 +2927,23 @@ button[type="submit"]:hover {
     padding-left: 0rem;
     width: 95vw;
   }
-  
+
   .aboutus-title {
     font-size: 1.75rem;
   }
-  
+
   .aboutus-card-title {
     font-size: 1.25rem;
   }
-  
+
   .aboutus-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .aboutus-list li {
     font-size: 0.95rem;
   }
-  
+
   .aboutus-card-content p {
     font-size: 0.95rem;
   }
@@ -3111,18 +3050,21 @@ button[type="submit"]:hover {
 }
 
 /* Alignement des colonnes */
-.header-left, .item-left {
+.header-left,
+.item-left {
   display: flex;
   align-items: center;
 }
 
-.header-center, .item-center {
+.header-center,
+.item-center {
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-.header-right, .item-right {
+.header-right,
+.item-right {
   display: flex;
   justify-content: flex-end;
   align-items: center;
@@ -3168,11 +3110,21 @@ button[type="submit"]:hover {
   display: inline-block;
 }
 
-.surahmemorization-level-strong { background-color: #22c55e; }
-.surahmemorization-level-good { background-color: #3b82f6; }
-.surahmemorization-level-moderate { background-color: #eab308; }
-.surahmemorization-level-weak { background-color: #ef4444; }
-.surahmemorization-level-na { background-color: #9ca3af; }
+.surahmemorization-level-strong {
+  background-color: #22c55e;
+}
+.surahmemorization-level-good {
+  background-color: #3b82f6;
+}
+.surahmemorization-level-moderate {
+  background-color: #eab308;
+}
+.surahmemorization-level-weak {
+  background-color: #ef4444;
+}
+.surahmemorization-level-na {
+  background-color: #9ca3af;
+}
 
 /* Zone des actions */
 .surahmemorization-summary {
@@ -3273,10 +3225,18 @@ button[type="submit"]:hover {
   justify-content: center;
 }
 
-.surahmemorization-eval-btn[data-level="Strong"] { background-color: #22c55e; }
-.surahmemorization-eval-btn[data-level="Good"] { background-color: #3b82f6; }
-.surahmemorization-eval-btn[data-level="Moderate"] { background-color: #eab308; }
-.surahmemorization-eval-btn[data-level="Weak"] { background-color: #ef4444; }
+.surahmemorization-eval-btn[data-level="Strong"] {
+  background-color: #22c55e;
+}
+.surahmemorization-eval-btn[data-level="Good"] {
+  background-color: #3b82f6;
+}
+.surahmemorization-eval-btn[data-level="Moderate"] {
+  background-color: #eab308;
+}
+.surahmemorization-eval-btn[data-level="Weak"] {
+  background-color: #ef4444;
+}
 
 .surahmemorization-eval-btn::before {
   content: "★";
@@ -3494,7 +3454,7 @@ button[type="submit"]:hover {
   margin-left: 250px;
   font-family: var(--main-font);
 }
- 
+
 .mosquetime-card {
   max-width: 800px;
   background-color: var(--card-background);
@@ -3504,33 +3464,29 @@ button[type="submit"]:hover {
   border-radius: 8px;
   overflow: hidden;
 }
- 
+
 .mosquetime-header {
   background-color: var(--secondary-color);
   color: white;
   padding: 20px;
 }
- 
+
 .mosquetime-title {
   margin: 0;
   font-size: 24px;
 }
- 
+
 .mosquetime-subtitle {
   margin: 5px 0 0;
   font-size: 14px;
 }
- 
-.mosquetime-content {
-  padding: 20px;
-}
- 
+
 .mosquetime-location-search {
   display: flex;
   gap: 10px;
   margin-bottom: 20px;
 }
- 
+
 .mosquetime-select {
   width: 100%;
   padding: 10px;
@@ -3538,7 +3494,7 @@ button[type="submit"]:hover {
   border-radius: 4px;
   font-family: var(--main-font);
 }
- 
+
 .mosquetime-button {
   background-color: var(--secondary-color);
   color: white;
@@ -3548,18 +3504,18 @@ button[type="submit"]:hover {
   cursor: pointer;
   font-family: var(--main-font);
 }
- 
+
 .mosquetime-button:hover {
   background-color: var(--primary-color);
 }
- 
+
 .mosquetime-date-display {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
 }
- 
+
 .mosquetime-tabs {
   display: flex;
   margin-bottom: 20px;
@@ -3567,7 +3523,7 @@ button[type="submit"]:hover {
   border-radius: 8px;
   padding: 4px;
 }
- 
+
 .mosquetime-tab {
   flex: 1;
   text-align: center;
@@ -3576,18 +3532,17 @@ button[type="submit"]:hover {
   border-radius: 6px;
   transition: all 0.3s ease;
 }
- 
+
 .mosquetime-tab.active {
   background-color: var(--secondary-color);
   color: white;
 }
- 
+
 .mosquetime-mosque-card {
   background-color: var(--card-background);
   border-radius: 8px;
   padding: 20px;
-  margin-top: 1rem;
-  margin-bottom: 16px;
+  margin-top: 0.5rem;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
@@ -3659,53 +3614,37 @@ button[type="submit"]:hover {
 }
 
 .mosque-address {
-  font-size: 14px;
-  color: #666;
-  font-style: italic;
-  line-height: 1.4;
+  color: var(--gray-color);
+  font-size: 0.875rem;
+  margin: 0.5rem 0;
 }
 
-.prayer-times-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 16px;
-  margin-bottom: 16px;
-}
-
-.additional-times-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 16px;
-  padding-top: 16px;
-  border-top: 1px solid #eaeaea;
-}
- 
 .prayer-item {
   text-align: center;
 }
- 
+
 .prayer-label {
   font-size: 14px;
   color: var(--text-color);
   margin-bottom: 4px;
   font-weight: 500;
 }
- 
+
 .jamaa-time {
   font-size: 16px;
   color: var(--primary-color);
   font-weight: 600;
 }
- 
+
 .mosquetime-error {
-  background-color: #FEE2E2;
-  color: #DC2626;
+  background-color: #fee2e2;
+  color: #dc2626;
   padding: 12px;
   border-radius: 6px;
   margin-bottom: 16px;
   display: none;
 }
- 
+
 .mosquetime-disclaimer {
   font-style: italic;
   color: var(--gray-color);
@@ -3723,6 +3662,27 @@ button[type="submit"]:hover {
   margin-bottom: 16px;
 }
 
+.scrollable-content {
+  max-height: 600px;
+  overflow-y: auto;
+  padding-right: 5px; /* Espace pour la barre de défilement */
+}
+
+.mosquetime-mosque-card {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.mosquetime-tab-content {
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+#welcome-mosquetime-grid {
+  max-height: 500px;
+  overflow-y: auto;
+}
+
 /* Media Queries */
 @media (max-width: 1024px) {
   #mosquetime {
@@ -3732,24 +3692,375 @@ button[type="submit"]:hover {
     max-width: 1500px;
   }
 }
- 
+
+/* Styles pour MosqueTime sur la page d'accueil */
+.welcome-mosquetime-card {
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 20px;
+  margin: 20px 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.welcome-mosquetime-controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.welcome-btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  background: var(--primary-color);
+  color: white;
+  cursor: pointer;
+}
+
+.welcome-select {
+  flex: 1;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+}
+
+/* ... autres styles ... */
+
+/* Styles pour MosqueTime sur la page d'accueil */
+.welcomepage-mosque-time {
+  padding: 0;
+  margin: 0;
+  background: var(--card-background);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.welcome-mosquetime-section {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.welcome-mosquetime-header {
+  margin-bottom: 2rem;
+}
+
+.welcome-mosquetime-title {
+  font-size: 1.5rem;
+  color: var(--text-color);
+  margin-bottom: 1rem;
+}
+
+.welcome-mosquetime-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.welcome-mosquetime-location-search {
+  display: flex;
+  gap: 1rem;
+  flex: 1;
+}
+
+.welcome-mosquetime-btn {
+  padding: 0.5rem 1rem;
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.welcome-mosquetime-btn:hover {
+  background: var(--secondary-color);
+}
+
+.welcome-mosquetime-select {
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: white;
+}
+
+.welcome-mosquetime-tabs {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.welcome-mosquetime-tab {
+  padding: 0.5rem 1rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+}
+
+.welcome-mosquetime-tab.active {
+  border-bottom-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.welcome-mosquetime-content {
+  background: white;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Grille des mosquées */
+.welcome-mosquetime-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+/* Styles pour les cartes de mosquées */
+.welcome-mosquetime-mosque-card {
+  background: white;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1rem;
+}
+
+.welcome-mosquetime-prayer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.welcome-mosquetime-prayer-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.5rem;
+  background: var(--background-color);
+  border-radius: 4px;
+}
+
+.prayer-time {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+.welcomepage-mosque-time .prayer-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.75rem 0.75rem 0 0.75rem;
+  background: white;
+  border-radius: 6px;
+}
+
+.welcomepage-mosque-time .mosquetime-mosque-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.welcomepage-mosque-time .mosque-header {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.welcomepage-mosque-time .mosque-info {
+  flex: 1;
+}
+
+.welcomepage-mosque-time .mosque-name {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-color);
+  margin-bottom: 0.5rem;
+}
+
+.welcomepage-mosque-time .mosque-address {
+  font-size: 0.875rem;
+  color: var(--gray-color);
+  margin: 0;
+}
+
+/* Ajustements pour la grille des mosquées */
+#welcome-mosquetime-grid {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 1rem;
+}
+
+/* Styles pour la page d'accueil */
+.welcomepage-mosque-time .mosquetime-card {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+.welcomepage-mosque-time .mosquetime-content {
+  width: 100%;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.mosquetime-card .mosquetime-content {
+  padding: 20px;
+}
+
+.mosque-prayer-times {
+  border-top: 1px solid var(--secondary-color);
+  margin-top: 1rem;
+}
+
+/* Rendre les éléments responsifs */
 @media (max-width: 768px) {
+  .welcomepage-container {
+    width: 95vw;
+  }
+
+  .mosquetime-sort-buttons {
+    margin-bottom: 0.5rem;
+  }
+
+  .mosquetime-card {
+    width: 100%;
+    padding: 0;
+  }
+
+  .welcomepage-mosque-time .mosque-name {
+    font-size: 1rem;
+    padding: 0.25rem 0.25rem 0 0.25rem;
+    margin: 0 0 0 0.3rem;
+  }
+
+  .welcomepage-mosque-time .mosque-address {
+    font-size: 0.7rem;
+    padding: 0 0.25rem 0.25rem 0.25rem;
+    margin: 0 0 0.25rem 0.3rem;
+  }
+
+  #welcome-mosquetime-grid {
+    width: 100%;
+    padding: 0rem;
+  }
+
+  #welcome-mosquetime-grid .mosquetime-mosque-card {
+    width: 100%;
+    padding: 0.65rem;
+    margin: 0.35rem;
+  }
+
+  .mosquetime-location-search {
+    padding: 0.5rem 0;
+  }
+
+  .welcomepage-mosque-time .mosquetime-content {
+    padding: 0rem;
+  }
+
+  .welcomepage-mosque-time .mosquetime-location-search {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .welcomepage-mosque-time .mosquetime-sort-buttons {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .mosque-prayer-times .prayer-times-grid {
+    padding: 0;
+  }
+}
+
+/* Aligner les styles avec MosqueTime */
+
+.welcomepage-mosque-time .mosque-header {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.welcomepage-mosque-time .mosque-info {
+  flex: 1;
+}
+
+.welcomepage-mosque-time .prayer-times-grid,
+.welcomepage-mosque-time .additional-times-grid,
+.mosquetime-mosque-card .prayer-times-grid,
+.mosquetime-mosque-card .additional-times-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  background: white;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+}
+
+/* Harmoniser les styles entre MosqueTime et WelcomeMosqueTime */
+
+/* Media queries communes pour les deux versions */
+@media (max-width: 1200px) {
+  .mosquetime-card,
+  .welcomepage-mosque-time .mosquetime-card {
+    width: 100%;
+    margin: 0 0 1rem 0;
+    padding: 1rem;
+  }
+
+  .prayer-times-grid,
+  .additional-times-grid,
+  .welcomepage-mosque-time .prayer-times-grid,
+  .welcomepage-mosque-time .additional-times-grid {
+    gap: 0.75rem; /* Réduire l'espacement */
+  }
+}
+
+@media (max-width: 768px) {
+  .mosquetime-location-search,
+  .welcomepage-mosque-time .mosquetime-location-search {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .welcomepage-mosque-time .prayer-item {
+    padding: 0.5rem;
+    box-shadow: none;
+  }
+
+  .prayer-label {
+    font-size: 0.9rem;
+  }
+
   .mosquetime-location-search {
     flex-direction: column;
   }
- 
-  .prayer-label {
-    font-size: 13px;
+
+  .welcomepage-mosque-time .mosque-prayer-times .prayer-times-grid,
+  .welcomepage-mosque-time .mosque-prayer-times .additional-times-grid {
+    padding: 0;
+    margin: 0;
   }
- 
+
   .jamaa-time {
-    font-size: 15px;
+    font-size: 1rem;
   }
 
   .mosquetime-title {
     font-size: 19px;
   }
-   
+
   .mosquetime-subtitle {
     font-size: 12px;
   }
@@ -3758,8 +4069,121 @@ button[type="submit"]:hover {
     font-size: 16px;
   }
 }
- 
+
+@media (max-width: 768px) {
+  .welcomepage-mosque-time .mosquetime-location-search {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .welcomepage-mosque-time .mosquetime-sort-buttons {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
 @media (max-width: 480px) {
+  .welcomepage-header {
+    padding: 0.25rem;
+  }
+
+  .language-selector .lang-btn {
+    font-size: 2.5em;
+    padding: 5px;
+  }
+
+  .welcomepage-hero h2 {
+    font-size: 1.5rem;
+  }
+
+  .welcomepage-container {
+    width: 99vw;
+    padding: 0.5rem;
+  }
+
+  .welcomepage-hero p {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .welcomepage-auth-forms {
+    margin: -2rem auto 2rem auto;
+  }
+
+  .welcomepage-btn {
+    font-size: 1.25rem;
+  }
+
+  @keyframes pulse {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.1);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  .welcomepage-hero {
+    margin-bottom: 2.5rem;
+  }
+
+  .welcomepage-features h2,
+  .welcomepage-vision h2,
+  .welcomepage-why-choose h2,
+  .welcomepage-commitment h2 {
+    font-size: 1.5rem;
+  }
+
+  .welcomepage-feature-card h3,
+  .welcomepage-why-choose-card h3 {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .welcomepage-feature-card p,
+  .welcomepage-why-choose-card p {
+    font-size: 1rem;
+  }
+
+  .welcomepage-vision p,
+  .welcomepage-commitment p,
+  .welcomepage-commitment li {
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+  }
+
+  .welcomepage-features,
+  .welcomepage-vision,
+  .welcomepage-why-choose,
+  .welcomepage-commitment {
+    margin-bottom: 3rem;
+  }
+
+  .welcomepage-footer {
+    padding: 1rem;
+    font-size: 1rem;
+  }
+
+  .welcomepage-mosque-time .mosquetime-title {
+    font-size: 1.25rem;
+    text-align: center;
+  }
+
+  .welcomepage-mosque-time .mosquetime-subtitle {
+    font-size: 0.75rem;
+  }
+
+  #welcome-mosquetime-city-date {
+    font-size: 1.5rem;
+  }
+
+  #mosquetime {
+    width: 100%;
+  }
+
   .mosquetime-header {
     text-align: center;
   }
@@ -3771,28 +4195,24 @@ button[type="submit"]:hover {
   .mosquetime-select {
     font-size: 13px;
   }
- 
+
   .prayer-label {
-    font-size: 11px;
+    font-size: 0.7rem;
   }
- 
-  .jamaa-time {
-    font-size: 13px;
-  }
- 
+
   .prayer-times-grid,
   .additional-times-grid {
     gap: 8px;
   }
- 
+
   .prayer-item {
     padding: 4px 2px;
   }
- 
+
   .mosque-name {
     font-size: 16px;
   }
- 
+
   .mosquetime-error {
     font-size: 12px;
   }
@@ -3802,7 +4222,7 @@ button[type="submit"]:hover {
   }
 
   .mosquetime-mosque-card {
-    padding: 15px;
+    padding: 3px;
     margin-left: -10px;
     margin-right: -10px;
     width: calc(100% + 20px);
@@ -3817,4 +4237,43 @@ button[type="submit"]:hover {
     width: 100%;
     padding: 0 10px;
   }
+
+  .welcomepage-mosque-time .mosquetime-title {
+    font-size: 1.5rem;
+  }
+
+  .welcomepage-mosque-time .mosquetime-subtitle {
+    font-size: 1rem;
+  }
+
+  .mosque-prayer-times {
+    margin-top: 0.25rem;
+  }
+}
+
+/* Styles pour l'onglet d'inscription désactivé */
+.welcomepage-tab-btn.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: #f0f0f0;
+}
+
+/* Style pour le message d'inscription fermée */
+.signup-closed-message {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-color);
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  margin: 1rem 0;
+}
+
+.signup-closed-message h3 {
+  color: var(--primary-color);
+  margin-bottom: 1rem;
+}
+
+.signup-closed-message p {
+  margin-bottom: 0.5rem;
+  line-height: 1.5;
 }

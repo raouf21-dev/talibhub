@@ -13,7 +13,7 @@
     />
 
     <!-- Feuilles de style principales -->
-    <link rel="stylesheet" href="/styles.css" />  
+    <link rel="stylesheet" href="/styles.css" />
 
     <!-- Bibliothèques principales depuis cdnjs -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
@@ -179,10 +179,7 @@
                 Connexion
               </button>
             </div>
-            <div
-              class="welcomepage-tab-content"
-              id="welcomepage-signupTab"
-            >
+            <div class="welcomepage-tab-content" id="welcomepage-signupTab">
               <form id="welcomepage-signupForm">
                 <!-- Champ honeypot caché -->
                 <div
@@ -346,7 +343,10 @@
                 </button>
               </form>
             </div>
-            <div class="welcomepage-tab-content active" id="welcomepage-signinTab">
+            <div
+              class="welcomepage-tab-content active"
+              id="welcomepage-signinTab"
+            >
               <form id="welcomepage-signinForm">
                 <h3>Connexion</h3>
                 <div class="form-grid">
@@ -375,10 +375,15 @@
                 >
                   Se connecter
                 </button>
-                <p><a href="./forgot-password.html">Mot de passe oublié ?</a></p>
+                <p>
+                  <a href="./forgot-password.html">Mot de passe oublié ?</a>
+                </p>
               </form>
             </div>
           </div>
+        </div>
+        <div id="welcomepage-mosque-time" class="welcomepage-mosque-time">
+          <!-- Mosque Time sera inséré ici -->
         </div>
         <div id="welcomepage-features" class="welcomepage-features">
           <h2>Nos Principales Fonctionnalités</h2>
@@ -781,11 +786,7 @@
                   <polyline points="15 18 9 12 15 6"></polyline>
                 </svg>
               </button>
-              <span
-                id="daily-period"
-                class="period-display"
-                ></span
-              >
+              <span id="daily-period" class="period-display"></span>
               <button class="nav-btn next">
                 <svg
                   width="20"
@@ -848,11 +849,7 @@
                   <polyline points="15 18 9 12 15 6"></polyline>
                 </svg>
               </button>
-              <span
-                id="weekly-period"
-                class="period-display"
-                ></span
-              >
+              <span id="weekly-period" class="period-display"></span>
               <button class="nav-btn next">
                 <svg
                   width="20"
@@ -915,11 +912,7 @@
                   <polyline points="15 18 9 12 15 6"></polyline>
                 </svg>
               </button>
-              <span
-                id="monthly-period"
-                class="period-display"
-                ></span
-              >
+              <span id="monthly-period" class="period-display"></span>
               <button class="nav-btn next">
                 <svg
                   width="20"
@@ -982,11 +975,7 @@
                   <polyline points="15 18 9 12 15 6"></polyline>
                 </svg>
               </button>
-              <span
-                id="yearly-period"
-                class="period-display"
-                ></span
-              >
+              <span id="yearly-period" class="period-display"></span>
               <button class="nav-btn next">
                 <svg
                   width="20"
@@ -1334,7 +1323,6 @@
 
           <div class="mosquetime-date-display">
             <h2 id="mosquetime-city-date"></h2>
-            <input id="mosquetime-date-picker" type="date" />
           </div>
 
           <div class="mosquetime-tabs">
@@ -2045,7 +2033,10 @@
     <script type="module" src="components/prayer/duaTimeCalculator.js"></script>
     <script type="module" src="components/prayer/mosqueTime.js"></script>
     <script type="module" src="components/quran/surahMemorization.js"></script>
-    <script type="module" src="components/notifications/notifications.js"></script>
+    <script
+      type="module"
+      src="components/notifications/notifications.js"
+    ></script>
     <script type="module" src="utils/utils.js"></script>
     <script type="module" src="utils/transLanguages.js"></script>
     <script type="module" src="components/auth/botTracker.js"></script>
@@ -2058,7 +2049,10 @@
     <script type="module" src="components/welcome/welcomePage.js"></script>
     <script type="module" src="services/state/state.js"></script>
     <script type="module" src="config/constants.js"></script>
-    <script type="module" src="services/notifications/translatNotifications.js"></script>
+    <script
+      type="module"
+      src="services/notifications/translatNotifications.js"
+    ></script>
     <script type="module" src="services/cache/cacheService.js"></script>
     <script type="module" src="services/cache/cacheCountries.js"></script>
     <script type="module" src="components/auth/terms.js"></script>

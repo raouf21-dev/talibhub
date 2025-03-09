@@ -1,17 +1,16 @@
-// mosqueTimeManager.js
-
 import { api } from "../../services/api/dynamicLoader.js";
 import { notificationService } from "../../services/notifications/notificationService.js";
 import CacheService, {
   getMidnightTimestamp,
 } from "../../services/cache/cacheMosqueTime.js";
 
-class MosqueTimeManager {
+export class MosqueTimeManager {
   constructor() {
     this.currentMosques = [];
     this.sortOrder = "asc";
     this.selectedCity = "";
     this.lastDate = null;
+    this.currentDate = new Date();
 
     document.addEventListener("languageChanged", (event) => {
       this.updateDateDisplay();
@@ -27,7 +26,6 @@ class MosqueTimeManager {
   async initialize() {
     try {
       console.log("Initializing mosqueTime module");
-      this.initializeDatePicker();
       this.updateDateDisplay();
       await this.checkAndUpdateData();
       this.setupEventListeners();
@@ -42,19 +40,10 @@ class MosqueTimeManager {
     }
   }
 
-  // --- Initialisation du datePicker ---
-  initializeDatePicker() {
-    const datePicker = document.getElementById("mosquetime-date-picker");
-    if (datePicker) {
-      const today = new Date().toISOString().split("T")[0];
-      datePicker.value = today;
-    }
-  }
-
   // --- Vérification et mise à jour des données si nécessaire ---
   async checkAndUpdateData() {
     try {
-      const date = new Date().toISOString().split("T")[0];
+      const date = this.getCurrentDateString();
       console.log("Checking data for date:", date); // Debug log
 
       const dataExists = await api.get(`/mosque-times/exists/${date}`);
@@ -85,17 +74,31 @@ class MosqueTimeManager {
     }
   }
 
+  // --- Helper to get current date as string ---
+  getCurrentDateString() {
+    return this.currentDate.toISOString().split("T")[0];
+  }
+
   // --- Déclencher le scraping pour toutes les villes ---
   async triggerScrapingForAllCities() {
     try {
-      console.log("Starting scraping for all cities"); // Debug log
+      console.log("Starting scraping for all cities");
       const data = await api.post("/mosque-times/scrape-all");
+
+      if (data.hasErrors) {
+        // Afficher une seule notification d'erreur générique
+        notificationService.show("mosque.scrape.partial_error", "warning");
+      } else {
+        notificationService.show("mosque.data.updated", "success");
+      }
+
       console.log("Scraping completed:", data.message);
       return data;
     } catch (error) {
       console.error("Erreur lors du scraping:", error);
+      // Une seule notification d'erreur critique
       notificationService.show("mosque.scrape.error", "error", 0);
-      throw error; // Propager l'erreur pour une meilleure gestion
+      throw error;
     }
   }
 
@@ -140,11 +143,10 @@ class MosqueTimeManager {
 
   // --- Mettre à jour l'affichage de la date (en fonction de la langue) ---
   updateDateDisplay() {
-    const datePicker = document.getElementById("mosquetime-date-picker");
     const cityDateElement = document.getElementById("mosquetime-city-date");
     const citySelect = document.getElementById("mosquetime-location-select");
 
-    if (!datePicker || !cityDateElement || !citySelect) return;
+    if (!cityDateElement || !citySelect) return;
 
     const currentLang = localStorage.getItem("userLang") || "fr";
     const locale = currentLang === "en" ? "en-US" : "fr-FR";
@@ -153,9 +155,7 @@ class MosqueTimeManager {
       citySelect.options[citySelect.selectedIndex]?.textContent ||
       (locale === "en-US" ? "Your City" : "Votre Ville");
 
-    const selectedDate = new Date(datePicker.value || new Date());
-
-    const dateString = selectedDate.toLocaleDateString(locale, {
+    const dateString = this.currentDate.toLocaleDateString(locale, {
       year: "numeric",
       month: "long",
       day: "numeric",
@@ -359,9 +359,7 @@ class MosqueTimeManager {
       return;
     }
 
-    const date =
-      document.getElementById("mosquetime-date-picker")?.value ||
-      new Date().toISOString().split("T")[0];
+    const date = this.getCurrentDateString();
 
     try {
       const times = await api.get(`/mosque-times/${selectedMosqueId}/${date}`);
@@ -435,9 +433,7 @@ class MosqueTimeManager {
   async handleCitySelection(city, forceUpdate = false) {
     // Normalisation de la ville pour créer une clé unique
     const normalizedCity = encodeURIComponent(city.trim().toLowerCase());
-    const date =
-      document.getElementById("mosquetime-date-picker")?.value ||
-      new Date().toISOString().split("T")[0];
+    const date = this.getCurrentDateString();
     // Clé de cache : combinaison normalisée de la ville et de la date
     const cacheKey = `mosqueData_${normalizedCity}_${date}`;
 
@@ -586,16 +582,6 @@ class MosqueTimeManager {
       });
     }
 
-    const datePicker = document.getElementById("mosquetime-date-picker");
-    if (datePicker) {
-      datePicker.addEventListener("change", async () => {
-        this.updateDateDisplay();
-        if (this.selectedCity) {
-          await this.handleCitySelection(this.selectedCity, true);
-        }
-      });
-    }
-
     const mosqueSelect = document.getElementById("mosquetime-mosque-select");
     if (mosqueSelect) {
       mosqueSelect.addEventListener("change", async () => {
@@ -685,7 +671,7 @@ class MosqueTimeManager {
   }
 }
 
-// --- Instance de MosqueTimeManager & fonction d'initialisation ---
+// --- Export de la fonction d'initialisation ---
 export function initializeMosqueTime() {
   const mosqueTimeManager = new MosqueTimeManager();
   return mosqueTimeManager.initialize();
