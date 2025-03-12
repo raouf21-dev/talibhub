@@ -4,6 +4,7 @@ import { api } from "../../services/api/dynamicLoader.js";
 import CacheService, {
   getMidnightTimestamp,
 } from "../../services/cache/cacheMosqueTime.js";
+import { API_BASE_URL } from "../../config/apiConfig.js";
 
 export class WelcomeMosqueTime extends MosqueTimeManager {
   constructor() {
@@ -12,6 +13,7 @@ export class WelcomeMosqueTime extends MosqueTimeManager {
     this.container = document.getElementById("welcomepage-mosque-time");
     console.log("WelcomeMosqueTime: Container found:", this.container);
     this.isWelcomePage = true;
+    this.apiBaseUrl = API_BASE_URL;
     this.cachePrefix = "public_";
 
     // Déterminer la langue actuelle
@@ -297,10 +299,29 @@ export class WelcomeMosqueTime extends MosqueTimeManager {
     return `${this.cachePrefix}${key}`;
   }
 
+  // Méthode pour construire les URLs d'API
+  getApiUrl(endpoint) {
+    return `${this.apiBaseUrl}/mosque-times/${endpoint}`;
+  }
+
   async loadCities() {
     try {
-      console.log("WelcomeMosqueTime: Fetching cities");
-      const response = await fetch("/api/mosque-times/cities/search");
+      console.log("[DEBUG] WelcomeMosqueTime: Starting loadCities");
+
+      // Utiliser une URL absolue
+      const response = await fetch(this.getApiUrl("cities/search"));
+      console.log("[DEBUG] WelcomeMosqueTime: Cities search response:", {
+        status: response.status,
+        ok: response.ok,
+        statusText: response.statusText,
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch cities: ${response.status} - ${response.statusText}`
+        );
+      }
+
       const cities = await response.json();
       console.log("WelcomeMosqueTime: Cities loaded:", cities);
 
@@ -540,23 +561,39 @@ export class WelcomeMosqueTime extends MosqueTimeManager {
         cityName
       );
 
-      // Récupérer les mosquées pour la ville sélectionnée via la route publique
-      const mosques = await fetch(
-        `/api/mosque-times/cities/${encodeURIComponent(cityName)}/mosques`
-      ).then((res) => res.json());
+      // Récupérer les mosquées avec URL absolue
+      const mosquesResponse = await fetch(
+        this.getApiUrl(`cities/${encodeURIComponent(cityName)}/mosques`)
+      );
+
+      if (!mosquesResponse.ok) {
+        throw new Error(
+          `Failed to fetch mosques: ${mosquesResponse.status} - ${mosquesResponse.statusText}`
+        );
+      }
+
+      const mosques = await mosquesResponse.json();
 
       if (!mosques || mosques.length === 0) {
         console.log("WelcomeMosqueTime: No mosques found for city", cityName);
         return;
       }
 
-      // Récupérer les horaires via la route publique
+      // Récupérer les horaires avec URL absolue
       const date = this.getCurrentDateString();
-      const prayerTimesData = await fetch(
-        `/api/mosque-times/cities/${encodeURIComponent(
-          cityName
-        )}/date/${date}/prayer-times`
-      ).then((res) => res.json());
+      const prayerTimesResponse = await fetch(
+        this.getApiUrl(
+          `cities/${encodeURIComponent(cityName)}/date/${date}/prayer-times`
+        )
+      );
+
+      if (!prayerTimesResponse.ok) {
+        throw new Error(
+          `Failed to fetch prayer times: ${prayerTimesResponse.status} - ${prayerTimesResponse.statusText}`
+        );
+      }
+
+      const prayerTimesData = await prayerTimesResponse.json();
 
       // Associer les horaires aux mosquées
       this.currentMosques = mosques.map((mosque) => {
@@ -599,17 +636,23 @@ export class WelcomeMosqueTime extends MosqueTimeManager {
   async checkAndUpdateData() {
     try {
       const date = this.getCurrentDateString();
-      console.log("WelcomeMosqueTime: Checking data for date:", date);
 
-      // Utiliser la route publique pour vérifier l'existence des données
-      const response = await fetch(`/api/mosque-times/exists/${date}`);
+      // Utiliser URL absolue
+      const response = await fetch(this.getApiUrl(`exists/${date}`));
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to check data: ${response.status} - ${response.statusText}`
+        );
+      }
+
       const dataExists = await response.json();
 
       if (!dataExists.exists) {
         console.log("WelcomeMosqueTime: No data found, reporting missing data");
 
         // Signaler les données manquantes via la route publique
-        await fetch(`/api/mosque-times/report-missing-data/${date}`, {
+        await fetch(this.getApiUrl(`report-missing-data/${date}`), {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
