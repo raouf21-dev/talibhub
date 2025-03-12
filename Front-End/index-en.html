@@ -42,8 +42,6 @@
     <script>
       // Intercepter les redirections codées en dur
       (function () {
-        console.log("[DEBUG] Vérification des redirections codées en dur");
-
         // Vérifier les balises meta refresh
         document.addEventListener("DOMContentLoaded", function () {
           const metaTags = document.querySelectorAll(
@@ -52,9 +50,6 @@
           metaTags.forEach((tag) => {
             const content = tag.getAttribute("content");
             if (content && content.includes("/login")) {
-              console.warn(
-                "[DEBUG] Meta refresh vers /login détecté et bloqué"
-              );
               tag.setAttribute(
                 "content",
                 content.replace("/login", "/welcomepage")
@@ -2095,7 +2090,7 @@
           if (window.feather && typeof window.feather.replace === "function") {
             window.feather.replace();
           }
-        }, 100);
+        }, 50);
       });
     </script>
   </body>

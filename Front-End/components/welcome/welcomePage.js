@@ -7,26 +7,13 @@ import { notificationService } from "../../services/notifications/notificationSe
 import { WelcomeMosqueTime } from "./welcomeMosqueTime.js";
 
 export async function initializeWelcomepage() {
-  const initId = Math.random().toString(36).substr(2, 9);
-  console.log(`[DEBUG] WelcomePage #${initId} - Début initialisation`);
-
   try {
     // Attendre un court instant pour s'assurer que Feather est chargé
     await new Promise((resolve) => setTimeout(resolve, 100));
 
     if (window.feather) {
       window.feather.replace();
-      console.log(`[DEBUG] WelcomePage #${initId} - Feather initialisé`);
     }
-
-    console.log(
-      "[DEBUG] WelcomePage: État de l'authentification:",
-      localStorage.getItem("token") ? "Token présent" : "Pas de token"
-    );
-    console.log(
-      "[DEBUG] WelcomePage: Chemin actuel:",
-      window.location.pathname
-    );
 
     // Désactiver l'onglet d'inscription
     const signupTab = document.querySelector(
@@ -45,18 +32,14 @@ export async function initializeWelcomepage() {
     });
 
     // Gestion du bouton Get Started
-    console.log(`[DEBUG] WelcomePage #${initId} - Avant getStartedBtn`);
     const getStartedBtn = document.getElementById("welcomepage-getStartedBtn");
     const authForms = document.getElementById("welcomepage-auth-forms");
     if (getStartedBtn && authForms) {
-      console.log(`[DEBUG] WelcomePage #${initId} - getStartedBtn trouvé`);
       getStartedBtn.addEventListener("click", () => {
-        console.log(`[DEBUG] WelcomePage - Click sur getStartedBtn`);
         // Masquer le bouton et afficher les formulaires d'authentification
         getStartedBtn.style.display = "none";
         authForms.classList.remove("hidden");
         authForms.style.display = "block";
-        console.log("Authentication forms displayed.");
         // Optionnel : vous pouvez forcer l'activation d'un onglet, par exemple "signin"
         // switchTab("signin");  // (si nécessaire, en vous assurant que switchTab est correctement importé/initialisé)
       });
@@ -108,31 +91,19 @@ export async function initializeWelcomepage() {
 
     // Initialisation de MosqueTime pour la page d'accueil
     try {
-      console.log("WelcomePage: Creating WelcomeMosqueTime instance");
       const welcomeMosqueTime = new WelcomeMosqueTime();
-      console.log("WelcomePage: Initializing WelcomeMosqueTime");
       await welcomeMosqueTime.initialize();
 
       // Ajouter un écouteur pour les changements de langue
       document.addEventListener("languageChanged", async () => {
-        console.log(
-          "WelcomePage: Language changed, reinitializing WelcomeMosqueTime"
-        );
         await welcomeMosqueTime.initialize();
       });
-
-      console.log("WelcomePage: WelcomeMosqueTime initialized successfully");
     } catch (error) {
       console.error("WelcomePage: Error initializing MosqueTime:", error);
       notificationService.show("mosque.init.error", "error");
     }
-
-    console.log(`[DEBUG] WelcomePage #${initId} - Fin initialisation réussie`);
   } catch (error) {
-    console.warn(
-      `[DEBUG] WelcomePage #${initId} - Erreur avec Feather:`,
-      error
-    );
+    console.warn("Erreur lors de l'initialisation de Feather:", error);
     // Continuer malgré l'erreur
   }
 }
