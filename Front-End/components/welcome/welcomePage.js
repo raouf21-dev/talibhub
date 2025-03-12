@@ -8,6 +8,30 @@ import { WelcomeMosqueTime } from "./welcomeMosqueTime.js";
 
 export async function initializeWelcomepage() {
   console.log("[DEBUG] WelcomePage: Début de l'initialisation");
+
+  // Attendre que Feather soit complètement chargé
+  await new Promise((resolve) => {
+    if (window.feather && typeof window.feather.replace === "function") {
+      resolve();
+    } else {
+      const checkFeather = setInterval(() => {
+        if (window.feather && typeof window.feather.replace === "function") {
+          clearInterval(checkFeather);
+          resolve();
+        }
+      }, 100);
+
+      // Timeout après 5 secondes
+      setTimeout(() => {
+        clearInterval(checkFeather);
+        console.warn("[DEBUG] Timeout en attendant Feather");
+        resolve();
+      }, 5000);
+    }
+  });
+
+  console.log("[DEBUG] WelcomePage: Feather est prêt");
+
   console.log(
     "[DEBUG] WelcomePage: État de l'authentification:",
     localStorage.getItem("token") ? "Token présent" : "Pas de token"
