@@ -36,31 +36,10 @@
     />
 
     <!-- Feather Icons -->
-    <script>
-      // Définir un objet feather temporaire pour éviter les erreurs
-      window.feather = window.feather || {
-        replace: function () {
-          console.log(
-            "Feather temporaire utilisé - le vrai script n'est pas encore chargé"
-          );
-        },
-      };
-
-      // Charger le vrai script Feather de manière asynchrone
-      (function loadFeather() {
-        var script = document.createElement("script");
-        script.src = "https://unpkg.com/feather-icons";
-        script.async = true;
-        script.onload = function () {
-          console.log("Feather Icons chargé avec succès");
-          // Remplacer les icônes une fois le script chargé
-          if (window.feather && typeof window.feather.replace === "function") {
-            window.feather.replace();
-          }
-        };
-        document.head.appendChild(script);
-      })();
-    </script>
+    <script
+      src="https://unpkg.com/feather-icons@4.29.2/dist/feather.min.js"
+      defer
+    ></script>
 
     <!-- Ajouter ce script au début du <head> -->
     <script>
