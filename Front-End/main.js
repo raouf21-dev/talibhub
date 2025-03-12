@@ -35,19 +35,19 @@ import "./utils/featherLoader.js";
 
 // Fonction pour détecter et corriger les boucles de redirection
 (function detectRedirectLoop() {
-  // Vérifier si nous sommes dans une boucle de redirection
   const currentPath = window.location.pathname;
   const referrer = document.referrer;
 
-  console.log("[DEBUG] detectRedirectLoop - Chemin actuel:", currentPath);
-  console.log("[DEBUG] detectRedirectLoop - Référent:", referrer);
-  console.log(
-    "[DEBUG] detectRedirectLoop - Historique de navigation:",
-    JSON.parse(localStorage.getItem("navigationHistory") || "[]")
-  );
+  console.log("[DEBUG] Navigation - État complet:", {
+    currentPath,
+    referrer,
+    hasToken: !!localStorage.getItem("token"),
+    stopRedirects: !!window.stopRedirects,
+    navigationStack: new Error().stack,
+  });
 
-  // Stocker l'historique de navigation récent
-  let navigationHistory = JSON.parse(
+  // Vérifier si nous sommes dans une boucle de redirection
+  const navigationHistory = JSON.parse(
     localStorage.getItem("navigationHistory") || "[]"
   );
 

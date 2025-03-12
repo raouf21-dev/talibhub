@@ -7,7 +7,8 @@ import { notificationService } from "../../services/notifications/notificationSe
 import { WelcomeMosqueTime } from "./welcomeMosqueTime.js";
 
 export async function initializeWelcomepage() {
-  console.log("[DEBUG] WelcomePage: Début de l'initialisation");
+  const initId = Math.random().toString(36).substr(2, 9);
+  console.log(`[DEBUG] WelcomePage #${initId} - Début initialisation`);
 
   // Attendre que Feather soit complètement chargé
   await new Promise((resolve) => {
@@ -55,10 +56,13 @@ export async function initializeWelcomepage() {
   });
 
   // Gestion du bouton Get Started
+  console.log(`[DEBUG] WelcomePage #${initId} - Avant getStartedBtn`);
   const getStartedBtn = document.getElementById("welcomepage-getStartedBtn");
   const authForms = document.getElementById("welcomepage-auth-forms");
   if (getStartedBtn && authForms) {
+    console.log(`[DEBUG] WelcomePage #${initId} - getStartedBtn trouvé`);
     getStartedBtn.addEventListener("click", () => {
+      console.log(`[DEBUG] WelcomePage - Click sur getStartedBtn`);
       // Masquer le bouton et afficher les formulaires d'authentification
       getStartedBtn.style.display = "none";
       authForms.classList.remove("hidden");
@@ -133,6 +137,8 @@ export async function initializeWelcomepage() {
     console.error("WelcomePage: Error initializing MosqueTime:", error);
     notificationService.show("mosque.init.error", "error");
   }
+
+  console.log(`[DEBUG] WelcomePage #${initId} - Fin initialisation réussie`);
 }
 
 // Fonction pour mettre à jour le contenu du formulaire d'inscription selon la langue

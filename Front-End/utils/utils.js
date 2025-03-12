@@ -52,13 +52,15 @@ export async function isAuthenticated() {
  * @returns {Promise<boolean>}
  */
 export async function navigateTo(pageId, addToHistory = true) {
-  console.log("[DEBUG] navigateTo - Détails:", {
+  // Ajouter un identifiant unique pour chaque appel
+  const navigationId = Math.random().toString(36).substr(2, 9);
+
+  console.log(`[DEBUG] NavigateTo #${navigationId} - Début`, {
     pageId,
     addToHistory,
     currentPath: window.location.pathname,
-    referrer: document.referrer,
     stack: new Error().stack,
-    featherStatus: window.feather ? "defined" : "undefined",
+    time: new Date().toISOString(),
   });
 
   // Bloquer toute navigation vers login
@@ -159,7 +161,18 @@ export async function navigateTo(pageId, addToHistory = true) {
 
   currentPage = pageId;
   updateNavVisibility(pageId);
-  return true;
+
+  // Ajouter un log à la fin de la fonction
+  const result = true;
+
+  console.log(`[DEBUG] NavigateTo #${navigationId} - Fin`, {
+    pageId,
+    result,
+    newPath: window.location.pathname,
+    time: new Date().toISOString(),
+  });
+
+  return result;
 }
 
 /**
