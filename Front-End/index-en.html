@@ -1,18 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <!-- Feather Icons -->
+    <!-- Feather Icons - Load first -->
+    <script src="https://unpkg.com/feather-icons@4.29.2/dist/feather.min.js"></script>
     <script>
-      // Définir un placeholder pour Feather
-      window.feather = {
-        replace: function () {
-          console.log("Feather placeholder utilisé");
-          return { icons: {} };
-        },
+      // Fallback si le chargement échoue
+      window.feather = window.feather || {
+        replace: () => ({ icons: {} }),
         icons: {},
       };
     </script>
-    <script src="https://unpkg.com/feather-icons@4.29.2/dist/feather.min.js"></script>
 
     <meta charset="UTF-8" />
     <meta

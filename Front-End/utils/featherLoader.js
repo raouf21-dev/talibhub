@@ -242,30 +242,19 @@ export default window.feather;
   document.head.appendChild(featherScript);
 })();
 
-// Simplifier le chargeur Feather
+// Simple gestionnaire Feather
 export function initFeather() {
-  return new Promise((resolve) => {
-    if (window.feather && typeof window.feather.replace === "function") {
+  if (window.feather && typeof window.feather.replace === "function") {
+    try {
       window.feather.replace();
-      resolve(window.feather);
-    } else {
-      // Attendre le chargement
-      const checkInterval = setInterval(() => {
-        if (window.feather && typeof window.feather.replace === "function") {
-          clearInterval(checkInterval);
-          window.feather.replace();
-          resolve(window.feather);
-        }
-      }, 100);
-
-      // Timeout de sécurité
-      setTimeout(() => {
-        clearInterval(checkInterval);
-        resolve(window.feather);
-      }, 2000);
+    } catch (error) {
+      console.warn("Erreur lors du remplacement des icônes:", error);
     }
-  });
+  }
 }
 
-// Initialiser automatiquement
+// Initialiser quand le DOM est prêt
 document.addEventListener("DOMContentLoaded", initFeather);
+
+// Réessayer quand la page est complètement chargée
+window.addEventListener("load", initFeather);

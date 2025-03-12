@@ -11,54 +11,10 @@ export async function initializeWelcomepage() {
   console.log(`[DEBUG] WelcomePage #${initId} - Début initialisation`);
 
   try {
-    // Attendre que Feather soit complètement chargé
-    await new Promise((resolve, reject) => {
-      const maxAttempts = 50;
-      let attempts = 0;
-
-      const checkFeather = setInterval(() => {
-        attempts++;
-        console.log(
-          `[DEBUG] WelcomePage: Tentative ${attempts} de chargement de Feather`
-        );
-
-        // Vérifier si feather.replace est disponible ET si le script est chargé
-        const featherScript = document.querySelector(
-          'script[src*="feather-icons"]'
-        );
-        const isScriptLoaded =
-          featherScript && featherScript.hasAttribute("loaded");
-
-        if (
-          window.feather &&
-          typeof window.feather.replace === "function" &&
-          isScriptLoaded
-        ) {
-          clearInterval(checkFeather);
-          clearTimeout(timeout);
-          resolve();
-        } else if (attempts >= maxAttempts) {
-          clearInterval(checkFeather);
-          reject(new Error("Timeout en attendant Feather"));
-        }
-      }, 100);
-
-      // Ajouter un événement load sur le script Feather
-      const featherScript = document.querySelector(
-        'script[src*="feather-icons"]'
-      );
-      if (featherScript) {
-        featherScript.addEventListener("load", () => {
-          featherScript.setAttribute("loaded", "true");
-        });
-      }
-
-      // Timeout de sécurité
-      const timeout = setTimeout(() => {
-        clearInterval(checkFeather);
-        reject(new Error("Timeout en attendant Feather"));
-      }, 5000);
-    });
+    // Utiliser directement feather
+    if (window.feather && typeof window.feather.replace === "function") {
+      window.feather.replace();
+    }
 
     console.log(`[DEBUG] WelcomePage #${initId} - Feather chargé avec succès`);
   } catch (error) {
