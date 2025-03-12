@@ -243,18 +243,31 @@ export default window.feather;
 })();
 
 // Simple gestionnaire Feather
+let featherInitialized = false;
+
 export function initFeather() {
-  if (window.feather && typeof window.feather.replace === "function") {
-    try {
+  if (featherInitialized) return;
+
+  try {
+    if (window.feather && typeof window.feather.replace === "function") {
       window.feather.replace();
-    } catch (error) {
-      console.warn("Erreur lors du remplacement des icônes:", error);
+      featherInitialized = true;
+      console.log("Feather initialisé avec succès");
     }
+  } catch (error) {
+    console.warn("Erreur lors de l'initialisation de Feather:", error);
   }
 }
 
-// Initialiser quand le DOM est prêt
-document.addEventListener("DOMContentLoaded", initFeather);
+// Initialiser dès que possible
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initFeather);
+} else {
+  initFeather();
+}
 
-// Réessayer quand la page est complètement chargée
+// Réessayer au chargement complet
 window.addEventListener("load", initFeather);
+
+// Réessayer quand le script Feather est chargé
+document.addEventListener("featherLoaded", initFeather);

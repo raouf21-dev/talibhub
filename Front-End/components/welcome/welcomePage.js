@@ -14,125 +14,125 @@ export async function initializeWelcomepage() {
     // Utiliser directement feather
     if (window.feather && typeof window.feather.replace === "function") {
       window.feather.replace();
+      console.log(`[DEBUG] WelcomePage #${initId} - Feather initialisé`);
     }
 
-    console.log(`[DEBUG] WelcomePage #${initId} - Feather chargé avec succès`);
+    console.log(
+      "[DEBUG] WelcomePage: État de l'authentification:",
+      localStorage.getItem("token") ? "Token présent" : "Pas de token"
+    );
+    console.log(
+      "[DEBUG] WelcomePage: Chemin actuel:",
+      window.location.pathname
+    );
+
+    // Désactiver l'onglet d'inscription
+    const signupTab = document.querySelector(
+      '.welcomepage-tab-btn[data-tab="signup"]'
+    );
+    if (signupTab) {
+      signupTab.classList.add("disabled");
+    }
+
+    // Remplacer le contenu du formulaire d'inscription
+    updateSignupContent();
+
+    // Ajouter un écouteur pour les changements de langue
+    document.addEventListener("languageChanged", (event) => {
+      updateSignupContent(event.detail.language);
+    });
+
+    // Gestion du bouton Get Started
+    console.log(`[DEBUG] WelcomePage #${initId} - Avant getStartedBtn`);
+    const getStartedBtn = document.getElementById("welcomepage-getStartedBtn");
+    const authForms = document.getElementById("welcomepage-auth-forms");
+    if (getStartedBtn && authForms) {
+      console.log(`[DEBUG] WelcomePage #${initId} - getStartedBtn trouvé`);
+      getStartedBtn.addEventListener("click", () => {
+        console.log(`[DEBUG] WelcomePage - Click sur getStartedBtn`);
+        // Masquer le bouton et afficher les formulaires d'authentification
+        getStartedBtn.style.display = "none";
+        authForms.classList.remove("hidden");
+        authForms.style.display = "block";
+        console.log("Authentication forms displayed.");
+        // Optionnel : vous pouvez forcer l'activation d'un onglet, par exemple "signin"
+        // switchTab("signin");  // (si nécessaire, en vous assurant que switchTab est correctement importé/initialisé)
+      });
+    } else {
+      console.warn("Welcome Page: Element(s) not found.");
+    }
+
+    // Initialisation du basculement des onglets pour le formulaire Sign In / Sign Up
+    initializeTabToggle();
+
+    // Ajout de l'écouteur pour le formulaire Sign In
+    const signinForm = document.getElementById("welcomepage-signinForm");
+    if (signinForm) {
+      signinForm.addEventListener("submit", async (e) => {
+        e.preventDefault(); // Empêche le rechargement de la page
+
+        // Récupération des valeurs saisies
+        const email = document
+          .getElementById("welcomepage-signin-email")
+          .value.trim();
+        const password = document
+          .getElementById("welcomepage-signin-password")
+          .value.trim();
+
+        // Vérification que les champs ne sont pas vides
+        if (!email || !password) {
+          console.error("Veuillez remplir tous les champs.");
+          return;
+        }
+
+        // Appel à votre service d'authentification
+        try {
+          const result = await authService.login(email, password);
+          if (result.success) {
+            // Sauvegarde du token et redirection vers le dashboard
+            localStorage.setItem("token", result.token);
+            await navigateTo("dashboard");
+          } else {
+            console.error("Authentification échouée:", result.message);
+            notificationService.show("auth.signin.error", "error");
+          }
+        } catch (error) {
+          console.error("Erreur lors de l'authentification :", error);
+        }
+      });
+    } else {
+      console.warn("Formulaire Sign In non trouvé.");
+    }
+
+    // Initialisation de MosqueTime pour la page d'accueil
+    try {
+      console.log("WelcomePage: Creating WelcomeMosqueTime instance");
+      const welcomeMosqueTime = new WelcomeMosqueTime();
+      console.log("WelcomePage: Initializing WelcomeMosqueTime");
+      await welcomeMosqueTime.initialize();
+
+      // Ajouter un écouteur pour les changements de langue
+      document.addEventListener("languageChanged", async () => {
+        console.log(
+          "WelcomePage: Language changed, reinitializing WelcomeMosqueTime"
+        );
+        await welcomeMosqueTime.initialize();
+      });
+
+      console.log("WelcomePage: WelcomeMosqueTime initialized successfully");
+    } catch (error) {
+      console.error("WelcomePage: Error initializing MosqueTime:", error);
+      notificationService.show("mosque.init.error", "error");
+    }
+
+    console.log(`[DEBUG] WelcomePage #${initId} - Fin initialisation réussie`);
   } catch (error) {
     console.warn(
-      `[DEBUG] WelcomePage #${initId} - Erreur de chargement Feather:`,
+      `[DEBUG] WelcomePage #${initId} - Erreur avec Feather:`,
       error
     );
     // Continuer malgré l'erreur
   }
-
-  console.log("[DEBUG] WelcomePage: Feather est prêt");
-
-  console.log(
-    "[DEBUG] WelcomePage: État de l'authentification:",
-    localStorage.getItem("token") ? "Token présent" : "Pas de token"
-  );
-  console.log("[DEBUG] WelcomePage: Chemin actuel:", window.location.pathname);
-
-  // Désactiver l'onglet d'inscription
-  const signupTab = document.querySelector(
-    '.welcomepage-tab-btn[data-tab="signup"]'
-  );
-  if (signupTab) {
-    signupTab.classList.add("disabled");
-  }
-
-  // Remplacer le contenu du formulaire d'inscription
-  updateSignupContent();
-
-  // Ajouter un écouteur pour les changements de langue
-  document.addEventListener("languageChanged", (event) => {
-    updateSignupContent(event.detail.language);
-  });
-
-  // Gestion du bouton Get Started
-  console.log(`[DEBUG] WelcomePage #${initId} - Avant getStartedBtn`);
-  const getStartedBtn = document.getElementById("welcomepage-getStartedBtn");
-  const authForms = document.getElementById("welcomepage-auth-forms");
-  if (getStartedBtn && authForms) {
-    console.log(`[DEBUG] WelcomePage #${initId} - getStartedBtn trouvé`);
-    getStartedBtn.addEventListener("click", () => {
-      console.log(`[DEBUG] WelcomePage - Click sur getStartedBtn`);
-      // Masquer le bouton et afficher les formulaires d'authentification
-      getStartedBtn.style.display = "none";
-      authForms.classList.remove("hidden");
-      authForms.style.display = "block";
-      console.log("Authentication forms displayed.");
-      // Optionnel : vous pouvez forcer l'activation d'un onglet, par exemple "signin"
-      // switchTab("signin");  // (si nécessaire, en vous assurant que switchTab est correctement importé/initialisé)
-    });
-  } else {
-    console.warn("Welcome Page: Element(s) not found.");
-  }
-
-  // Initialisation du basculement des onglets pour le formulaire Sign In / Sign Up
-  initializeTabToggle();
-
-  // Ajout de l'écouteur pour le formulaire Sign In
-  const signinForm = document.getElementById("welcomepage-signinForm");
-  if (signinForm) {
-    signinForm.addEventListener("submit", async (e) => {
-      e.preventDefault(); // Empêche le rechargement de la page
-
-      // Récupération des valeurs saisies
-      const email = document
-        .getElementById("welcomepage-signin-email")
-        .value.trim();
-      const password = document
-        .getElementById("welcomepage-signin-password")
-        .value.trim();
-
-      // Vérification que les champs ne sont pas vides
-      if (!email || !password) {
-        console.error("Veuillez remplir tous les champs.");
-        return;
-      }
-
-      // Appel à votre service d'authentification
-      try {
-        const result = await authService.login(email, password);
-        if (result.success) {
-          // Sauvegarde du token et redirection vers le dashboard
-          localStorage.setItem("token", result.token);
-          await navigateTo("dashboard");
-        } else {
-          console.error("Authentification échouée:", result.message);
-          notificationService.show("auth.signin.error", "error");
-        }
-      } catch (error) {
-        console.error("Erreur lors de l'authentification :", error);
-      }
-    });
-  } else {
-    console.warn("Formulaire Sign In non trouvé.");
-  }
-
-  // Initialisation de MosqueTime pour la page d'accueil
-  try {
-    console.log("WelcomePage: Creating WelcomeMosqueTime instance");
-    const welcomeMosqueTime = new WelcomeMosqueTime();
-    console.log("WelcomePage: Initializing WelcomeMosqueTime");
-    await welcomeMosqueTime.initialize();
-
-    // Ajouter un écouteur pour les changements de langue
-    document.addEventListener("languageChanged", async () => {
-      console.log(
-        "WelcomePage: Language changed, reinitializing WelcomeMosqueTime"
-      );
-      await welcomeMosqueTime.initialize();
-    });
-
-    console.log("WelcomePage: WelcomeMosqueTime initialized successfully");
-  } catch (error) {
-    console.error("WelcomePage: Error initializing MosqueTime:", error);
-    notificationService.show("mosque.init.error", "error");
-  }
-
-  console.log(`[DEBUG] WelcomePage #${initId} - Fin initialisation réussie`);
 }
 
 // Fonction pour mettre à jour le contenu du formulaire d'inscription selon la langue
