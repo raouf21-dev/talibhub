@@ -241,3 +241,31 @@ export default window.feather;
   featherScript.async = true;
   document.head.appendChild(featherScript);
 })();
+
+// Simplifier le chargeur Feather
+export function initFeather() {
+  return new Promise((resolve) => {
+    if (window.feather && typeof window.feather.replace === "function") {
+      window.feather.replace();
+      resolve(window.feather);
+    } else {
+      // Attendre le chargement
+      const checkInterval = setInterval(() => {
+        if (window.feather && typeof window.feather.replace === "function") {
+          clearInterval(checkInterval);
+          window.feather.replace();
+          resolve(window.feather);
+        }
+      }, 100);
+
+      // Timeout de sécurité
+      setTimeout(() => {
+        clearInterval(checkInterval);
+        resolve(window.feather);
+      }, 2000);
+    }
+  });
+}
+
+// Initialiser automatiquement
+document.addEventListener("DOMContentLoaded", initFeather);

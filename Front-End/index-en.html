@@ -1,22 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <!-- Feather Icons - Load first -->
+    <!-- Feather Icons -->
     <script>
-      // Preload Feather
-      const featherScript = document.createElement("script");
-      featherScript.src =
-        "https://unpkg.com/feather-icons@4.29.2/dist/feather.min.js";
-      document.head.appendChild(featherScript);
-
-      // Ensure feather is defined early
-      window.feather = window.feather || {
+      // Définir un placeholder pour Feather
+      window.feather = {
         replace: function () {
+          console.log("Feather placeholder utilisé");
           return { icons: {} };
         },
         icons: {},
       };
     </script>
+    <script src="https://unpkg.com/feather-icons@4.29.2/dist/feather.min.js"></script>
 
     <meta charset="UTF-8" />
     <meta
@@ -2109,18 +2105,14 @@
     <script type="module" src="services/cache/cacheCountries.js"></script>
     <script type="module" src="components/auth/terms.js"></script>
     <script>
-      // At the end of your <body>:
-      if (window.feather && typeof window.feather.replace === "function") {
-        try {
-          window.feather.replace();
-        } catch (e) {
-          console.warn("Erreur lors du remplacement des icônes Feather:", e);
-        }
-      } else {
-        console.log(
-          "Feather n'est pas encore disponible, les icônes seront remplacées plus tard"
-        );
-      }
+      document.addEventListener("DOMContentLoaded", function () {
+        // Attendre un court instant pour s'assurer que Feather est chargé
+        setTimeout(function () {
+          if (window.feather && typeof window.feather.replace === "function") {
+            window.feather.replace();
+          }
+        }, 100);
+      });
     </script>
   </body>
 </html>
