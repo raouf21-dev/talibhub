@@ -170,14 +170,16 @@ class AuthService {
   }
 
   handleAuthError(error) {
-    if (error.response?.status === 401 || error.response?.status === 403) {
-      this.clearAuth();
-      window.dispatchEvent(new CustomEvent('authError', {
-        detail: {
-          message: 'Session expirée ou invalide'
-        }
-      }));
+    console.error("Erreur d'authentification:", error);
+    
+    // Au lieu de rediriger vers /login, rediriger vers /welcomepage
+    if (window.location.pathname !== '/welcomepage') {
+      console.log("Redirection vers welcomepage suite à une erreur d'authentification");
+      window.location.href = '/welcomepage';
     }
+    
+    // Déclencher l'événement logout
+    window.dispatchEvent(new Event('logout'));
   }
 
   async refreshToken() {

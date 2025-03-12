@@ -119,4 +119,98 @@ window.addEventListener('load', () => {
 })();
 
 // Exporter l'objet feather pour utilisation dans d'autres modules
-export default window.feather; 
+export default window.feather;
+
+/**
+ * Solution d'urgence pour le problème de Feather Icons
+ */
+
+// Exécuter immédiatement avant tout autre code
+(function() {
+  // Définir feather globalement avant tout
+  window.feather = window.feather || {
+    replace: function() {
+      console.log("Feather temporaire utilisé");
+      return {
+        icons: {}
+      };
+    },
+    icons: {}
+  };
+  
+  // Intercepter toutes les redirections vers /login
+  const originalPushState = history.pushState;
+  const originalReplaceState = history.replaceState;
+  
+  // Fonction pour vérifier si une URL pointe vers /login
+  function isLoginUrl(url) {
+    if (typeof url !== 'string') return false;
+    return url.includes('/login');
+  }
+  
+  // Remplacer pushState
+  history.pushState = function() {
+    if (arguments.length > 2 && isLoginUrl(arguments[2])) {
+      console.warn("Redirection vers /login bloquée, redirection vers /welcomepage à la place");
+      arguments[2] = '/welcomepage';
+    }
+    return originalPushState.apply(this, arguments);
+  };
+  
+  // Remplacer replaceState
+  history.replaceState = function() {
+    if (arguments.length > 2 && isLoginUrl(arguments[2])) {
+      console.warn("Redirection vers /login bloquée, redirection vers /welcomepage à la place");
+      arguments[2] = '/welcomepage';
+    }
+    return originalReplaceState.apply(this, arguments);
+  };
+  
+  // Intercepter les redirections via window.location
+  const originalLocationDescriptor = Object.getOwnPropertyDescriptor(window, 'location');
+  if (originalLocationDescriptor && originalLocationDescriptor.configurable) {
+    Object.defineProperty(window, 'location', {
+      get: function() {
+        return originalLocationDescriptor.get.call(this);
+      },
+      set: function(value) {
+        if (isLoginUrl(value)) {
+          console.warn("Redirection vers /login bloquée, redirection vers /welcomepage à la place");
+          originalLocationDescriptor.set.call(this, '/welcomepage');
+        } else {
+          originalLocationDescriptor.set.call(this, value);
+        }
+      },
+      configurable: true
+    });
+  }
+  
+  // Ajouter un script inline au début du document pour définir feather globalement
+  const script = document.createElement('script');
+  script.textContent = `
+    // Définir feather globalement avant tout autre script
+    window.feather = window.feather || {
+      replace: function() {
+        console.log("Feather temporaire utilisé (script inline)");
+        return {
+          icons: {}
+        };
+      },
+      icons: {}
+    };
+  `;
+  
+  // Insérer au début du document
+  const firstScript = document.getElementsByTagName('script')[0];
+  if (firstScript && firstScript.parentNode) {
+    firstScript.parentNode.insertBefore(script, firstScript);
+  } else {
+    document.head.appendChild(script);
+  }
+  
+  // Charger Feather de manière asynchrone
+  const featherScript = document.createElement('script');
+  featherScript.src = "https://unpkg.com/feather-icons";
+  featherScript.async = true;
+  document.head.appendChild(featherScript);
+})(); 
