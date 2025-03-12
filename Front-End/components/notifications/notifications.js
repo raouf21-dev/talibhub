@@ -1,6 +1,62 @@
 // notifications.js
 import { translations } from "../../services/notifications/translatNotifications.js";
 
+// Fonction utilitaire pour charger dynamiquement Feather si nécessaire
+function ensureFeather() {
+  return new Promise((resolve) => {
+    if (window.feather) {
+      resolve(window.feather);
+      return;
+    }
+
+    // Vérifier si le script est déjà dans le DOM mais pas encore exécuté
+    const existingScript = document.querySelector(
+      'script[src*="feather-icons"]'
+    );
+
+    if (existingScript) {
+      // Le script est présent mais pas encore chargé, attendre son chargement
+      existingScript.addEventListener("load", () => {
+        resolve(window.feather);
+      });
+
+      // En cas d'erreur ou de timeout, résoudre quand même
+      setTimeout(() => resolve(window.feather || null), 2000);
+    } else {
+      // Le script n'est pas présent, l'ajouter dynamiquement
+      const script = document.createElement("script");
+      script.src = "https://unpkg.com/feather-icons";
+      script.async = true;
+
+      script.onload = () => {
+        resolve(window.feather);
+      };
+
+      script.onerror = () => {
+        console.error("Impossible de charger Feather Icons");
+        resolve(null);
+      };
+
+      document.head.appendChild(script);
+    }
+  });
+}
+
+// Fonction sécurisée pour remplacer les icônes
+async function safeFeatherReplace() {
+  const feather = await ensureFeather();
+  if (feather) {
+    try {
+      feather.replace();
+      return true;
+    } catch (error) {
+      console.warn("Erreur lors du remplacement des icônes:", error);
+      return false;
+    }
+  }
+  return false;
+}
+
 function initializeNotifications() {
   console.log("Initialisation des notifications...");
   console.log("État de feather au démarrage:", typeof window.feather);
@@ -97,7 +153,7 @@ function saveNotifications(notifications) {
 }
 
 // Fonction pour afficher les notifications
-function renderNotifications() {
+async function renderNotifications() {
   console.log("Rendu des notifications...");
   console.log("État de feather avant rendu:", typeof window.feather);
 
@@ -126,81 +182,8 @@ function renderNotifications() {
     notificationsList.appendChild(notificationItem);
   });
 
-  // Vérification plus robuste pour feather
-  console.log("Tentative de remplacement des icônes feather...");
-
-  // Première tentative immédiate avec vérification
-  if (window.feather) {
-    console.log("Feather est disponible immédiatement");
-    try {
-      window.feather.replace();
-      console.log("Remplacement des icônes feather réussi");
-    } catch (error) {
-      console.warn(
-        "Erreur lors du remplacement immédiat des icônes feather:",
-        error
-      );
-    }
-  } else {
-    console.log(
-      "Feather n'est pas disponible immédiatement, planification d'une tentative différée"
-    );
-  }
-
-  // Deuxième tentative avec délai court
-  setTimeout(() => {
-    console.log(
-      "Tentative différée (court délai) - État de feather:",
-      typeof window.feather
-    );
-    if (window.feather) {
-      try {
-        window.feather.replace();
-        console.log(
-          "Remplacement différé (court délai) des icônes feather réussi"
-        );
-      } catch (error) {
-        console.warn(
-          "Erreur lors du remplacement différé (court délai) des icônes feather:",
-          error
-        );
-      }
-    }
-  }, 0);
-
-  // Troisième tentative avec délai plus long
-  setTimeout(() => {
-    console.log(
-      "Tentative différée (long délai) - État de feather:",
-      typeof window.feather
-    );
-    if (window.feather) {
-      try {
-        window.feather.replace();
-        console.log(
-          "Remplacement différé (long délai) des icônes feather réussi"
-        );
-      } catch (error) {
-        console.warn(
-          "Erreur lors du remplacement différé (long délai) des icônes feather:",
-          error
-        );
-      }
-    } else {
-      console.warn(
-        "Feather n'est toujours pas disponible après un délai plus long"
-      );
-
-      // Tentative de chargement dynamique de feather si nécessaire
-      if (typeof window.feather === "undefined") {
-        console.log("Tentative de vérification de l'élément script feather");
-        const featherScript = document.querySelector(
-          'script[src*="feather-icons"]'
-        );
-        console.log("Script feather trouvé dans le DOM:", !!featherScript);
-      }
-    }
-  }, 500);
+  // Utiliser la fonction sécurisée pour remplacer les icônes
+  await safeFeatherReplace();
 }
 
 // Fonction pour obtenir l'icône appropriée
