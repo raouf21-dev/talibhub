@@ -104,9 +104,18 @@ function renderNotifications() {
     }
     notificationsList.appendChild(notificationItem);
   });
-  if (typeof feather !== "undefined") {
-    feather.replace();
-  }
+
+  // Amélioration de la vérification de feather
+  // Utiliser setTimeout pour s'assurer que feather est chargé
+  setTimeout(() => {
+    if (window.feather) {
+      try {
+        window.feather.replace();
+      } catch (error) {
+        console.warn("Erreur lors du remplacement des icônes feather:", error);
+      }
+    }
+  }, 0);
 }
 
 // Fonction pour obtenir l'icône appropriée
