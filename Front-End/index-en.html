@@ -15,7 +15,6 @@
     <!-- Stylesheets -->
     <link rel="stylesheet" href="/styles.css" />
 
-
     <!-- Core Libraries from cdnjs -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
@@ -37,7 +36,31 @@
     />
 
     <!-- Feather Icons -->
-    <script src="https://unpkg.com/feather-icons"></script>
+    <script>
+      // Définir un objet feather temporaire pour éviter les erreurs
+      window.feather = window.feather || {
+        replace: function () {
+          console.log(
+            "Feather temporaire utilisé - le vrai script n'est pas encore chargé"
+          );
+        },
+      };
+
+      // Charger le vrai script Feather de manière asynchrone
+      (function loadFeather() {
+        var script = document.createElement("script");
+        script.src = "https://unpkg.com/feather-icons";
+        script.async = true;
+        script.onload = function () {
+          console.log("Feather Icons chargé avec succès");
+          // Remplacer les icônes une fois le script chargé
+          if (window.feather && typeof window.feather.replace === "function") {
+            window.feather.replace();
+          }
+        };
+        document.head.appendChild(script);
+      })();
+    </script>
   </head>
 
   <body>
@@ -2039,7 +2062,10 @@
     <script type="module" src="components/prayer/duaTimeCalculator.js"></script>
     <script type="module" src="components/prayer/mosqueTime.js"></script>
     <script type="module" src="components/quran/surahMemorization.js"></script>
-    <script type="module" src="components/notifications/notifications.js"></script>
+    <script
+      type="module"
+      src="components/notifications/notifications.js"
+    ></script>
     <script type="module" src="utils/utils.js"></script>
     <script type="module" src="utils/transLanguages.js"></script>
     <script type="module" src="components/auth/botTracker.js"></script>
@@ -2052,13 +2078,26 @@
     <script type="module" src="components/welcome/welcomePage.js"></script>
     <script type="module" src="services/state/state.js"></script>
     <script type="module" src="config/constants.js"></script>
-    <script type="module" src="services/notifications/translatNotifications.js"></script>
+    <script
+      type="module"
+      src="services/notifications/translatNotifications.js"
+    ></script>
     <script type="module" src="services/cache/cacheService.js"></script>
     <script type="module" src="services/cache/cacheCountries.js"></script>
     <script type="module" src="components/auth/terms.js"></script>
     <script>
       // At the end of your <body>:
-      feather.replace();
+      if (window.feather && typeof window.feather.replace === "function") {
+        try {
+          window.feather.replace();
+        } catch (e) {
+          console.warn("Erreur lors du remplacement des icônes Feather:", e);
+        }
+      } else {
+        console.log(
+          "Feather n'est pas encore disponible, les icônes seront remplacées plus tard"
+        );
+      }
     </script>
   </body>
 </html>

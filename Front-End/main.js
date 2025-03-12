@@ -30,6 +30,123 @@ import { translations } from "./services/notifications/translatNotifications.js"
 // Si vous avez déplacé profile.js dans components/user
 import { initializeProfile } from "./components/user/profile.js";
 
+// Fonction pour détecter et corriger les boucles de redirection
+(function detectRedirectLoop() {
+  // Vérifier si nous sommes dans une boucle de redirection
+  const currentPath = window.location.pathname;
+  const referrer = document.referrer;
+
+  console.log("Chemin actuel:", currentPath);
+  console.log("Référent:", referrer);
+
+  // Stocker l'historique de navigation récent
+  let navigationHistory = JSON.parse(
+    localStorage.getItem("navigationHistory") || "[]"
+  );
+
+  // Ajouter le chemin actuel à l'historique
+  navigationHistory.push({
+    path: currentPath,
+    timestamp: Date.now(),
+  });
+
+  // Ne garder que les 5 dernières entrées
+  if (navigationHistory.length > 5) {
+    navigationHistory = navigationHistory.slice(-5);
+  }
+
+  localStorage.setItem("navigationHistory", JSON.stringify(navigationHistory));
+
+  // Vérifier s'il y a une boucle (même chemin visité plusieurs fois en peu de temps)
+  const lastMinute = Date.now() - 60000; // 60 secondes
+  const recentPaths = navigationHistory
+    .filter((entry) => entry.timestamp > lastMinute)
+    .map((entry) => entry.path);
+
+  // Compter les occurrences de chaque chemin
+  const pathCounts = {};
+  recentPaths.forEach((path) => {
+    pathCounts[path] = (pathCounts[path] || 0) + 1;
+  });
+
+  // Vérifier si un chemin apparaît plus de 2 fois (indiquant une boucle potentielle)
+  const loopDetected = Object.values(pathCounts).some((count) => count > 2);
+
+  if (loopDetected) {
+    console.warn("Boucle de redirection détectée! Arrêt de la boucle.");
+
+    // Si nous sommes sur /login mais que nous venons de /welcomepage, forcer le retour à /welcomepage
+    if (currentPath.includes("/login") && referrer.includes("/welcomepage")) {
+      console.log("Redirection vers /welcomepage pour briser la boucle");
+      // Utiliser replaceState pour ne pas ajouter à l'historique
+      history.replaceState(null, "", "/welcomepage");
+      // Empêcher toute redirection automatique
+      window.stopRedirects = true;
+      return;
+    }
+
+    // Si nous sommes sur /welcomepage mais que nous venons de /login, rester sur /welcomepage
+    if (currentPath.includes("/welcomepage") && referrer.includes("/login")) {
+      console.log("Maintien sur /welcomepage pour briser la boucle");
+      window.stopRedirects = true;
+      return;
+    }
+
+    // Si aucune des conditions ci-dessus n'est remplie, rediriger vers la page d'accueil
+    if (currentPath !== "/") {
+      console.log("Redirection vers la page d'accueil pour briser la boucle");
+      history.replaceState(null, "", "/");
+      window.stopRedirects = true;
+    }
+  }
+})();
+
+// Intercepter les redirections
+(function interceptRedirects() {
+  // Sauvegarder la fonction originale
+  const originalPushState = history.pushState;
+  const originalReplaceState = history.replaceState;
+
+  // Remplacer pushState
+  history.pushState = function () {
+    if (window.stopRedirects) {
+      console.warn("Redirection bloquée:", arguments[2]);
+      return;
+    }
+    return originalPushState.apply(this, arguments);
+  };
+
+  // Remplacer replaceState
+  history.replaceState = function () {
+    if (window.stopRedirects) {
+      console.warn("Redirection bloquée:", arguments[2]);
+      return;
+    }
+    return originalReplaceState.apply(this, arguments);
+  };
+
+  // Intercepter les redirections via window.location
+  const originalLocationDescriptor = Object.getOwnPropertyDescriptor(
+    window,
+    "location"
+  );
+  if (originalLocationDescriptor && originalLocationDescriptor.configurable) {
+    Object.defineProperty(window, "location", {
+      get: function () {
+        return originalLocationDescriptor.get.call(this);
+      },
+      set: function (value) {
+        if (window.stopRedirects) {
+          console.warn("Redirection bloquée:", value);
+          return;
+        }
+        originalLocationDescriptor.set.call(this, value);
+      },
+      configurable: true,
+    });
+  }
+})();
+
 /**
  * Vérifie l'authentification de l'utilisateur en consultant le token stocké.
  * Si le token est présent, il effectue une vérification serveur.
