@@ -1,6 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <!-- Feather Icons - Load first -->
+    <script>
+      // Preload Feather
+      const featherScript = document.createElement("script");
+      featherScript.src =
+        "https://unpkg.com/feather-icons@4.29.2/dist/feather.min.js";
+      document.head.appendChild(featherScript);
+
+      // Ensure feather is defined early
+      window.feather = window.feather || {
+        replace: function () {
+          return { icons: {} };
+        },
+        icons: {},
+      };
+    </script>
+
     <meta charset="UTF-8" />
     <meta
       name="viewport"

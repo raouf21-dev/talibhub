@@ -13,7 +13,7 @@ export async function initializeWelcomepage() {
   try {
     // Attendre que Feather soit complètement chargé
     await new Promise((resolve, reject) => {
-      const maxAttempts = 50; // 5 secondes maximum
+      const maxAttempts = 50;
       let attempts = 0;
 
       const checkFeather = setInterval(() => {
@@ -22,7 +22,18 @@ export async function initializeWelcomepage() {
           `[DEBUG] WelcomePage: Tentative ${attempts} de chargement de Feather`
         );
 
-        if (window.feather && typeof window.feather.replace === "function") {
+        // Vérifier si feather.replace est disponible ET si le script est chargé
+        const featherScript = document.querySelector(
+          'script[src*="feather-icons"]'
+        );
+        const isScriptLoaded =
+          featherScript && featherScript.hasAttribute("loaded");
+
+        if (
+          window.feather &&
+          typeof window.feather.replace === "function" &&
+          isScriptLoaded
+        ) {
           clearInterval(checkFeather);
           clearTimeout(timeout);
           resolve();
@@ -31,6 +42,16 @@ export async function initializeWelcomepage() {
           reject(new Error("Timeout en attendant Feather"));
         }
       }, 100);
+
+      // Ajouter un événement load sur le script Feather
+      const featherScript = document.querySelector(
+        'script[src*="feather-icons"]'
+      );
+      if (featherScript) {
+        featherScript.addEventListener("load", () => {
+          featherScript.setAttribute("loaded", "true");
+        });
+      }
 
       // Timeout de sécurité
       const timeout = setTimeout(() => {

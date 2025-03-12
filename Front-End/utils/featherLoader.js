@@ -95,6 +95,14 @@ window.addEventListener("load", () => {
 
 // Patch global pour éviter les erreurs
 (function patchFeatherGlobally() {
+  // Vérifier si le script est déjà chargé
+  const existingScript = document.querySelector('script[src*="feather-icons"]');
+  if (!existingScript) {
+    const script = document.createElement("script");
+    script.src = "https://unpkg.com/feather-icons@4.29.2/dist/feather.min.js";
+    document.head.appendChild(script);
+  }
+
   // Sauvegarder l'original pour référence
   window.featherTemp = window.feather;
 
