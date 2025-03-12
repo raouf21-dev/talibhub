@@ -540,16 +540,40 @@ export class WelcomeMosqueTime extends MosqueTimeManager {
         cityName
       );
 
-      // Si pas de token, ne pas faire la requête API
-      if (!localStorage.getItem("token")) {
-        console.log("[DEBUG] WelcomeMosqueTime: Skipping API call - no token");
-        // Afficher un message ou un état par défaut
-        this.displayDefaultState();
+      // Récupérer les mosquées pour la ville sélectionnée via la route publique
+      const mosques = await fetch(
+        `/api/mosque-times/cities/${encodeURIComponent(cityName)}/mosques`
+      ).then((res) => res.json());
+
+      if (!mosques || mosques.length === 0) {
+        console.log("WelcomeMosqueTime: No mosques found for city", cityName);
         return;
       }
 
-      const mosques = await this.fetchMosques(cityName);
-      // ... reste du code ...
+      // Récupérer les horaires via la route publique
+      const date = this.getCurrentDateString();
+      const prayerTimesData = await fetch(
+        `/api/mosque-times/cities/${encodeURIComponent(
+          cityName
+        )}/date/${date}/prayer-times`
+      ).then((res) => res.json());
+
+      // Associer les horaires aux mosquées
+      this.currentMosques = mosques.map((mosque) => {
+        const prayerTime = prayerTimesData.prayerTimes?.find(
+          (pt) => String(pt.mosque_id) === String(mosque.id)
+        );
+        return {
+          ...mosque,
+          prayerTimes: prayerTime || null,
+        };
+      });
+
+      // Mettre à jour l'interface
+      this.populateMosqueSelect(this.currentMosques);
+      this.updateAllMosques();
+      this.updateDateDisplay(cityName);
+      localStorage.setItem("lastSelectedCity", cityName);
     } catch (error) {
       console.warn(
         "[DEBUG] WelcomeMosqueTime: Error in city selection:",
@@ -577,132 +601,29 @@ export class WelcomeMosqueTime extends MosqueTimeManager {
       const date = this.getCurrentDateString();
       console.log("WelcomeMosqueTime: Checking data for date:", date);
 
-      // Ajouter un loader visuel pendant la vérification
-      const loader = document.getElementById("welcome-loader");
-      if (loader) loader.classList.remove("hidden");
-
-      // Utilisation de l'API publique sans authentification
+      // Utiliser la route publique pour vérifier l'existence des données
       const response = await fetch(`/api/mosque-times/exists/${date}`);
       const dataExists = await response.json();
-
-      console.log("WelcomeMosqueTime: Data exists response:", dataExists);
 
       if (!dataExists.exists) {
         console.log("WelcomeMosqueTime: No data found, reporting missing data");
 
-        // Afficher un message d'attente à l'utilisateur
-        // Utiliser un message plus générique qui existe certainement dans les traductions
-        notificationService.show("general.wait", "info");
-
-        // Signaler les données manquantes à l'API (qui lancera un scraping en arrière-plan)
-        console.log(
-          "WelcomeMosqueTime: Sending request to report-missing-data"
-        );
-
-        // Afficher explicitement le loader pour indiquer une action en cours
-        document.body.classList.add("loading");
-
-        const reportResponse = await fetch(
-          `/api/mosque-times/report-missing-data/${date}`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ source: "welcome-page" }),
-          }
-        );
-
-        const reportResult = await reportResponse.json();
-        console.log("WelcomeMosqueTime: Report response:", reportResult);
-
-        // Masquer le loader global
-        document.body.classList.remove("loading");
+        // Signaler les données manquantes via la route publique
+        await fetch(`/api/mosque-times/report-missing-data/${date}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ source: "welcome-page" }),
+        });
 
         // Informer l'utilisateur que les données sont en cours de génération
-        // Utiliser un message existant dans les traductions
-        notificationService.show("general.processing", "success");
-
-        // Démarrer le polling pour vérifier si les données deviennent disponibles
-        this.startPollingForData(date);
+        notificationService.show("mosque.data.updating", "info");
       }
-
-      // Masquer le loader à la fin de la vérification
-      if (loader) loader.classList.add("hidden");
     } catch (error) {
       console.error("WelcomeMosqueTime: Error checking data:", error);
-      // Utiliser un message d'erreur générique existant
-      notificationService.show("general.error", "warning");
-
-      // S'assurer que le loader est masqué en cas d'erreur
-      const loader = document.getElementById("welcome-loader");
-      if (loader) loader.classList.add("hidden");
-      document.body.classList.remove("loading");
+      notificationService.show("mosque.data.error", "warning");
     }
-  }
-
-  // Nouvelle méthode pour polling des données avec gestion du loader
-  async startPollingForData(date) {
-    console.log("WelcomeMosqueTime: Starting polling for data");
-
-    // Vérifier toutes les 10 secondes pendant 2 minutes maximum (12 tentatives)
-    let attempts = 0;
-    const maxAttempts = 12;
-
-    // On sauvegarde la ville actuelle pour pouvoir recharger les données après
-    const currentCity = this.getCurrentCity();
-
-    const checkInterval = setInterval(async () => {
-      attempts++;
-      console.log(
-        `WelcomeMosqueTime: Polling attempt ${attempts}/${maxAttempts}`
-      );
-
-      try {
-        // Vérifier si les données sont maintenant disponibles
-        const response = await fetch(`/api/mosque-times/exists/${date}`);
-        const dataExists = await response.json();
-
-        if (dataExists.exists) {
-          console.log(
-            "WelcomeMosqueTime: Data is now available, updating display"
-          );
-          clearInterval(checkInterval);
-
-          // Afficher un loader pendant le chargement des données
-          document.body.classList.add("loading");
-
-          // Afficher une notification de succès avec un message existant
-          notificationService.show("general.success", "success");
-
-          // Recharger les données pour la ville actuelle
-          if (currentCity) {
-            await this.handleCitySelection(currentCity);
-          } else {
-            // Si aucune ville n'était sélectionnée, recharger les villes
-            await this.loadCities();
-
-            // Mettre à jour l'affichage par défaut
-            this.switchTab("all");
-            this.displayAllMosques();
-          }
-
-          // Masquer le loader une fois les données chargées
-          document.body.classList.remove("loading");
-        } else if (attempts >= maxAttempts) {
-          // Arrêter le polling après le nombre maximum de tentatives
-          clearInterval(checkInterval);
-          console.log(
-            "WelcomeMosqueTime: Max polling attempts reached, giving up"
-          );
-          notificationService.show("general.refresh", "info");
-        }
-      } catch (error) {
-        console.error("WelcomeMosqueTime: Error during polling:", error);
-        clearInterval(checkInterval);
-        notificationService.show("general.error", "warning");
-      }
-    }, 10000); // Vérifier toutes les 10 secondes
   }
 
   getCurrentCity() {
