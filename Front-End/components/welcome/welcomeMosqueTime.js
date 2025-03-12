@@ -50,6 +50,10 @@ export class WelcomeMosqueTime extends MosqueTimeManager {
           "These times correspond to congregational prayers at the mosque and may differ from individual prayer times.",
         prayerNotAvailable: "Prayer times not available",
         pleaseSelectMosque: "Please select a mosque",
+        authRequired: "Authentication Required",
+        authRequiredDescription:
+          "Please log in to view mosque prayer times for this city.",
+        loginButton: "Log In",
       },
       fr: {
         title: "Horaires de Prière en Congrégation à la Mosquée",
@@ -69,6 +73,10 @@ export class WelcomeMosqueTime extends MosqueTimeManager {
           "Ces horaires correspondent aux prières en congrégation à la mosquée et peuvent différer des horaires de prières individuels.",
         prayerNotAvailable: "Horaires non disponibles",
         pleaseSelectMosque: "Veuillez sélectionner une mosquée",
+        authRequired: "Authentification Requise",
+        authRequiredDescription:
+          "Veuillez vous connecter pour voir les horaires des mosquées pour cette ville.",
+        loginButton: "Se Connecter",
       },
     };
 
@@ -561,10 +569,19 @@ export class WelcomeMosqueTime extends MosqueTimeManager {
         cityName
       );
 
-      // Récupérer les mosquées avec URL absolue
+      // Tenter de récupérer les mosquées avec URL absolue
       const mosquesResponse = await fetch(
         this.getApiUrl(`cities/${encodeURIComponent(cityName)}/mosques`)
       );
+
+      // Si on reçoit une erreur 401, on affiche un message adapté pour les utilisateurs non connectés
+      if (mosquesResponse.status === 401) {
+        console.log(
+          "[DEBUG] WelcomeMosqueTime: Authentication required for this endpoint"
+        );
+        this.displayAuthRequiredState(cityName);
+        return;
+      }
 
       if (!mosquesResponse.ok) {
         throw new Error(
@@ -616,9 +633,49 @@ export class WelcomeMosqueTime extends MosqueTimeManager {
         "[DEBUG] WelcomeMosqueTime: Error in city selection:",
         error
       );
-      // Gérer l'erreur sans provoquer de redirection
       this.displayDefaultState();
     }
+  }
+
+  // Nouvelle méthode pour afficher un état spécifique quand l'authentification est requise
+  displayAuthRequiredState(cityName) {
+    // Mettre à jour l'affichage de la date avec la ville sélectionnée
+    this.updateDateDisplay(cityName);
+    localStorage.setItem("lastSelectedCity", cityName);
+
+    // Afficher un message spécifique dans le conteneur des mosquées
+    const allMosquesContainer = document.getElementById(
+      "welcome-mosquetime-all-mosques"
+    );
+    const singleMosqueContainer = document.getElementById(
+      "welcome-mosquetime-single-mosque"
+    );
+
+    if (allMosquesContainer) {
+      allMosquesContainer.innerHTML = `
+        <div class="auth-required-message">
+          <p>
+            <strong>${
+              this.texts.authRequired || "Authentication Required"
+            }</strong>
+          </p>
+          <p>${
+            this.texts.authRequiredDescription ||
+            "Please log in to view mosque prayer times."
+          }</p>
+          <button class="btn btn-primary login-btn" onclick="document.getElementById('login-btn').click()">
+            ${this.texts.loginButton || "Log In"}
+          </button>
+        </div>
+      `;
+    }
+
+    if (singleMosqueContainer) {
+      singleMosqueContainer.innerHTML = allMosquesContainer.innerHTML;
+    }
+
+    // Activer l'onglet All Mosques
+    this.setDefaultTab();
   }
 
   displayDefaultState() {
