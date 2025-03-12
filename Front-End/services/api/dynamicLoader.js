@@ -134,8 +134,11 @@ class ApiService {
       }
 
       if (response.status === 401) {
-        // Rediriger vers la page de connexion
-        window.location.href = "/login";
+        console.warn(
+          "[DEBUG] Réponse 401 détectée, redirection vers welcomepage au lieu de login"
+        );
+        // Rediriger vers welcomepage au lieu de login
+        window.location.href = "/welcomepage";
         return;
       }
 
