@@ -11,8 +11,10 @@ export async function initializeWelcomepage() {
   console.log(`[DEBUG] WelcomePage #${initId} - Début initialisation`);
 
   try {
-    // Utiliser directement feather
-    if (window.feather && typeof window.feather.replace === "function") {
+    // Attendre un court instant pour s'assurer que Feather est chargé
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    if (window.feather) {
       window.feather.replace();
       console.log(`[DEBUG] WelcomePage #${initId} - Feather initialisé`);
     }
