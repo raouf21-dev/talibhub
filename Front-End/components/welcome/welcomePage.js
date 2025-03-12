@@ -10,26 +10,43 @@ export async function initializeWelcomepage() {
   const initId = Math.random().toString(36).substr(2, 9);
   console.log(`[DEBUG] WelcomePage #${initId} - Début initialisation`);
 
-  // Attendre que Feather soit complètement chargé
-  await new Promise((resolve) => {
-    if (window.feather && typeof window.feather.replace === "function") {
-      resolve();
-    } else {
+  try {
+    // Attendre que Feather soit complètement chargé
+    await new Promise((resolve, reject) => {
+      const maxAttempts = 50; // 5 secondes maximum
+      let attempts = 0;
+
       const checkFeather = setInterval(() => {
+        attempts++;
+        console.log(
+          `[DEBUG] WelcomePage: Tentative ${attempts} de chargement de Feather`
+        );
+
         if (window.feather && typeof window.feather.replace === "function") {
           clearInterval(checkFeather);
+          clearTimeout(timeout);
           resolve();
+        } else if (attempts >= maxAttempts) {
+          clearInterval(checkFeather);
+          reject(new Error("Timeout en attendant Feather"));
         }
       }, 100);
 
-      // Timeout après 5 secondes
-      setTimeout(() => {
+      // Timeout de sécurité
+      const timeout = setTimeout(() => {
         clearInterval(checkFeather);
-        console.warn("[DEBUG] Timeout en attendant Feather");
-        resolve();
+        reject(new Error("Timeout en attendant Feather"));
       }, 5000);
-    }
-  });
+    });
+
+    console.log(`[DEBUG] WelcomePage #${initId} - Feather chargé avec succès`);
+  } catch (error) {
+    console.warn(
+      `[DEBUG] WelcomePage #${initId} - Erreur de chargement Feather:`,
+      error
+    );
+    // Continuer malgré l'erreur
+  }
 
   console.log("[DEBUG] WelcomePage: Feather est prêt");
 

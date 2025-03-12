@@ -47,7 +47,7 @@ import "./utils/featherLoader.js";
   });
 
   // Vérifier si nous sommes dans une boucle de redirection
-  const navigationHistory = JSON.parse(
+  let navigationHistory = JSON.parse(
     localStorage.getItem("navigationHistory") || "[]"
   );
 
