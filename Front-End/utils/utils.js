@@ -52,6 +52,19 @@ export async function isAuthenticated() {
  * @returns {Promise<boolean>}
  */
 export async function navigateTo(pageId, addToHistory = true) {
+  console.log(
+    `[DEBUG] navigateTo appelé avec pageId: ${pageId}, addToHistory: ${addToHistory}`
+  );
+  console.log(`[DEBUG] Stack trace:`, new Error().stack);
+
+  // Bloquer toute navigation vers login
+  if (pageId === "login") {
+    console.warn(
+      "[DEBUG] Tentative de navigation vers login bloquée, redirection vers welcomepage"
+    );
+    pageId = "welcomepage";
+  }
+
   // Si le pageId ressemble à un nom de fichier (ex: index-en.html), on le remplace par 'welcomepage'
   if (pageId.endsWith(".html")) {
     pageId = "welcomepage";

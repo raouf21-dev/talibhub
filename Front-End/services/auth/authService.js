@@ -27,6 +27,7 @@ class AuthService {
   }
 
   async login(email, password) {
+    console.log('[DEBUG] authService.login appelé');
     try {
       const response = await apiClient.post('/auth/login', { email, password }, {
         ...defaultConfig,
@@ -41,7 +42,8 @@ class AuthService {
       }
       throw new Error('Token non reçu dans la réponse');
     } catch (error) {
-      console.error('Erreur de connexion:', error);
+      console.error('[DEBUG] Erreur dans authService.login:', error);
+      console.log('[DEBUG] Stack trace:', new Error().stack);
       this.handleAuthError(error);
       throw error;
     }
@@ -159,6 +161,8 @@ class AuthService {
   }
 
   clearAuth() {
+    console.log('[DEBUG] authService.clearAuth appelé');
+    console.log('[DEBUG] Stack trace:', new Error().stack);
     this._token = null;
     localStorage.removeItem('token');
     document.cookie = 'auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
@@ -170,7 +174,9 @@ class AuthService {
   }
 
   handleAuthError(error) {
-    console.error("Erreur d'authentification:", error);
+    console.error('[DEBUG] authService.handleAuthError appelé:', error);
+    console.log('[DEBUG] Stack trace:', new Error().stack);
+    console.log('[DEBUG] Chemin actuel:', window.location.pathname);
     
     // Au lieu de rediriger vers /login, rediriger vers /welcomepage
     if (window.location.pathname !== '/welcomepage') {

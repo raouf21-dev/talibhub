@@ -107,6 +107,7 @@ class ApiService {
   }
 
   async request(endpoint, options = {}) {
+    console.log(`[DEBUG] API Request: ${endpoint}`);
     const url = endpoint.startsWith("http")
       ? endpoint
       : `${this.baseUrl}${endpoint}`;
@@ -124,6 +125,14 @@ class ApiService {
       loader.show();
       const response = await fetch(url, config);
 
+      // Vérifier les redirections
+      console.log(
+        `[DEBUG] API Response status: ${response.status}, URL: ${response.url}`
+      );
+      if (response.redirected) {
+        console.warn(`[DEBUG] Redirection détectée: ${response.url}`);
+      }
+
       if (response.status === 401) {
         // Rediriger vers la page de connexion
         window.location.href = "/login";
@@ -139,7 +148,7 @@ class ApiService {
 
       return await response.json();
     } catch (error) {
-      console.error(`API Error (${endpoint}):`, error);
+      console.error(`[DEBUG] API Error: ${endpoint}`, error);
       throw error;
     } finally {
       loader.hide();

@@ -242,9 +242,9 @@ async function initializeApp() {
 // on supprime le token et redirige l'utilisateur vers la page de connexion.
 window.addEventListener("logout", () => {
   localStorage.removeItem("token");
-  
+
   // Vérifier si nous sommes déjà sur welcomepage pour éviter une boucle
-  if (window.location.pathname !== '/welcomepage') {
+  if (window.location.pathname !== "/welcomepage") {
     console.log("Redirection vers welcomepage suite à une déconnexion");
     navigateTo("welcomepage");
   }
