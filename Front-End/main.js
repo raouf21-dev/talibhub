@@ -30,6 +30,9 @@ import { translations } from "./services/notifications/translatNotifications.js"
 // Si vous avez déplacé profile.js dans components/user
 import { initializeProfile } from "./components/user/profile.js";
 
+// Importation du module featherLoader
+import "./utils/featherLoader.js";
+
 // Fonction pour détecter et corriger les boucles de redirection
 (function detectRedirectLoop() {
   // Vérifier si nous sommes dans une boucle de redirection

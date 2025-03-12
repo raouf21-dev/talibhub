@@ -1,0 +1,122 @@
+/**
+ * Utilitaire pour charger et gérer Feather Icons de manière fiable
+ */
+
+// Créer un objet feather temporaire global s'il n'existe pas déjà
+if (typeof window.feather === 'undefined') {
+  window.feather = {
+    replace: function() {
+      console.log("Feather temporaire utilisé - le vrai script n'est pas encore chargé");
+    }
+  };
+}
+
+/**
+ * Charge Feather Icons de manière asynchrone et sécurisée
+ * @returns {Promise} Une promesse résolue quand Feather est chargé
+ */
+export function loadFeather() {
+  return new Promise((resolve) => {
+    // Si Feather est déjà complètement chargé, résoudre immédiatement
+    if (window.feather && typeof window.feather.replace === 'function' && window.feather !== window.featherTemp) {
+      resolve(window.feather);
+      return;
+    }
+    
+    // Vérifier si le script est déjà en cours de chargement
+    const existingScript = document.querySelector('script[src*="feather-icons"]');
+    
+    if (existingScript) {
+      // Le script est présent mais pas encore chargé, attendre son chargement
+      existingScript.addEventListener('load', () => {
+        console.log("Script Feather existant chargé");
+        resolve(window.feather);
+      });
+      
+      // En cas d'erreur ou de timeout, résoudre quand même après un délai
+      setTimeout(() => resolve(window.feather), 2000);
+    } else {
+      // Le script n'est pas présent, l'ajouter dynamiquement
+      console.log("Chargement dynamique de Feather Icons");
+      const script = document.createElement('script');
+      script.src = "https://unpkg.com/feather-icons";
+      script.async = true;
+      
+      script.onload = () => {
+        console.log("Feather Icons chargé avec succès");
+        resolve(window.feather);
+      };
+      
+      script.onerror = () => {
+        console.error("Impossible de charger Feather Icons");
+        resolve(window.feather); // Résoudre avec le feather temporaire
+      };
+      
+      document.head.appendChild(script);
+    }
+  });
+}
+
+/**
+ * Remplace les icônes Feather de manière sécurisée
+ * @returns {Promise<boolean>} Succès ou échec du remplacement
+ */
+export async function safeReplace() {
+  try {
+    const feather = await loadFeather();
+    if (feather && typeof feather.replace === 'function') {
+      feather.replace();
+      return true;
+    }
+    return false;
+  } catch (error) {
+    console.warn("Erreur lors du remplacement des icônes:", error);
+    return false;
+  }
+}
+
+// Exécuter automatiquement au chargement de la page
+document.addEventListener('DOMContentLoaded', () => {
+  safeReplace();
+});
+
+// Exécuter à nouveau après le chargement complet
+window.addEventListener('load', () => {
+  safeReplace();
+});
+
+// Patch global pour éviter les erreurs
+(function patchFeatherGlobally() {
+  // Sauvegarder l'original pour référence
+  window.featherTemp = window.feather;
+  
+  // Créer un proxy pour intercepter les appels à feather
+  const featherProxy = new Proxy(window.feather || {}, {
+    get: function(target, prop) {
+      // Si la propriété existe, la retourner
+      if (prop in target && typeof target[prop] === 'function') {
+        return function() {
+          try {
+            return target[prop].apply(target, arguments);
+          } catch (e) {
+            console.warn(`Erreur lors de l'appel à feather.${prop}:`, e);
+            return null;
+          }
+        };
+      } else if (prop in target) {
+        return target[prop];
+      }
+      
+      // Sinon, retourner une fonction vide
+      return function() {
+        console.log(`Appel à feather.${prop} ignoré - feather n'est pas complètement chargé`);
+      };
+    }
+  });
+  
+  // Remplacer l'objet global
+  window.feather = featherProxy;
+})();
+
+// Exporter l'objet feather pour utilisation dans d'autres modules
+export default window.feather; 
