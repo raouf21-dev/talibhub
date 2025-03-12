@@ -7,7 +7,12 @@ import { notificationService } from "../../services/notifications/notificationSe
 import { WelcomeMosqueTime } from "./welcomeMosqueTime.js";
 
 export async function initializeWelcomepage() {
-  console.log("WelcomePage: Initialization started");
+  console.log("[DEBUG] WelcomePage: Début de l'initialisation");
+  console.log(
+    "[DEBUG] WelcomePage: État de l'authentification:",
+    localStorage.getItem("token") ? "Token présent" : "Pas de token"
+  );
+  console.log("[DEBUG] WelcomePage: Chemin actuel:", window.location.pathname);
 
   // Désactiver l'onglet d'inscription
   const signupTab = document.querySelector(

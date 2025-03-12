@@ -52,16 +52,21 @@ export async function isAuthenticated() {
  * @returns {Promise<boolean>}
  */
 export async function navigateTo(pageId, addToHistory = true) {
-  console.log(
-    `[DEBUG] navigateTo appelé avec pageId: ${pageId}, addToHistory: ${addToHistory}`
-  );
-  console.log(`[DEBUG] Stack trace:`, new Error().stack);
+  console.log("[DEBUG] navigateTo - Détails:", {
+    pageId,
+    addToHistory,
+    currentPath: window.location.pathname,
+    referrer: document.referrer,
+    stack: new Error().stack,
+    featherStatus: window.feather ? "defined" : "undefined",
+  });
 
   // Bloquer toute navigation vers login
   if (pageId === "login") {
     console.warn(
-      "[DEBUG] Tentative de navigation vers login bloquée, redirection vers welcomepage"
+      "[DEBUG] navigateTo - Tentative de navigation vers login bloquée"
     );
+    console.warn("[DEBUG] navigateTo - Stack trace:", new Error().stack);
     pageId = "welcomepage";
   }
 

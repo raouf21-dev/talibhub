@@ -107,7 +107,13 @@ class ApiService {
   }
 
   async request(endpoint, options = {}) {
-    console.log(`[DEBUG] API Request: ${endpoint}`);
+    console.log("[DEBUG] API Request - Détails:", {
+      endpoint,
+      method: options.method || "GET",
+      hasToken: !!localStorage.getItem("token"),
+      currentPath: window.location.pathname,
+    });
+
     const url = endpoint.startsWith("http")
       ? endpoint
       : `${this.baseUrl}${endpoint}`;
@@ -125,18 +131,22 @@ class ApiService {
       loader.show();
       const response = await fetch(url, config);
 
-      // Vérifier les redirections
-      console.log(
-        `[DEBUG] API Response status: ${response.status}, URL: ${response.url}`
-      );
-      if (response.redirected) {
-        console.warn(`[DEBUG] Redirection détectée: ${response.url}`);
-      }
+      console.log("[DEBUG] API Response - Détails:", {
+        status: response.status,
+        url: response.url,
+        redirected: response.redirected,
+        type: response.type,
+        headers: Object.fromEntries(response.headers.entries()),
+      });
 
       if (response.status === 401) {
-        console.warn(
-          "[DEBUG] Réponse 401 détectée, redirection vers welcomepage au lieu de login"
-        );
+        console.warn("[DEBUG] API 401 - Détails complets:", {
+          endpoint,
+          currentPath: window.location.pathname,
+          referrer: document.referrer,
+          hasToken: !!localStorage.getItem("token"),
+          stack: new Error().stack,
+        });
         // Rediriger vers welcomepage au lieu de login
         window.location.href = "/welcomepage";
         return;

@@ -39,18 +39,24 @@ import "./utils/featherLoader.js";
   const currentPath = window.location.pathname;
   const referrer = document.referrer;
 
-  console.log("Chemin actuel:", currentPath);
-  console.log("Référent:", referrer);
+  console.log("[DEBUG] detectRedirectLoop - Chemin actuel:", currentPath);
+  console.log("[DEBUG] detectRedirectLoop - Référent:", referrer);
+  console.log(
+    "[DEBUG] detectRedirectLoop - Historique de navigation:",
+    JSON.parse(localStorage.getItem("navigationHistory") || "[]")
+  );
 
   // Stocker l'historique de navigation récent
   let navigationHistory = JSON.parse(
     localStorage.getItem("navigationHistory") || "[]"
   );
 
-  // Ajouter le chemin actuel à l'historique
+  // Ajouter le chemin actuel à l'historique avec plus d'informations
   navigationHistory.push({
     path: currentPath,
     timestamp: Date.now(),
+    referrer: referrer,
+    featherStatus: window.feather ? "defined" : "undefined",
   });
 
   // Ne garder que les 5 dernières entrées
