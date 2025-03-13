@@ -1,8 +1,17 @@
 const express = require("express");
-const { authenticateToken } = require("../middlewares/authenticateToken");
-const { attachCookieManager } = require("../middlewares/cookieManager");
 const router = express.Router();
 const mosqueTimesController = require("../controllers/mosqueTimesController");
+const { authenticateToken } = require("../middlewares/authenticateToken");
+const { attachCookieManager } = require("../middlewares/cookieManager");
+
+// Routes STRICTEMENT publiques
+const publicRoutes = express.Router();
+publicRoutes.get("/exists/:date", mosqueTimesController.checkDataExists);
+publicRoutes.get("/cities/search", mosqueTimesController.searchCities);
+publicRoutes.get("/cities/:city/mosques", mosqueTimesController.getMosquesByCity);
+
+// Appliquer les routes publiques AVANT l'authentification
+router.use("/", publicRoutes);
 
 // Middlewares globaux pour ce routeur
 router.use(attachCookieManager);
@@ -11,9 +20,6 @@ router.use(attachCookieManager);
 const auth = (handler) => [authenticateToken, handler];
 
 // Routes publiques (sans authentification)
-router.get("/exists/:date", mosqueTimesController.checkDataExists);
-router.get("/cities/search", mosqueTimesController.searchCities);
-router.get("/cities/:city/mosques", mosqueTimesController.getMosquesByCity);
 router.get("/:mosqueId/:date", mosqueTimesController.getPrayerTimes);
 // Ajout de la route des horaires en public
 router.get(

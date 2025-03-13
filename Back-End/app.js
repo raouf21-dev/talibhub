@@ -163,6 +163,14 @@ const surahMemorizationRoutes = require("./routes/surahMemorizationRoutes");
 const captchaRoutes = require("./routes/captchaRoutes");
 const duaTimeRoutes = require("./routes/duaTimeRoutes");
 
+// Ajouter avant les routes
+app.use((req, res, next) => {
+  console.log(`[DEBUG] ${req.method} ${req.path}`);
+  console.log('[DEBUG] Auth Header:', req.headers.authorization);
+  console.log('[DEBUG] Cookies:', req.cookies);
+  next();
+});
+
 // Routes API
 app.use("/api/auth", authRoutes);
 app.use("/api/tasks", tasksRoutes);
