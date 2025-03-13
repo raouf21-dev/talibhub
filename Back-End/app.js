@@ -163,15 +163,39 @@ const surahMemorizationRoutes = require("./routes/surahMemorizationRoutes");
 const captchaRoutes = require("./routes/captchaRoutes");
 const duaTimeRoutes = require("./routes/duaTimeRoutes");
 
-// Ajouter avant les routes
-app.use((req, res, next) => {
-  console.log(`[DEBUG] ${req.method} ${req.path}`);
-  console.log('[DEBUG] Auth Header:', req.headers.authorization);
-  console.log('[DEBUG] Cookies:', req.cookies);
-  next();
+// Avant toutes les routes API
+const publicPaths = [
+  '/api/mosque-times/cities/search',
+  '/api/mosque-times/cities/:city/mosques',
+  '/api/mosque-times/exists/:date'
+];
+
+// Middleware pour vérifier si c'est une route publique
+const isPublicRoute = (path) => {
+  return publicPaths.some(publicPath => {
+    // Convertir le chemin public en expression régulière
+    const regexPath = publicPath
+      .replace(/:\w+/g, '[^/]+') // Remplacer les paramètres de route par un pattern
+      .replace(/\//g, '\\/');    // Échapper les slashes
+    const regex = new RegExp(`^${regexPath}$`);
+    return regex.test(path);
+  });
+};
+
+// Middleware d'authentification global SAUF pour les routes publiques
+app.use('/api/*', (req, res, next) => {
+  if (isPublicRoute(req.path)) {
+    console.log('[DEBUG] Route publique détectée:', req.path);
+    return next();
+  }
+  
+  // Authentification pour les autres routes
+  const { authenticateToken } = require('./middlewares/authenticateToken');
+  authenticateToken(req, res, next);
 });
 
-// Routes API
+// Routes API (après le middleware)
+app.use("/api/mosque-times", mosqueTimesRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/tasks", tasksRoutes);
 app.use("/api/timer", timerRoutes);
@@ -179,7 +203,6 @@ app.use("/api/counter", counterRoutes);
 app.use("/api/session", sessionRoutes);
 app.use("/api/sourates", sourateRoutes);
 app.use("/api/statistics", statisticsRoutes);
-app.use("/api/mosque-times", mosqueTimesRoutes);
 app.use("/api/surah-memorization", surahMemorizationRoutes);
 app.use("/api/captcha", captchaRoutes);
 app.use("/api/dua-time", duaTimeRoutes);
