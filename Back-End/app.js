@@ -7,7 +7,7 @@ const corsOptions = require("./config/corsConfig");
 const cookieParser = require("cookie-parser");
 const { attachCookieManager } = require("./middlewares/cookieManager");
 const fs = require("fs");
-const { authenticateToken } = require('./middlewares/authenticateToken');
+const { authenticateToken } = require("./middlewares/authenticateToken");
 
 require("dotenv").config({
   path: path.join(__dirname, `.env.${process.env.NODE_ENV || "development"}`),
@@ -136,7 +136,10 @@ app.use((req, res, next) => {
 // Assurez-vous que vos routes statiques sont configurées correctement
 app.use("/assets", express.static(path.join(__dirname, "../Front-End/assets")));
 app.use("/config", express.static(path.join(__dirname, "../Front-End/config")));
-app.use("/services", express.static(path.join(__dirname, "../Front-End/services")));
+app.use(
+  "/services",
+  express.static(path.join(__dirname, "../Front-End/services"))
+);
 app.use(express.static(path.join(__dirname, "../Front-End")));
 
 // Modifier la route pour le favicon
@@ -163,41 +166,6 @@ const mosqueTimesRoutes = require("./routes/mosqueTimesRoutes");
 const surahMemorizationRoutes = require("./routes/surahMemorizationRoutes");
 const captchaRoutes = require("./routes/captchaRoutes");
 const duaTimeRoutes = require("./routes/duaTimeRoutes");
-
-// Définir les routes publiques
-const publicPaths = [
-  '/api/mosque-times/cities/search',
-  '/api/mosque-times/cities/:city/mosques',
-  '/api/mosque-times/exists/:date',
-  '/api/mosque-times/report-missing-data/:date'
-];
-
-// Middleware de debug pour voir toutes les requêtes
-app.use((req, res, next) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
-  next();
-});
-
-// Middleware pour les routes API
-app.use('/api/*', (req, res, next) => {
-  const path = req.path;
-  
-  // Vérifier si c'est une route publique
-  const isPublic = publicPaths.some(publicPath => {
-    const pattern = publicPath
-      .replace(/:\w+/g, '[^/]+')
-      .replace(/\//g, '\\/');
-    return new RegExp(`^${pattern}$`).test(path);
-  });
-
-  if (isPublic) {
-    console.log(`[DEBUG] Route publique autorisée: ${path}`);
-    return next();
-  }
-
-  console.log(`[DEBUG] Route protégée: ${path}`);
-  authenticateToken(req, res, next);
-});
 
 // Routes API (après le middleware)
 app.use("/api/mosque-times", mosqueTimesRoutes);
