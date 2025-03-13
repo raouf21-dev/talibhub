@@ -7,6 +7,7 @@ const corsOptions = require("./config/corsConfig");
 const cookieParser = require("cookie-parser");
 const { attachCookieManager } = require("./middlewares/cookieManager");
 const fs = require("fs");
+const { authenticateToken } = require('./middlewares/authenticateToken');
 
 require("dotenv").config({
   path: path.join(__dirname, `.env.${process.env.NODE_ENV || "development"}`),
@@ -163,34 +164,38 @@ const surahMemorizationRoutes = require("./routes/surahMemorizationRoutes");
 const captchaRoutes = require("./routes/captchaRoutes");
 const duaTimeRoutes = require("./routes/duaTimeRoutes");
 
-// Avant toutes les routes API
+// Définir les routes publiques
 const publicPaths = [
   '/api/mosque-times/cities/search',
   '/api/mosque-times/cities/:city/mosques',
-  '/api/mosque-times/exists/:date'
+  '/api/mosque-times/exists/:date',
+  '/api/mosque-times/report-missing-data/:date'
 ];
 
-// Middleware pour vérifier si c'est une route publique
-const isPublicRoute = (path) => {
-  return publicPaths.some(publicPath => {
-    // Convertir le chemin public en expression régulière
-    const regexPath = publicPath
-      .replace(/:\w+/g, '[^/]+') // Remplacer les paramètres de route par un pattern
-      .replace(/\//g, '\\/');    // Échapper les slashes
-    const regex = new RegExp(`^${regexPath}$`);
-    return regex.test(path);
-  });
-};
+// Middleware de debug pour voir toutes les requêtes
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
+  next();
+});
 
-// Middleware d'authentification global SAUF pour les routes publiques
+// Middleware pour les routes API
 app.use('/api/*', (req, res, next) => {
-  if (isPublicRoute(req.path)) {
-    console.log('[DEBUG] Route publique détectée:', req.path);
+  const path = req.path;
+  
+  // Vérifier si c'est une route publique
+  const isPublic = publicPaths.some(publicPath => {
+    const pattern = publicPath
+      .replace(/:\w+/g, '[^/]+')
+      .replace(/\//g, '\\/');
+    return new RegExp(`^${pattern}$`).test(path);
+  });
+
+  if (isPublic) {
+    console.log(`[DEBUG] Route publique autorisée: ${path}`);
     return next();
   }
-  
-  // Authentification pour les autres routes
-  const { authenticateToken } = require('./middlewares/authenticateToken');
+
+  console.log(`[DEBUG] Route protégée: ${path}`);
   authenticateToken(req, res, next);
 });
 
