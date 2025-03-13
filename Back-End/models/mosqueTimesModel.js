@@ -33,9 +33,7 @@ const savePrayerTimes = async (mosqueId, date, times) => {
 
   try {
     await pool.query(query, values);
-    console.log(`Prayer times saved successfully for mosque ID ${mosqueId} on date ${date}`);
   } catch (error) {
-    console.error(`Failed to save prayer times for mosque ID ${mosqueId} on date ${date}:`, error);
     throw error;
   }
 };

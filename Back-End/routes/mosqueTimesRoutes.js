@@ -21,29 +21,44 @@ router.post(
 );
 
 // Routes protégées (avec authentification)
-router.post("/scrape", authenticateToken, mosqueTimesController.manualScrape);
-router.post(
-  "/scrape-all",
-  authenticateToken,
-  mosqueTimesController.scrapeAllCities
-);
-router.post(
-  "/scrape/:city",
-  authenticateToken,
-  mosqueTimesController.scrapeByCity
-);
-router.get("/all", authenticateToken, mosqueTimesController.getAllMosques);
-router.get("/search", authenticateToken, mosqueTimesController.searchMosques);
-router.post("/add", authenticateToken, mosqueTimesController.addMosque);
-router.post(
-  "/user/selected-city",
-  authenticateToken,
-  mosqueTimesController.setSelectedCity
-);
-router.get(
-  "/user/selected-city",
-  authenticateToken,
-  mosqueTimesController.getSelectedCity
-);
+const protectedRoutes = [
+  {
+    method: "post",
+    path: "/scrape",
+    handler: mosqueTimesController.manualScrape,
+  },
+  {
+    method: "post",
+    path: "/scrape-all",
+    handler: mosqueTimesController.scrapeAllCities,
+  },
+  {
+    method: "post",
+    path: "/scrape/:city",
+    handler: mosqueTimesController.scrapeByCity,
+  },
+  { method: "get", path: "/all", handler: mosqueTimesController.getAllMosques },
+  {
+    method: "get",
+    path: "/search",
+    handler: mosqueTimesController.searchMosques,
+  },
+  { method: "post", path: "/add", handler: mosqueTimesController.addMosque },
+  {
+    method: "post",
+    path: "/user/selected-city",
+    handler: mosqueTimesController.setSelectedCity,
+  },
+  {
+    method: "get",
+    path: "/user/selected-city",
+    handler: mosqueTimesController.getSelectedCity,
+  },
+];
+
+// Enregistrer les routes protégées
+protectedRoutes.forEach((route) => {
+  router[route.method](route.path, authenticateToken, route.handler);
+});
 
 module.exports = router;

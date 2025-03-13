@@ -262,9 +262,8 @@ class MosqueTimesController {
 
       const prayerTimesResults = await Promise.all(prayerTimesPromises);
       const formattedPrayerTimes = prayerTimesResults
-        .filter((times) => times !== null && times !== undefined) // Ajout de la vérification undefined
+        .filter((times) => times !== null && times !== undefined)
         .map((times) => {
-          // Vérification supplémentaire pour s'assurer que times est valide
           if (!times || !times.mosque_id) {
             return null;
           }
@@ -282,9 +281,8 @@ class MosqueTimesController {
             tarawih: times.tarawih || null,
           };
         })
-        .filter((times) => times !== null); // Filtrer les résultats nuls
+        .filter((times) => times !== null);
 
-      // Si aucun horaire n'est trouvé, renvoyer un tableau vide plutôt qu'une erreur
       return res.json({
         prayerTimes: formattedPrayerTimes,
         message:
@@ -293,10 +291,6 @@ class MosqueTimesController {
             : undefined,
       });
     } catch (error) {
-      console.error(
-        "Erreur lors de la récupération des horaires de prière:",
-        error
-      );
       return res
         .status(500)
         .json({ message: "Erreur du serveur", error: error.message });

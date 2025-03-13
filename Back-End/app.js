@@ -29,58 +29,56 @@ if (!process.env.COOKIE_SECRET) {
   }
 }
 
-// Configuration de Helmet
+// Configuration de Helmet - Simplification des directives CSP
+const cspDirectives = {
+  defaultSrc: ["'self'"],
+  scriptSrc: [
+    "'self'",
+    "'unsafe-inline'",
+    "'unsafe-eval'",
+    "https://unpkg.com",
+    "https://cdnjs.cloudflare.com",
+    "https://cdn.jsdelivr.net",
+    "https://www.talibhub.com",
+    "http://www.talibhub.com",
+    ...(isProd ? [] : ["http://localhost:*"]),
+  ],
+  fontSrc: [
+    "'self'",
+    "data:",
+    "https://cdnjs.cloudflare.com",
+    "https://www.talibhub.com",
+    "http://www.talibhub.com",
+    ...(isProd ? [] : ["http://localhost:*"]),
+  ],
+  styleSrc: [
+    "'self'",
+    "'unsafe-inline'",
+    "https://unpkg.com",
+    "https://cdnjs.cloudflare.com",
+    "https://www.talibhub.com",
+    "http://www.talibhub.com",
+  ],
+  imgSrc: ["'self'", "data:", "https:"],
+  connectSrc: [
+    "'self'",
+    "https://api.example.com",
+    "https://api.aladhan.com",
+    "https://www.talibhub.com",
+    "http://www.talibhub.com",
+    "https://talibhub.com",
+    "http://talibhub.com",
+    ...(isProd ? [] : ["http://localhost:*", "ws://localhost:*"]),
+  ],
+  objectSrc: ["'none'"],
+  mediaSrc: ["'self'"],
+  frameSrc: ["'self'", "https://www.talibhub.com", "http://www.talibhub.com"],
+};
+
 app.use(
   helmet({
     contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
-        scriptSrc: [
-          "'self'",
-          "'unsafe-inline'",
-          "'unsafe-eval'",
-          "https://unpkg.com",
-          "https://cdnjs.cloudflare.com",
-          "https://cdn.jsdelivr.net",
-          "https://www.talibhub.com",
-          "http://www.talibhub.com",
-          ...(isProd ? [] : ["http://localhost:*"]),
-        ],
-        fontSrc: [
-          "'self'",
-          "data:",
-          "https://cdnjs.cloudflare.com",
-          "https://www.talibhub.com",
-          "http://www.talibhub.com",
-          ...(isProd ? [] : ["http://localhost:*"]),
-        ],
-        styleSrc: [
-          "'self'",
-          "'unsafe-inline'",
-          "https://unpkg.com",
-          "https://cdnjs.cloudflare.com",
-          "https://www.talibhub.com",
-          "http://www.talibhub.com",
-        ],
-        imgSrc: ["'self'", "data:", "https:"],
-        connectSrc: [
-          "'self'",
-          "https://api.example.com",
-          "https://api.aladhan.com",
-          "https://www.talibhub.com",
-          "http://www.talibhub.com",
-          "https://talibhub.com",
-          "http://talibhub.com",
-          ...(isProd ? [] : ["http://localhost:*", "ws://localhost:*"]),
-        ],
-        objectSrc: ["'none'"],
-        mediaSrc: ["'self'"],
-        frameSrc: [
-          "'self'",
-          "https://www.talibhub.com",
-          "http://www.talibhub.com",
-        ],
-      },
+      directives: cspDirectives,
     },
     crossOriginEmbedderPolicy: false,
     crossOriginResourcePolicy: { policy: "cross-origin" },
