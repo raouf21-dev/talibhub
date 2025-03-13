@@ -41,6 +41,15 @@ app.use(
           "'unsafe-eval'",
           "https://unpkg.com",
           "https://cdnjs.cloudflare.com",
+          "https://cdn.jsdelivr.net",
+          "https://www.talibhub.com",
+          "http://www.talibhub.com",
+          ...(isProd ? [] : ["http://localhost:*"]),
+        ],
+        fontSrc: [
+          "'self'",
+          "data:",
+          "https://cdnjs.cloudflare.com",
           "https://www.talibhub.com",
           "http://www.talibhub.com",
           ...(isProd ? [] : ["http://localhost:*"]),
@@ -63,13 +72,6 @@ app.use(
           "https://talibhub.com",
           "http://talibhub.com",
           ...(isProd ? [] : ["http://localhost:*", "ws://localhost:*"]),
-        ],
-        fontSrc: [
-          "'self'",
-          "https://cdnjs.cloudflare.com",
-          "data:",
-          "https://www.talibhub.com",
-          "http://www.talibhub.com",
         ],
         objectSrc: ["'none'"],
         mediaSrc: ["'self'"],
@@ -110,20 +112,6 @@ if (!isProd) {
     next();
   });
 }
-
-// En-têtes de sécurité
-app.use((req, res, next) => {
-  res.setHeader("X-Content-Type-Options", "nosniff");
-  res.setHeader("X-Frame-Options", "DENY");
-  res.setHeader("X-XSS-Protection", "1; mode=block");
-  if (isProd) {
-    res.setHeader(
-      "Strict-Transport-Security",
-      "max-age=31536000; includeSubDomains"
-    );
-  }
-  next();
-});
 
 // Configuration des types MIME pour les fichiers JavaScript
 app.use((req, res, next) => {
