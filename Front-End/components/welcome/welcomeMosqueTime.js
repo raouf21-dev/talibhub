@@ -625,9 +625,18 @@ export class WelcomeMosqueTime extends MosqueTimeManager {
 
       // Mettre à jour l'interface
       this.populateMosqueSelect(this.currentMosques);
-      this.updateAllMosques();
+      
+      // Modification ici : Appeler displayAllMosques au lieu de updateAllMosques
+      this.displayAllMosques();
+      
       this.updateDateDisplay(cityName);
       localStorage.setItem("lastSelectedCity", cityName);
+      
+      // Vérifier quel onglet est actif et mettre à jour l'affichage en conséquence
+      const activeTab = document.querySelector(".mosquetime-tab.active");
+      if (activeTab) {
+        this.switchTab(activeTab.dataset.tab);
+      }
     } catch (error) {
       console.warn(
         "[DEBUG] WelcomeMosqueTime: Error in city selection:",
