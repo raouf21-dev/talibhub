@@ -132,9 +132,9 @@ export class WelcomeMosqueTime extends MosqueTimeManager {
 
             <div class="mosquetime-content">
                 <div class="mosquetime-location-search">
-                    <button id="welcome-mosquetime-location" class="mosquetime-button">
+                    <!--<button id="welcome-mosquetime-location" class="mosquetime-button">
                         <i class="fas fa-map-marker-alt"></i> ${this.texts.useLocation}
-                    </button>
+                    </button>-->
                     <select id="welcome-mosquetime-city" class="mosquetime-select">
                         <option value="">${this.texts.selectCity}</option>
                     </select>
@@ -470,12 +470,12 @@ export class WelcomeMosqueTime extends MosqueTimeManager {
                   prayerTimes.jumuah3
                 )}</span>
             </div>
-            <!--<div class="prayer-item">
+            <div class="prayer-item">
                 <span class="prayer-label">Jumuah4</span>
                 <span class="jamaa-time">${formatTime(
                   prayerTimes.jumuah4
                 )}</span>
-            </div>-->
+            </div>
             <div class="prayer-item">
                 <span class="prayer-label">Tarawih</span>
                 <span class="jamaa-time">${formatTime(
