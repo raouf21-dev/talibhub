@@ -479,6 +479,17 @@ body {
   }
 }
 
+@media (max-width: 480px) {
+  .welcomepage-features-grid,.welcomepage-why-choose-grid {
+    gap: 1rem;
+  }
+
+  .welcomepage-feature-card,
+  .welcomepage-why-choose-card {
+    margin: 0 1rem;
+  }
+}
+
 .hidden {
   display: none;
 }
