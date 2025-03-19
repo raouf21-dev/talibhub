@@ -24,6 +24,8 @@ const scrapeMasjidAsSunnah = require("./birmingham/masjidAs-SunnahAn-NabawiyyahB
 const scrapeMasjidEUsman = require("./walsall/masjidAlAqsaWalsall");
 const scrapeMasjidAlAqsaWalsall = require("./walsall/masjidAlAqsaWalsall");
 const scrapeJameMasjid = require("./birmingham/jameMasjidBham");
+const scrapeMasjidAnnoor = require("./birmingham/masjidAnnoorBirmingham");
+const scrapeMahmudSabirMasjid = require("./birmingham/mahmudSabirMasjidBham");
 
 // Debug logs pour vérifier les imports
 //console.log('===== DEBUG: Checking imports =====');
@@ -58,6 +60,11 @@ const SCRAPER_CONFIG = {
   19: { name: "Masjid-e-Usman Birmingham", fn: scrapeMasjidEUsman },
   20: { name: "Masjid Al-Aqsa Walsall", fn: scrapeMasjidAlAqsaWalsall },
   21: { name: "Jame Masjid Birmingham", fn: scrapeJameMasjid },
+  22: { name: "Masjid An-noor Birmingham", fn: scrapeMasjidAnnoor },
+  23: {
+    name: "MahmudSabir Al Furqan Masjid Birmingham",
+    fn: scrapeMahmudSabirMasjid,
+  },
 };
 
 class ScraperManager {

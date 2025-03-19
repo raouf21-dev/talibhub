@@ -470,12 +470,12 @@ export class WelcomeMosqueTime extends MosqueTimeManager {
                   prayerTimes.jumuah3
                 )}</span>
             </div>
-            <div class="prayer-item">
+            <!--<div class="prayer-item">
                 <span class="prayer-label">Jumuah4</span>
                 <span class="jamaa-time">${formatTime(
                   prayerTimes.jumuah4
                 )}</span>
-            </div>
+            </div>-->
             <div class="prayer-item">
                 <span class="prayer-label">Tarawih</span>
                 <span class="jamaa-time">${formatTime(

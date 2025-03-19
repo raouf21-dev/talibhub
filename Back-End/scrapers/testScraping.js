@@ -1,9 +1,9 @@
 // scrapeQubaIsmalicCenter.js
-const scrapeJameMasjid = require("./birmingham/jameMasjidBham");
+const scrapeMahmudSabirMasjid = require("./birmingham/mahmudSabirMasjidBham");
 
 async function test() {
   try {
-    const result = await scrapeJameMasjid();
+    const result = await scrapeMahmudSabirMasjid();
     console.log("Résultat:", result);
   } catch (error) {
     console.error("Erreur:", error);
