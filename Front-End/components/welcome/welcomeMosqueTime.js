@@ -291,7 +291,7 @@ export class WelcomeMosqueTime extends MosqueTimeManager {
     // Méthode vide car nous n'avons plus de date picker à configurer
   }
 
-  // Surcharge des méthodes d'API pour identifier les appels de la page d'accueil
+  // Modifier la méthode fetchData pour corriger la construction de l'URL
   async fetchData(endpoint, options = {}) {
     const defaultOptions = {
       headers: {
@@ -299,7 +299,17 @@ export class WelcomeMosqueTime extends MosqueTimeManager {
         "Content-Type": "application/json",
       },
     };
-    return super.fetchData(endpoint, { ...defaultOptions, ...options });
+
+    try {
+      // Correction: s'assurer qu'il y a un slash entre api et l'endpoint
+      const fullEndpoint = endpoint.startsWith("http")
+        ? endpoint
+        : `/mosque-times/${endpoint}`;
+      return await api.request(fullEndpoint, { ...defaultOptions, ...options });
+    } catch (error) {
+      console.error("WelcomeMosqueTime: Error fetching data:", error);
+      throw error;
+    }
   }
 
   // Surcharge de la méthode de cache
@@ -316,21 +326,8 @@ export class WelcomeMosqueTime extends MosqueTimeManager {
     try {
       console.log("[DEBUG] WelcomeMosqueTime: Starting loadCities");
 
-      // Utiliser une URL absolue
-      const response = await fetch(this.getApiUrl("cities/search"));
-      console.log("[DEBUG] WelcomeMosqueTime: Cities search response:", {
-        status: response.status,
-        ok: response.ok,
-        statusText: response.statusText,
-      });
-
-      if (!response.ok) {
-        throw new Error(
-          `Failed to fetch cities: ${response.status} - ${response.statusText}`
-        );
-      }
-
-      const cities = await response.json();
+      // Utiliser api au lieu de fetch avec le bon chemin
+      const cities = await api.get("/mosque-times/cities/search");
       console.log("WelcomeMosqueTime: Cities loaded:", cities);
 
       // Populate city select
@@ -569,73 +566,60 @@ export class WelcomeMosqueTime extends MosqueTimeManager {
         cityName
       );
 
-      // Tenter de récupérer les mosquées avec URL absolue
-      const mosquesResponse = await fetch(
-        this.getApiUrl(`cities/${encodeURIComponent(cityName)}/mosques`)
-      );
-
-      // Si on reçoit une erreur 401, on affiche un message adapté pour les utilisateurs non connectés
-      if (mosquesResponse.status === 401) {
-        console.log(
-          "[DEBUG] WelcomeMosqueTime: Authentication required for this endpoint"
+      try {
+        // Correction: ajouter un slash au début du chemin
+        const mosques = await api.get(
+          `/mosque-times/cities/${encodeURIComponent(cityName)}/mosques`
         );
-        this.displayAuthRequiredState(cityName);
-        return;
-      }
 
-      if (!mosquesResponse.ok) {
-        throw new Error(
-          `Failed to fetch mosques: ${mosquesResponse.status} - ${mosquesResponse.statusText}`
+        if (!mosques || mosques.length === 0) {
+          console.log("WelcomeMosqueTime: No mosques found for city", cityName);
+          return;
+        }
+
+        // Correction: ajouter un slash au début du chemin
+        const date = this.getCurrentDateString();
+        const prayerTimesData = await api.get(
+          `/mosque-times/cities/${encodeURIComponent(
+            cityName
+          )}/date/${date}/prayer-times`
         );
-      }
 
-      const mosques = await mosquesResponse.json();
+        // Associer les horaires aux mosquées
+        this.currentMosques = mosques.map((mosque) => {
+          const prayerTime = prayerTimesData.prayerTimes?.find(
+            (pt) => String(pt.mosque_id) === String(mosque.id)
+          );
+          return {
+            ...mosque,
+            prayerTimes: prayerTime || null,
+          };
+        });
 
-      if (!mosques || mosques.length === 0) {
-        console.log("WelcomeMosqueTime: No mosques found for city", cityName);
-        return;
-      }
+        // Mettre à jour l'interface
+        this.populateMosqueSelect(this.currentMosques);
 
-      // Récupérer les horaires avec URL absolue
-      const date = this.getCurrentDateString();
-      const prayerTimesResponse = await fetch(
-        this.getApiUrl(
-          `cities/${encodeURIComponent(cityName)}/date/${date}/prayer-times`
-        )
-      );
+        // Appeler displayAllMosques au lieu de updateAllMosques
+        this.displayAllMosques();
 
-      if (!prayerTimesResponse.ok) {
-        throw new Error(
-          `Failed to fetch prayer times: ${prayerTimesResponse.status} - ${prayerTimesResponse.statusText}`
-        );
-      }
+        this.updateDateDisplay(cityName);
+        localStorage.setItem("lastSelectedCity", cityName);
 
-      const prayerTimesData = await prayerTimesResponse.json();
-
-      // Associer les horaires aux mosquées
-      this.currentMosques = mosques.map((mosque) => {
-        const prayerTime = prayerTimesData.prayerTimes?.find(
-          (pt) => String(pt.mosque_id) === String(mosque.id)
-        );
-        return {
-          ...mosque,
-          prayerTimes: prayerTime || null,
-        };
-      });
-
-      // Mettre à jour l'interface
-      this.populateMosqueSelect(this.currentMosques);
-      
-      // Modification ici : Appeler displayAllMosques au lieu de updateAllMosques
-      this.displayAllMosques();
-      
-      this.updateDateDisplay(cityName);
-      localStorage.setItem("lastSelectedCity", cityName);
-      
-      // Vérifier quel onglet est actif et mettre à jour l'affichage en conséquence
-      const activeTab = document.querySelector(".mosquetime-tab.active");
-      if (activeTab) {
-        this.switchTab(activeTab.dataset.tab);
+        // Vérifier quel onglet est actif et mettre à jour l'affichage en conséquence
+        const activeTab = document.querySelector(".mosquetime-tab.active");
+        if (activeTab) {
+          this.switchTab(activeTab.dataset.tab);
+        }
+      } catch (error) {
+        // Si on reçoit une erreur 401, on affiche un message adapté pour les utilisateurs non connectés
+        if (error.message && error.message.includes("401")) {
+          console.log(
+            "[DEBUG] WelcomeMosqueTime: Authentication required for this endpoint"
+          );
+          this.displayAuthRequiredState(cityName);
+          return;
+        }
+        throw error;
       }
     } catch (error) {
       console.warn(
@@ -703,27 +687,15 @@ export class WelcomeMosqueTime extends MosqueTimeManager {
     try {
       const date = this.getCurrentDateString();
 
-      // Utiliser URL absolue
-      const response = await fetch(this.getApiUrl(`exists/${date}`));
-
-      if (!response.ok) {
-        throw new Error(
-          `Failed to check data: ${response.status} - ${response.statusText}`
-        );
-      }
-
-      const dataExists = await response.json();
+      // Correction: ajouter un slash au début du chemin
+      const dataExists = await api.get(`/mosque-times/exists/${date}`);
 
       if (!dataExists.exists) {
         console.log("WelcomeMosqueTime: No data found, reporting missing data");
 
-        // Signaler les données manquantes via la route publique
-        await fetch(this.getApiUrl(`report-missing-data/${date}`), {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ source: "welcome-page" }),
+        // Correction: ajouter un slash au début du chemin
+        await api.post(`/mosque-times/report-missing-data/${date}`, {
+          source: "welcome-page",
         });
 
         // Informer l'utilisateur que les données sont en cours de génération
