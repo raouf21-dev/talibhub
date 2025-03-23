@@ -5,6 +5,7 @@ import CacheService, {
   getMidnightTimestamp,
 } from "../../services/cache/cacheMosqueTime.js";
 import { API_BASE_URL } from "../../config/apiConfig.js";
+import mosqueTimesStorageService from "../../services/cache/mosqueTimesStorageService.js";
 
 export class WelcomeMosqueTime extends MosqueTimeManager {
   constructor() {
@@ -409,7 +410,7 @@ export class WelcomeMosqueTime extends MosqueTimeManager {
 
   // Méthode utilitaire pour formater les horaires
   formatPrayerTimes(times) {
-    console.log("WelcomeMosqueTime: Formatting prayer times:", times);
+    //console.log("WelcomeMosqueTime: Formatting prayer times:", times);
     if (!times) {
       console.warn("WelcomeMosqueTime: No prayer times provided");
       return `<p>${this.texts.prayerNotAvailable}</p>`;
@@ -558,7 +559,7 @@ export class WelcomeMosqueTime extends MosqueTimeManager {
     `;
   }
 
-  // Surcharge de handleCitySelection pour gérer le cas public
+  // Surcharge de handleCitySelection pour gérer le cas public et utiliser les cookies
   async handleCitySelection(cityName) {
     try {
       console.log(
@@ -566,8 +567,27 @@ export class WelcomeMosqueTime extends MosqueTimeManager {
         cityName
       );
 
+      // Vérifier si les données sont déjà en cache
+      const cachedData = mosqueTimesStorageService.getCityData(cityName);
+
+      if (cachedData) {
+        this.currentMosques = cachedData.currentMosques;
+        this.populateMosqueSelect(this.currentMosques);
+        this.displayAllMosques();
+        this.updateDateDisplay(cityName);
+
+        // Vérifier quel onglet est actif
+        const activeTab = document.querySelector(".mosquetime-tab.active");
+        if (activeTab) {
+          this.switchTab(activeTab.dataset.tab);
+        }
+
+        return;
+      }
+
+      // Si données non trouvées, charger depuis l'API
       try {
-        // Correction: ajouter un slash au début du chemin
+        const date = mosqueTimesStorageService.getCurrentDateString();
         const mosques = await api.get(
           `/mosque-times/cities/${encodeURIComponent(cityName)}/mosques`
         );
@@ -577,8 +597,6 @@ export class WelcomeMosqueTime extends MosqueTimeManager {
           return;
         }
 
-        // Correction: ajouter un slash au début du chemin
-        const date = this.getCurrentDateString();
         const prayerTimesData = await api.get(
           `/mosque-times/cities/${encodeURIComponent(
             cityName
@@ -598,28 +616,25 @@ export class WelcomeMosqueTime extends MosqueTimeManager {
 
         // Mettre à jour l'interface
         this.populateMosqueSelect(this.currentMosques);
-
-        // Appeler displayAllMosques au lieu de updateAllMosques
         this.displayAllMosques();
-
         this.updateDateDisplay(cityName);
         localStorage.setItem("lastSelectedCity", cityName);
 
-        // Vérifier quel onglet est actif et mettre à jour l'affichage en conséquence
+        // Vérifier quel onglet est actif et mettre à jour l'affichage
         const activeTab = document.querySelector(".mosquetime-tab.active");
         if (activeTab) {
           this.switchTab(activeTab.dataset.tab);
         }
+
+        // Stocker les données dans localStorage
+        mosqueTimesStorageService.saveCityData(cityName, {
+          currentMosques: this.currentMosques,
+        });
+
+        notificationService.show("mosque.city.selected", "success");
       } catch (error) {
-        // Si on reçoit une erreur 401, on affiche un message adapté pour les utilisateurs non connectés
-        if (error.message && error.message.includes("401")) {
-          console.log(
-            "[DEBUG] WelcomeMosqueTime: Authentication required for this endpoint"
-          );
-          this.displayAuthRequiredState(cityName);
-          return;
-        }
-        throw error;
+        console.warn("Erreur lors de la récupération des données:", error);
+        this.displayDefaultState();
       }
     } catch (error) {
       console.warn(
@@ -758,5 +773,13 @@ export class WelcomeMosqueTime extends MosqueTimeManager {
 
   toRad(value) {
     return (value * Math.PI) / 180;
+  }
+
+  getFormattedDate() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
   }
 }

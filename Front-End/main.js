@@ -33,6 +33,9 @@ import { initializeProfile } from "./components/user/profile.js";
 // Importation du module featherLoader
 import "./utils/featherLoader.js";
 
+// Importation du service mosqueTimesStorageService
+import mosqueTimesStorageService from './services/cache/mosqueTimesStorageService.js';
+
 // Fonction pour détecter et corriger les boucles de redirection
 (function detectRedirectLoop() {
   const currentPath = window.location.pathname;
@@ -241,6 +244,9 @@ async function initializeApp() {
     await authService.logout();
     window.location.reload();
   });
+
+  // Nettoyer les anciens cookies mosque_times_data
+  mosqueTimesStorageService.clearMosqueTimesCookies();
 }
 
 // Gestion globale de l'événement "logout" :

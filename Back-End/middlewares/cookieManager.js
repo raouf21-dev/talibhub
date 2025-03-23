@@ -25,6 +25,13 @@ const getCookieOptions = () => {
   };
 };
 
+// Fonction utilitaire pour obtenir le timestamp de minuit
+const getMidnightTimestamp = () => {
+  const midnight = new Date();
+  midnight.setHours(24, 0, 0, 0);
+  return midnight.getTime();
+};
+
 const cookieManager = {
   setAuthCookies(res, token) {
     const options = getCookieOptions();
@@ -84,6 +91,87 @@ const cookieManager = {
     return req.cookies.selected_city;
   },
 
+  // Nouvelle méthode pour stocker les horaires de mosquée jusqu'à minuit
+  setMosqueTimesData(res, city, data) {
+    const options = {
+      ...getCookieOptions(),
+      httpOnly: false, // Permettre l'accès depuis JavaScript
+      signed: false, // Pas besoin de signature pour ces données
+      maxAge: getMidnightTimestamp() - Date.now(), // Expire à minuit
+    };
+
+    // Normaliser le nom de la ville pour l'utiliser comme clé
+    const normalizedCity = encodeURIComponent(city.trim().toLowerCase());
+
+    // Récupérer les données existantes s'il y en a
+    const cookieName = `mosque_times_data`;
+    let existingData = {};
+
+    try {
+      if (req.cookies[cookieName]) {
+        existingData = JSON.parse(req.cookies[cookieName]);
+      }
+    } catch (error) {
+      console.error("Erreur lors de la lecture des données existantes:", error);
+    }
+
+    // Ajouter/remplacer les données pour cette ville
+    existingData[normalizedCity] = {
+      date: new Date().toISOString().split("T")[0], // Date au format YYYY-MM-DD
+      data,
+      timestamp: Date.now(),
+    };
+
+    // Enregistrer dans le cookie
+    res.cookie(cookieName, JSON.stringify(existingData), options);
+
+    // Également sauvegarder dans localStorage côté client
+    res.setPublicCookie("mosque_times_backup", JSON.stringify(existingData));
+  },
+
+  // Méthode pour récupérer les données d'horaires de mosquée
+  getMosqueTimesData(req, city) {
+    try {
+      const cookieName = `mosque_times_data`;
+      const allData = req.cookies[cookieName]
+        ? JSON.parse(req.cookies[cookieName])
+        : {};
+
+      // Si aucune ville n'est spécifiée, retourner toutes les données
+      if (!city) return allData;
+
+      // Normaliser le nom de la ville
+      const normalizedCity = encodeURIComponent(city.trim().toLowerCase());
+
+      // Vérifier si les données pour cette ville existent et sont valides (même jour)
+      const cityData = allData[normalizedCity];
+      if (cityData) {
+        const currentDate = new Date().toISOString().split("T")[0];
+        if (cityData.date === currentDate) {
+          return cityData.data;
+        }
+      }
+
+      // Pas de données valides trouvées
+      return null;
+    } catch (error) {
+      console.error(
+        "Erreur lors de la récupération des données de mosquée:",
+        error
+      );
+      return null;
+    }
+  },
+
+  clearMosqueTimesData(res) {
+    const options = getCookieOptions();
+    res.clearCookie("mosque_times_data", {
+      ...options,
+      httpOnly: false,
+      signed: false,
+    });
+  },
+
   setPublicCookie(res, name, value) {
     const options = {
       ...getCookieOptions(),
@@ -107,4 +195,5 @@ const attachCookieManager = (req, res, next) => {
 module.exports = {
   cookieManager,
   attachCookieManager,
+  getMidnightTimestamp, // Exporter cette fonction pour pouvoir l'utiliser ailleurs
 };

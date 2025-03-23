@@ -107,12 +107,12 @@ class ApiService {
   }
 
   async request(endpoint, options = {}) {
-    console.log("[DEBUG] API Request - Détails:", {
-      endpoint,
-      method: options.method || "GET",
-      hasToken: !!localStorage.getItem("token"),
-      currentPath: window.location.pathname,
-    });
+    //console.log("[DEBUG] API Request - Détails:", {
+    //  endpoint,
+    //  method: options.method || "GET",
+    //  hasToken: !!localStorage.getItem("token"),
+    //  currentPath: window.location.pathname,
+    //});
 
     const url = endpoint.startsWith("http")
       ? endpoint
@@ -131,13 +131,13 @@ class ApiService {
       loader.show();
       const response = await fetch(url, config);
 
-      console.log("[DEBUG] API Response - Détails:", {
-        status: response.status,
-        url: response.url,
-        redirected: response.redirected,
-        type: response.type,
-        headers: Object.fromEntries(response.headers.entries()),
-      });
+      //console.log("[DEBUG] API Response - Détails:", {
+      //  status: response.status,
+      //  url: response.url,
+      //  redirected: response.redirected,
+      //  type: response.type,
+      //  headers: Object.fromEntries(response.headers.entries()),
+      //});
 
       if (response.status === 401) {
         console.warn("[DEBUG] API 401 - Détails complets:", {

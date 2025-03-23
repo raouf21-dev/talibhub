@@ -8,6 +8,7 @@ const cookieParser = require("cookie-parser");
 const { attachCookieManager } = require("./middlewares/cookieManager");
 const fs = require("fs");
 const { authenticateToken } = require("./middlewares/authenticateToken");
+const authController = require("./controllers/authController");
 
 require("dotenv").config({
   path: path.join(__dirname, `.env.${process.env.NODE_ENV || "development"}`),
@@ -165,6 +166,16 @@ app.use("/api/statistics", statisticsRoutes);
 app.use("/api/surah-memorization", surahMemorizationRoutes);
 app.use("/api/captcha", captchaRoutes);
 app.use("/api/dua-time", duaTimeRoutes);
+
+// Ajouter une route pour stocker les horaires dans les cookies
+app.post("/api/cookie/mosque-times", authenticateToken, (req, res) => {
+  authController.storeMosqueTimesInCookie(req, res);
+});
+
+// Ajouter le middleware cookieManager à la route publique
+app.post("/api/public/cookie/mosque-times", attachCookieManager, (req, res) => {
+  authController.storePublicMosqueTimesInCookie(req, res);
+});
 
 // Routes statiques
 app.use("/api/data", express.static(path.join(__dirname, "data")));
