@@ -65,14 +65,14 @@ class ScraperManager {
     this.retryAttempts = new Map();
     this.MAX_RETRIES = 2;
     this.scrapers = new Map();
-    this.setupScrapers();
+    //this.setupScrapers();
   }
 
   setupScrapers() {
     console.log("===== DEBUG: Starting scraper setup =====");
     Object.entries(SCRAPER_CONFIG).forEach(([id, config]) => {
-      //console.log(`DEBUG: Setting up scraper ${id} (${config.name})`);
-      //console.log(`DEBUG: Scraper function type:`, typeof config.fn);
+      console.log(`DEBUG: Setting up scraper ${id} (${config.name})`);
+      console.log(`DEBUG: Scraper function type:`, typeof config.fn);
 
       // Vérifier si la fonction est correctement importée
       if (!config.fn) {

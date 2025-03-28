@@ -192,6 +192,68 @@ export class WelcomeMosqueTime extends MosqueTimeManager {
 
     // Mettre à jour l'affichage de la date
     this.updateDateDisplay();
+
+    // Ajouter un style personnalisé pour les liens d'adresses
+    const styleElement = document.createElement("style");
+    styleElement.textContent = `
+      .mosque-info-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        margin-bottom: 10px;
+      }
+      
+      .mosque-text-container {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+      
+      .mosque-name {
+        margin-bottom: 5px;
+      }
+      
+      .mosque-address {
+        color: var(--gray-color, #8b8c89);
+        font-size: 0.90em;
+        display: flex;
+        align-items: center;
+      }
+      
+      .mosque-address i {
+        margin-right: 5px;
+        color: var(--gray-color, #8b8c89);
+      }
+      
+      .mosque-directions-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #ffffff;
+        border-radius: 50%;
+        width: 44px;
+        height: 44px;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        padding: 0;
+        overflow: hidden;
+        margin-left: 15px;
+      }
+      
+      .mosque-directions-link:hover {
+        transform: scale(1.1);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+      }
+      
+      .navigation-icon {
+        width: 32px;
+        height: 32px;
+        object-fit: contain;
+      }
+    `;
+    document.head.appendChild(styleElement);
   }
 
   setupEventListeners() {
@@ -484,6 +546,20 @@ export class WelcomeMosqueTime extends MosqueTimeManager {
     `;
   }
 
+  // Nouvelle méthode utilitaire pour créer des liens de navigation à partir d'une adresse
+  createMapsLink(address, name) {
+    if (!address) return "";
+    // Encoder l'adresse et le nom pour l'URL
+    const encodedAddress = encodeURIComponent(`${name}, ${address}`);
+    return `https://maps.google.com/?q=${encodedAddress}`;
+  }
+
+  // Méthode pour référencer l'icône SVG externe
+  createNavigationIconSVG() {
+    // Au lieu de créer un SVG en ligne, on utilise le fichier dans les assets
+    return `<img src="/assets/icons/navmap-icone.svg" class="navigation-icon" alt="Icône de navigation routière">`;
+  }
+
   // Surcharge pour l'affichage des mosquées
   async displayAllMosques() {
     console.log("WelcomeMosqueTime: Displaying all mosques");
@@ -503,8 +579,20 @@ export class WelcomeMosqueTime extends MosqueTimeManager {
         .map(
           (mosque) => `
     <div class="mosquetime-mosque-card">
-      <h3 class="mosque-name">${mosque.name}</h3>
-      <p class="mosque-address">${mosque.address}</p>
+      <div class="mosque-info-container">
+        <div class="mosque-text-container">
+          <h3 class="mosque-name">${mosque.name}</h3>
+          <div class="mosque-address">
+            <i class="fas fa-map-marker-alt"></i> ${mosque.address}
+          </div>
+        </div>
+        <a href="${this.createMapsLink(
+          mosque.address,
+          mosque.name
+        )}" target="_blank" class="mosque-directions-link" title="Obtenir l'itinéraire">
+          ${this.createNavigationIconSVG()}
+        </a>
+      </div>
       <div class="mosque-prayer-times">
         ${this.formatPrayerTimes(mosque.prayerTimes)}
       </div>
@@ -547,9 +635,21 @@ export class WelcomeMosqueTime extends MosqueTimeManager {
     contentDiv.innerHTML = `
         <div class="mosquetime-mosque-card">
             <div class="mosque-header">
-                <div class="mosque-info">
-                    <h3 class="mosque-name">${selectedMosque.name}</h3>
-                    <p class="mosque-address">${selectedMosque.address}</p>
+                <div class="mosque-info-container">
+                    <div class="mosque-text-container">
+                        <h3 class="mosque-name">${selectedMosque.name}</h3>
+                        <div class="mosque-address">
+                            <i class="fas fa-map-marker-alt"></i> ${
+                              selectedMosque.address
+                            }
+                        </div>
+                    </div>
+                    <a href="${this.createMapsLink(
+                      selectedMosque.address,
+                      selectedMosque.name
+                    )}" target="_blank" class="mosque-directions-link" title="Obtenir l'itinéraire">
+                        ${this.createNavigationIconSVG()}
+                    </a>
                 </div>
             </div>
             <div class="mosque-prayer-times">
