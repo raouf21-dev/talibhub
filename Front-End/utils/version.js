@@ -1,5 +1,5 @@
-// Fichier à mettre à jour manuellement à chaque déploiement
-export const APP_VERSION = "1.2.3"; // Incrémentez ce numéro à chaque déploiement
+// Version initiale au format X.XX
+export const APP_VERSION = "0.01";
 
 // Service pour vérifier la version actuelle de l'application
 export async function checkAppVersion() {

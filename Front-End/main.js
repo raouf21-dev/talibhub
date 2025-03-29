@@ -164,8 +164,10 @@ async function initializeApp() {
     return;
   }
 
-  // Vérification de version APP_VERSION (pour les mises à jour mineures sans rechargement)
+  // Vérification de version APP_VERSION
   const storedVersion = localStorage.getItem("app_version");
+  console.log("Version actuelle:", APP_VERSION);
+  console.log("Version stockée:", storedVersion);
   if (storedVersion !== APP_VERSION) {
     console.log(`Nouvelle version détectée: ${APP_VERSION}`);
     mosqueTimesStorageService.clearAllData();
