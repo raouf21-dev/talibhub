@@ -5,7 +5,10 @@
   "main": "index.js",
   "scripts": {
     "start": "node Back-End/server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "generate-build": "node Front-End/scripts/generate-build-info.js",
+    "prebuild": "npm run generate-build",
+    "build": "votre-commande-de-build-existante"
   },
   "author": "",
   "license": "ISC",

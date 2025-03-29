@@ -47,75 +47,26 @@ import { BUILD_HASH, checkBuildHash } from "./build/build-info.js";
   const currentPath = window.location.pathname;
   const referrer = document.referrer;
 
-  console.log("[DEBUG] Navigation - État complet:", {
+  // Stocker l'état de navigation pour le débogage
+  const state = {
     currentPath,
     referrer,
     hasToken: !!localStorage.getItem("token"),
-    stopRedirects: !!window.stopRedirects,
+    stopRedirects: !!sessionStorage.getItem("stopRedirects"),
     navigationStack: new Error().stack,
-  });
+  };
 
-  // Vérifier si nous sommes dans une boucle de redirection
-  let navigationHistory = JSON.parse(
-    localStorage.getItem("navigationHistory") || "[]"
-  );
+  console.log("[DEBUG] Navigation - État complet:", state);
 
-  // Ajouter le chemin actuel à l'historique avec plus d'informations
-  navigationHistory.push({
-    path: currentPath,
-    timestamp: Date.now(),
-    referrer: referrer,
-    featherStatus: window.feather ? "defined" : "undefined",
-  });
-
-  // Ne garder que les 5 dernières entrées
-  if (navigationHistory.length > 5) {
-    navigationHistory = navigationHistory.slice(-5);
-  }
-
-  localStorage.setItem("navigationHistory", JSON.stringify(navigationHistory));
-
-  // Vérifier s'il y a une boucle (même chemin visité plusieurs fois en peu de temps)
-  const lastMinute = Date.now() - 60000; // 60 secondes
-  const recentPaths = navigationHistory
-    .filter((entry) => entry.timestamp > lastMinute)
-    .map((entry) => entry.path);
-
-  // Compter les occurrences de chaque chemin
-  const pathCounts = {};
-  recentPaths.forEach((path) => {
-    pathCounts[path] = (pathCounts[path] || 0) + 1;
-  });
-
-  // Vérifier si un chemin apparaît plus de 2 fois (indiquant une boucle potentielle)
-  const loopDetected = Object.values(pathCounts).some((count) => count > 2);
-
-  if (loopDetected) {
-    console.warn("Boucle de redirection détectée! Arrêt de la boucle.");
-
-    // Si nous sommes sur /login mais que nous venons de /welcomepage, forcer le retour à /welcomepage
-    if (currentPath.includes("/login") && referrer.includes("/welcomepage")) {
-      console.log("Redirection vers /welcomepage pour briser la boucle");
-      // Utiliser replaceState pour ne pas ajouter à l'historique
-      history.replaceState(null, "", "/welcomepage");
-      // Empêcher toute redirection automatique
-      window.stopRedirects = true;
-      return;
-    }
-
-    // Si nous sommes sur /welcomepage mais que nous venons de /login, rester sur /welcomepage
-    if (currentPath.includes("/welcomepage") && referrer.includes("/login")) {
-      console.log("Maintien sur /welcomepage pour briser la boucle");
-      window.stopRedirects = true;
-      return;
-    }
-
-    // Si aucune des conditions ci-dessus n'est remplie, rediriger vers la page d'accueil
-    if (currentPath !== "/") {
-      console.log("Redirection vers la page d'accueil pour briser la boucle");
-      history.replaceState(null, "", "/");
-      window.stopRedirects = true;
-    }
+  // Créer une variable de session qui empêche de rentrer dans une boucle
+  // Mais permet encore d'exécuter le code de vérification de version
+  if (sessionStorage.getItem("stopRedirects")) {
+    console.log(
+      "Redirection bloquée précédemment - mais continuons l'exécution"
+    );
+    // Supprimer la référence pour une future tentative
+    sessionStorage.removeItem("stopRedirects");
+    // Ne pas quitter la fonction, continuons l'exécution
   }
 })();
 
@@ -197,6 +148,32 @@ async function checkAuthStatus() {
 async function initializeApp() {
   console.log("Initialisation de l'application");
 
+  // Exécuter la vérification build-info.js AVANT toute redirection
+  // Vérifier la version du build en premier
+  console.log("Vérification de build-info.js...");
+  const buildUpdated = checkBuildHash(() => {
+    console.log(
+      "Nettoyage des données suite à la détection d'un nouveau build"
+    );
+    mosqueTimesStorageService.clearAllData();
+  });
+
+  // Si un nouveau build est détecté, la page sera rechargée et nous n'exécuterons pas le reste
+  if (buildUpdated) {
+    console.log("Build mis à jour - recharge en cours...");
+    return;
+  }
+
+  // Vérification de version APP_VERSION (pour les mises à jour mineures sans rechargement)
+  const storedVersion = localStorage.getItem("app_version");
+  if (storedVersion !== APP_VERSION) {
+    console.log(`Nouvelle version détectée: ${APP_VERSION}`);
+    mosqueTimesStorageService.clearAllData();
+    localStorage.setItem("app_version", APP_VERSION);
+    // Notification reportée après l'initialisation de l'interface
+    window.showUpdateNotification = true;
+  }
+
   // Détermine la langue et la définit dans le document.
   const userLang =
     localStorage.getItem("userLang") || navigator.language.split("-")[0];
@@ -251,23 +228,10 @@ async function initializeApp() {
     window.location.reload();
   });
 
-  // Vérifier la version du build en premier
-  // Si un nouveau build est détecté, la page sera rechargée et nous n'exécuterons pas le reste
-  const buildUpdated = checkBuildHash(() => {
-    mosqueTimesStorageService.clearAllData();
-    console.log("Données nettoyées suite à la détection d'un nouveau build");
-  });
-
-  // Si la page a été rechargée à cause d'un nouveau build, ne pas continuer
-  if (buildUpdated) return;
-
-  // Vérification de version APP_VERSION (pour les mises à jour mineures sans rechargement)
-  const storedVersion = localStorage.getItem("app_version");
-  if (storedVersion !== APP_VERSION) {
-    console.log(`Nouvelle version détectée: ${APP_VERSION}`);
-    mosqueTimesStorageService.clearAllData();
-    localStorage.setItem("app_version", APP_VERSION);
+  // Afficher la notification de mise à jour si nécessaire à la fin de l'initialisation
+  if (window.showUpdateNotification) {
     notificationService.show("app.updated", "info");
+    delete window.showUpdateNotification;
   }
 }
 

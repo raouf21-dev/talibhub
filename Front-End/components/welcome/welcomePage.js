@@ -102,6 +102,22 @@ export async function initializeWelcomepage() {
       console.error("WelcomePage: Error initializing MosqueTime:", error);
       notificationService.show("mosque.init.error", "error");
     }
+
+    // Pour les tests seulement - à supprimer en production
+    const debugButton = document.createElement('button');
+    debugButton.innerText = 'Forcer mise à jour';
+    debugButton.style.position = 'fixed';
+    debugButton.style.bottom = '10px';
+    debugButton.style.right = '10px';
+    debugButton.style.zIndex = '9999';
+    debugButton.style.fontSize = '10px';
+    debugButton.style.opacity = '0.5';
+    debugButton.addEventListener('click', () => {
+      console.log('Test: Force mise à jour');
+      localStorage.removeItem('build_hash');
+      window.location.reload();
+    });
+    document.body.appendChild(debugButton);
   } catch (error) {
     console.warn("Erreur lors de l'initialisation de Feather:", error);
     // Continuer malgré l'erreur
