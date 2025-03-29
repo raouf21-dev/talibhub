@@ -206,19 +206,28 @@ export async function initializeApp() {
 }
 
 /**
- * Met à jour la visibilité de la barre de navigation en fonction de la page.
- * @param {string} pageId
+ * Met à jour la visibilité des éléments de navigation
  */
 export function updateNavVisibility(pageId) {
-  const sideNav = document.getElementById("nav");
-  if (sideNav) {
-    sideNav.style.display = pageId === "welcomepage" ? "none" : "block";
+  // Vérifier si nous sommes sur la welcomepage avant d'essayer de mettre à jour la navigation
+  const isWelcomePage =
+    pageId === "welcomepage" || pageId === "/" || pageId === "";
+
+  if (isWelcomePage) {
+    // Ne rien faire si nous sommes sur la welcomepage
+    return;
   }
 
-  const topNav = document.querySelector(".top-nav");
-  if (topNav) {
-    topNav.style.display = pageId === "welcomepage" ? "none" : "flex";
-  }
+  // Code existant pour mettre à jour la navigation
+  const navItems = document.querySelectorAll(".nav-item");
+  navItems.forEach((item) => {
+    const link = item.querySelector(".nav-link");
+    if (link && link.dataset.navId === pageId) {
+      item.classList.add("active");
+    } else {
+      item.classList.remove("active");
+    }
+  });
 }
 
 /**
