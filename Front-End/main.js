@@ -146,110 +146,103 @@ async function checkAuthStatus() {
  * Fonction principale d'initialisation de l'application.
  */
 async function initializeApp() {
-  try {
-    console.log("Initialisation de l'application");
+  console.log("Initialisation de l'application");
 
-    // Exécuter la vérification build-info.js AVANT toute redirection
-    // Vérifier la version du build en premier
-    console.log("Vérification de build-info.js...");
-    checkBuildHash(() => {
-      localStorage.removeItem("auth_token");
-      localStorage.removeItem("build_hash");
+  // Vérification de build-info.js...
+  console.log("Vérification de build-info.js...");
+  const buildUpdated = checkBuildHash(() => {
+    console.log(
+      "Nettoyage des données suite à la détection d'un nouveau build"
+    );
+    mosqueTimesStorageService.clearAllData();
+  });
+
+  // Si un nouveau build est détecté, la page sera rechargée et nous n'exécuterons pas le reste
+  if (buildUpdated) {
+    console.log("Build mis à jour - recharge en cours...");
+    return;
+  }
+
+  // Vérification de version APP_VERSION
+  const storedVersion = localStorage.getItem("app_version");
+  console.log("Version actuelle:", APP_VERSION);
+  console.log("Version stockée:", storedVersion);
+  if (storedVersion !== APP_VERSION) {
+    console.log(`Nouvelle version détectée: ${APP_VERSION}`);
+    mosqueTimesStorageService.clearAllData();
+    localStorage.setItem("app_version", APP_VERSION);
+    // Notification reportée après l'initialisation de l'interface
+    window.showUpdateNotification = true;
+  }
+
+  // Détermine la langue et la définit dans le document.
+  const userLang =
+    localStorage.getItem("userLang") || navigator.language.split("-")[0];
+  document.documentElement.lang = userLang;
+
+  // Récupère la page actuelle depuis l'URL
+  let currentPath = window.location.pathname.substring(1);
+  if (currentPath.endsWith(".html") || !currentPath) {
+    currentPath = "welcomepage";
+  }
+
+  // Appliquer immédiatement la visibilité de la navigation
+  updateNavVisibility(currentPath);
+
+  // Initialisations communes
+  initializeUtils();
+  initializeNavigation();
+
+  // Initialiser topnav seulement si nécessaire
+  const isWelcomePage = currentPath === "welcomepage";
+  const hasToken = localStorage.getItem("token");
+  if (!isWelcomePage || hasToken) {
+    initializeTopNav();
+  } else {
+    console.log("Initialisation de topnav ignorée sur welcomepage");
+  }
+
+  const token = await checkAuthStatus();
+
+  if (token) {
+    console.log("Utilisateur authentifié");
+    await navigateTo(currentPath);
+  } else {
+    console.log("Utilisateur non authentifié");
+    await navigateTo("welcomepage");
+    await initializeAuth();
+  }
+
+  // Initialisation des composants
+  initializeDuaTimeCalculator();
+  initializeDashboard();
+
+  // Initialisation des graphiques si la page contient des éléments de graphique
+  if (document.querySelector('[id$="Chart"]')) {
+    ChartManager.init();
+  }
+
+  // Gestion des événements de navigation
+  document.querySelectorAll("[data-destination]").forEach((element) => {
+    element.addEventListener("click", (e) => {
+      const destination = e.currentTarget.dataset.destination;
+      if (destination) {
+        navigateTo(destination);
+      }
     });
+  });
 
-    // Si un nouveau build est détecté, la page sera rechargée et nous n'exécuterons pas le reste
-    if (sessionStorage.getItem("stopRedirects")) {
-      console.log(
-        "Redirection bloquée précédemment - mais continuons l'exécution"
-      );
-      // Supprimer la référence pour une future tentative
-      sessionStorage.removeItem("stopRedirects");
-      // Ne pas quitter la fonction, continuons l'exécution
-    }
+  // Gestion de la déconnexion
+  document.getElementById("logoutBtn")?.addEventListener("click", async (e) => {
+    e.preventDefault();
+    await authService.logout();
+    window.location.reload();
+  });
 
-    // Vérification de version APP_VERSION
-    const storedVersion = localStorage.getItem("app_version");
-    console.log("Version actuelle:", APP_VERSION);
-    console.log("Version stockée:", storedVersion);
-    if (storedVersion !== APP_VERSION) {
-      console.log(`Nouvelle version détectée: ${APP_VERSION}`);
-      localStorage.setItem("app_version", APP_VERSION);
-      window.showUpdateNotification = true;
-    }
-
-    initializeUtils();
-    initializeNotifications();
-
-    // Détermine si nous sommes sur la welcomepage
-    const currentPath = window.location.pathname;
-    const isWelcomePage =
-      currentPath === "/welcomepage" ||
-      currentPath === "/" ||
-      currentPath === "/index.html";
-
-    // Initialiser topnav et navigation uniquement si on n'est PAS sur la welcomepage
-    if (!isWelcomePage) {
-      initializeTopNav();
-      initializeNavigation();
-      initializeDashboard();
-    }
-
-    // Récupère la page actuelle depuis l'URL
-    let targetPage = currentPath.substring(1);
-    if (targetPage.endsWith(".html") || !targetPage) {
-      targetPage = "welcomepage";
-    }
-
-    // Ne mettre à jour la visibilité de la navigation que si nous ne sommes pas sur la welcomepage
-    if (!isWelcomePage) {
-      updateNavVisibility(targetPage);
-    }
-
-    const isAuthenticated = await checkAuthStatus();
-
-    if (isAuthenticated) {
-      console.log("Utilisateur authentifié");
-      await navigateTo(currentPath);
-    } else {
-      console.log("Utilisateur non authentifié");
-      await navigateTo("welcomepage");
-      await initializeAuth();
-    }
-
-    // Initialisation des composants
-    initializeDuaTimeCalculator();
-
-    // Initialisation des graphiques si la page contient des éléments de graphique
-    if (document.querySelector('[id$="Chart"]')) {
-      ChartManager.init();
-    }
-
-    // Gestion des événements de navigation
-    document.querySelectorAll("[data-destination]").forEach((element) => {
-      element.addEventListener("click", (e) => {
-        const destination = e.currentTarget.dataset.destination;
-        if (destination) {
-          navigateTo(destination);
-        }
-      });
-    });
-
-    // Gestion de la déconnexion
-    document
-      .getElementById("logoutBtn")
-      ?.addEventListener("click", async (e) => {
-        e.preventDefault();
-        await authService.logout();
-        window.location.reload();
-      });
-
-    // Afficher la notification de mise à jour si nécessaire à la fin de l'initialisation
-    if (window.showUpdateNotification) {
-      notificationService.show("app.updated", "info");
-      delete window.showUpdateNotification;
-    }
-  } catch (error) {
-    console.error("Erreur dans initializeApp:", error);
+  // Afficher la notification de mise à jour si nécessaire à la fin de l'initialisation
+  if (window.showUpdateNotification) {
+    notificationService.show("app.updated", "info");
+    delete window.showUpdateNotification;
   }
 }
 

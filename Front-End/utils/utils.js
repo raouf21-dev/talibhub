@@ -206,28 +206,30 @@ export async function initializeApp() {
 }
 
 /**
- * Met à jour la visibilité des éléments de navigation
+ * Met à jour la visibilité de la barre de navigation en fonction de la page.
+ * @param {string} pageId
  */
 export function updateNavVisibility(pageId) {
-  // Vérifier si nous sommes sur la welcomepage avant d'essayer de mettre à jour la navigation
-  const isWelcomePage =
-    pageId === "welcomepage" || pageId === "/" || pageId === "";
+  const sideNav = document.getElementById("nav");
+  const topNav = document.querySelector(".top-nav");
+  const hasToken = !!localStorage.getItem("token");
 
-  if (isWelcomePage) {
-    // Ne rien faire si nous sommes sur la welcomepage
-    return;
+  if (sideNav) {
+    // Masquer la barre latérale si sur welcomepage
+    sideNav.style.display = pageId === "welcomepage" ? "none" : "block";
   }
 
-  // Code existant pour mettre à jour la navigation
-  const navItems = document.querySelectorAll(".nav-item");
-  navItems.forEach((item) => {
-    const link = item.querySelector(".nav-link");
-    if (link && link.dataset.navId === pageId) {
-      item.classList.add("active");
-    } else {
-      item.classList.remove("active");
-    }
-  });
+  if (topNav) {
+    // Masquer la topnav uniquement sur welcomepage pour les non-connectés
+    const hideTopNav = pageId === "welcomepage" && !hasToken;
+    topNav.style.display = hideTopNav ? "none" : "flex";
+  }
+
+  console.log(
+    `Navigation visibility updated: pageId=${pageId}, topNav=${
+      topNav ? topNav.style.display : "N/A"
+    }`
+  );
 }
 
 /**

@@ -38,6 +38,8 @@ class AuthService {
         this._token = response.token;
         localStorage.setItem('token', response.token);
         this.initAuthCheck();
+        console.log("Authentification réussie, déclenchement de l'événement login");
+        window.dispatchEvent(new Event("login"));
         return response;
       }
       throw new Error('Token non reçu dans la réponse');
