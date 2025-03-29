@@ -201,7 +201,7 @@ export class WelcomeMosqueTime extends MosqueTimeManager {
         justify-content: space-between;
         align-items: center;
         width: 100%;
-        margin-bottom: 10px;
+        margin-bottom: 0px;
       }
       
       .mosque-text-container {
