@@ -3,11 +3,8 @@ const path = require("path");
 const envFile = `.env.${process.env.NODE_ENV || "development"}`;
 require("dotenv").config({ path: path.join(__dirname, envFile) });
 
-// Importer les tâches planifiées
+// Importer uniquement scheduledTasks, qui importe déjà autoScraping
 require("./scheduledTasks");
-
-// Importer directement autoScraping
-require("./scrapers/autoScraping");
 
 // Debug des variables d'environnement
 console.log("Variables d'environnement chargées:", {
