@@ -433,14 +433,14 @@ const translations = {
       message:
         "L'application a été mise à jour. Des nouvelles fonctionnalités sont maintenant disponibles.",
       icon: "refresh-cw",
-      duration: 5000,
+      duration: 2500,
     },
     en: {
       title: "Application Updated",
       message:
         "The application has been updated. New features are now available.",
       icon: "refresh-cw",
-      duration: 5000,
+      duration: 2500,
     },
   },
 };

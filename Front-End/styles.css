@@ -3863,7 +3863,7 @@ button[type="submit"]:hover {
 }
 
 .prayer-times-grid {
-  padding-top: 10px;
+  padding: 10px 0;
 }
 
 .welcomepage-mosque-time .prayer-item {
@@ -4064,7 +4064,7 @@ button[type="submit"]:hover {
 
   .welcomepage-mosque-time .mosque-prayer-times .prayer-times-grid,
   .welcomepage-mosque-time .mosque-prayer-times .additional-times-grid {
-    padding: 0;
+    padding: 0 0 10px 0;
     margin: 0;
   }
 
