@@ -144,8 +144,23 @@ class NotificationService {
   }
 
   // Notification temporaire de feedback
-  show(messageKey, type = "info", duration = 2500) {
-    const message = this.getTranslation(messageKey, type);
+  show(messageId, type = "info", params = {}) {
+    // Récupération du message traduit
+    const lang = localStorage.getItem("userLang") || "en";
+    const messageObj = translations[messageId]?.[lang];
+
+    if (!messageObj) return;
+
+    // Traitement des paramètres et remplacement des placeholders
+    let message = messageObj.message;
+    if (params) {
+      // Remplacer tous les placeholders par leurs valeurs correspondantes
+      Object.keys(params).forEach((key) => {
+        message = message.replace(`\${${key}}`, params[key]);
+      });
+    }
+
+    // Affichage de la notification avec le message traité
     const notification = document.createElement("div");
     notification.className = `notification ${type}`;
 
@@ -171,6 +186,7 @@ class NotificationService {
       });
 
     setTimeout(() => notification.classList.add("show"), 10);
+    const duration = messageObj.duration || params.duration || 2500;
     if (duration > 0) {
       setTimeout(() => this.remove(notification), duration);
     }

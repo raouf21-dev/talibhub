@@ -425,6 +425,24 @@ const translations = {
       },
     },
   },
+
+  // Notification de mise à jour de l'application
+  "app.updated": {
+    fr: {
+      title: "Application mise à jour",
+      message:
+        "L'application a été mise à jour. Des nouvelles fonctionnalités sont maintenant disponibles.",
+      icon: "refresh-cw",
+      duration: 5000,
+    },
+    en: {
+      title: "Application Updated",
+      message:
+        "The application has been updated. New features are now available.",
+      icon: "refresh-cw",
+      duration: 5000,
+    },
+  },
 };
 
 // Export à la fois par défaut et nommé
