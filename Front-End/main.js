@@ -36,6 +36,12 @@ import "./utils/featherLoader.js";
 // Importation du service mosqueTimesStorageService
 import mosqueTimesStorageService from './services/cache/mosqueTimesStorageService.js';
 
+// Importation de la constante APP_VERSION
+import { APP_VERSION } from "./services/version.js";
+
+// Importation de la constante BUILD_HASH
+import { BUILD_HASH } from "./build/build-info.js";
+
 // Fonction pour détecter et corriger les boucles de redirection
 (function detectRedirectLoop() {
   const currentPath = window.location.pathname;
@@ -245,8 +251,31 @@ async function initializeApp() {
     window.location.reload();
   });
 
-  // Nettoyer les anciens cookies mosque_times_data
-  mosqueTimesStorageService.clearMosqueTimesCookies();
+  // Vérification de version
+  const storedVersion = localStorage.getItem("app_version");
+  if (storedVersion !== APP_VERSION) {
+    console.log(`Nouvelle version détectée: ${APP_VERSION} (précédente: ${storedVersion})`);
+    
+    // Nettoyer les données stockées
+    mosqueTimesStorageService.clearAllData();
+    
+    // Mettre à jour la version stockée
+    localStorage.setItem("app_version", APP_VERSION);
+    
+    // Informer l'utilisateur
+    notificationService.show("app.updated", "info");
+  }
+
+  // Vérification de hash de build
+  const storedHash = localStorage.getItem("build_hash");
+  if (storedHash !== BUILD_HASH) {
+    console.log(`Nouveau build détecté: ${BUILD_HASH}`);
+    mosqueTimesStorageService.clearAllData();
+    localStorage.setItem("build_hash", BUILD_HASH);
+    
+    // Forcer le rechargement de la page pour prendre en compte tous les changements
+    window.location.reload(true);
+  }
 }
 
 // Gestion globale de l'événement "logout" :

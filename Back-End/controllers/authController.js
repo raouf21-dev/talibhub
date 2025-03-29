@@ -401,6 +401,14 @@ exports.storeMosqueTimesInCookie = async (req, res) => {
 // Fonction pour stocker les horaires des mosquées dans un cookie public
 exports.storePublicMosqueTimesInCookie = async (req, res) => {
   try {
+    /*
+     * NOTE: Cette fonction est conservée pour référence historique uniquement.
+     * Nous avons migré vers une approche basée sur localStorage pour le stockage des données.
+     * Les cookies ne sont plus utilisés pour stocker les horaires de mosquée.
+     * Envisagez d'utiliser une API REST standard pour récupérer les données nécessaires.
+     */
+
+    /*
     // Définir directement le cookie sans passer par cookieManager
     const cookieName = "mosque_times_data";
     let cookieData = {};
@@ -439,10 +447,16 @@ exports.storePublicMosqueTimesInCookie = async (req, res) => {
       httpOnly: false,
       path: "/",
     });
+    */
 
-    res.status(200).json({ success: true });
+    // Retourner simplement un succès, le client utilisera localStorage
+    res.status(200).json({
+      success: true,
+      message:
+        "Cette API est dépréciée. Utilisez localStorage pour le stockage des données de mosquée.",
+    });
   } catch (error) {
-    console.error("Erreur lors du stockage des données dans le cookie:", error);
+    console.error("Erreur lors du traitement de la requête:", error);
     res.status(500).json({ error: "Erreur interne du serveur" });
   }
 };

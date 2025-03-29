@@ -74,14 +74,50 @@ const mosqueTimesStorageService = {
   // Ajouter cette méthode au service
   clearMosqueTimesCookies() {
     try {
-      document.cookie =
-        "mosque_times_data=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-      console.log("Cookie mosque_times_data effacé");
+      /*
+       * NOTE: Cette fonction est conservée pour référence mais n'est plus utilisée.
+       * Nous avons migré complètement vers localStorage pour une meilleure gestion du cache.
+       * Les cookies sont maintenant abandonnés pour le stockage des données de mosquée.
+       */
+      // document.cookie =
+      //   "mosque_times_data=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      // console.log("Cookie mosque_times_data effacé");
       return true;
     } catch (error) {
       console.error("Erreur lors de la suppression du cookie:", error);
       return false;
     }
+  },
+
+  // Vérifier la version actuelle et nettoyer les données si nécessaire
+  checkVersionAndCleanup(version) {
+    const storedVersion = localStorage.getItem("app_version");
+
+    if (storedVersion !== version) {
+      console.log(
+        `Nouvelle version détectée (${version}). Nettoyage des données.`
+      );
+      this.clearAllData();
+      localStorage.setItem("app_version", version);
+      return true; // Indique qu'une mise à jour a été effectuée
+    }
+
+    return false; // Aucune mise à jour nécessaire
+  },
+
+  // Effacer toutes les données stockées
+  clearAllData() {
+    // Nettoyer localStorage
+    localStorage.removeItem(this.storageKey);
+
+    // Nettoyer les cookies - commenté car nous n'utilisons plus les cookies
+    // this.clearMosqueTimesCookies();
+
+    // Nettoyer d'autres données si nécessaire
+    localStorage.removeItem("lastSelectedCity");
+
+    console.log("Toutes les données de cache ont été effacées");
+    return true;
   },
 };
 
