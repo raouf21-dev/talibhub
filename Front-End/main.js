@@ -39,8 +39,8 @@ import mosqueTimesStorageService from "./services/cache/mosqueTimesStorageServic
 // Importation de la constante APP_VERSION
 import { APP_VERSION } from "./utils/version.js";
 
-// Importation de la constante BUILD_HASH
-import { BUILD_HASH } from "./build/build-info.js";
+// Importation de la constante BUILD_HASH et de la fonction checkBuildHash
+import { BUILD_HASH, checkBuildHash } from "./build/build-info.js";
 
 // Fonction pour détecter et corriger les boucles de redirection
 (function detectRedirectLoop() {
@@ -251,32 +251,23 @@ async function initializeApp() {
     window.location.reload();
   });
 
-  // Vérification de version
+  // Vérifier la version du build en premier
+  // Si un nouveau build est détecté, la page sera rechargée et nous n'exécuterons pas le reste
+  const buildUpdated = checkBuildHash(() => {
+    mosqueTimesStorageService.clearAllData();
+    console.log("Données nettoyées suite à la détection d'un nouveau build");
+  });
+
+  // Si la page a été rechargée à cause d'un nouveau build, ne pas continuer
+  if (buildUpdated) return;
+
+  // Vérification de version APP_VERSION (pour les mises à jour mineures sans rechargement)
   const storedVersion = localStorage.getItem("app_version");
   if (storedVersion !== APP_VERSION) {
-    console.log(
-      `Nouvelle version détectée: ${APP_VERSION} (précédente: ${storedVersion})`
-    );
-
-    // Nettoyer les données stockées
+    console.log(`Nouvelle version détectée: ${APP_VERSION}`);
     mosqueTimesStorageService.clearAllData();
-
-    // Mettre à jour la version stockée
     localStorage.setItem("app_version", APP_VERSION);
-
-    // Informer l'utilisateur
     notificationService.show("app.updated", "info");
-  }
-
-  // Vérification de hash de build
-  const storedHash = localStorage.getItem("build_hash");
-  if (storedHash !== BUILD_HASH) {
-    console.log(`Nouveau build détecté: ${BUILD_HASH}`);
-    mosqueTimesStorageService.clearAllData();
-    localStorage.setItem("build_hash", BUILD_HASH);
-
-    // Forcer le rechargement de la page pour prendre en compte tous les changements
-    window.location.reload(true);
   }
 }
 

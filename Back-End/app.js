@@ -190,6 +190,22 @@ const langConfig = {
 app.use("/assets", express.static(path.join(__dirname, "../Front-End/assets")));
 app.use(express.static(path.join(__dirname, "../Front-End")));
 
+// Ajouter cette configuration aux middleware statiques
+app.use(
+  express.static(path.join(__dirname, "../Front-End"), {
+    setHeaders: (res, path, stat) => {
+      // Définir des en-têtes qui empêchent la mise en cache trop agressive
+      if (path.endsWith(".js") || path.endsWith(".css")) {
+        res.setHeader("Cache-Control", "no-cache");
+        res.setHeader(
+          "Content-Type",
+          path.endsWith(".js") ? "application/javascript" : "text/css"
+        );
+      }
+    },
+  })
+);
+
 // Puis plus bas, modifier la route SPA pour qu'elle ne s'applique qu'aux routes non-fichiers
 app.get("*", (req, res, next) => {
   // Ne pas traiter les requêtes API

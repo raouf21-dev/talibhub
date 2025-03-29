@@ -2,28 +2,23 @@
 export const BUILD_HASH = "${HASH}"; // Hash généré automatiquement
 export const BUILD_DATE = "${BUILD_DATE}";
 
-// Vérification de hash de build
-const storedHash = localStorage.getItem("build_hash");
-if (storedHash !== BUILD_HASH) {
-  console.log(`Nouveau build détecté: ${BUILD_HASH}`);
+// Exporter la fonction de vérification au lieu de l'exécuter immédiatement
+export function checkBuildHash(clearDataCallback) {
+  const storedHash = localStorage.getItem("build_hash");
+  if (storedHash !== BUILD_HASH) {
+    console.log(`Nouveau build détecté: ${BUILD_HASH}`);
 
-  // Récupération du service mosqueTimesStorageService
-  try {
-    // Note: Nous utilisons uniquement localStorage pour le nettoyage des données
-    // Les cookies ne sont plus utilisés pour stocker les données de mosquée
-    import("../../services/cache/mosqueTimesStorageService.js").then(
-      (module) => {
-        const mosqueTimesStorageService = module.default;
-        mosqueTimesStorageService.clearAllData();
-        localStorage.setItem("build_hash", BUILD_HASH);
+    // Nettoyer les données
+    if (typeof clearDataCallback === "function") {
+      clearDataCallback();
+    }
 
-        // Forcer le rechargement de la page pour prendre en compte tous les changements
-        window.location.reload(true);
-      }
-    );
-  } catch (error) {
-    console.error("Erreur lors du nettoyage des données:", error);
+    // Mettre à jour le hash stocké
     localStorage.setItem("build_hash", BUILD_HASH);
+
+    // Forcer le rechargement de la page
     window.location.reload(true);
+    return true;
   }
+  return false;
 }
