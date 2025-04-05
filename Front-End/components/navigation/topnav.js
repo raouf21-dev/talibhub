@@ -6,6 +6,7 @@ import { authService } from "../../services/auth/authService.js";
 // Variable pour stocker les références aux gestionnaires d'événements
 const eventListeners = {
   profileButton: null,
+  usernameDisplay: null,
   document: null,
   navLinks: [],
   hamburger: null,
@@ -22,6 +23,19 @@ function cleanupEventListeners() {
     const profileButton = document.getElementById("profile-button");
     if (profileButton) {
       profileButton.removeEventListener("click", eventListeners.profileButton);
+    }
+  }
+
+  // Supprimer l'écouteur d'événement pour username-display
+  if (eventListeners.usernameDisplay) {
+    const usernameDisplay =
+      document.getElementById("username-display") ||
+      document.getElementById("usernameDisplay");
+    if (usernameDisplay) {
+      usernameDisplay.removeEventListener(
+        "click",
+        eventListeners.usernameDisplay
+      );
     }
   }
 
@@ -87,6 +101,9 @@ export async function initializeTopNav() {
   // Éléments du DOM
   const profileDropdown = document.getElementById("profile-dropdown");
   const profileButton = document.getElementById("profile-button");
+  const usernameDisplay =
+    document.getElementById("username-display") ||
+    document.getElementById("usernameDisplay");
   const hamburgerBtn = document.getElementById("hamburgerBtn");
   const themeToggle = document.getElementById("theme-toggle");
   const logoutBtn = document.getElementById("logoutBtn");
@@ -136,6 +153,17 @@ export async function initializeTopNav() {
       profileDropdown?.classList.toggle("show");
     };
     profileButton.addEventListener("click", eventListeners.profileButton);
+  }
+
+  // Ajouter un écouteur d'événement pour username-display
+  if (usernameDisplay) {
+    eventListeners.usernameDisplay = (e) => {
+      e.stopPropagation();
+      profileDropdown?.classList.toggle("show");
+    };
+    usernameDisplay.addEventListener("click", eventListeners.usernameDisplay);
+    // Ajouter un style de curseur pour indiquer que l'élément est cliquable
+    usernameDisplay.style.cursor = "pointer";
   }
 
   // Fermer le dropdown si clic extérieur

@@ -114,7 +114,6 @@ const scrapeMasjidAbuBakrWalsall = async () => {
     } catch (error) {
         console.error('Erreur lors du scraping de Masjid Abu Bakr:', error);
         if (page) {
-            await page.screenshot({ path: 'failed_masjid_abu_bakr.png' });
         }
         throw error;
     } finally {

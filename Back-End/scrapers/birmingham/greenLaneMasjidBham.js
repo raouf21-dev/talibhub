@@ -94,7 +94,6 @@ const scrapeGreenLaneMasjidBham = async () => {
             } catch (error) {
                 retryCount++;
                 if (retryCount === maxRetries) {
-                    await page.screenshot({ path: 'failed_greenlane_masjid.png' });
                     throw error;
                 }
                 console.log(`Tentative ${retryCount}/${maxRetries}`);

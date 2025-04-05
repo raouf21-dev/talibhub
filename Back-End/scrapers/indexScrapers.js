@@ -50,13 +50,22 @@ const SCRAPER_CONFIG = {
   14: { name: "Masjid Esa ibn Maryama Birmingham", fn: scrapeEsaIbnMaryama },
   15: { name: "Hall Green Mosque Birmingham", fn: scrapeHallGreenMosque },
   16: { name: "Kings Heath Mosque Birmingham", fn: scrapeKingsHeathMosque },
-  17: { name: "Bournville Masjid and Community Centre Birmingham", fn: scrapeBournvilleMasjid },
-  18: { name: "Masjid As-Sunnah An-Nabawiyyah Birmingham", fn: scrapeMasjidAsSunnah },
+  17: {
+    name: "Bournville Masjid and Community Centre Birmingham",
+    fn: scrapeBournvilleMasjid,
+  },
+  18: {
+    name: "Masjid As-Sunnah An-Nabawiyyah Birmingham",
+    fn: scrapeMasjidAsSunnah,
+  },
   19: { name: "Masjid-e-Usman Birmingham", fn: scrapeMasjidEUsman },
   20: { name: "Masjid Al-Aqsa Walsall", fn: scrapeMasjidAlAqsaWalsall },
   21: { name: "Jame Masjid Birmingham", fn: scrapeJameMasjid },
   22: { name: "Masjid An-noor Birmingham", fn: scrapeMasjidAnnoor },
-  23: { name: "MahmudSabir Al Furqan Masjid Birmingham", fn: scrapeMahmudSabirMasjid },
+  23: {
+    name: "MahmudSabir Al Furqan Masjid Birmingham",
+    fn: scrapeMahmudSabirMasjid,
+  },
   24: { name: "Test Mosque Tourade", fn: scrapetestMosqueTourade },
 };
 
@@ -65,7 +74,7 @@ class ScraperManager {
     this.retryAttempts = new Map();
     this.MAX_RETRIES = 2;
     this.scrapers = new Map();
-    //this.setupScrapers();
+    this.setupScrapers();
   }
 
   setupScrapers() {

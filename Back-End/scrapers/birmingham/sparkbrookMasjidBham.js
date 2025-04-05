@@ -124,7 +124,6 @@ for (let [prayer, time] of Object.entries(rawTimes)) {
     } catch (error) {
         console.error('Erreur lors du scraping de Sparkbrook Masjid:', error);
         if (page) {
-            await page.screenshot({ path: 'failed_sparkbrook_masjid.png' });
         }
         throw error;
     } finally {

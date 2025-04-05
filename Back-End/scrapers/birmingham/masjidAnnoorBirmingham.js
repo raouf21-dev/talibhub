@@ -154,7 +154,6 @@ const scrapeMasjidAnnoor = async () => {
           "Sélecteur spécifique non trouvé dans l'iframe, tentative avec sélecteur alternatif..."
         );
 
-        // Essayer des sélecteurs alternatifs basés sur le screenshot
         await frame.waitForSelector("div[class*='styles__Item']", {
           timeout: 15000,
         });
@@ -221,7 +220,6 @@ const scrapeMasjidAnnoor = async () => {
       console.log("Aucun iframe trouvé, recherche sur la page principale...");
 
       try {
-        // Essayer de trouver des éléments similaires à ceux vus dans le screenshot
         await page.waitForSelector(
           "div[class*='styles__Wrapper'], div[class*='time'], div[class*='Prayer']",
           {
@@ -361,7 +359,6 @@ const scrapeMasjidAnnoor = async () => {
     // Si toujours pas de données, faire une capture d'écran pour analyse
     if (!rawData || Object.keys(rawData).length === 0) {
       console.log("Aucune donnée extraite, capture d'écran pour analyse...");
-      await page.screenshot({ path: "masjid_annoor_debug.png" });
       throw new Error("Aucune donnée extraite de la page");
     }
 

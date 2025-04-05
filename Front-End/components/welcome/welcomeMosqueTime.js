@@ -6,6 +6,15 @@ import CacheService, {
 } from "../../services/cache/cacheMosqueTime.js";
 import { API_BASE_URL } from "../../config/apiConfig.js";
 import mosqueTimesStorageService from "../../services/cache/mosqueTimesStorageService.js";
+import {
+  formatPrayerTime,
+  createMapsLink,
+  createNavigationIconSVG,
+  formatPrayerTimesHTML,
+  getCurrentDateString,
+  calculateDistance,
+  toRad,
+} from "../../services/utils/mosqueTimeUtils.js";
 
 export class WelcomeMosqueTime extends MosqueTimeManager {
   constructor() {
@@ -93,17 +102,26 @@ export class WelcomeMosqueTime extends MosqueTimeManager {
       return;
     }
 
+    // Setup initial HTML
     console.log("WelcomeMosqueTime: Setting up HTML structure");
     this.updateInterface();
 
+    // Setup event listeners
     console.log("WelcomeMosqueTime: Setting up event listeners");
     this.setupEventListeners();
 
+    // Vérifier d'abord si des données existent pour aujourd'hui
+    // et déclencher le scraping si nécessaire
+    console.log("WelcomeMosqueTime: Checking for today's data in DB");
+    await this.checkAndUpdateData();
+
+    // Load cities
     console.log("WelcomeMosqueTime: Loading cities");
     await this.loadCities();
 
-    console.log("WelcomeMosqueTime: Checking and updating data");
-    await this.checkAndUpdateData();
+    // Vérifier l'intégrité des données locales
+    console.log("WelcomeMosqueTime: Checking data integrity");
+    await this.checkAndFixDataIntegrity();
 
     // Sélectionner l'onglet "All Mosques" par défaut
     console.log("WelcomeMosqueTime: Setting default tab to All Mosques");
@@ -118,6 +136,101 @@ export class WelcomeMosqueTime extends MosqueTimeManager {
 
     // Activer l'onglet "All Mosques"
     this.switchTab("all");
+  }
+
+  // Nouvelle méthode pour vérifier et corriger l'intégrité des données
+  async checkAndFixDataIntegrity() {
+    // Si les mosquées sont chargées mais qu'aucune n'a d'horaires, essayer de les récupérer
+    if (
+      this.currentMosques &&
+      this.currentMosques.length > 0 &&
+      this.selectedCity
+    ) {
+      let hasMissingTimes = false;
+      let hasSomeTimes = false;
+
+      this.currentMosques.forEach((mosque) => {
+        if (!mosque.prayerTimes) {
+          hasMissingTimes = true;
+        } else {
+          hasSomeTimes = true;
+        }
+      });
+
+      // Si aucune mosquée n'a d'horaires, c'est probablement un problème
+      if (hasMissingTimes && !hasSomeTimes) {
+        console.warn(
+          "[DEBUG] WelcomeMosqueTime: Problème détecté - mosquées sans horaires"
+        );
+
+        try {
+          // Supprimer les données en cache pour forcer une récupération complète
+          mosqueTimesStorageService.clearAllData();
+
+          // Réessayer de charger les données
+          const cityName = this.selectedCity;
+          console.log(
+            "[DEBUG] WelcomeMosqueTime: Tentative de récupération complète pour",
+            cityName
+          );
+
+          // Simuler un clic sur le bouton de recherche pour relancer le processus
+          const searchBtn = document.getElementById(
+            "welcome-mosquetime-search"
+          );
+          if (searchBtn) {
+            console.log(
+              "[DEBUG] WelcomeMosqueTime: Relance automatique de la recherche"
+            );
+            searchBtn.click();
+          } else {
+            // Essayer de récupérer les données directement
+            const date = getCurrentDateString();
+
+            // Recharger les mosquées
+            const mosques = await api.get(
+              `/mosque-times/cities/${encodeURIComponent(cityName)}/mosques`
+            );
+
+            if (mosques && mosques.length > 0) {
+              // Charger les horaires
+              const prayerTimesData = await api.get(
+                `/mosque-times/cities/${encodeURIComponent(
+                  cityName
+                )}/date/${date}/prayer-times`
+              );
+
+              if (prayerTimesData && prayerTimesData.prayerTimes) {
+                // Mettre à jour les données
+                this.currentMosques = mosques.map((mosque) => {
+                  const prayerTime = prayerTimesData.prayerTimes.find(
+                    (pt) => String(pt.mosque_id) === String(mosque.id)
+                  );
+                  return {
+                    ...mosque,
+                    prayerTimes: prayerTime || null,
+                  };
+                });
+
+                // Mettre à jour l'affichage
+                this.updateInterface();
+                this.displayAllMosques();
+
+                // Sauvegarder dans le cache
+                mosqueTimesStorageService.saveCityData(cityName, {
+                  currentMosques: this.currentMosques,
+                });
+              }
+            }
+          }
+        } catch (error) {
+          console.error(
+            "[DEBUG] WelcomeMosqueTime: Erreur lors de la récupération des données:",
+            error
+          );
+        }
+      }
+    }
   }
 
   // Méthode pour mettre à jour l'interface selon la langue
@@ -472,105 +585,108 @@ export class WelcomeMosqueTime extends MosqueTimeManager {
 
   // Méthode utilitaire pour formater les horaires
   formatPrayerTimes(times) {
-    //console.log("WelcomeMosqueTime: Formatting prayer times:", times);
-    if (!times) {
-      console.warn("WelcomeMosqueTime: No prayer times provided");
-      return `<p>${this.texts.prayerNotAvailable}</p>`;
-    }
-
-    const prayerTimes = times.prayer_times || times;
-
-    // Fonction pour formater l'heure sans les secondes
-    const formatTime = (time) => {
-      if (!time) return "--:--";
-      return time.substring(0, 5); // Garde uniquement HH:MM
-    };
-
-    return `
-        <div class="prayer-times-grid">
-            <div class="prayer-item">
-                <span class="prayer-label">Fajr</span>
-                <span class="jamaa-time">${formatTime(prayerTimes.fajr)}</span>
-            </div>
-            <div class="prayer-item">
-                <span class="prayer-label">Dhuhr</span>
-                <span class="jamaa-time">${formatTime(prayerTimes.dhuhr)}</span>
-            </div>
-            <div class="prayer-item">
-                <span class="prayer-label">Asr</span>
-                <span class="jamaa-time">${formatTime(prayerTimes.asr)}</span>
-            </div>
-            <div class="prayer-item">
-                <span class="prayer-label">Maghrib</span>
-                <span class="jamaa-time">${formatTime(
-                  prayerTimes.maghrib
-                )}</span>
-            </div>
-            <div class="prayer-item">
-                <span class="prayer-label">Isha</span>
-                <span class="jamaa-time">${formatTime(prayerTimes.isha)}</span>
-            </div>
-        </div>
-        <div class="additional-times-grid">
-            <div class="prayer-item">
-                <span class="prayer-label">Jumuah1</span>
-                <span class="jamaa-time">${formatTime(
-                  prayerTimes.jumuah1
-                )}</span>
-            </div>
-            <div class="prayer-item">
-                <span class="prayer-label">Jumuah2</span>
-                <span class="jamaa-time">${formatTime(
-                  prayerTimes.jumuah2
-                )}</span>
-            </div>
-            <div class="prayer-item">
-                <span class="prayer-label">Jumuah3</span>
-                <span class="jamaa-time">${formatTime(
-                  prayerTimes.jumuah3
-                )}</span>
-            </div>
-            <div class="prayer-item">
-                <span class="prayer-label">Jumuah4</span>
-                <span class="jamaa-time">${formatTime(
-                  prayerTimes.jumuah4
-                )}</span>
-            </div>
-            <div class="prayer-item">
-                <span class="prayer-label">Tarawih</span>
-                <span class="jamaa-time">${formatTime(
-                  prayerTimes.tarawih
-                )}</span>
-            </div>
-        </div>
-    `;
+    if (!times) return "<p>Horaires non disponibles</p>";
+    return formatPrayerTimesHTML(times);
   }
 
   // Nouvelle méthode utilitaire pour créer des liens de navigation à partir d'une adresse
   createMapsLink(address, name) {
-    if (!address) return "";
-    // Encoder l'adresse et le nom pour l'URL
-    const encodedAddress = encodeURIComponent(`${name}, ${address}`);
-    return `https://maps.google.com/?q=${encodedAddress}`;
+    return createMapsLink(address, name);
   }
 
   // Méthode pour référencer l'icône SVG externe
   createNavigationIconSVG() {
-    // Au lieu de créer un SVG en ligne, on utilise le fichier dans les assets
-    return `<img src="/assets/icons/navmap-icone.svg" class="navigation-icon" alt="Icône de navigation routière">`;
+    return createNavigationIconSVG();
   }
 
   // Surcharge pour l'affichage des mosquées
   async displayAllMosques() {
-    console.log("WelcomeMosqueTime: Displaying all mosques");
+    console.log("[DEBUG] WelcomeMosqueTime: Displaying all mosques");
     const grid = document.getElementById("welcome-mosquetime-grid");
     if (!grid) {
-      console.error("WelcomeMosqueTime: Grid element not found");
+      console.error("[DEBUG] WelcomeMosqueTime: Grid element not found");
       return;
     }
-    if (!this.currentMosques.length) {
-      console.warn("WelcomeMosqueTime: No mosques to display");
+    if (!this.currentMosques || !this.currentMosques.length) {
+      console.warn("[DEBUG] WelcomeMosqueTime: No mosques to display");
       return;
+    }
+
+    // Vérifier si les horaires sont présents
+    let hasMissingTimes = false;
+    let hasSomeTimes = false;
+
+    this.currentMosques.forEach((mosque) => {
+      if (!mosque.prayerTimes) {
+        hasMissingTimes = true;
+        console.warn(
+          `[DEBUG] WelcomeMosqueTime: Mosquée ${mosque.id} (${mosque.name}) n'a pas d'horaires`
+        );
+      } else {
+        hasSomeTimes = true;
+        console.log(
+          `[DEBUG] WelcomeMosqueTime: Mosquée ${mosque.id} (${mosque.name}) a des horaires`,
+          mosque.prayerTimes
+        );
+      }
+    });
+
+    // Si toutes les mosquées n'ont pas d'horaires, essayer une dernière tentative de récupération
+    if (hasMissingTimes && !hasSomeTimes && this.selectedCity) {
+      console.log(
+        "[DEBUG] WelcomeMosqueTime: Tentative de récupération d'urgence des horaires"
+      );
+      try {
+        const date = getCurrentDateString();
+        const cityName = this.selectedCity;
+
+        // Appel direct à l'API pour récupérer les horaires
+        const prayerTimesData = await api.get(
+          `/mosque-times/cities/${encodeURIComponent(
+            cityName
+          )}/date/${date}/prayer-times`
+        );
+
+        console.log(
+          "[DEBUG] WelcomeMosqueTime: Récupération d'urgence - résultat:",
+          prayerTimesData
+        );
+
+        if (
+          prayerTimesData &&
+          prayerTimesData.prayerTimes &&
+          prayerTimesData.prayerTimes.length > 0
+        ) {
+          // Mettre à jour les horaires des mosquées
+          this.currentMosques = this.currentMosques.map((mosque) => {
+            const prayerTime = prayerTimesData.prayerTimes.find(
+              (pt) => String(pt.mosque_id) === String(mosque.id)
+            );
+            return {
+              ...mosque,
+              prayerTimes: prayerTime || null,
+            };
+          });
+
+          // Mettre à jour le cache
+          mosqueTimesStorageService.saveCityData(cityName, {
+            currentMosques: this.currentMosques,
+          });
+
+          // Vérifier à nouveau les horaires
+          hasMissingTimes = false;
+          this.currentMosques.forEach((mosque) => {
+            if (!mosque.prayerTimes) {
+              hasMissingTimes = true;
+            }
+          });
+        }
+      } catch (error) {
+        console.error(
+          "[DEBUG] WelcomeMosqueTime: Échec de la récupération d'urgence",
+          error
+        );
+      }
     }
 
     grid.innerHTML =
@@ -594,7 +710,11 @@ export class WelcomeMosqueTime extends MosqueTimeManager {
         </a>
       </div>
       <div class="mosque-prayer-times">
-        ${this.formatPrayerTimes(mosque.prayerTimes)}
+        ${
+          mosque.prayerTimes
+            ? this.formatPrayerTimes(mosque.prayerTimes)
+            : `<p class="mosque-no-times">${this.texts.prayerNotAvailable}</p>`
+        }
       </div>
     </div>
   `
@@ -667,40 +787,76 @@ export class WelcomeMosqueTime extends MosqueTimeManager {
         cityName
       );
 
-      // Vérifier si les données sont déjà en cache
+      // Sauvegarder la ville sélectionnée
+      this.selectedCity = cityName;
+
+      // Vérifier dans le storage en premier
       const cachedData = mosqueTimesStorageService.getCityData(cityName);
+      console.log(
+        "[DEBUG] WelcomeMosqueTime: Données en cache pour",
+        cityName,
+        cachedData ? "trouvées" : "non trouvées"
+      );
 
       if (cachedData) {
+        console.log(
+          "[DEBUG] WelcomeMosqueTime: Utilisation des données en cache pour",
+          cityName,
+          cachedData
+        );
         this.currentMosques = cachedData.currentMosques;
         this.populateMosqueSelect(this.currentMosques);
         this.displayAllMosques();
         this.updateDateDisplay(cityName);
-
-        // Vérifier quel onglet est actif
-        const activeTab = document.querySelector(".mosquetime-tab.active");
-        if (activeTab) {
-          this.switchTab(activeTab.dataset.tab);
-        }
-
+        localStorage.setItem("lastSelectedCity", cityName);
         return;
       }
 
       // Si données non trouvées, charger depuis l'API
       try {
-        const date = mosqueTimesStorageService.getCurrentDateString();
+        const date = getCurrentDateString();
+        console.log(
+          "[DEBUG] WelcomeMosqueTime: Chargement des données pour la date",
+          date
+        );
+
+        // Charger les mosquées
+        console.log(
+          "[DEBUG] WelcomeMosqueTime: Appel API pour les mosquées de",
+          cityName
+        );
         const mosques = await api.get(
           `/mosque-times/cities/${encodeURIComponent(cityName)}/mosques`
         );
+        console.log("[DEBUG] WelcomeMosqueTime: Mosquées reçues:", mosques);
 
         if (!mosques || mosques.length === 0) {
-          console.log("WelcomeMosqueTime: No mosques found for city", cityName);
+          console.warn(
+            "[DEBUG] WelcomeMosqueTime: No mosques found for city",
+            cityName
+          );
           return;
         }
 
+        // Charger les horaires
+        console.log(
+          "[DEBUG] WelcomeMosqueTime: Appel API pour les horaires:",
+          `/mosque-times/cities/${encodeURIComponent(
+            cityName
+          )}/date/${date}/prayer-times`
+        );
         const prayerTimesData = await api.get(
           `/mosque-times/cities/${encodeURIComponent(
             cityName
           )}/date/${date}/prayer-times`
+        );
+        console.log(
+          "[DEBUG] WelcomeMosqueTime: Horaires reçus:",
+          prayerTimesData
+        );
+        console.log(
+          "[DEBUG] WelcomeMosqueTime: prayerTimes disponible:",
+          !!prayerTimesData?.prayerTimes
         );
 
         // Associer les horaires aux mosquées
@@ -708,11 +864,22 @@ export class WelcomeMosqueTime extends MosqueTimeManager {
           const prayerTime = prayerTimesData.prayerTimes?.find(
             (pt) => String(pt.mosque_id) === String(mosque.id)
           );
+          console.log(
+            "[DEBUG] WelcomeMosqueTime: Horaire pour mosquée",
+            mosque.id,
+            "trouvé:",
+            !!prayerTime
+          );
           return {
             ...mosque,
             prayerTimes: prayerTime || null,
           };
         });
+
+        console.log(
+          "[DEBUG] WelcomeMosqueTime: Mosquées traitées:",
+          this.currentMosques
+        );
 
         // Mettre à jour l'interface
         this.populateMosqueSelect(this.currentMosques);
@@ -727,13 +894,20 @@ export class WelcomeMosqueTime extends MosqueTimeManager {
         }
 
         // Stocker les données dans localStorage
+        console.log(
+          "[DEBUG] WelcomeMosqueTime: Sauvegarde des données en cache pour",
+          cityName
+        );
         mosqueTimesStorageService.saveCityData(cityName, {
           currentMosques: this.currentMosques,
         });
 
         notificationService.show("mosque.city.selected", "success");
       } catch (error) {
-        console.warn("Erreur lors de la récupération des données:", error);
+        console.warn(
+          "[DEBUG] WelcomeMosqueTime: Erreur lors de la récupération des données:",
+          error
+        );
         this.displayDefaultState();
       }
     } catch (error) {
@@ -800,25 +974,104 @@ export class WelcomeMosqueTime extends MosqueTimeManager {
 
   async checkAndUpdateData() {
     try {
-      const date = this.getCurrentDateString();
+      const date = this.getFormattedDate();
+      console.log(
+        "[DEBUG] WelcomeMosqueTime: Vérification des données pour la date:",
+        date
+      );
 
-      // Correction: ajouter un slash au début du chemin
-      const dataExists = await api.get(`/mosque-times/exists/${date}`);
+      // FORCER le scraping quelle que soit la réponse
+      console.log(
+        "[DEBUG] WelcomeMosqueTime: Forçage du scraping pour s'assurer d'avoir des données récentes"
+      );
 
-      if (!dataExists.exists) {
-        console.log("WelcomeMosqueTime: No data found, reporting missing data");
-
-        // Correction: ajouter un slash au début du chemin
-        await api.post(`/mosque-times/report-missing-data/${date}`, {
-          source: "welcome-page",
-        });
-
-        // Informer l'utilisateur que les données sont en cours de génération
+      try {
+        // Afficher une notification de mise à jour
         notificationService.show("mosque.data.updating", "info");
+
+        // Utiliser la route publique pour déclencher un scraping complet
+        const response = await api.post(
+          `/mosque-times/report-missing-data/${date}`,
+          {
+            source: "welcome-page-forced",
+          }
+        );
+
+        console.log(
+          "[DEBUG] WelcomeMosqueTime: Réponse du scraping forcé:",
+          response
+        );
+
+        // Notifier l'utilisateur
+        notificationService.show("mosque.data.updating.background", "info");
+
+        // Si une ville est déjà sélectionnée, recharger ses données
+        if (this.selectedCity) {
+          // Vider le cache pour cette ville
+          mosqueTimesStorageService.clearAllData();
+
+          // Recharger les données
+          await this.handleCitySelection(this.selectedCity);
+          console.log(
+            "[DEBUG] WelcomeMosqueTime: Données rechargées pour",
+            this.selectedCity
+          );
+        } else {
+          // Si aucune ville n'est sélectionnée, sélectionner Birmingham par défaut
+          await this.handleCitySelection("Birmingham");
+          console.log(
+            "[DEBUG] WelcomeMosqueTime: Birmingham sélectionné par défaut"
+          );
+        }
+
+        // Notification finale
+        notificationService.show("mosque.data.updated", "success");
+      } catch (error) {
+        console.error(
+          "[DEBUG] WelcomeMosqueTime: Erreur lors du scraping forcé:",
+          error
+        );
+
+        // Tenter une dernière solution - mettre à jour manuellement le stockage
+        if (this.selectedCity) {
+          await this.handleCitySelection(this.selectedCity);
+        } else {
+          await this.handleCitySelection("Birmingham");
+        }
       }
     } catch (error) {
-      console.error("WelcomeMosqueTime: Error checking data:", error);
-      notificationService.show("mosque.data.error", "warning");
+      console.error(
+        "[DEBUG] WelcomeMosqueTime: Erreur lors de la vérification des données:",
+        error
+      );
+    }
+  }
+
+  // Fonction pour déclencher le scraping (utilise la route publique)
+  async triggerScrapingForAllCities() {
+    try {
+      console.log("[DEBUG] WelcomeMosqueTime: Signalement pour scraping");
+      const date = this.getCurrentDateString();
+
+      // Utiliser la route publique qui ne nécessite pas d'authentification
+      const response = await api.post(
+        `/mosque-times/report-missing-data/${date}`,
+        {
+          source: "welcome-page",
+        }
+      );
+
+      console.log(
+        "[DEBUG] WelcomeMosqueTime: Résultat du signalement:",
+        response
+      );
+      return response;
+    } catch (error) {
+      console.error(
+        "[DEBUG] WelcomeMosqueTime: Erreur lors du signalement pour scraping:",
+        error
+      );
+      throw error;
     }
   }
 
@@ -856,30 +1109,46 @@ export class WelcomeMosqueTime extends MosqueTimeManager {
   }
 
   calculateDistance(pos1, pos2) {
-    if (!pos1 || !pos2) return Infinity;
-
-    const R = 6371; // Rayon de la Terre en km
-    const lat1 = this.toRad(pos1.latitude);
-    const lat2 = this.toRad(pos2.latitude);
-    const dLat = this.toRad(pos2.latitude - pos1.latitude);
-    const dLon = this.toRad(pos2.longitude - pos1.longitude);
-
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;
+    return calculateDistance(pos1, pos2);
   }
 
   toRad(value) {
-    return (value * Math.PI) / 180;
+    return toRad(value);
+  }
+
+  // Override getCurrentDateString to use our fixed getFormattedDate method
+  getCurrentDateString() {
+    // Utiliser notre méthode getFormattedDate qui corrige les dates futures
+    return this.getFormattedDate();
   }
 
   getFormattedDate() {
     const now = new Date();
+
+    // Extraction directe des composants de date
     const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const month = String(now.getMonth() + 1).padStart(2, "0"); // Janvier = 0
     const day = String(now.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
+
+    // Format ISO de la date (YYYY-MM-DD)
+    const formattedDate = `${year}-${month}-${day}`;
+
+    console.log(
+      `[DEBUG] WelcomeMosqueTime: Date pour le scraping : ${formattedDate} (aujourd'hui)`
+    );
+    console.log(
+      `[DEBUG] WelcomeMosqueTime: Détails de date : année=${year}, mois=${month}, jour=${day}`
+    );
+
+    // Vérification supplémentaire pour s'assurer du format valide
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(formattedDate)) {
+      console.error(
+        `[DEBUG] WelcomeMosqueTime: Format de date invalide détecté : ${formattedDate}`
+      );
+      // Date de secours en cas de problème
+      return "2025-04-05";
+    }
+
+    return formattedDate;
   }
 }

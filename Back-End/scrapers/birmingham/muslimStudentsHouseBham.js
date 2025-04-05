@@ -107,7 +107,6 @@ const scrapeMSHUK = async () => {
             } catch (error) {
                 retryCount++;
                 if (retryCount === maxRetries) {
-                    await page.screenshot({ path: 'failed_mshuk.png' });
                     throw error;
                 }
                 console.log(`Tentative ${retryCount}/${maxRetries}`);

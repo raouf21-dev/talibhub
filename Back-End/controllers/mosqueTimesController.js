@@ -80,10 +80,39 @@ class MosqueTimesController {
 
   async scrapeAllCities(req, res) {
     try {
+      // Si c'est une requête HTTP avec réponse différée
+      let isHttpRequest = req && res;
+      let responseAlreadySent = false;
+
+      // Si c'est une requête HTTP, envoyer immédiatement une réponse pour ne pas bloquer le client
+      if (isHttpRequest) {
+        res.json({
+          message: "Scraping démarré avec succès",
+          status: "processing",
+          requestId: Date.now().toString(), // Identifiant unique pour cette requête
+        });
+        responseAlreadySent = true;
+      }
+
+      // Stocker les résultats pour les rendre disponibles aux clients
+      const scrapingResults = {
+        cities: {},
+        completedAt: null,
+        status: "processing",
+      };
+
+      // Ajouter cette requête à la liste des scrapings en cours
+      global.activeScrapings = global.activeScrapings || {};
+      const requestId = Date.now().toString();
+      global.activeScrapings[requestId] = scrapingResults;
+
+      // Exécuter le scraping
       const cities = await mosqueTimesModel.getAllCities();
       for (const city of cities) {
         const mosques = await mosqueTimesModel.getMosquesByCity(city);
         const data = await this.scrapingService.scrapeCity(city, mosques);
+
+        // Collecter les données pour chaque ville au fur et à mesure
         for (const item of data) {
           await mosqueTimesModel.savePrayerTimes(
             item.mosqueId,
@@ -91,16 +120,164 @@ class MosqueTimesController {
             item.times
           );
         }
+
+        // Récupérer les données à jour pour cette ville
+        const date = new Date().toISOString().split("T")[0];
+        const prayerTimesData = await this.getPrayerTimesForCityAndDateInternal(
+          city,
+          date
+        );
+
+        // Stocker les résultats pour cette ville
+        scrapingResults.cities[city] = {
+          mosques,
+          prayerTimesData,
+        };
+
+        // Mettre à jour le statut global
+        scrapingResults.lastUpdatedCity = city;
       }
-      res.json({
-        message: "Scraping terminé avec succès pour toutes les villes",
-      });
+
+      // Marquer le scraping comme terminé
+      scrapingResults.completedAt = new Date().toISOString();
+      scrapingResults.status = "completed";
+
+      console.log("Scraping en arrière-plan terminé avec succès");
+
+      // La réponse a déjà été envoyée (processing),
+      // les données seront récupérées via l'endpoint de vérification
+      return scrapingResults;
     } catch (error) {
       console.error("Erreur lors du scraping pour toutes les villes :", error);
-      res
-        .status(500)
-        .json({ message: "Erreur lors du scraping", error: error.message });
+
+      // Mettre à jour le statut global
+      if (global.activeScrapings && global.activeScrapings[requestId]) {
+        global.activeScrapings[requestId].status = "failed";
+        global.activeScrapings[requestId].error = error.message;
+      }
+
+      if (req && res && !responseAlreadySent) {
+        res
+          .status(500)
+          .json({ message: "Erreur lors du scraping", error: error.message });
+      }
+      return false;
     }
+  }
+
+  // Méthode interne pour récupérer les horaires par ville et date (sans réponse HTTP)
+  async getPrayerTimesForCityAndDateInternal(city, date) {
+    try {
+      const mosques = await mosqueTimesModel.getMosquesByCity(city);
+
+      if (mosques.length === 0) {
+        return { message: "Aucune mosquée trouvée dans cette ville." };
+      }
+
+      const prayerTimesPromises = mosques.map((mosque) =>
+        mosqueTimesModel.getPrayerTimes(mosque.id, date)
+      );
+
+      const prayerTimesResults = await Promise.all(prayerTimesPromises);
+      const formattedPrayerTimes = prayerTimesResults
+        .filter((times) => times !== null && times !== undefined)
+        .map((times, index) => {
+          // Formater les horaires et créer un objet complet avec l'ID de la mosquée
+          const formattedTimes = { ...times };
+          Object.keys(formattedTimes).forEach((key) => {
+            if (formattedTimes[key] instanceof Date) {
+              formattedTimes[key] = formattedTimes[key]
+                .toTimeString()
+                .slice(0, 5);
+            }
+          });
+          return {
+            mosque_id: mosques[index].id,
+            ...formattedTimes,
+          };
+        });
+
+      return {
+        cityName: city,
+        date: date,
+        prayerTimes: formattedPrayerTimes,
+      };
+    } catch (error) {
+      console.error(
+        "Erreur lors de la récupération des horaires de prière :",
+        error
+      );
+      throw error;
+    }
+  }
+
+  // Nouvel endpoint pour vérifier le statut d'un scraping
+  async checkScrapingStatus(req, res) {
+    const { requestId } = req.params;
+    console.log(
+      `[DEBUG] Vérification du statut de scraping pour requestId: ${requestId}`
+    );
+
+    // Initialiser global.activeScrapings s'il n'existe pas encore
+    if (!global.activeScrapings) {
+      global.activeScrapings = {};
+      console.log(`[DEBUG] Initialisation de global.activeScrapings`);
+    }
+
+    // Si aucun scraping n'est trouvé pour cet ID
+    if (!global.activeScrapings[requestId]) {
+      console.log(`[DEBUG] Aucun scraping trouvé pour requestId: ${requestId}`);
+
+      // Vérifier si des scrapings sont en cours
+      const activeScrapings = Object.keys(global.activeScrapings);
+      if (activeScrapings.length > 0) {
+        // Prendre le scraping actif le plus récent
+        const latestRequestId = activeScrapings[activeScrapings.length - 1];
+        console.log(
+          `[DEBUG] Redirection vers le scraping actif le plus récent: ${latestRequestId}`
+        );
+
+        // Rediriger la requête vers le scraping le plus récent
+        return res.json({
+          ...global.activeScrapings[latestRequestId],
+          requestId: latestRequestId,
+          redirected: true,
+          originalRequestId: requestId,
+        });
+      }
+
+      // Si aucun scraping n'est en cours, retourner une erreur
+      return res.status(404).json({
+        message: "Aucun scraping en cours",
+        status: "not_found",
+        error: "Scraping non trouvé",
+      });
+    }
+
+    const scrapingResult = global.activeScrapings[requestId];
+    console.log(
+      `[DEBUG] Statut actuel du scraping ${requestId}: ${scrapingResult.status}`
+    );
+
+    // Si le scraping est terminé, supprimer la référence après un certain temps
+    if (
+      scrapingResult.status === "completed" ||
+      scrapingResult.status === "failed"
+    ) {
+      console.log(
+        `[DEBUG] Scraping ${requestId} terminé (${scrapingResult.status}), programmation du nettoyage`
+      );
+
+      // Programmer la suppression après 5 minutes
+      setTimeout(() => {
+        if (global.activeScrapings && global.activeScrapings[requestId]) {
+          console.log(`[DEBUG] Nettoyage du scraping terminé ${requestId}`);
+          delete global.activeScrapings[requestId];
+        }
+      }, 5 * 60 * 1000);
+    }
+
+    return res.json(scrapingResult);
   }
 
   async scrapeByCity(req, res) {
@@ -248,19 +425,36 @@ class MosqueTimesController {
   async getPrayerTimesForCityAndDate(req, res) {
     try {
       const { city, date } = req.params;
+      console.log(
+        `[DEBUG] getPrayerTimesForCityAndDate: Requête pour ville=${city}, date=${date}`
+      );
+
       const mosques = await mosqueTimesModel.getMosquesByCity(city);
 
       if (mosques.length === 0) {
+        console.log(
+          `[DEBUG] getPrayerTimesForCityAndDate: Aucune mosquée trouvée pour la ville ${city}`
+        );
         return res
           .status(404)
           .json({ message: "Aucune mosquée trouvée dans cette ville." });
       }
+
+      console.log(
+        `[DEBUG] getPrayerTimesForCityAndDate: ${mosques.length} mosquées trouvées pour ${city}`
+      );
 
       const prayerTimesPromises = mosques.map((mosque) =>
         mosqueTimesModel.getPrayerTimes(mosque.id, date)
       );
 
       const prayerTimesResults = await Promise.all(prayerTimesPromises);
+      console.log(
+        `[DEBUG] getPrayerTimesForCityAndDate: Résultats récupérés=${
+          prayerTimesResults.filter((r) => r !== null).length
+        }/${prayerTimesResults.length}`
+      );
+
       const formattedPrayerTimes = prayerTimesResults
         .filter((times) => times !== null && times !== undefined)
         .map((times) => {
@@ -283,6 +477,49 @@ class MosqueTimesController {
         })
         .filter((times) => times !== null);
 
+      console.log(
+        `[DEBUG] getPrayerTimesForCityAndDate: Horaires formatés pour réponse=${formattedPrayerTimes.length} mosquées`
+      );
+
+      // Si aucun horaire n'est trouvé, déclencher un scraping (peut être en arrière-plan)
+      if (formattedPrayerTimes.length === 0) {
+        console.log(
+          `[DEBUG] getPrayerTimesForCityAndDate: Aucun horaire trouvé, déclenchement du scraping en arrière-plan`
+        );
+        // Lancer un scraping en arrière-plan pour cette ville
+        setImmediate(async () => {
+          try {
+            const mosques = await mosqueTimesModel.getMosquesByCity(city);
+            console.log(
+              `[DEBUG] Scraping en arrière-plan pour ${city}, ${mosques.length} mosquées`
+            );
+            const scrapeService = new ScrapingService();
+            const data = await scrapeService.scrapeCity(city, mosques);
+            console.log(
+              `[DEBUG] Résultats du scraping: ${data.length} mosquées scrapées`
+            );
+            for (const item of data) {
+              console.log(
+                `[DEBUG] Sauvegarde des données pour mosquée ${item.mosqueId}`
+              );
+              await mosqueTimesModel.savePrayerTimes(
+                item.mosqueId,
+                item.date,
+                item.times
+              );
+            }
+            console.log(
+              `[DEBUG] Scraping en arrière-plan terminé pour ${city}`
+            );
+          } catch (error) {
+            console.error(
+              `[DEBUG] Erreur lors du scraping en arrière-plan:`,
+              error
+            );
+          }
+        });
+      }
+
       return res.json({
         prayerTimes: formattedPrayerTimes,
         message:
@@ -291,6 +528,7 @@ class MosqueTimesController {
             : undefined,
       });
     } catch (error) {
+      console.error(`[DEBUG] getPrayerTimesForCityAndDate: Erreur:`, error);
       return res
         .status(500)
         .json({ message: "Erreur du serveur", error: error.message });
@@ -348,17 +586,11 @@ class MosqueTimesController {
           "Déclenchement du scraping en arrière-plan suite à un signalement"
         );
 
-        // Utiliser la méthode existante pour le scraping, mais sans attendre la réponse
+        // Utiliser la méthode scrapeAllCities sans les paramètres req/res
         (async () => {
           try {
             console.log("Début du scraping pour toutes les villes");
-
-            // Correction: Lier explicitement le contexte 'this' à la méthode
-            await this.scrapeAllCitiesBackground.bind(this)();
-
-            // Alternative: Appeler directement la méthode avec le bon contexte
-            // await this.scrapeAllCitiesBackground();
-
+            await this.scrapeAllCities.bind(this)();
             console.log("Scraping en arrière-plan terminé avec succès");
           } catch (backgroundError) {
             console.error(
@@ -374,28 +606,6 @@ class MosqueTimesController {
         success: false,
         message: "Une erreur est survenue lors du traitement de votre demande",
       });
-    }
-  }
-
-  // Nouvelle méthode qui exécute scrapeAllCities sans envoyer de réponse HTTP
-  async scrapeAllCitiesBackground() {
-    try {
-      const cities = await mosqueTimesModel.getAllCities();
-      for (const city of cities) {
-        const mosques = await mosqueTimesModel.getMosquesByCity(city);
-        const data = await this.scrapingService.scrapeCity(city, mosques);
-        for (const item of data) {
-          await mosqueTimesModel.savePrayerTimes(
-            item.mosqueId,
-            item.date,
-            item.times
-          );
-        }
-      }
-      return true;
-    } catch (error) {
-      console.error("Erreur lors du scraping en arrière-plan :", error);
-      return false;
     }
   }
 }
@@ -420,4 +630,5 @@ module.exports = {
   setSelectedCity: controller.setSelectedCity.bind(controller),
   getSelectedCity: controller.getSelectedCity.bind(controller),
   reportMissingData: controller.reportMissingData.bind(controller),
+  checkScrapingStatus: controller.checkScrapingStatus.bind(controller),
 };

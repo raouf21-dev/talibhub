@@ -59,9 +59,6 @@ const scrapeEsaIbnMaryama = async () => {
 
     await page.waitForSelector("table.dptTimetable", { timeout: 15000 });
 
-    // Prendre une capture d'écran pour débogage
-    await page.screenshot({ path: "debug_esa_page.png" });
-
     const rawTimes = await page.evaluate(() => {
       const prayerTimes = {};
 

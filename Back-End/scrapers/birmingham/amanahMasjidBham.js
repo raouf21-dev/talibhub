@@ -129,7 +129,6 @@ const scrapeAmanahMasjid = async () => {
     } catch (error) {
         console.error('Erreur lors du scraping de Amanah Masjid:', error);
         if (page) {
-            await page.screenshot({ path: 'failed_amanah_masjid.png' });
         }
         throw error;
     } finally {

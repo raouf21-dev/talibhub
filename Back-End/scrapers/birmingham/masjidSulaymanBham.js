@@ -72,17 +72,15 @@ const scrapeMasjidSulayman = async () => {
       );
 
       if (jamatRow) {
-        // Extraire tous les td avec classe jamah ou commençant par jamah
-        const jamatCells = Array.from(
-          jamatRow.querySelectorAll('td[class^="jamah"], td.jamah')
-        );
+        // Extraire toutes les cellules TD dans la rangée, indépendamment de leur classe
+        const allCells = Array.from(jamatRow.querySelectorAll("td"));
 
-        // Associer chaque cellule à sa prière correspondante
-        jamatCells.forEach((cell, index) => {
-          if (index < prayers.length) {
-            const time = cell.textContent.trim();
+        // Associer chaque cellule à sa prière correspondante par ordre
+        prayers.forEach((prayer, index) => {
+          if (index < allCells.length) {
+            const time = allCells[index].textContent.trim();
             if (time && !time.includes("-")) {
-              prayerTimes[prayers[index]] = time;
+              prayerTimes[prayer] = time;
             }
           }
         });

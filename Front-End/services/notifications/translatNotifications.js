@@ -35,6 +35,15 @@ const translations = {
         "mosque.city.selected": "Ville sélectionnée avec succès",
         "mosque.location.found": "Ville la plus proche trouvée",
         "mosque.data.updated": "Horaires mis à jour avec succès",
+        "mosque.data.updating.background":
+          "Mise à jour des horaires lancée en arrière-plan...",
+        "mosque.data.waiting": "En attente des données d'horaires de prière",
+        "mosque.data.ready":
+          "Les horaires de prière sont maintenant disponibles",
+        "mosque.data.timeout":
+          "Temps d'attente dépassé. Veuillez réessayer plus tard",
+        "mosque.data.error":
+          "Erreur lors de la récupération des horaires de prière",
 
         // --- Duas ---
         "dua.times.loaded": "Horaires chargés avec succès",
@@ -117,6 +126,8 @@ const translations = {
         // --- Mosquées ---
         "mosque.geolocation.searching": "Recherche de votre position...",
         "mosque.data.updating": "Mise à jour des horaires en cours...",
+        "mosque.data.updating.background":
+          "Mise à jour des horaires lancée en arrière-plan...",
 
         // --- Duas ---
         "dua.geolocation.searching": "Recherche de votre position...",
@@ -254,6 +265,12 @@ const translations = {
         "mosque.city.selected": "City selected successfully",
         "mosque.location.found": "Nearest city found",
         "mosque.data.updated": "Prayer times updated successfully",
+        "mosque.data.updating.background":
+          "Prayer times update started in background...",
+        "mosque.data.waiting": "Waiting for prayer times data to be available",
+        "mosque.data.ready": "Prayer times data is now available",
+        "mosque.data.timeout": "Waiting time exceeded. Please try again later",
+        "mosque.data.error": "Error while retrieving prayer times data",
 
         // --- Duas ---
         "dua.times.loaded": "Prayer times loaded successfully",
@@ -330,6 +347,8 @@ const translations = {
         // --- Mosques ---
         "mosque.geolocation.searching": "Searching for your location...",
         "mosque.data.updating": "Updating prayer times...",
+        "mosque.data.updating.background":
+          "Mise à jour des horaires lancée en arrière-plan...",
 
         // --- Duas ---
         "dua.geolocation.searching": "Searching for your location...",

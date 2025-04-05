@@ -20,6 +20,8 @@ router.post(
   mosqueTimesController.reportMissingData
 );
 
+router.get("/scraping-status/:requestId", mosqueTimesController.checkScrapingStatus);
+
 // Routes protégées (avec authentification)
 const protectedRoutes = [
   {

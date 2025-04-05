@@ -1,9 +1,15 @@
 import { api } from "../../services/api/dynamicLoader.js";
 import { notificationService } from "../../services/notifications/notificationService.js";
-import CacheService, {
-  getMidnightTimestamp,
-} from "../../services/cache/cacheMosqueTime.js";
 import mosqueTimesStorageService from "../../services/cache/mosqueTimesStorageService.js";
+import {
+  formatPrayerTime,
+  createMapsLink,
+  createNavigationIconSVG,
+  formatPrayerTimesHTML,
+  getCurrentDateString,
+  calculateDistance,
+  toRad,
+} from "../../services/utils/mosqueTimeUtils.js";
 
 export class MosqueTimeManager {
   constructor() {
@@ -129,20 +135,6 @@ export class MosqueTimeManager {
     document.head.appendChild(styleElement);
   }
 
-  // Nouvelle méthode pour créer des liens de navigation à partir d'une adresse
-  createMapsLink(address, name) {
-    if (!address) return "";
-    // Encoder l'adresse et le nom pour l'URL
-    const encodedAddress = encodeURIComponent(`${name}, ${address}`);
-    return `https://maps.google.com/?q=${encodedAddress}`;
-  }
-
-  // Méthode pour référencer l'icône SVG externe
-  createNavigationIconSVG() {
-    // Utiliser le fichier SVG dans les assets
-    return `<img src="/assets/icons/navmap-icone.svg" class="navigation-icon" alt="Icône de navigation routière">`;
-  }
-
   // --- Vérification et mise à jour des données si nécessaire ---
   async checkAndUpdateData() {
     try {
@@ -177,30 +169,107 @@ export class MosqueTimeManager {
     }
   }
 
-  // --- Helper to get current date as string ---
-  getCurrentDateString() {
-    return this.currentDate.toISOString().split("T")[0];
-  }
-
   // --- Déclencher le scraping pour toutes les villes ---
   async triggerScrapingForAllCities() {
     try {
       console.log("Starting scraping for all cities");
-      const data = await api.post("/mosque-times/scrape-all");
 
-      if (data.hasErrors) {
-        // Afficher une seule notification d'erreur générique
-        notificationService.show("mosque.scrape.partial_error", "warning");
-      } else {
+      // Afficher le loader et la notification
+      const loader = document.querySelector(".loader-container");
+      if (loader) loader.style.display = "flex";
+      notificationService.show("mosque.data.updating", "info");
+
+      // Utiliser le service de requête longue durée
+      const result = await api.longRunningRequest(
+        "/mosque-times/scrape-all",
+        {
+          method: "POST",
+          body: JSON.stringify({}),
+        },
+        3000
+      ); // Augmenter l'intervalle à 3 secondes
+
+      console.log("Scraping result received:", result);
+
+      // Une fois que le scraping est terminé, les résultats sont disponibles
+      if (result && result.status === "completed" && result.cities) {
+        console.log("Scraping completed, updating interface with new data");
+
+        // Si nous avons une ville sélectionnée, mettre à jour ses données
+        if (this.selectedCity && result.cities[this.selectedCity]) {
+          const cityData = result.cities[this.selectedCity];
+
+          // Formater les données de la même manière que handleCitySelection
+          this.currentMosques = cityData.mosques.map((mosque) => {
+            const prayerTime = cityData.prayerTimesData.prayerTimes?.find(
+              (pt) => String(pt.mosque_id) === String(mosque.id)
+            );
+            return {
+              ...mosque,
+              prayerTimes: prayerTime || null,
+            };
+          });
+
+          // Mettre à jour l'interface
+          this.populateMosqueSelect(this.currentMosques);
+
+          // Sauvegarder dans le cache
+          mosqueTimesStorageService.saveCityData(this.selectedCity, {
+            currentMosques: this.currentMosques,
+          });
+
+          // Mettre à jour l'affichage
+          this.updateDisplay();
+          console.log(
+            "Interface updated with new data for selected city:",
+            this.selectedCity
+          );
+        }
+        // Si pas de ville sélectionnée mais des données disponibles
+        else if (Object.keys(result.cities).length > 0) {
+          // Sélectionner la première ville disponible
+          const firstCity = Object.keys(result.cities)[0];
+          console.log(
+            "No city selected, selecting first available city:",
+            firstCity
+          );
+
+          // Ne pas attendre la fin du traitement pour afficher la notification de succès
+          this.handleCitySelection(firstCity)
+            .then(() => {
+              console.log("First city data loaded");
+            })
+            .catch((err) => {
+              console.error("Error loading first city data:", err);
+            });
+        }
+
+        // Dans tous les cas, masquer le loader et montrer une notification de succès
+        if (loader) loader.style.display = "none";
         notificationService.show("mosque.data.updated", "success");
-      }
+        return result;
+      } else {
+        console.warn("Incomplete scraping results:", result);
+        if (loader) loader.style.display = "none";
+        notificationService.show("mosque.data.partial", "warning");
 
-      console.log("Scraping completed:", data.message);
-      return data;
+        // Essayer de charger quand même les données
+        await this.loadLastSelectedCity();
+
+        return { success: false };
+      }
     } catch (error) {
       console.error("Erreur lors du scraping:", error);
-      // Une seule notification d'erreur critique
+
+      // Masquer le loader en cas d'erreur
+      const loader = document.querySelector(".loader-container");
+      if (loader) loader.style.display = "none";
+
       notificationService.show("mosque.scrape.error", "error", 0);
+
+      // Essayer de charger quand même les données existantes
+      await this.loadLastSelectedCity();
+
       throw error;
     }
   }
@@ -233,7 +302,7 @@ export class MosqueTimeManager {
   // --- Charger la dernière ville sélectionnée (si existante) ---
   async loadLastSelectedCity() {
     try {
-      const lastCity = localStorage.getItem("lastSelectedCity");
+      const lastCity = mosqueTimesStorageService.getLastSelectedCity();
       if (lastCity) {
         // Forcer la mise à jour pour afficher les données depuis le cache ou via l'API
         await this.handleCitySelection(lastCity, true);
@@ -291,11 +360,7 @@ export class MosqueTimeManager {
 
   // --- Formatage de l'heure (ex. "HH:mm" ou "--:--") ---
   formatTime(timeString) {
-    if (!timeString || timeString === "--:--") return "--:--";
-    if (timeString.includes(":")) {
-      return timeString.split(":").slice(0, 2).join(":");
-    }
-    return timeString;
+    return formatPrayerTime(timeString);
   }
 
   // --- Mettre à jour l'affichage de la mosquée sélectionnée ---
@@ -406,7 +471,7 @@ export class MosqueTimeManager {
                 </a>
               </div>
               <div class="mosque-prayer-times">
-                ${this.formatPrayerTimes(mosque.prayerTimes)}
+                ${formatPrayerTimesHTML(mosque.prayerTimes)}
               </div>
             </div>
           `
@@ -563,7 +628,7 @@ export class MosqueTimeManager {
       }
 
       // Si pas en cache, charger depuis l'API
-      const date = mosqueTimesStorageService.getCurrentDateString();
+      const date = getCurrentDateString();
 
       // Charger les mosquées
       const mosques = await api.get(
@@ -599,6 +664,9 @@ export class MosqueTimeManager {
       mosqueTimesStorageService.saveCityData(cityName, {
         currentMosques: this.currentMosques,
       });
+
+      // Sauvegarder également la ville sélectionnée
+      mosqueTimesStorageService.saveLastSelectedCity(cityName);
 
       // Mettre à jour l'affichage
       this.updateDisplay();
@@ -763,7 +831,7 @@ export class MosqueTimeManager {
 
       // Sauvegarder la dernière ville sélectionnée
       if (this.selectedCity) {
-        localStorage.setItem("lastSelectedCity", this.selectedCity);
+        mosqueTimesStorageService.saveLastSelectedCity(this.selectedCity);
       }
 
       // Afficher une notification de succès seulement si nous sommes sur la page principale
@@ -779,67 +847,22 @@ export class MosqueTimeManager {
   // Correction de la méthode formatPrayerTimes pour aligner correctement les horaires
   formatPrayerTimes(times) {
     if (!times) return "<p>Horaires non disponibles</p>";
+    return formatPrayerTimesHTML(times);
+  }
 
-    const formatTime = (time) => {
-      if (!time) return "--:--";
+  // Nouvelle méthode pour créer des liens de navigation à partir d'une adresse
+  createMapsLink(address, name) {
+    return createMapsLink(address, name);
+  }
 
-      // Si le format est HH:MM:SS, extraire uniquement HH:MM
-      if (time.includes(":")) {
-        const parts = time.split(":");
-        if (parts.length >= 2) {
-          return `${parts[0]}:${parts[1]}`;
-        }
-      }
+  // Méthode pour référencer l'icône SVG externe
+  createNavigationIconSVG() {
+    return createNavigationIconSVG();
+  }
 
-      return time;
-    };
-
-    const mainPrayers = ["fajr", "dhuhr", "asr", "maghrib", "isha"];
-    let mainPrayerTimesHTML = mainPrayers
-      .map(
-        (prayer) => `
-            <div class="prayer-item">
-                <div class="prayer-name">
-                    <span class="prayer-label">${
-                      prayer.charAt(0).toUpperCase() + prayer.slice(1)
-                    }</span>
-                    <span class="jamaa-time">${formatTime(times[prayer])}</span>
-                </div>
-            </div>
-        `
-      )
-      .join("");
-
-    const additionalPrayers = [
-      "jumuah1",
-      "jumuah2",
-      "jumuah3",
-      "jumuah4",
-      "tarawih",
-    ];
-    let additionalPrayerTimesHTML = additionalPrayers
-      .map(
-        (prayer) => `
-            <div class="prayer-item">
-                <div class="prayer-name">
-                    <span class="prayer-label">${
-                      prayer.charAt(0).toUpperCase() + prayer.slice(1)
-                    }</span>
-                    <span class="jamaa-time">${formatTime(times[prayer])}</span>
-                </div>
-            </div>
-        `
-      )
-      .join("");
-
-    return `
-        <div class="prayer-times-grid">
-            ${mainPrayerTimesHTML}
-        </div>
-        <div class="additional-times-grid">
-            ${additionalPrayerTimesHTML}
-        </div>
-    `;
+  // --- Helper to get current date as string ---
+  getCurrentDateString() {
+    return getCurrentDateString();
   }
 }
 

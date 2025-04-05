@@ -115,7 +115,6 @@ const scrapeMasjidUmarBham = async () => {
     } catch (error) {
         console.error('Erreur lors du scraping de Masjid Umar:', error);
         if (page) {
-            await page.screenshot({ path: 'failed_masjid_umar.png' });
         }
         throw error;
     } finally {

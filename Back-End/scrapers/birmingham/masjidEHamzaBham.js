@@ -108,7 +108,6 @@ const scrapeMasjidEHamza = async () => {
     } catch (error) {
         console.error('Erreur lors du scraping de Masjid E Hamza:', error);
         if (page) {
-            await page.screenshot({ path: 'failed_masjid_e_hamza.png' });
         }
         throw error;
     } finally {

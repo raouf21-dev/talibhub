@@ -1,95 +1,148 @@
 // Service pour centraliser le stockage des horaires de mosquées
-const mosqueTimesStorageService = {
-  storageKey: "mosque_times_data",
+import CacheService, { getMidnightTimestamp } from "./cacheMosqueTime.js";
+import { getCurrentDateString } from "../utils/mosqueTimeUtils.js";
 
-  // Récupérer les données d'une ville
+const mosqueTimesStorageService = {
+  // Préfixe pour toutes les clés de cache liées aux mosquées
+  KEY_PREFIX: "mosque_times_",
+
+  // Clé pour les données de villes
+  CITIES_KEY: "mosque_times_cities",
+
+  // Clé pour stocker la dernière ville sélectionnée
+  LAST_CITY_KEY: "lastSelectedCity",
+
+  /**
+   * Génère une clé de cache unique pour une ville
+   * @param {string} cityName - Nom de la ville
+   * @returns {string} - Clé unique formatée
+   */
+  getCityKey(cityName) {
+    const normalizedCity = this.normalizeCity(cityName);
+    return `${this.KEY_PREFIX}city_${normalizedCity}`;
+  },
+
+  /**
+   * Normalise le nom d'une ville pour le stockage
+   * @param {string} cityName - Nom de la ville à normaliser
+   * @returns {string} - Nom normalisé
+   */
+  normalizeCity(cityName) {
+    return cityName ? cityName.toLowerCase().trim() : "";
+  },
+
+  /**
+   * Récupère les données d'une ville depuis le cache
+   * @param {string} cityName - Nom de la ville
+   * @returns {Object|null} - Données de la ville ou null si non trouvées/expirées
+   */
   getCityData(cityName) {
     try {
-      const normalizedCity = cityName.toLowerCase().trim();
-      const today = this.getCurrentDateString();
-      const storedData = this.getAllData();
+      const cacheKey = this.getCityKey(cityName);
+      console.log(
+        `[DEBUG] mosqueTimesStorageService: getCityData pour ${cityName}, clé: ${cacheKey}`
+      );
 
-      if (
-        storedData[normalizedCity] &&
-        storedData[normalizedCity].date === today
-      ) {
-        console.log(`Données trouvées dans le stockage local pour ${cityName}`);
-        return storedData[normalizedCity].data;
+      const cachedData = CacheService.getItem(cacheKey);
+
+      if (cachedData) {
+        console.log(
+          `[DEBUG] mosqueTimesStorageService: Données trouvées dans le cache`,
+          cachedData
+        );
+        return cachedData;
+      } else {
+        console.log(
+          `[DEBUG] mosqueTimesStorageService: Aucune donnée dans le cache pour ${cityName}`
+        );
+        return null;
       }
-
-      return null;
     } catch (error) {
-      console.error("Erreur lors de la récupération des données:", error);
+      console.error(
+        "[DEBUG] mosqueTimesStorageService: Erreur lors de la récupération:",
+        error
+      );
       return null;
     }
   },
 
-  // Stocker les données d'une ville
+  /**
+   * Sauvegarde les données d'une ville dans le cache
+   * @param {string} cityName - Nom de la ville
+   * @param {Object} data - Données à sauvegarder
+   * @returns {boolean} - Succès ou échec
+   */
   saveCityData(cityName, data) {
     try {
-      const normalizedCity = cityName.toLowerCase().trim();
-      const today = this.getCurrentDateString();
+      const cacheKey = this.getCityKey(cityName);
+      console.log(
+        `[DEBUG] mosqueTimesStorageService: Sauvegarde pour ${cityName}, clé: ${cacheKey}`
+      );
 
-      // Récupérer les données existantes
-      const allData = this.getAllData();
+      // Stockage avec expiration à minuit
+      CacheService.setItem(cacheKey, data, getMidnightTimestamp());
 
-      // Mettre à jour les données pour cette ville
-      allData[normalizedCity] = {
-        date: today,
-        data: data,
-        timestamp: Date.now(),
-      };
+      // Mémoriser cette ville dans la liste des villes mises en cache
+      this.addCityToList(cityName);
 
-      // Sauvegarder
-      localStorage.setItem(this.storageKey, JSON.stringify(allData));
-      console.log(`Données stockées pour ${cityName}`);
-
+      console.log(
+        `[DEBUG] mosqueTimesStorageService: Données stockées avec succès`
+      );
       return true;
     } catch (error) {
-      console.error("Erreur lors du stockage des données:", error);
+      console.error(
+        "[DEBUG] mosqueTimesStorageService: Erreur lors du stockage:",
+        error
+      );
       return false;
     }
   },
 
-  // Récupérer toutes les données stockées
-  getAllData() {
-    try {
-      const existingData = localStorage.getItem(this.storageKey);
-      return existingData ? JSON.parse(existingData) : {};
-    } catch (error) {
-      console.error("Erreur lors de la lecture du localStorage:", error);
-      return {};
+  /**
+   * Ajoute une ville à la liste des villes mises en cache
+   * @param {string} cityName - Nom de la ville
+   */
+  addCityToList(cityName) {
+    const normalizedCity = this.normalizeCity(cityName);
+    const cities = this.getCachedCities();
+
+    if (!cities.includes(normalizedCity)) {
+      cities.push(normalizedCity);
+      CacheService.setItem(this.CITIES_KEY, cities, getMidnightTimestamp());
     }
   },
 
-  // Obtenir la date actuelle au format YYYY-MM-DD
-  getCurrentDateString() {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, "0");
-    const day = String(now.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
+  /**
+   * Récupère la liste des villes mises en cache
+   * @returns {Array} - Liste des noms de villes
+   */
+  getCachedCities() {
+    return CacheService.getItem(this.CITIES_KEY) || [];
   },
 
-  // Ajouter cette méthode au service
-  clearMosqueTimesCookies() {
-    try {
-      /*
-       * NOTE: Cette fonction est conservée pour référence mais n'est plus utilisée.
-       * Nous avons migré complètement vers localStorage pour une meilleure gestion du cache.
-       * Les cookies sont maintenant abandonnés pour le stockage des données de mosquée.
-       */
-      // document.cookie =
-      //   "mosque_times_data=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-      // console.log("Cookie mosque_times_data effacé");
-      return true;
-    } catch (error) {
-      console.error("Erreur lors de la suppression du cookie:", error);
-      return false;
+  /**
+   * Enregistre la dernière ville sélectionnée
+   * @param {string} cityName - Nom de la ville
+   */
+  saveLastSelectedCity(cityName) {
+    if (cityName) {
+      localStorage.setItem(this.LAST_CITY_KEY, cityName);
     }
   },
 
-  // Vérifier la version actuelle et nettoyer les données si nécessaire
+  /**
+   * Récupère la dernière ville sélectionnée
+   * @returns {string|null} - Nom de la dernière ville ou null
+   */
+  getLastSelectedCity() {
+    return localStorage.getItem(this.LAST_CITY_KEY);
+  },
+
+  /**
+   * Vérifie la version actuelle et nettoie les données si nécessaire
+   * @param {string} version - Version actuelle de l'application
+   * @returns {boolean} - Indique si un nettoyage a été effectué
+   */
   checkVersionAndCleanup(version) {
     const storedVersion = localStorage.getItem("app_version");
 
@@ -105,19 +158,37 @@ const mosqueTimesStorageService = {
     return false; // Aucune mise à jour nécessaire
   },
 
-  // Effacer toutes les données stockées
+  /**
+   * Efface toutes les données de cache liées aux mosquées
+   * @returns {boolean} - Succès ou échec
+   */
   clearAllData() {
-    // Nettoyer localStorage
-    localStorage.removeItem(this.storageKey);
+    try {
+      // Supprimer toutes les villes mises en cache
+      const cities = this.getCachedCities();
+      cities.forEach((city) => {
+        const key = this.getCityKey(city);
+        CacheService.removeItem(key);
+        console.log(`[DEBUG] mosqueTimesStorageService: Suppression de ${key}`);
+      });
 
-    // Nettoyer les cookies - commenté car nous n'utilisons plus les cookies
-    // this.clearMosqueTimesCookies();
+      // Supprimer la liste des villes
+      CacheService.removeItem(this.CITIES_KEY);
 
-    // Nettoyer d'autres données si nécessaire
-    localStorage.removeItem("lastSelectedCity");
+      // Supprimer la dernière ville sélectionnée
+      localStorage.removeItem(this.LAST_CITY_KEY);
 
-    console.log("Toutes les données de cache ont été effacées");
-    return true;
+      console.log(
+        "[DEBUG] mosqueTimesStorageService: Toutes les données ont été effacées"
+      );
+      return true;
+    } catch (error) {
+      console.error(
+        "[DEBUG] mosqueTimesStorageService: Erreur lors du nettoyage:",
+        error
+      );
+      return false;
+    }
   },
 };
 

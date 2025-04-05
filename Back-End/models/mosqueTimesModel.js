@@ -1,4 +1,4 @@
-const pool = require('../config/db');
+const pool = require("../config/db");
 
 const savePrayerTimes = async (mosqueId, date, times) => {
   const query = `
@@ -16,19 +16,19 @@ const savePrayerTimes = async (mosqueId, date, times) => {
       jumuah3 = EXCLUDED.jumuah3,
       tarawih = EXCLUDED.tarawih
   `;
-  
+
   const values = [
-    mosqueId, 
-    date, 
-    times.fajr || null, 
-    times.dhuhr || null, 
-    times.asr || null, 
-    times.maghrib || null, 
+    mosqueId,
+    date,
+    times.fajr || null,
+    times.dhuhr || null,
+    times.asr || null,
+    times.maghrib || null,
     times.isha || null,
-    times.jumuah1 || null, 
-    times.jumuah2 || null, 
-    times.jumuah3 || null, 
-    times.tarawih || null
+    times.jumuah1 || null,
+    times.jumuah2 || null,
+    times.jumuah3 || null,
+    times.tarawih || null,
   ];
 
   try {
@@ -39,13 +39,29 @@ const savePrayerTimes = async (mosqueId, date, times) => {
 };
 
 const getPrayerTimes = async (mosqueId, date) => {
-  const query = 'SELECT * FROM prayer_times WHERE mosque_id = $1 AND date = $2';
-  const result = await pool.query(query, [mosqueId, date]);
-  return result.rows[0];
+  try {
+    const query =
+      "SELECT * FROM prayer_times WHERE mosque_id = $1 AND date = $2";
+    const values = [mosqueId, date];
+    const result = await pool.query(query, values);
+
+    if (result.rows.length > 0) {
+      return result.rows[0];
+    } else {
+      return null;
+    }
+  } catch (error) {
+    console.error("Error during manual scraping:", error);
+    console.error(
+      "Erreur lors de la récupération des horaires de prière:",
+      error
+    );
+    throw error;
+  }
 };
 
 const getAllMosques = async () => {
-  const query = 'SELECT * FROM mosques';
+  const query = "SELECT * FROM mosques";
   const result = await pool.query(query);
   return result.rows;
 };
@@ -68,7 +84,13 @@ const addMosque = async (name, address, city, latitude, longitude) => {
     VALUES ($1, $2, $3, $4, $5)
     RETURNING id
   `;
-  const result = await pool.query(query, [name, address, city, parseFloat(latitude), parseFloat(longitude)]);
+  const result = await pool.query(query, [
+    name,
+    address,
+    city,
+    parseFloat(latitude),
+    parseFloat(longitude),
+  ]);
   return result.rows[0].id;
 };
 
@@ -82,7 +104,7 @@ const searchCities = async (queryStr) => {
   `;
   const values = [`%${queryStr}%`];
   const result = await pool.query(sqlQuery, values);
-  return result.rows.map(row => row.city);
+  return result.rows.map((row) => row.city);
 };
 
 const getMosquesByCity = async (city) => {
@@ -99,41 +121,30 @@ const getMosquesByCity = async (city) => {
 
 const checkDataExists = async (date) => {
   try {
-    const query = 'SELECT COUNT(*) FROM prayer_times WHERE date = $1';
+    const query = "SELECT COUNT(*) FROM prayer_times WHERE date = $1";
     const values = [date];
     const result = await pool.query(query, values);
     const count = parseInt(result.rows[0].count, 10);
     return count > 0;
   } catch (error) {
-    console.error('Erreur lors de la vérification des données existantes :', error);
+    console.error(
+      "Erreur lors de la vérification des données existantes :",
+      error
+    );
     throw error;
   }
 };
 
 const getAllCities = async () => {
   try {
-    const query = 'SELECT DISTINCT city FROM mosques';
+    const query = "SELECT DISTINCT city FROM mosques";
     const result = await pool.query(query);
-    return result.rows.map(row => row.city);
+    return result.rows.map((row) => row.city);
   } catch (error) {
-    console.error('Erreur lors de la récupération de toutes les villes :', error);
-    throw error;
-  }
-};
-
-const getPrayerTimesByMosqueAndDate = async (mosqueId, date) => {
-  try {
-    const query = 'SELECT * FROM prayer_times WHERE mosque_id = $1 AND date = $2';
-    const values = [mosqueId, date];
-    const result = await pool.query(query, values);
-
-    if (result.rows.length > 0) {
-      return result.rows[0];
-    } else {
-      return null;
-    }
-  } catch (error) {
-    console.error('Erreur lors de la récupération des horaires de prière:', error);
+    console.error(
+      "Erreur lors de la récupération de toutes les villes :",
+      error
+    );
     throw error;
   }
 };
@@ -148,5 +159,4 @@ module.exports = {
   getMosquesByCity,
   checkDataExists,
   getAllCities,
-  getPrayerTimesByMosqueAndDate,
 };

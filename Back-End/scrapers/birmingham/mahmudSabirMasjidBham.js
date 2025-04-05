@@ -128,7 +128,6 @@ const scrapeMahmudSabirMasjid = async () => {
     } catch (error) {
         console.error('Erreur lors du scraping de MahmudSabir Al Furqan Masjid:', error);
         if (page) {
-            await page.screenshot({ path: 'failed_mahmudsabir_masjid.png' });
         }
         throw error;
     } finally {
