@@ -9,6 +9,7 @@ const { attachCookieManager } = require("./middlewares/cookieManager");
 const fs = require("fs");
 const { authenticateToken } = require("./middlewares/authenticateToken");
 const authController = require("./controllers/authController");
+const mosqueTimesController = require("./controllers/mosqueTimesController");
 
 require("dotenv").config({
   path: path.join(__dirname, `.env.${process.env.NODE_ENV || "development"}`),
@@ -245,6 +246,9 @@ app.get("/services/state/state.js", (req, res, next) => {
     next();
   }
 });
+
+// Initialiser la tâche de nettoyage périodique
+mosqueTimesController.initializeCleanupTask();
 
 // Gestion des erreurs
 app.use((err, req, res, next) => {

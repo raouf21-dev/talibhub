@@ -64,6 +64,11 @@ export class WelcomeMosqueTime extends MosqueTimeManager {
         authRequiredDescription:
           "Please log in to view mosque prayer times for this city.",
         loginButton: "Log In",
+        scrapingInProgress: "Scraping in progress...",
+        scrapingCompleted: "Scraping completed",
+        scrapingBackground: "Scraping in background",
+        scrapingFailed: "Scraping failed",
+        scrapingError: "Scraping error",
       },
       fr: {
         title: "Horaires de Prière en Congrégation à la Mosquée",
@@ -87,6 +92,11 @@ export class WelcomeMosqueTime extends MosqueTimeManager {
         authRequiredDescription:
           "Veuillez vous connecter pour voir les horaires des mosquées pour cette ville.",
         loginButton: "Se Connecter",
+        scrapingInProgress: "Scraping en cours...",
+        scrapingCompleted: "Scraping terminé",
+        scrapingBackground: "Scraping en arrière-plan",
+        scrapingFailed: "Scraping échoué",
+        scrapingError: "Erreur de scraping",
       },
     };
 
@@ -974,104 +984,92 @@ export class WelcomeMosqueTime extends MosqueTimeManager {
 
   async checkAndUpdateData() {
     try {
-      const date = this.getFormattedDate();
-      console.log(
-        "[DEBUG] WelcomeMosqueTime: Vérification des données pour la date:",
-        date
-      );
+      const date = this.getCurrentDateString();
+      console.log("Checking data for date:", date);
 
-      // FORCER le scraping quelle que soit la réponse
-      console.log(
-        "[DEBUG] WelcomeMosqueTime: Forçage du scraping pour s'assurer d'avoir des données récentes"
-      );
+      const dataExists = await api.get(`/mosque-times/exists/${date}`);
+      console.log("Data exists response:", dataExists);
 
-      try {
-        // Afficher une notification de mise à jour
+      // Si les données n'existent pas, attendre un court instant
+      // pour laisser le backend démarrer le scraping, puis continuer
+      if (!dataExists.exists) {
         notificationService.show("mosque.data.updating", "info");
 
-        // Utiliser la route publique pour déclencher un scraping complet
-        const response = await api.post(
-          `/mosque-times/report-missing-data/${date}`,
-          {
-            source: "welcome-page-forced",
-          }
-        );
+        // Court délai pour permettre au backend de démarrer le scraping
+        await new Promise((resolve) => setTimeout(resolve, 1000));
 
-        console.log(
-          "[DEBUG] WelcomeMosqueTime: Réponse du scraping forcé:",
-          response
-        );
-
-        // Notifier l'utilisateur
-        notificationService.show("mosque.data.updating.background", "info");
-
-        // Si une ville est déjà sélectionnée, recharger ses données
-        if (this.selectedCity) {
-          // Vider le cache pour cette ville
-          mosqueTimesStorageService.clearAllData();
-
-          // Recharger les données
-          await this.handleCitySelection(this.selectedCity);
-          console.log(
-            "[DEBUG] WelcomeMosqueTime: Données rechargées pour",
-            this.selectedCity
-          );
-        } else {
-          // Si aucune ville n'est sélectionnée, sélectionner Birmingham par défaut
-          await this.handleCitySelection("Birmingham");
-          console.log(
-            "[DEBUG] WelcomeMosqueTime: Birmingham sélectionné par défaut"
+        // Continuer avec l'interface utilisateur
+        if (mosqueTimesStorageService.getLastSelectedCity()) {
+          await this.handleCitySelection(
+            mosqueTimesStorageService.getLastSelectedCity()
           );
         }
-
-        // Notification finale
-        notificationService.show("mosque.data.updated", "success");
-      } catch (error) {
-        console.error(
-          "[DEBUG] WelcomeMosqueTime: Erreur lors du scraping forcé:",
-          error
-        );
-
-        // Tenter une dernière solution - mettre à jour manuellement le stockage
-        if (this.selectedCity) {
-          await this.handleCitySelection(this.selectedCity);
-        } else {
-          await this.handleCitySelection("Birmingham");
+      } else {
+        // Données déjà présentes, charger directement
+        if (mosqueTimesStorageService.getLastSelectedCity()) {
+          await this.handleCitySelection(
+            mosqueTimesStorageService.getLastSelectedCity()
+          );
         }
       }
     } catch (error) {
-      console.error(
-        "[DEBUG] WelcomeMosqueTime: Erreur lors de la vérification des données:",
-        error
-      );
+      console.error("Erreur lors de la vérification des données:", error);
+      notificationService.show("mosque.data.error", "error", 0);
     }
   }
 
   // Fonction pour déclencher le scraping (utilise la route publique)
   async triggerScrapingForAllCities() {
     try {
-      console.log("[DEBUG] WelcomeMosqueTime: Signalement pour scraping");
-      const date = this.getCurrentDateString();
+      // Montrer l'indicateur de chargement
+      this.updateStateMessage(this.texts.scrapingInProgress);
+      this.mosquesTab.classList.add("loading");
 
-      // Utiliser la route publique qui ne nécessite pas d'authentification
-      const response = await api.post(
-        `/mosque-times/report-missing-data/${date}`,
+      // Faire la requête API pour déclencher le scraping
+      const response = await api.longRunningRequest(
+        "/mosque-times/scrape-all",
         {
-          source: "welcome-page",
-        }
-      );
+          method: "POST",
+          body: JSON.stringify({ source: "welcome-page" }),
+        },
+        3000
+      ); // Vérification toutes les 3 secondes
 
-      console.log(
-        "[DEBUG] WelcomeMosqueTime: Résultat du signalement:",
-        response
-      );
-      return response;
+      console.log("Résultat du scraping:", response);
+
+      if (response.status === "completed") {
+        // Mise à jour réussie
+        this.updateStateMessage(this.texts.scrapingCompleted);
+
+        // Recharger les données pour la ville actuelle
+        const currentCity = this.getCurrentCity();
+        if (currentCity) {
+          await this.handleCitySelection(currentCity);
+        }
+      } else if (response.status === "timeout") {
+        // Le scraping continue en arrière-plan
+        this.updateStateMessage(this.texts.scrapingBackground);
+      } else if (response.status === "failed") {
+        // Échec du scraping
+        this.updateStateMessage(this.texts.scrapingFailed);
+        console.error("Échec du scraping:", response.error);
+      }
     } catch (error) {
-      console.error(
-        "[DEBUG] WelcomeMosqueTime: Erreur lors du signalement pour scraping:",
-        error
-      );
-      throw error;
+      console.error("Erreur lors du scraping:", error);
+      this.updateStateMessage(this.texts.scrapingError);
+    } finally {
+      // Cacher l'indicateur de chargement
+      this.mosquesTab.classList.remove("loading");
+
+      // Réactiver le bouton après un court délai
+      setTimeout(() => {
+        const refreshButton = document.getElementById(
+          "welcome-refreshMosqueData"
+        );
+        if (refreshButton) {
+          refreshButton.disabled = false;
+        }
+      }, 3000);
     }
   }
 

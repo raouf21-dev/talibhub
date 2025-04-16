@@ -1,122 +1,102 @@
 // scraperQueue.js
+const TIMEOUT_DURATION = 90000; // 1.5 minutes
+const RECENT_EXECUTION_TTL = 60000; // 1 minute
+
 class ScraperQueue {
-    constructor() {
-        this.queue = new Map(); // Map des tâches en cours par mosquée
-        this.cache = new Map(); // Cache des résultats récents
-        this.CACHE_TTL = 60000; // 1 minute en millisecondes
-        this.processing = new Set(); // Set des mosquées en cours de traitement
+  constructor() {
+    this.processing = new Map(); // Tâches en cours {id -> Promise}
+    this.results = new Map(); // Résultats récents {id -> {result, timestamp}}
+  }
+
+  // Vérifier si une tâche est en cours pour un ID
+  isProcessing(id) {
+    return this.processing.has(id);
+  }
+
+  // Récupérer une tâche en cours
+  getActiveTask(id) {
+    return this.processing.get(id);
+  }
+
+  // Récupérer un résultat récent (moins de 30 secondes)
+  hasRecentExecution(id) {
+    const entry = this.results.get(id);
+    if (!entry) return false;
+
+    const ageMs = Date.now() - entry.timestamp;
+    return ageMs < 30000; // 30 secondes
+  }
+
+  // Ajouter une tâche à la queue
+  async enqueue(id, taskFn) {
+    // Nettoyer les résultats périmés
+    this.cleanup();
+
+    // Si déjà en cours, retourner la promesse existante
+    if (this.isProcessing(id)) {
+      return this.getActiveTask(id);
     }
 
-    /**
-     * Ajoute une tâche à la file d'attente
-     * @param {number} mosqueId - ID de la mosquée
-     * @param {Function} task - Fonction à exécuter
-     * @returns {Promise} - Résultat de la tâche
-     */
-    async enqueue(mosqueId, task) {
-        // Vérifier le cache d'abord
-        const cached = this.cache.get(mosqueId);
-        if (cached && (Date.now() - cached.timestamp < this.CACHE_TTL)) {
-            console.log(`Using cached result for mosque ${mosqueId}`);
-            return cached.data;
-        }
-
-        // Si une tâche est déjà en cours pour cette mosquée, retourner sa promesse
-        if (this.queue.has(mosqueId)) {
-            console.log(`Waiting for existing task for mosque ${mosqueId}`);
-            return this.queue.get(mosqueId);
-        }
-
-        // Créer une nouvelle promesse pour cette tâche
-        const taskPromise = new Promise(async (resolve, reject) => {
-            try {
-                // Marquer comme en cours de traitement
-                this.processing.add(mosqueId);
-
-                // Exécuter la tâche
-                const result = await task();
-
-                // Mettre en cache le résultat valide
-                if (result) {
-                    this.cache.set(mosqueId, {
-                        data: result,
-                        timestamp: Date.now()
-                    });
-                }
-
-                resolve(result);
-            } catch (error) {
-                console.error(`Error in queue for mosque ${mosqueId}:`, error);
-                reject(error);
-            } finally {
-                // Nettoyage
-                this.queue.delete(mosqueId);
-                this.processing.delete(mosqueId);
-                this.cleanCache(); // Nettoyer le cache après chaque tâche
-            }
-        });
-
-        // Stocker la promesse dans la queue
-        this.queue.set(mosqueId, taskPromise);
-
-        return taskPromise;
+    // Si un résultat récent existe, le retourner directement
+    if (this.hasRecentExecution(id)) {
+      return this.results.get(id).result;
     }
 
-    /**
-     * Nettoie les entrées expirées du cache
-     */
-    cleanCache() {
-        const now = Date.now();
-        for (const [mosqueId, entry] of this.cache.entries()) {
-            if (now - entry.timestamp > this.CACHE_TTL) {
-                this.cache.delete(mosqueId);
-            }
-        }
-    }
+    // Créer une nouvelle promesse avec timeout
+    const taskPromise = Promise.race([
+      taskFn(),
+      new Promise((_, reject) =>
+        setTimeout(
+          () => reject(new Error(`Timeout pour la tâche ${id}`)),
+          TIMEOUT_DURATION
+        )
+      ),
+    ]);
 
-    /**
-     * Retourne le statut actuel de la queue
-     */
-    getStatus() {
-        return {
-            activeScrapers: [...this.processing],
-            queueSize: this.queue.size,
-            cachedResults: [...this.cache.keys()],
-            totalTasks: this.queue.size + this.processing.size
-        };
-    }
+    // Enregistrer la promesse
+    this.processing.set(id, taskPromise);
 
-    /**
-     * Vérifie si une mosquée est en cours de traitement
-     */
-    isProcessing(mosqueId) {
-        return this.processing.has(mosqueId) || this.queue.has(mosqueId);
+    try {
+      // Exécuter la tâche et stocker le résultat
+      const result = await taskPromise;
+      this.results.set(id, {
+        result,
+        timestamp: Date.now(),
+      });
+      return result;
+    } catch (error) {
+      console.error(`Erreur pour la tâche ${id}:`, error.message);
+      throw error;
+    } finally {
+      this.processing.delete(id);
     }
+  }
 
-    /**
-     * Attend que toutes les tâches en cours soient terminées
-     */
-    async waitForAll() {
-        if (this.queue.size === 0) return;
-        
-        const promises = Array.from(this.queue.values());
-        await Promise.all(promises);
-    }
+  // Attendre que toutes les tâches soient terminées
+  async waitForAll() {
+    if (this.processing.size === 0) return;
 
-    /**
-     * Vide le cache
-     */
-    clearCache() {
-        this.cache.clear();
-    }
+    // Attendre toutes les tâches actives
+    await Promise.allSettled(Array.from(this.processing.values()));
+  }
 
-    /**
-     * Retourne une tâche en cours si elle existe
-     */
-    getActiveTask(mosqueId) {
-        return this.queue.get(mosqueId);
+  // Statut actuel de la queue
+  getStatus() {
+    return {
+      active: this.processing.size,
+      recentResults: this.results.size,
+    };
+  }
+
+  // Ajouter une méthode pour nettoyer les résultats périmés
+  cleanup() {
+    const now = Date.now();
+    for (const [id, entry] of this.results.entries()) {
+      if (now - entry.timestamp > RECENT_EXECUTION_TTL) {
+        this.results.delete(id);
+      }
     }
+  }
 }
 
-// Exporter une instance unique de la queue
 module.exports = new ScraperQueue();

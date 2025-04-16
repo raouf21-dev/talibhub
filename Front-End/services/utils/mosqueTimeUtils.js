@@ -49,8 +49,30 @@ export function createNavigationIconSVG() {
  * @returns {string} - Code HTML pour l'affichage des horaires
  */
 export function formatPrayerTimesHTML(times) {
-  if (!times) return "<p>Horaires non disponibles</p>";
+  // Logs détaillés des données reçues pour débogage
+  console.log("[MOSQUE-UTILS] Formatage des horaires:", times);
+  console.log("[MOSQUE-UTILS] Type de données:", typeof times);
 
+  // Protection contre les données nulles ou non définies
+  if (!times) {
+    console.warn("[MOSQUE-UTILS] Données d'horaires nulles ou non définies");
+    return "<p>Horaires non disponibles</p>";
+  }
+
+  // Vérifier si times est vraiment un objet (protection contre les erreurs)
+  if (typeof times !== "object") {
+    console.error(
+      "[MOSQUE-UTILS] Format invalide - times n'est pas un objet:",
+      times
+    );
+    return "<p>Format d'horaires invalide</p>";
+  }
+
+  // Afficher les clés disponibles
+  const availableKeys = Object.keys(times);
+  console.log("[MOSQUE-UTILS] Clés disponibles:", availableKeys.join(", "));
+
+  // Vérifier la présence des prières principales
   const mainPrayers = ["fajr", "dhuhr", "asr", "maghrib", "isha"];
   const additionalPrayers = [
     "jumuah1",
@@ -60,37 +82,89 @@ export function formatPrayerTimesHTML(times) {
     "tarawih",
   ];
 
+  // Vérifier quelles prières principales sont présentes
+  const foundMainPrayers = mainPrayers.filter((prayer) => times[prayer]);
+  console.log(
+    "[MOSQUE-UTILS] Prières principales trouvées:",
+    foundMainPrayers.join(", ")
+  );
+
+  // Vérifier s'il y a des prières problématiques (zuhr au lieu de dhuhr, etc.)
+  const possibleAlternatives = {
+    zuhr: "dhuhr",
+    dhur: "dhuhr",
+    duhr: "dhuhr",
+  };
+
+  // Correction automatique des noms alternatifs
+  Object.entries(possibleAlternatives).forEach(([alt, standard]) => {
+    if (times[alt] && !times[standard]) {
+      console.log(`[MOSQUE-UTILS] Correction de nom: ${alt} -> ${standard}`);
+      times[standard] = times[alt];
+    }
+  });
+
+  // Vérifier à nouveau après correction
+  const correctedMainPrayers = mainPrayers.filter((prayer) => times[prayer]);
+  if (correctedMainPrayers.length !== foundMainPrayers.length) {
+    console.log(
+      "[MOSQUE-UTILS] Prières après correction:",
+      correctedMainPrayers.join(", ")
+    );
+  }
+
   // Génération du HTML pour les prières principales
   let mainPrayerTimesHTML = mainPrayers
-    .map(
-      (prayer) => `
-      <div class="prayer-item">
-        <div class="prayer-name">
-          <span class="prayer-label">${
-            prayer.charAt(0).toUpperCase() + prayer.slice(1)
-          }</span>
-          <span class="jamaa-time">${formatPrayerTime(times[prayer])}</span>
+    .map((prayer) => {
+      const prayerTime = times[prayer];
+      // Log pour chaque prière
+      console.log(`[MOSQUE-UTILS] Formatage de ${prayer}: ${prayerTime}`);
+
+      return `
+        <div class="prayer-item">
+          <div class="prayer-name">
+            <span class="prayer-label">${
+              prayer.charAt(0).toUpperCase() + prayer.slice(1)
+            }</span>
+            <span class="jamaa-time">${formatPrayerTime(prayerTime)}</span>
+          </div>
         </div>
-      </div>
-    `
-    )
+      `;
+    })
     .join("");
 
   // Génération du HTML pour les prières additionnelles
   let additionalPrayerTimesHTML = additionalPrayers
-    .map(
-      (prayer) => `
-      <div class="prayer-item">
-        <div class="prayer-name">
-          <span class="prayer-label">${
-            prayer.charAt(0).toUpperCase() + prayer.slice(1)
-          }</span>
-          <span class="jamaa-time">${formatPrayerTime(times[prayer])}</span>
+    .map((prayer) => {
+      const prayerTime = times[prayer];
+      // N'inclure que les prières additionnelles qui ont une valeur
+      if (!prayerTime) return "";
+
+      console.log(
+        `[MOSQUE-UTILS] Formatage de prière additionnelle ${prayer}: ${prayerTime}`
+      );
+
+      return `
+        <div class="prayer-item">
+          <div class="prayer-name">
+            <span class="prayer-label">${
+              prayer.charAt(0).toUpperCase() + prayer.slice(1)
+            }</span>
+            <span class="jamaa-time">${formatPrayerTime(prayerTime)}</span>
+          </div>
         </div>
-      </div>
-    `
-    )
+      `;
+    })
     .join("");
+
+  // Log final pour vérifier la structure
+  console.log("[MOSQUE-UTILS] Génération de HTML terminée");
+
+  // Si aucune prière n'a été trouvée, afficher un message spécifique
+  if (!mainPrayerTimesHTML.trim() && !additionalPrayerTimesHTML.trim()) {
+    console.warn("[MOSQUE-UTILS] Aucune prière trouvée dans les données");
+    return "<p>Aucune donnée d'horaire valide trouvée</p>";
+  }
 
   // Retourner le HTML complet
   return `

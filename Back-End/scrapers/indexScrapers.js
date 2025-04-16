@@ -26,7 +26,6 @@ const scrapeMasjidAlAqsaWalsall = require("./walsall/masjidAlAqsaWalsall");
 const scrapeJameMasjid = require("./birmingham/jameMasjidBham");
 const scrapeMasjidAnnoor = require("./birmingham/masjidAnnoorBirmingham");
 const scrapeMahmudSabirMasjid = require("./birmingham/mahmudSabirMasjidBham");
-const scrapetestMosqueTourade = require("./walsall/testMosqueTourade");
 
 // Debug logs pour vérifier les imports
 //console.log('===== DEBUG: Checking imports =====');
@@ -66,7 +65,6 @@ const SCRAPER_CONFIG = {
     name: "MahmudSabir Al Furqan Masjid Birmingham",
     fn: scrapeMahmudSabirMasjid,
   },
-  24: { name: "Test Mosque Tourade", fn: scrapetestMosqueTourade },
 };
 
 class ScraperManager {
@@ -75,13 +73,13 @@ class ScraperManager {
     this.MAX_RETRIES = 2;
     this.scrapers = new Map();
     this.setupScrapers();
+    this.activeScrapings = new Map(); // Pour suivre les scrapings en cours
   }
 
   setupScrapers() {
     console.log("===== DEBUG: Starting scraper setup =====");
     Object.entries(SCRAPER_CONFIG).forEach(([id, config]) => {
       console.log(`DEBUG: Setting up scraper ${id} (${config.name})`);
-      console.log(`DEBUG: Scraper function type:`, typeof config.fn);
 
       // Vérifier si la fonction est correctement importée
       if (!config.fn) {
@@ -100,57 +98,37 @@ class ScraperManager {
       }
     });
 
-    console.log("DEBUG: Current scrapers map:", [...this.scrapers.keys()]);
     console.log("===== DEBUG: Scraper setup complete =====");
   }
 
   createRobustScraper(id, config) {
-    console.log(`DEBUG: Creating robust scraper for ID ${id}`);
     return async () => {
-      const startTime = Date.now();
+      // Si déjà en cours, attendre sans log supplémentaire
+      if (scraperQueue.isProcessing(id)) {
+        return await scraperQueue.getActiveTask(id);
+      }
 
-      try {
-        // Si déjà en cours de scraping, attendre le résultat
-        if (scraperQueue.isProcessing(id)) {
-          console.log(
-            `DEBUG: Scraper ${id} is already running, waiting for result...`
-          );
-          return await scraperQueue.getActiveTask(id);
+      // Log unique au démarrage du scraping
+      console.log(`Scraping de ${config.name} (ID: ${id})`);
+
+      // Utiliser la queue pour gérer le scraping
+      return await scraperQueue.enqueue(id, async () => {
+        const rawResult = await config.fn();
+
+        if (!rawResult || !rawResult.times) {
+          throw new Error(`Format invalide depuis ${config.name}`);
         }
 
-        console.log(
-          `DEBUG: Starting new scrape for ${config.name} (ID: ${id})`
-        );
-
-        // Utiliser la queue pour gérer le scraping
-        const result = await scraperQueue.enqueue(id, async () => {
-          console.log(
-            `DEBUG: Executing scraper for ID ${id}, function:`,
-            config.fn.name
-          );
-          const rawResult = await config.fn();
-
-          if (!rawResult || !rawResult.times) {
-            throw new Error(`Invalid result format from ${config.name}`);
-          }
-
-          return {
-            source: config.name,
-            date: rawResult.date,
-            times: rawResult.times,
-            mosqueId: id,
-            scrapedAt: new Date().toISOString(),
-          };
-        });
-
-        const duration = Date.now() - startTime;
-        console.log(`Successfully scraped ${config.name} in ${duration}ms`);
-
-        return result;
-      } catch (error) {
-        console.error(`Error scraping ${config.name}:`, error);
-        return null;
-      }
+        // Log de succès
+        console.log(`Scraping réussi pour ${config.name}`);
+        return {
+          source: config.name,
+          date: rawResult.date,
+          times: rawResult.times,
+          mosqueId: id,
+          scrapedAt: new Date().toISOString(),
+        };
+      });
     };
   }
 
@@ -158,54 +136,86 @@ class ScraperManager {
     console.log(`Attempting to run scraper for mosque ID ${mosqueId}`);
     const scraper = this.scrapers.get(mosqueId);
     if (!scraper) {
-      console.error(
-        `No scraper found for mosque ID ${mosqueId}. Available scrapers:`,
-        Array.from(this.scrapers.keys())
-      );
+      console.error(`No scraper found for mosque ID ${mosqueId}`);
       throw new Error(`No scraper found for mosque ID ${mosqueId}`);
     }
-    console.log(`Found scraper for mosque ID ${mosqueId}, executing...`);
     return scraper();
   }
 
+  // Optimisation de runAllScrapers pour réduire la verbosité et organiser par lots plus grands
   async runAllScrapers() {
     const startTime = Date.now();
     const results = [];
     const errors = [];
-    let hasShownError = false;
+    const batchSize = 8; // Augmentation du batch pour réduire le nombre de lots
 
-    // Exécuter les scrapers séquentiellement
-    for (const [id, config] of Object.entries(SCRAPER_CONFIG)) {
-      try {
-        const result = await this.runScraper(parseInt(id));
-        if (result) results.push(result);
+    // Récupérer tous les IDs de scrapers
+    const scraperIds = Object.keys(SCRAPER_CONFIG).map((id) => parseInt(id));
 
-        // Petit délai entre les scrapers pour éviter la surcharge
-        await new Promise((resolve) => setTimeout(resolve, 500));
-      } catch (error) {
-        errors.push({
-          mosqueId: id,
-          mosqueName: config.name,
-          error: error.message,
-        });
-        // Ne pas propager l'erreur, juste la logger
-        console.error(`Error scraping ${config.name}:`, error);
+    // Variable pour traquer les scrapers déjà exécutés dans cette session
+    const executedScrapers = new Set();
+
+    // Log global au début seulement
+    console.log(`Démarrage du scraping pour ${scraperIds.length} mosquées...`);
+
+    // Traiter par lots
+    for (let i = 0; i < scraperIds.length; i += batchSize) {
+      const batch = scraperIds.slice(i, i + batchSize);
+
+      // Log une seule fois par lot
+      console.log(
+        `Traitement du lot ${Math.floor(i / batchSize) + 1}/${Math.ceil(
+          scraperIds.length / batchSize
+        )}`
+      );
+
+      // Vérifier quels scrapers peuvent réellement être exécutés
+      const scrapersToRun = batch.filter((id) => {
+        // Ignorer si déjà exécuté durant cette session
+        if (executedScrapers.has(id)) return false;
+
+        // Ignorer si déjà en cours de traitement
+        if (scraperQueue.isProcessing(id)) return false;
+
+        // Ignorer si résultat récent existe déjà
+        if (scraperQueue.hasRecentExecution(id)) return false;
+
+        // Marquer comme exécuté pour cette session
+        executedScrapers.add(id);
+        return true;
+      });
+
+      // Exécuter seulement ceux qui n'ont pas été exécutés
+      if (scrapersToRun.length > 0) {
+        await Promise.allSettled(
+          scrapersToRun.map((id) =>
+            this.runScraper(id)
+              .then((result) => {
+                if (result) results.push(result);
+              })
+              .catch((error) => {
+                errors.push({
+                  mosqueId: id,
+                  mosqueName: SCRAPER_CONFIG[id].name,
+                  error: error.message,
+                });
+              })
+          )
+        );
+      }
+
+      // Délai plus important entre les lots pour permettre au navigateur de respirer
+      if (i + batchSize < scraperIds.length) {
+        await new Promise((resolve) => setTimeout(resolve, 2000));
       }
     }
 
-    // Attendre que toutes les tâches soient terminées
-    await scraperQueue.waitForAll();
-
     const duration = Date.now() - startTime;
-    console.log(`All scrapers completed in ${duration}ms`);
+    console.log(
+      `Scraping terminé en ${duration}ms - Résultats: ${results.length}, Erreurs: ${errors.length}`
+    );
 
-    return {
-      results,
-      errors,
-      duration,
-      timestamp: new Date().toISOString(),
-      hasErrors: errors.length > 0,
-    };
+    return { results, errors, duration, timestamp: new Date().toISOString() };
   }
 
   getScraperStatus() {
