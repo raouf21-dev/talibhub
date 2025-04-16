@@ -94,24 +94,27 @@ app.use(attachCookieManager);
 app.use(bodyParser.json({ limit: "10kb" }));
 app.use(express.urlencoded({ extended: true }));
 
-// Logger de développement
-if (!isProd) {
-  app.use((req, res, next) => {
-    const sanitizedBody = { ...req.body };
-    ["password", "confirmPassword", "currentPassword", "newPassword"].forEach(
-      (field) => {
-        if (sanitizedBody[field]) sanitizedBody[field] = "[MASQUÉ]";
-      }
-    );
+// Logger pour tous les environnements
+app.use((req, res, next) => {
+  const sanitizedBody = { ...req.body };
+  ["password", "confirmPassword", "currentPassword", "newPassword"].forEach(
+    (field) => {
+      if (sanitizedBody[field]) sanitizedBody[field] = "[MASQUÉ]";
+    }
+  );
 
-    console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+  // En production, limitons les détails affichés pour les cookies et le body
+  if (process.env.NODE_ENV === "production") {
+    console.log("Request received");
+  } else {
     console.log("Cookies:", req.cookies);
     if (Object.keys(sanitizedBody).length > 0) {
       console.log("Body:", sanitizedBody);
     }
-    next();
-  });
-}
+  }
+  next();
+});
 
 // Configuration des types MIME pour les fichiers JavaScript
 app.use((req, res, next) => {

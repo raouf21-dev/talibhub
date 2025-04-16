@@ -70,11 +70,8 @@ process.on("SIGTERM", () => {
 
 process.on("unhandledRejection", (reason, promise) => {
   console.error("Unhandled Rejection at:", promise, "reason:", reason);
-  // En développement, on peut laisser crasher l'application
-  if (process.env.NODE_ENV === "production") {
-    // En production, on log l'erreur mais on ne crashe pas le serveur
-    console.error("Unhandled rejection occurred:", reason);
-  } else {
-    process.exit(1);
-  }
+  // Même comportement dans tous les environnements
+  console.error("Unhandled rejection occurred:", reason);
+  // Optionnel: si vous voulez que le serveur crashe dans les deux environnements
+  // process.exit(1);
 });
