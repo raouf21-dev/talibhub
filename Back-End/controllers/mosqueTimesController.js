@@ -1,8 +1,11 @@
 // mosqueTimesController.js
 const axios = require("axios");
 const cheerio = require("cheerio");
-const { scrapers } = require("../scrapers/indexScrapers.js");
+const { scrapers } = require("../scrapers/index.js");
+const { monitoring } = require("../scrapers/utils/monitoring");
 const mosqueTimesModel = require("../models/mosqueTimesModel");
+const scraperQueue = require("../scrapers/queue");
+const scrapingEventEmitter = require("../scrapers/utils/scrapingEventEmitter");
 
 class ScrapingService {
   async scrapeMosque(mosqueId) {
@@ -58,6 +61,9 @@ class MosqueTimesController {
     this.scrapingInProgress = new Map(); // Suivi des scrapings en cours
     this.saveLocks = new Map(); // Verrous pour éviter les sauvegardes redondantes
     this.pendingRequests = new Map(); // Pour éviter les multiples déclenchements
+
+    // ✅ Exposer l'instance globalement pour le vidage de cache
+    global.mosqueTimesController = this;
   }
 
   async manualScrape(req, res) {
@@ -127,13 +133,13 @@ class MosqueTimesController {
         responseAlreadySent = true;
       }
 
-      // Initialiser les résultats
+      // Initialiser les résultats - VERSION SIMPLIFIÉE
       const scrapingResults = {
         cities: {},
         completedAt: null,
         status: "processing",
         type: "global",
-        progress: { total: 0, completed: 0, failed: 0 },
+        progress: { total: 0, completed: 0 },
       };
 
       // Enregistrer ce scraping
@@ -149,32 +155,22 @@ class MosqueTimesController {
         // Récupérer toutes les mosquées d'un coup
         const allMosques = await mosqueTimesModel.getAllMosques();
 
-        // Organiser les mosquées par ville
-        const mosquesByCity = cities.reduce((acc, city) => {
-          acc[city] = allMosques.filter(
-            (m) => m.city.toLowerCase() === city.toLowerCase()
-          );
-          return acc;
-        }, {});
-
         // Créer un ensemble plat de toutes les mosquées pour le traitement par lots
         const allMosqueIds = allMosques.map((m) => m.id);
         console.log(
           `Traitement global de ${allMosqueIds.length} mosquées dans ${cities.length} villes`
         );
 
-        // Initialiser le suivi pour chaque ville
+        // Initialiser le suivi basique pour chaque ville
         for (const city of cities) {
           scrapingResults.cities[city] = {
-            status: "pending",
-            mosqueCount: mosquesByCity[city].length,
-            completedCount: 0,
+            status: "processing",
             startedAt: new Date().toISOString(),
           };
         }
 
-        // Traiter toutes les mosquées par lots
-        const BATCH_SIZE = 10; // Plus grand pour traitement global
+        // Traiter toutes les mosquées par lots - VERSION SIMPLIFIÉE
+        const BATCH_SIZE = 10;
         for (let i = 0; i < allMosqueIds.length; i += BATCH_SIZE) {
           const batch = allMosqueIds.slice(i, i + BATCH_SIZE);
           console.log(
@@ -205,7 +201,7 @@ class MosqueTimesController {
                   scrapingResults.cities[city].status = "processing";
                 }
 
-                // Exécuter le scraper
+                // Exécuter le scraper - SIMPLIFIÉ
                 const data = await this.scrapingService.scrapeMosque(mosqueId);
                 if (data) {
                   await this.savePrayerTimesSafely(
@@ -213,11 +209,6 @@ class MosqueTimesController {
                     data.date,
                     data.times
                   );
-
-                  // Incrémenter le compteur de cette ville
-                  if (scrapingResults.cities[city]) {
-                    scrapingResults.cities[city].completedCount++;
-                  }
                 }
               } catch (error) {
                 console.error(
@@ -229,24 +220,50 @@ class MosqueTimesController {
           );
         }
 
-        // Finaliser les résultats de chaque ville
+        // Finaliser - VERSION ULTRA SIMPLIFIÉE avec vérification complète
+        console.log(
+          "🔄 Finalisation du scraping - vérification des sauvegardes..."
+        );
+
+        // Attendre que toutes les sauvegardes en cours soient terminées
+        let attempts = 0;
+        const maxAttempts = 30; // 30 secondes max
+        while (
+          global.savingMosques &&
+          global.savingMosques.size > 0 &&
+          attempts < maxAttempts
+        ) {
+          console.log(
+            `⏳ Attente de ${global.savingMosques.size} sauvegardes en cours...`
+          );
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          attempts++;
+        }
+
+        if (attempts >= maxAttempts) {
+          console.warn("⚠️ Timeout sur les sauvegardes, continuation...");
+        }
+
+        // Attendre 2 secondes supplémentaires pour sécurité
+        console.log("⏳ Délai de sécurité avant finalisation...");
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+
         for (const city of cities) {
           if (scrapingResults.cities[city]) {
             scrapingResults.cities[city].status = "completed";
             scrapingResults.cities[city].completedAt = new Date().toISOString();
             scrapingResults.progress.completed++;
-
-            // Récupérer les données fraîches pour cette ville
-            const date = new Date().toISOString().split("T")[0];
-            scrapingResults.cities[city].prayerTimesData =
-              await this.getPrayerTimesForCityAndDateInternal(city, date);
           }
         }
 
-        // Marquer le scraping comme terminé
+        // Marquer le scraping comme terminé - TOUJOURS "completed"
         scrapingResults.completedAt = new Date().toISOString();
         scrapingResults.status = "completed";
-        console.log("Scraping global terminé avec succès");
+
+        console.log(
+          `✅ Scraping global COMPLÈTEMENT terminé pour ${cities.length} villes`
+        );
+        console.log(`📊 Données prêtes pour rafraîchissement frontend`);
 
         // Nettoyage après 10 minutes
         setTimeout(() => {
@@ -290,12 +307,14 @@ class MosqueTimesController {
         return true;
       }
 
-      // Initialiser le suivi
+      // Initialiser le suivi DÉTAILLÉ
       if (!scrapingResults.cities[city]) {
         scrapingResults.cities[city] = {
           status: "processing",
           mosqueCount: mosques.length,
-          completedCount: 0,
+          processedCount: 0, // Nouvea: mosquées traitées (succès/échec)
+          successCount: 0, // Nouveau: mosquées avec succès
+          skippedCount: 0, // Nouveau: mosquées ignorées
           startedAt: new Date().toISOString(),
         };
       }
@@ -319,18 +338,32 @@ class MosqueTimesController {
             const promise = this.scrapingService
               .scrapeMosque(id)
               .then(async (result) => {
-                if (result) {
-                  // Sauvegarde uniquement si données modifiées
+                scrapingResults.cities[city].processedCount++;
+
+                if (result && result.times) {
+                  // Sauvegarde uniquement si données valides
                   await this.savePrayerTimesSafely(
                     id,
                     result.date,
                     result.times
                   );
-                  scrapingResults.cities[city].completedCount++;
+                  scrapingResults.cities[city].successCount++;
+                } else {
+                  console.warn(`❌ Scraping échoué pour mosquée ${id}`);
                 }
                 return result;
+              })
+              .catch((error) => {
+                console.error(`❌ Erreur scraping mosquée ${id}:`, error);
+                scrapingResults.cities[city].processedCount++;
+                return null;
               });
             scrapePromises.push(promise);
+          } else {
+            // Mosquée ignorée - compter immédiatement
+            console.log(`⏭️ Mosquée ${id} ignorée (déjà en cours ou récente)`);
+            scrapingResults.cities[city].skippedCount++;
+            scrapingResults.cities[city].processedCount++;
           }
         }
 
@@ -340,14 +373,26 @@ class MosqueTimesController {
         }
       }
 
-      // Finaliser les résultats
-      scrapingResults.cities[city].status = "completed";
-      scrapingResults.cities[city].completedAt = new Date().toISOString();
+      // Vérification de complétude CORRECTE
+      const totalExpected = mosques.length;
+      const totalProcessed = scrapingResults.cities[city].processedCount;
+      const isComplete = totalProcessed >= totalExpected;
 
-      console.log(
-        `Scraping terminé pour ${city}: ${scrapingResults.cities[city].completedCount}/${mosques.length} mosquées`
-      );
-      return true;
+      if (isComplete) {
+        scrapingResults.cities[city].status = "completed";
+        scrapingResults.cities[city].completedAt = new Date().toISOString();
+
+        console.log(
+          `✅ Scraping terminé pour ${city}: ${scrapingResults.cities[city].successCount}/${totalExpected} réussites, ${scrapingResults.cities[city].skippedCount} ignorées`
+        );
+      } else {
+        console.error(
+          `❌ Scraping incomplet pour ${city}: ${totalProcessed}/${totalExpected} traitées`
+        );
+        scrapingResults.cities[city].status = "incomplete";
+      }
+
+      return isComplete;
     } catch (error) {
       console.error(`Erreur lors du scraping pour ${city}:`, error);
       if (scrapingResults.cities[city]) {
@@ -648,7 +693,7 @@ class MosqueTimesController {
     scrapingInProgress = true;
 
     try {
-      const { runAllScrapers } = require("../scrapers/indexScrapers.js");
+      const { runAllScrapers } = require("../scrapers/index.js");
       const result = await runAllScrapers();
 
       if (result && result.results && result.results.length > 0) {
@@ -883,9 +928,9 @@ class MosqueTimesController {
 
   // Ajout d'une fonction de nettoyage périodique
   initializeCleanupTask() {
-    // Nettoyer les scrapings inactifs toutes les 5 minutes
+    // Nettoyer les scrapings inactifs toutes les 10 minutes (optimisé pour votre charge)
     setInterval(() => {
-      console.log("Nettoyage des scrapings inactifs...");
+      console.debug("🧹 Nettoyage périodique des ressources de scraping..."); // Utilise debug au lieu de log
 
       // Nettoyer les verrous de ville inactifs
       for (const [city, lockPromise] of this.cityLocks.entries()) {
@@ -894,7 +939,7 @@ class MosqueTimesController {
           lockPromise.status === "rejected"
         ) {
           this.cityLocks.delete(city);
-          console.log(`Verrou nettoyé pour la ville ${city}`);
+          console.debug(`Verrou nettoyé pour la ville ${city}`);
         }
       }
 
@@ -909,7 +954,7 @@ class MosqueTimesController {
             if (global.activeScrapings && global.activeScrapings[requestId]) {
               delete global.activeScrapings[requestId];
             }
-            console.log(`Scraping ${requestId} nettoyé`);
+            console.debug(`Scraping ${requestId} nettoyé`);
           }
         }
       }
@@ -920,10 +965,405 @@ class MosqueTimesController {
         const count = global.savingMosques.size;
         if (count > 0) {
           global.savingMosques.clear();
-          console.log(`Nettoyage de ${count} verrous de sauvegarde bloqués`);
+          console.debug(`Nettoyage de ${count} verrous de sauvegarde bloqués`);
         }
       }
-    }, 5 * 60 * 1000); // 5 minutes
+    }, 10 * 60 * 1000); // 10 minutes - fréquence optimisée pour votre application
+  }
+
+  // === ENDPOINTS DE MONITORING ===
+
+  // Obtenir toutes les métriques de monitoring
+  async getMonitoringMetrics(req, res) {
+    try {
+      const metrics = monitoring.getMetrics();
+      res.json({
+        success: true,
+        monitoring: metrics,
+      });
+    } catch (error) {
+      console.error("Erreur lors de la récupération des métriques:", error);
+      res.status(500).json({
+        success: false,
+        message: "Erreur lors de la récupération des métriques",
+        error: error.message,
+      });
+    }
+  }
+
+  // Obtenir le statut de santé simple
+  async getMonitoringHealth(req, res) {
+    try {
+      const health = monitoring.getHealthStatus();
+      res.json({
+        success: true,
+        health: health,
+      });
+    } catch (error) {
+      console.error(
+        "Erreur lors de la récupération du statut de santé:",
+        error
+      );
+      res.status(500).json({
+        success: false,
+        message: "Erreur lors de la récupération du statut de santé",
+        error: error.message,
+      });
+    }
+  }
+
+  // Obtenir les problèmes détectés uniquement
+  async getMonitoringProblems(req, res) {
+    try {
+      const metrics = monitoring.getMetrics();
+      res.json({
+        success: true,
+        problems: metrics.problèmes,
+        count: metrics.problèmes.length,
+        generatedAt: metrics.généré_le,
+      });
+    } catch (error) {
+      console.error("Erreur lors de la récupération des problèmes:", error);
+      res.status(500).json({
+        success: false,
+        message: "Erreur lors de la récupération des problèmes",
+        error: error.message,
+      });
+    }
+  }
+
+  // Réinitialiser les métriques de monitoring
+  async resetMonitoring(req, res) {
+    try {
+      monitoring.reset();
+      console.log("🔄 Monitoring metrics reset");
+      res.json({
+        success: true,
+        message: "Monitoring metrics have been reset",
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error("Error resetting monitoring:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to reset monitoring metrics",
+        error: error.message,
+      });
+    }
+  }
+
+  async checkCompletionStatus(req, res) {
+    try {
+      const { date } = req.params;
+
+      // Valider le format de date
+      const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+      if (!dateRegex.test(date)) {
+        return res.status(400).json({
+          success: false,
+          message: "Format de date invalide. Utilisez YYYY-MM-DD",
+        });
+      }
+
+      console.log(
+        `🔍 Vérification du statut de completion pour la date: ${date}`
+      );
+
+      // Utiliser le model pour récupérer les données
+      const completionData = await mosqueTimesModel.checkCompletionStatus(date);
+
+      console.log(
+        `📊 Statut completion: ${completionData.completedMosques}/${completionData.totalMosques} (${completionData.percentage}%)`
+      );
+
+      // Structurer la réponse
+      const response = {
+        success: true,
+        data: {
+          date: completionData.date,
+          totalMosques: completionData.totalMosques,
+          completedMosques: completionData.completedMosques,
+          isComplete: completionData.isComplete,
+          percentage: completionData.percentage,
+          timestamp: new Date().toISOString(),
+        },
+      };
+
+      // Ajouter les mosquées manquantes seulement si demandé ou si pas complet
+      if (!completionData.isComplete || req.query.include_missing === "true") {
+        response.data.missingMosques = completionData.missingMosques;
+      }
+
+      res.json(response);
+    } catch (error) {
+      console.error(
+        "Erreur lors de la vérification du statut de completion:",
+        error
+      );
+      res.status(500).json({
+        success: false,
+        message: "Erreur lors de la vérification du statut de completion",
+        error: error.message,
+      });
+    }
+  }
+
+  // Nouvelle méthode pour vérifier le statut du scraping en temps réel
+  async getScrapingStatus(req, res) {
+    try {
+      const { date } = req.params;
+
+      // Vérifier si des données existent pour cette date
+      const hasData = await mosqueTimesModel.checkDataExists(date);
+
+      // Obtenir le statut du scraping depuis l'EventEmitter
+      const globalStatus = scrapingEventEmitter.getGlobalScrapingStatus();
+      const recentEvents = scrapingEventEmitter.getRecentEvents(5);
+
+      let scrapingStatus = "unknown";
+      let completionDetails = null;
+
+      // Vérifier le statut du scraping en cours
+      if (globalStatus.isRunning) {
+        scrapingStatus = "in_progress";
+        completionDetails = {
+          message: "Scraping en cours",
+          progress: {
+            total: globalStatus.totalScrapers,
+            completed: globalStatus.completedScrapers,
+            failed: globalStatus.failedScrapers,
+            percentage: Math.round(
+              ((globalStatus.completedScrapers + globalStatus.failedScrapers) /
+                globalStatus.totalScrapers) *
+                100
+            ),
+          },
+          start_time: globalStatus.startTime,
+        };
+      } else if (!hasData) {
+        scrapingStatus = "not_started";
+        completionDetails = {
+          message: "Aucune donnée disponible, scraping nécessaire",
+          action_required: "trigger_scraping",
+        };
+      } else {
+        scrapingStatus = "completed";
+        completionDetails = {
+          message: "Données disponibles",
+          data_exists: true,
+          last_scraping:
+            globalStatus.completedScrapers > 0
+              ? {
+                  success_count: globalStatus.completedScrapers,
+                  error_count: globalStatus.failedScrapers,
+                  total_scrapers: globalStatus.totalScrapers,
+                }
+              : null,
+        };
+      }
+
+      res.json({
+        success: true,
+        data: {
+          date,
+          scraping_status: scrapingStatus,
+          data_exists: hasData,
+          completion_details: completionDetails,
+          recent_events: recentEvents,
+          global_status: globalStatus,
+          timestamp: new Date().toISOString(),
+        },
+      });
+    } catch (error) {
+      console.error(
+        "Erreur lors de la vérification du statut du scraping:",
+        error
+      );
+      res.status(500).json({
+        success: false,
+        message: "Erreur serveur lors de la vérification du statut",
+        error: error.message,
+      });
+    }
+  }
+
+  /**
+   * ✅ NOUVEAU: Long Polling pour notification immédiate de fin de scraping
+   * Cette méthode ne répond que quand le scraping est VRAIMENT terminé
+   */
+  async waitForScrapingCompletion(req, res) {
+    try {
+      const { date } = req.params;
+      const maxWaitTime = 5 * 60 * 1000; // 5 minutes max
+      const startTime = Date.now();
+
+      console.log(
+        `[Long Polling] 📡 Client en attente de completion pour ${date}`
+      );
+
+      // Si déjà terminé, répondre immédiatement
+      const hasData = await mosqueTimesModel.checkDataExists(date);
+      const globalStatus = scrapingEventEmitter.getGlobalScrapingStatus();
+
+      if (!globalStatus.isRunning && hasData) {
+        console.log(`[Long Polling] ✅ Déjà terminé, réponse immédiate`);
+        return res.json({
+          success: true,
+          message: "Scraping déjà terminé",
+          status: "completed",
+          data_exists: true,
+          timestamp: new Date().toISOString(),
+        });
+      }
+
+      // Si pas de scraping en cours, pas d'attente
+      if (!globalStatus.isRunning) {
+        console.log(`[Long Polling] ⚠️ Pas de scraping en cours`);
+        return res.json({
+          success: false,
+          message: "Aucun scraping en cours",
+          status: "not_started",
+          data_exists: hasData,
+          timestamp: new Date().toISOString(),
+        });
+      }
+
+      // ✅ Écouter l'événement de completion globale
+      const completionListener = async (eventData) => {
+        try {
+          console.log(`[Long Polling] 🎉 Scraping terminé détecté!`, eventData);
+
+          // Vérifier que les données sont maintenant disponibles
+          const finalHasData = await mosqueTimesModel.checkDataExists(date);
+
+          // Nettoyer les listeners
+          scrapingEventEmitter.removeListener(
+            "globalScrapingCompleted",
+            completionListener
+          );
+          clearTimeout(timeoutHandle);
+
+          // Répondre au client
+          res.json({
+            success: true,
+            message: "Scraping terminé avec succès",
+            status: "completed",
+            data_exists: finalHasData,
+            completion_details: {
+              success_count: eventData.successCount,
+              error_count: eventData.errorCount,
+              total_scrapers: eventData.totalScrapers,
+              duration: eventData.duration,
+            },
+            timestamp: new Date().toISOString(),
+          });
+        } catch (error) {
+          console.error(
+            `[Long Polling] ❌ Erreur dans completionListener:`,
+            error
+          );
+        }
+      };
+
+      // ✅ Timeout de sécurité
+      const timeoutHandle = setTimeout(() => {
+        console.log(`[Long Polling] ⏰ Timeout atteint pour ${date}`);
+        scrapingEventEmitter.removeListener(
+          "globalScrapingCompleted",
+          completionListener
+        );
+
+        if (!res.headersSent) {
+          res.json({
+            success: false,
+            message: "Timeout de l'attente de completion",
+            status: "timeout",
+            data_exists: false,
+            timestamp: new Date().toISOString(),
+          });
+        }
+      }, maxWaitTime);
+
+      // ✅ Enregistrer l'écoute de l'événement
+      scrapingEventEmitter.once("globalScrapingCompleted", completionListener);
+
+      // Gestion de la déconnexion client
+      req.on("close", () => {
+        console.log(`[Long Polling] 🔌 Client déconnecté pour ${date}`);
+        scrapingEventEmitter.removeListener(
+          "globalScrapingCompleted",
+          completionListener
+        );
+        clearTimeout(timeoutHandle);
+      });
+    } catch (error) {
+      console.error("❌ Erreur dans waitForScrapingCompletion:", error);
+      res.status(500).json({
+        success: false,
+        message: "Erreur serveur lors de l'attente",
+        error: error.message,
+        timestamp: new Date().toISOString(),
+      });
+    }
+  }
+
+  // ✨ APPROCHE ULTRA-SIMPLE : Scraper tout et attendre la fin complète
+  async scrapeAllAndWait(req, res) {
+    try {
+      console.log("🚀 Démarrage du scraping complet avec attente...");
+
+      // Un verrou simple pour éviter les scrapings simultanés
+      if (global.isScrapingAll) {
+        console.log("Un scraping global est déjà en cours");
+        return res.status(409).json({
+          success: false,
+          message: "Un scraping est déjà en cours, veuillez patienter",
+        });
+      }
+
+      global.isScrapingAll = true;
+
+      try {
+        // ✅ CORRECTION CRITIQUE : Utiliser scrapeAllCities qui SAUVEGARDE en DB
+        console.log(
+          "🔄 Lancement du scraping avec sauvegarde en base de données..."
+        );
+
+        // Utiliser la vraie méthode qui sauvegarde en DB
+        // Cette méthode va gérer le scraping ET la sauvegarde
+        await this.scrapeAllCities(null, null); // Passer null pour req/res car on gère nous-mêmes la réponse
+
+        console.log("✅ Scraping ET sauvegarde complètement terminés !");
+
+        // Attendre un peu pour s'assurer que toutes les transactions DB sont commitées
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+
+        // Ne répondre que quand TOUT est vraiment fini
+        res.json({
+          success: true,
+          message: "Scraping et sauvegarde complètement terminés",
+          timestamp: new Date().toISOString(),
+        });
+      } catch (error) {
+        console.error("❌ Erreur lors du scraping complet:", error);
+        res.status(500).json({
+          success: false,
+          message: "Erreur lors du scraping",
+          error: error.message,
+        });
+      } finally {
+        // Toujours libérer le verrou
+        global.isScrapingAll = false;
+      }
+    } catch (error) {
+      console.error("❌ Erreur critique lors du scraping complet:", error);
+      global.isScrapingAll = false;
+      res.status(500).json({
+        success: false,
+        message: "Erreur critique lors du scraping",
+        error: error.message,
+      });
+    }
   }
 }
 
@@ -948,7 +1388,16 @@ module.exports = {
   getSelectedCity: controller.getSelectedCity.bind(controller),
   reportMissingData: controller.reportMissingData.bind(controller),
   checkScrapingStatus: controller.checkScrapingStatus.bind(controller),
+  getScrapingStatus: controller.getScrapingStatus.bind(controller),
   initializeCleanupTask: controller.initializeCleanupTask.bind(controller),
   triggerScrapingByRunAllScrapers:
     controller.triggerScrapingByRunAllScrapers.bind(controller),
+  getMonitoringMetrics: controller.getMonitoringMetrics.bind(controller),
+  getMonitoringHealth: controller.getMonitoringHealth.bind(controller),
+  getMonitoringProblems: controller.getMonitoringProblems.bind(controller),
+  resetMonitoring: controller.resetMonitoring.bind(controller),
+  checkCompletionStatus: controller.checkCompletionStatus.bind(controller),
+  scrapeAllAndWait: controller.scrapeAllAndWait.bind(controller),
+  waitForScrapingCompletion:
+    controller.waitForScrapingCompletion.bind(controller),
 };

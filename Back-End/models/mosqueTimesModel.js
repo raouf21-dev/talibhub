@@ -51,7 +51,6 @@ const getPrayerTimes = async (mosqueId, date) => {
       return null;
     }
   } catch (error) {
-    console.error("Error during manual scraping:", error);
     console.error(
       "Erreur lors de la récupération des horaires de prière:",
       error
@@ -149,6 +148,67 @@ const getAllCities = async () => {
   }
 };
 
+const checkCompletionStatus = async (date) => {
+  try {
+    // 1. Compter le total des mosquées
+    const totalMosquesResult = await pool.query(
+      "SELECT COUNT(*) as total FROM mosques"
+    );
+    const totalMosques = parseInt(totalMosquesResult.rows[0].total);
+
+    // 2. Compter les prayer_times pour la date donnée
+    const completedResult = await pool.query(
+      `
+      SELECT COUNT(*) as completed_count
+      FROM prayer_times 
+      WHERE DATE(date) = $1 
+      AND mosque_id IS NOT NULL
+    `,
+      [date]
+    );
+
+    const completedMosques = parseInt(completedResult.rows[0].completed_count);
+
+    // 3. Calculer le statut
+    const isComplete = completedMosques === totalMosques;
+    const percentage =
+      totalMosques > 0
+        ? ((completedMosques / totalMosques) * 100).toFixed(1)
+        : 0;
+
+    // 4. Optionnel : Récupérer les mosquées manquantes si pas complet
+    let missingMosques = [];
+    if (!isComplete) {
+      const missingResult = await pool.query(
+        `
+        SELECT m.id, m.name, m.city
+        FROM mosques m
+        LEFT JOIN prayer_times pt ON m.id = pt.mosque_id AND DATE(pt.date) = $1
+        WHERE pt.id IS NULL
+      `,
+        [date]
+      );
+
+      missingMosques = missingResult.rows;
+    }
+
+    return {
+      date,
+      totalMosques,
+      completedMosques,
+      isComplete,
+      percentage: parseFloat(percentage),
+      missingMosques,
+    };
+  } catch (error) {
+    console.error(
+      "Erreur lors de la vérification du statut de completion :",
+      error
+    );
+    throw error;
+  }
+};
+
 module.exports = {
   savePrayerTimes,
   getPrayerTimes,
@@ -159,4 +219,5 @@ module.exports = {
   getMosquesByCity,
   checkDataExists,
   getAllCities,
+  checkCompletionStatus,
 };

@@ -4,13 +4,13 @@ const appState = AppState;
 
 class StatisticsManager {
   constructor() {
-    console.debug('[StatisticsManager] constructor: Initializing...');
+    console.debug("[StatisticsManager] constructor: Initializing...");
     // Le cache contiendra uniquement les enregistrements existants
     this.cache = {
       daily: { dates: [], dataMap: new Map(), lastFetch: null },
       weekly: { dates: [], dataMap: new Map(), lastFetch: null },
       monthly: { dates: [], dataMap: new Map(), lastFetch: null },
-      yearly: { dates: [], dataMap: new Map(), lastFetch: null }
+      yearly: { dates: [], dataMap: new Map(), lastFetch: null },
     };
 
     // Pour chaque période, l’index courant dans le tableau des enregistrements
@@ -19,31 +19,33 @@ class StatisticsManager {
       daily: 0,
       weekly: 0,
       monthly: 0,
-      yearly: 0
+      yearly: 0,
     };
 
     // Périodes gérées
-    this.periods = ['daily', 'weekly', 'monthly', 'yearly'];
+    this.periods = ["daily", "weekly", "monthly", "yearly"];
     // Nombre maximum d'enregistrements à afficher pour chaque période
     this.periodLimits = {
       daily: 7,
       weekly: 4,
       monthly: 12,
-      yearly: 2
+      yearly: 2,
     };
   }
 
   async fetchAndCacheData(period) {
-    console.debug(`[StatisticsManager] fetchAndCacheData(${period}): Start fetching data...`);
+    console.debug(
+      `[StatisticsManager] fetchAndCacheData(${period}): Start fetching data...`
+    );
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       if (!token) {
-        console.error('[StatisticsManager] No token found.');
+        console.error("[StatisticsManager] No token found.");
         return false;
       }
 
       const response = await fetch(`/api/statistics/${period}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       if (!response.ok) {
@@ -51,15 +53,21 @@ class StatisticsManager {
       }
 
       const result = await response.json();
-      console.debug(`[StatisticsManager] fetchAndCacheData(${period}): Response received:`, result);
+      console.debug(
+        `[StatisticsManager] fetchAndCacheData(${period}): Response received:`,
+        result
+      );
 
-      if (result.status === 'success' && Array.isArray(result.data)) {
+      if (result.status === "success" && Array.isArray(result.data)) {
         this.updateCache(period, result.data);
         return true;
       }
       return false;
     } catch (error) {
-      console.error(`[StatisticsManager] Error in fetchAndCacheData(${period}):`, error);
+      console.error(
+        `[StatisticsManager] Error in fetchAndCacheData(${period}):`,
+        error
+      );
       return false;
     }
   }
@@ -71,7 +79,10 @@ class StatisticsManager {
    * et limitées au maximum défini (7 pour daily, 4 pour weekly, etc.).
    */
   updateCache(period, data) {
-    console.debug(`[StatisticsManager] updateCache(${period}): Updating cache with server data:`, data);
+    console.debug(
+      `[StatisticsManager] updateCache(${period}): Updating cache with server data:`,
+      data
+    );
     const cache = this.cache[period];
     cache.dates = [];
     cache.dataMap.clear();
@@ -81,9 +92,12 @@ class StatisticsManager {
     const maxRecords = this.periodLimits[period];
     // Limiter aux enregistrements existants (au maximum maxRecords)
     const limitedData = sortedData.slice(0, maxRecords);
-    console.debug(`[StatisticsManager] updateCache(${period}): Limited data:`, limitedData);
+    console.debug(
+      `[StatisticsManager] updateCache(${period}): Limited data:`,
+      limitedData
+    );
 
-    limitedData.forEach(record => {
+    limitedData.forEach((record) => {
       // On crée une clé de la forme "YYYY-MM-DD" pour chaque enregistrement
       const dateKey = this.formatKey(new Date(record.date));
       cache.dates.push(dateKey);
@@ -99,15 +113,17 @@ class StatisticsManager {
   // Retourne une chaîne "YYYY-MM-DD" pour une date donnée
   formatKey(date) {
     const year = date.getFullYear();
-    const month = ('0' + (date.getMonth() + 1)).slice(-2);
-    const day = ('0' + date.getDate()).slice(-2);
+    const month = ("0" + (date.getMonth() + 1)).slice(-2);
+    const day = ("0" + date.getDate()).slice(-2);
     return `${year}-${month}-${day}`;
   }
 
   getCurrentDateForPeriod(period) {
     const cache = this.cache[period];
     const index = this.currentPeriodIndex[period];
-    console.debug(`[StatisticsManager] getCurrentDateForPeriod(${period}): Current index: ${index}, Date: ${cache.dates[index]}`);
+    console.debug(
+      `[StatisticsManager] getCurrentDateForPeriod(${period}): Current index: ${index}, Date: ${cache.dates[index]}`
+    );
     return cache.dates[index];
   }
 
@@ -116,26 +132,36 @@ class StatisticsManager {
   }
 
   async updatePeriodData(period) {
-    console.debug(`[StatisticsManager] updatePeriodData(${period}): Updating period data...`);
+    console.debug(
+      `[StatisticsManager] updatePeriodData(${period}): Updating period data...`
+    );
     try {
       // Si aucun enregistrement n'est présent, on récupère les données depuis le serveur
       if (this.cache[period].dates.length === 0) {
-        console.debug(`[StatisticsManager] updatePeriodData(${period}): Cache empty, fetching data...`);
+        console.debug(
+          `[StatisticsManager] updatePeriodData(${period}): Cache empty, fetching data...`
+        );
         if (!(await this.fetchAndCacheData(period))) {
-          throw new Error('Unable to load data');
+          throw new Error("Unable to load data");
         }
       }
       const currentDateKey = this.getCurrentDateForPeriod(period);
       if (!currentDateKey) {
-        throw new Error('Invalid date');
+        throw new Error("Invalid date");
       }
       const record = this.getDataForDate(period, currentDateKey);
-      console.debug(`[StatisticsManager] updatePeriodData(${period}): Record for ${currentDateKey}:`, record);
+      console.debug(
+        `[StatisticsManager] updatePeriodData(${period}): Record for ${currentDateKey}:`,
+        record
+      );
       this.displayRecord(period, record);
       this.updateNavigationButtons(period);
     } catch (error) {
-      console.error(`[StatisticsManager] updatePeriodData(${period}) Error:`, error);
-      ChartManager.updateChart(period, ['Erreur de chargement'], [0], [0], []);
+      console.error(
+        `[StatisticsManager] updatePeriodData(${period}) Error:`,
+        error
+      );
+      ChartManager.updateChart(period, ["Erreur de chargement"], [0], [0], []);
     }
   }
 
@@ -151,7 +177,9 @@ class StatisticsManager {
       const newIndex = this.currentPeriodIndex[period] + direction;
       if (newIndex < 0 || newIndex >= cache.dates.length) {
         console.debug(
-          `[StatisticsManager] navigatePeriod(${period}): Navigation out of bounds. newIndex=${newIndex}, valid range=0-${cache.dates.length - 1}`
+          `[StatisticsManager] navigatePeriod(${period}): Navigation out of bounds. newIndex=${newIndex}, valid range=0-${
+            cache.dates.length - 1
+          }`
         );
         return;
       }
@@ -161,7 +189,10 @@ class StatisticsManager {
       this.currentPeriodIndex[period] = newIndex;
       this.updatePeriodData(period);
     } catch (error) {
-      console.error(`[StatisticsManager] navigatePeriod(${period}) Error:`, error);
+      console.error(
+        `[StatisticsManager] navigatePeriod(${period}) Error:`,
+        error
+      );
     }
   }
 
@@ -173,7 +204,7 @@ class StatisticsManager {
   displayRecord(period, record) {
     try {
       if (!record || !record.date) {
-        throw new Error('Invalid record');
+        throw new Error("Invalid record");
       }
       const dateObj = new Date(record.date);
       const label = this.formatDate(dateObj, period);
@@ -185,11 +216,16 @@ class StatisticsManager {
       const span = document.getElementById(`${period}-period`);
       if (span) {
         span.textContent = label;
-        span.setAttribute('data-date', record.date);
+        span.setAttribute("data-date", record.date);
       }
-      console.debug(`[StatisticsManager] displayRecord(${period}): Displaying record for ${record.date}`);
+      console.debug(
+        `[StatisticsManager] displayRecord(${period}): Displaying record for ${record.date}`
+      );
     } catch (error) {
-      console.error(`[StatisticsManager] displayRecord(${period}) Error:`, error);
+      console.error(
+        `[StatisticsManager] displayRecord(${period}) Error:`,
+        error
+      );
       ChartManager.updateChart(period, ["Erreur d'affichage"], [0], [0], []);
     }
   }
@@ -204,29 +240,40 @@ class StatisticsManager {
   formatDate(date, period) {
     try {
       if (!(date instanceof Date) || isNaN(date.getTime())) {
-        throw new Error('Invalid date');
+        throw new Error("Invalid date");
       }
       switch (period) {
-        case 'daily':
-          return date.toLocaleDateString('fr-FR', {
-            weekday: 'long',
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric'
+        case "daily":
+          return date.toLocaleDateString("fr-FR", {
+            weekday: "long",
+            day: "numeric",
+            month: "long",
+            year: "numeric",
           });
-        case 'weekly':
+        case "weekly":
           // Affichage en anglais pour la semaine, par exemple "Week of January 27, 2025"
-          return `Week of ${date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`;
-        case 'monthly':
-          return date.toLocaleString('fr-FR', { month: 'long', year: 'numeric', timeZone: 'UTC' });
-        case 'yearly':
+          return `Week of ${date.toLocaleDateString("en-US", {
+            month: "long",
+            day: "numeric",
+            year: "numeric",
+          })}`;
+        case "monthly":
+          return date.toLocaleString("fr-FR", {
+            month: "long",
+            year: "numeric",
+            timeZone: "UTC",
+          });
+        case "yearly":
           return date.getUTCFullYear().toString();
         default:
-          return date.toLocaleDateString('fr-FR');
+          return date.toLocaleDateString("fr-FR");
       }
     } catch (error) {
-      console.error(`[StatisticsManager] formatDate Error for period ${period}:`, error);
-      return 'Date invalide';
+      console.error(
+        `[StatisticsManager] formatDate Error for period ${period}:`,
+        error
+      );
+      return "Date invalide";
     }
   }
 
@@ -240,8 +287,8 @@ class StatisticsManager {
       const nav = document.querySelector(`[data-period="${period}"]`);
       if (!nav) return;
 
-      const prevBtn = nav.querySelector('.prev');
-      const nextBtn = nav.querySelector('.next');
+      const prevBtn = nav.querySelector(".prev");
+      const nextBtn = nav.querySelector(".next");
       const currentIndex = this.currentPeriodIndex[period];
       const maxIndex = this.cache[period].dates.length - 1;
 
@@ -255,49 +302,60 @@ class StatisticsManager {
         `[StatisticsManager] updateNavigationButtons(${period}): currentIndex=${currentIndex}, maxIndex=${maxIndex}, prevBtn.disabled=${prevBtn.disabled}, nextBtn.disabled=${nextBtn.disabled}`
       );
     } catch (error) {
-      console.error(`[StatisticsManager] updateNavigationButtons(${period}) Error:`, error);
+      console.error(
+        `[StatisticsManager] updateNavigationButtons(${period}) Error:`,
+        error
+      );
     }
   }
 
   setupListeners() {
     try {
-      console.debug('[StatisticsManager] setupListeners: Setting up navigation buttons...');
-      document.querySelectorAll('.period-navigation').forEach((nav) => {
+      console.debug(
+        "[StatisticsManager] setupListeners: Setting up navigation buttons..."
+      );
+      document.querySelectorAll(".period-navigation").forEach((nav) => {
         const period = nav.dataset.period;
-        nav.querySelector('.prev')?.addEventListener('click', () => {
-          console.debug(`[StatisticsManager] setupListeners: ${period} prev button clicked.`);
+        nav.querySelector(".prev")?.addEventListener("click", () => {
+          console.debug(
+            `[StatisticsManager] setupListeners: ${period} prev button clicked.`
+          );
           this.navigatePeriod(period, +1);
         });
-        nav.querySelector('.next')?.addEventListener('click', () => {
-          console.debug(`[StatisticsManager] setupListeners: ${period} next button clicked.`);
+        nav.querySelector(".next")?.addEventListener("click", () => {
+          console.debug(
+            `[StatisticsManager] setupListeners: ${period} next button clicked.`
+          );
           this.navigatePeriod(period, -1);
         });
       });
     } catch (error) {
-      console.error('[StatisticsManager] setupListeners Error:', error);
+      console.error("[StatisticsManager] setupListeners Error:", error);
     }
   }
 
   async init() {
     try {
-      console.debug('[StatisticsManager] init: Starting initialization...');
+      console.debug("[StatisticsManager] init: Starting initialization...");
       ChartManager.init();
       this.setupListeners();
       // Pour chaque période, on récupère et affiche les enregistrements existants
       for (const period of this.periods) {
-        console.debug(`[StatisticsManager] init: Fetching and updating data for period "${period}"`);
+        console.debug(
+          `[StatisticsManager] init: Fetching and updating data for period "${period}"`
+        );
         await this.fetchAndCacheData(period);
         await this.updatePeriodData(period);
       }
-      console.debug('[StatisticsManager] init: Initialization complete.');
+      console.debug("[StatisticsManager] init: Initialization complete.");
     } catch (error) {
-      console.error('[StatisticsManager] init Error:', error);
+      console.error("[StatisticsManager] init Error:", error);
     }
   }
 
   cleanup() {
     try {
-      console.debug('[StatisticsManager] cleanup: Cleaning up...');
+      console.debug("[StatisticsManager] cleanup: Cleaning up...");
       this.periods.forEach((period) => {
         this.cache[period].dates = [];
         this.cache[period].dataMap.clear();
@@ -305,7 +363,7 @@ class StatisticsManager {
       });
       ChartManager.destroy();
     } catch (error) {
-      console.error('[StatisticsManager] cleanup Error:', error);
+      console.error("[StatisticsManager] cleanup Error:", error);
     }
   }
 }
@@ -313,15 +371,17 @@ class StatisticsManager {
 const statisticsManager = new StatisticsManager();
 
 export async function initializeStatistics() {
-  console.debug('[initializeStatistics] Starting initialization of statistics...');
+  console.debug(
+    "[initializeStatistics] Starting initialization of statistics..."
+  );
   await statisticsManager.init();
-  console.debug('[initializeStatistics] Initialization complete.');
+  console.debug("[initializeStatistics] Initialization complete.");
 }
 
 export function cleanupStatistics() {
-  console.debug('[cleanupStatistics] Starting cleanup of statistics...');
+  console.debug("[cleanupStatistics] Starting cleanup of statistics...");
   statisticsManager.cleanup();
-  console.debug('[cleanupStatistics] Cleanup complete.');
+  console.debug("[cleanupStatistics] Cleanup complete.");
 }
 
 export { statisticsManager };

@@ -1,5 +1,5 @@
 // Service pour centraliser le stockage des horaires de mosquées
-import CacheService, { getMidnightTimestamp } from "./cacheMosqueTime.js";
+import CacheService, { getMidnightTimestamp } from "./cacheService.js";
 import { getCurrentDateString } from "../utils/mosqueTimeUtils.js";
 
 const mosqueTimesStorageService = {
@@ -185,6 +185,44 @@ const mosqueTimesStorageService = {
     } catch (error) {
       console.error(
         "[DEBUG] mosqueTimesStorageService: Erreur lors du nettoyage:",
+        error
+      );
+      return false;
+    }
+  },
+
+  /**
+   * Efface les données de cache pour une ville spécifique
+   * @param {string} cityName - Nom de la ville
+   * @returns {boolean} - Succès ou échec
+   */
+  clearCityData(cityName) {
+    try {
+      const normalizedCity = this.normalizeCity(cityName);
+      const cacheKey = this.getCityKey(normalizedCity);
+
+      // Supprimer les données de la ville
+      CacheService.removeItem(cacheKey);
+
+      // Supprimer la ville de la liste des villes mises en cache
+      const cities = this.getCachedCities();
+      const updatedCities = cities.filter((city) => city !== normalizedCity);
+
+      if (updatedCities.length !== cities.length) {
+        CacheService.setItem(
+          this.CITIES_KEY,
+          updatedCities,
+          getMidnightTimestamp()
+        );
+      }
+
+      console.log(
+        `[DEBUG] mosqueTimesStorageService: Données de ${cityName} supprimées du cache`
+      );
+      return true;
+    } catch (error) {
+      console.error(
+        `[DEBUG] mosqueTimesStorageService: Erreur lors de la suppression des données de ${cityName}:`,
         error
       );
       return false;

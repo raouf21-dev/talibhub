@@ -5,7 +5,7 @@ import {
   navigateTo,
 } from "../../utils/utils.js";
 import { BotTracker } from "./botTracker.js";
-import CaptchaHandler from "./captcha.js";
+import TurnstileHandler from "./turnstile.js";
 import { api } from "../../services/api/dynamicLoader.js";
 import TermsHandler from "./terms.js";
 import { notificationService } from "../../services/notifications/notificationService.js";
@@ -17,7 +17,7 @@ let isCountryInputInitialized = false;
 
 // Instances globales
 const botTracker = new BotTracker();
-const captchaHandler = new CaptchaHandler();
+const turnstileHandler = new TurnstileHandler();
 let termsHandler;
 
 /* =========================
@@ -121,9 +121,9 @@ async function handleSignup(event) {
       return;
     }
 
-    // Vérification du CAPTCHA
-    const isCaptchaValid = await captchaHandler.verify();
-    if (!isCaptchaValid) {
+    // Vérification Turnstile
+    const isTurnstileValid = await turnstileHandler.verify();
+    if (!isTurnstileValid) {
       notificationService.show("auth.captcha.required", "warning");
       return;
     }

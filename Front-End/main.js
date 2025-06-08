@@ -1,46 +1,17 @@
-// Imports corrects pour main.js
-import { initializeAuth } from "./components/auth/auth.js";
-import { initializeNavigation } from "./components/navigation/navigation.js";
-import { initializeWelcomepage } from "./components/welcome/welcomePage.js";
-import { initializeNotifications } from "./components/notifications/notifications.js";
-import { initializeTimer } from "./components/timer/timer.js";
-import { initializeSurahSelector } from "./components/quran/surahSelector.js";
-import { initializeMosqueTime } from "./components/prayer/mosqueTime.js";
-import { initializeStatistics } from "./components/statistics/statistics.js";
-import { initializeUtils, updateNavVisibility } from "./utils/utils.js";
-import { initializeTopNav } from "./components/navigation/topnav.js";
+// Imports principaux pour main.js
 import { langConfig } from "./config/apiConfig.js";
-
-// Importation des services
 import { authService } from "./services/auth/authService.js";
-import { notificationService } from "./services/notifications/notificationService.js";
-import { api } from "./services/api/dynamicLoader.js";
-import AppState from "../../services/state/state.js";
+import AppState from "./services/state/state.js";
 import CacheService from "./services/cache/cacheService.js";
-
-// Importation des composants
-import { initializeDuaTimeCalculator } from "./components/prayer/duaTimeCalculator.js";
-import { ChartManager } from "./components/statistics/charts.js";
-import { initializeDashboard } from "./components/navigation/dashboard.js";
-
-// Importation des utilitaires
-import { navigateTo, switchTab } from "./utils/utils.js";
-import { translations } from "./services/notifications/translatNotifications.js";
-
-// Si vous avez déplacé profile.js dans components/user
-import { initializeProfile } from "./components/user/profile.js";
-
-// Importation du module featherLoader
-import "./utils/featherLoader.js";
-
-// Importation du service mosqueTimesStorageService
 import mosqueTimesStorageService from "./services/cache/mosqueTimesStorageService.js";
-
-// Importation de la constante APP_VERSION
 import { APP_VERSION } from "./utils/version.js";
-
-// Importation de la constante BUILD_HASH et de la fonction checkBuildHash
 import { BUILD_HASH, checkBuildHash } from "./build/build-info.js";
+
+// Importation du système de traductions
+import translationManager from "./utils/translations.js";
+
+// Note: Les imports de utils.js sont supprimés pour éviter les dépendances circulaires
+// Ces fonctions seront importées dynamiquement quand nécessaire
 
 // Fonction pour détecter et corriger les boucles de redirection
 (function detectRedirectLoop() {
@@ -55,8 +26,6 @@ import { BUILD_HASH, checkBuildHash } from "./build/build-info.js";
     stopRedirects: !!sessionStorage.getItem("stopRedirects"),
     navigationStack: new Error().stack,
   };
-
-  console.log("[DEBUG] Navigation - État complet:", state);
 
   // Créer une variable de session qui empêche de rentrer dans une boucle
   // Mais permet encore d'exécuter le code de vérification de version
@@ -146,8 +115,6 @@ async function checkAuthStatus() {
  * Fonction principale d'initialisation de l'application.
  */
 async function initializeApp() {
-  console.log("Initialisation de l'application");
-
   // Vérification de build-info.js...
   console.log("Vérification de build-info.js...");
   const buildUpdated = checkBuildHash(() => {
@@ -186,6 +153,17 @@ async function initializeApp() {
     currentPath = "welcomepage";
   }
 
+  // Importer dynamiquement les utilitaires pour éviter les dépendances circulaires
+  const { updateNavVisibility, initializeUtils } = await import(
+    "./utils/utils.js"
+  );
+  const { initializeNavigation } = await import(
+    "./components/navigation/navigation.js"
+  );
+  const { initializeTopNav } = await import(
+    "./components/navigation/topnav.js"
+  );
+
   // Appliquer immédiatement la visibilité de la navigation
   updateNavVisibility(currentPath);
 
@@ -202,6 +180,10 @@ async function initializeApp() {
     console.log("Initialisation de topnav ignorée sur welcomepage");
   }
 
+  // Importer dynamiquement les fonctions nécessaires
+  const { navigateTo } = await import("./utils/utils.js");
+  const { initializeAuth } = await import("./components/auth/auth.js");
+
   const token = await checkAuthStatus();
 
   if (token) {
@@ -211,15 +193,6 @@ async function initializeApp() {
     console.log("Utilisateur non authentifié");
     await navigateTo("welcomepage");
     await initializeAuth();
-  }
-
-  // Initialisation des composants
-  initializeDuaTimeCalculator();
-  initializeDashboard();
-
-  // Initialisation des graphiques si la page contient des éléments de graphique
-  if (document.querySelector('[id$="Chart"]')) {
-    ChartManager.init();
   }
 
   // Gestion des événements de navigation
@@ -238,23 +211,28 @@ async function initializeApp() {
     await authService.logout();
     window.location.reload();
   });
-
-  // Afficher la notification de mise à jour si nécessaire à la fin de l'initialisation
-  if (window.showUpdateNotification) {
-    notificationService.show("app.updated", "info");
-    delete window.showUpdateNotification;
-  }
 }
+
+// Gestion globale de l'événement "login" :
+// Lorsqu'un login réussi est déclenché, on initialise la topnav
+window.addEventListener("login", async () => {
+  console.log("Événement login détecté, initialisation de la topnav");
+  const { initializeTopNav } = await import(
+    "./components/navigation/topnav.js"
+  );
+  await initializeTopNav();
+});
 
 // Gestion globale de l'événement "logout" :
 // Lorsqu'un logout est déclenché (par exemple via une réponse 401),
 // on supprime le token et redirige l'utilisateur vers la page de connexion.
-window.addEventListener("logout", () => {
+window.addEventListener("logout", async () => {
   localStorage.removeItem("token");
 
   // Vérifier si nous sommes déjà sur welcomepage pour éviter une boucle
   if (window.location.pathname !== "/welcomepage") {
     console.log("Redirection vers welcomepage suite à une déconnexion");
+    const { navigateTo } = await import("./utils/utils.js");
     navigateTo("welcomepage");
   }
 });
@@ -276,6 +254,7 @@ window.addEventListener("popstate", async (event) => {
   } else if (isUserAuthenticated && targetPage === "welcomepage") {
     targetPage = "dashboard";
   }
+  const { navigateTo } = await import("./utils/utils.js");
   await navigateTo(targetPage, false);
 });
 
@@ -288,4 +267,4 @@ window.addEventListener("error", (event) => {
 });
 
 // Exportation pour utilisation dans d'autres fichiers si nécessaire
-export { authService, notificationService, api, CacheService };
+export { authService, CacheService };

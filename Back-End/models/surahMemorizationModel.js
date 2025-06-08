@@ -1,26 +1,26 @@
 // surahMemorizationModel.js
-const pool = require('../config/db'); // Assurez-vous que c'est votre configuration de base de données
+const pool = require("../config/db"); // Assurez-vous que c'est votre configuration de base de données
 
 // Fonction pour calculer la prochaine date de révision
 const calculateNextRevisionDate = (lastRevisionDate, memorizationLevel) => {
   const date = new Date(lastRevisionDate);
   switch (memorizationLevel) {
-    case 'Strong':
+    case "Strong":
       date.setDate(date.getDate() + 30);
       break;
-    case 'Good':
+    case "Good":
       date.setDate(date.getDate() + 14);
       break;
-    case 'Moderate':
+    case "Moderate":
       date.setDate(date.getDate() + 7);
       break;
-    case 'Weak':
+    case "Weak":
       date.setDate(date.getDate() + 3);
       break;
     default:
       date.setDate(date.getDate() + 7); // Par défaut, une semaine
   }
-  return date.toISOString().split('T')[0];
+  return date.toISOString().split("T")[0];
 };
 
 // Récupérer les sourates de l'utilisateur
@@ -39,14 +39,22 @@ const getSurahsByUser = async (userId) => {
     const result = await pool.query(query, [userId]);
     return result.rows;
   } catch (error) {
-    console.error('Erreur dans getSurahsByUser:', error);
+    console.error("Erreur dans getSurahsByUser:", error);
     throw error;
   }
 };
 
 // Mettre à jour le statut de mémorisation d'une sourate
-const updateSurahStatus = async (userId, surahNumber, memorizationLevel, lastRevisionDate) => {
-  const nextRevisionDate = calculateNextRevisionDate(lastRevisionDate, memorizationLevel);
+const updateSurahStatus = async (
+  userId,
+  surahNumber,
+  memorizationLevel,
+  lastRevisionDate
+) => {
+  const nextRevisionDate = calculateNextRevisionDate(
+    lastRevisionDate,
+    memorizationLevel
+  );
   const query = `
     INSERT INTO surah_memorization (user_id, surah_number, memorization_level, last_revision_date, next_revision_date)
     VALUES ($1, $2, $3, $4, $5)
@@ -56,12 +64,23 @@ const updateSurahStatus = async (userId, surahNumber, memorizationLevel, lastRev
         next_revision_date = EXCLUDED.next_revision_date;
   `;
   try {
-    console.log(`Mise à jour du statut de mémorisation pour l'utilisateur ${userId}, sourate ${surahNumber}`);
-    const result = await pool.query(query, [userId, surahNumber, memorizationLevel, lastRevisionDate, nextRevisionDate]);
-    console.log('Statut de mémorisation mis à jour avec succès');
+    console.log(
+      `Mise à jour du statut de mémorisation pour l'utilisateur ${userId}, sourate ${surahNumber}`
+    );
+    const result = await pool.query(query, [
+      userId,
+      surahNumber,
+      memorizationLevel,
+      lastRevisionDate,
+      nextRevisionDate,
+    ]);
+    console.log("Statut de mémorisation mis à jour avec succès");
     return result;
   } catch (error) {
-    console.error('Erreur lors de la mise à jour du statut de mémorisation:', error);
+    console.error(
+      "Erreur lors de la mise à jour du statut de mémorisation:",
+      error
+    );
     throw error;
   }
 };
@@ -79,7 +98,7 @@ const getRevisionHistory = async (userId) => {
     const result = await pool.query(query, [userId]);
     return result.rows;
   } catch (error) {
-    console.error('Erreur dans getRevisionHistory:', error);
+    console.error("Erreur dans getRevisionHistory:", error);
     throw error;
   }
 };
@@ -89,9 +108,12 @@ const clearRevisionHistory = async (userId) => {
   const query = `DELETE FROM surah_memorization WHERE user_id = $1;`;
   try {
     await pool.query(query, [userId]);
-    console.log('Historique de révision effacé avec succès pour l\'utilisateur', userId);
+    console.log(
+      "Historique de révision effacé avec succès pour l'utilisateur",
+      userId
+    );
   } catch (error) {
-    console.error('Erreur dans clearRevisionHistory:', error);
+    console.error("Erreur dans clearRevisionHistory:", error);
     throw error;
   }
 };
@@ -100,14 +122,17 @@ const clearRevisionHistory = async (userId) => {
 const saveKnownSurahs = async (userId, surahNumbers) => {
   const client = await pool.connect();
   try {
-    await client.query('BEGIN');
+    await client.query("BEGIN");
 
     // Marquer toutes les sourates comme non connues
-    await client.query(`
+    await client.query(
+      `
       UPDATE surah_memorization
       SET is_known = FALSE
       WHERE user_id = $1
-    `, [userId]);
+    `,
+      [userId]
+    );
 
     // Mettre à jour les sourates sélectionnées comme connues (is_known = TRUE), ou les insérer si elles n'existent pas
     const upsertQuery = `
@@ -120,18 +145,21 @@ const saveKnownSurahs = async (userId, surahNumbers) => {
       await client.query(upsertQuery, [userId, surahNumber]);
     }
 
-    await client.query('COMMIT');
-    console.log('Sourates connues mises à jour avec succès pour l\'utilisateur', userId);
+    await client.query("COMMIT");
+    console.log(
+      "Sourates connues mises à jour avec succès pour l'utilisateur",
+      userId
+    );
   } catch (error) {
-    await client.query('ROLLBACK');
-    console.error('Erreur lors de la mise à jour des sourates connues:', error);
+    await client.query("ROLLBACK");
+    console.error("Erreur lors de la mise à jour des sourates connues:", error);
     throw error;
   } finally {
     client.release();
   }
 };
 
-// Récupérer les sourates connues
+// Récupérer les sourates à réciter
 const getKnownSurahs = async (userId) => {
   const query = `
     SELECT surah_number
@@ -140,9 +168,9 @@ const getKnownSurahs = async (userId) => {
   `;
   try {
     const result = await pool.query(query, [userId]);
-    return result.rows.map(row => row.surah_number);
+    return result.rows.map((row) => row.surah_number);
   } catch (error) {
-    console.error('Erreur dans getKnownSurahs:', error);
+    console.error("Erreur dans getKnownSurahs:", error);
     throw error;
   }
 };

@@ -1,0 +1,436 @@
+{
+  "navigation": {
+    "sidebar": {
+      "title": "TalibHub(Beta)",
+      "dashboard": "Tableau de bord",
+      "todoLists": "Listes de Tâches",
+      "apprentissage": "TalibTimer",
+      "statistics": "Statistiques",
+      "salatSurahSelector": "Sélecteur de Sourate",
+      "duaTimeCalculator": "Temps de Doua",
+      "surahmemorization": "Mémorisation des Sourates",
+      "mosquetime": "Horaires de Prière à la Mosquée"
+    },
+    "topnav": {
+      "profile": "Profil",
+      "notifications": "Notifications",
+      "contribution": "Contribution",
+      "contact": "Contact",
+      "aboutus": "À propos de nous",
+      "theme": "Thème",
+      "logout": "Déconnexion"
+    }
+  },
+  "welcomepage": {
+    "header": {
+      "title": "TalibHub(Beta)"
+    },
+    "hero": {
+      "title": "Bienvenue sur TalibHub",
+      "subtitle": "Votre plateforme innovante pour l'apprentissage et la pratique islamique",
+      "getStarted": "Commencer"
+    },
+    "auth": {
+      "tabs": {
+        "signup": "Inscription",
+        "signin": "Connexion"
+      },
+      "signup": {
+        "title": "Inscription",
+        "username": "Pseudo",
+        "firstName": "Prénom",
+        "lastName": "Nom",
+        "age": "Âge",
+        "gender": "Sexe",
+        "country": "Pays",
+        "email": "Adresse e-mail",
+        "confirmEmail": "Confirmer l'adresse e-mail",
+        "password": "Mot de passe",
+        "confirmPassword": "Confirmer le mot de passe",
+        "terms": "J'accepte les",
+        "termsLink": "Conditions Générales d'Utilisation",
+        "captcha": "Vérification de sécurité",
+        "createAccount": "Créer un compte",
+        "genderOptions": {
+          "select": "Sélectionner",
+          "male": "Masculin",
+          "female": "Féminin"
+        }
+      },
+      "signin": {
+        "title": "Connexion",
+        "email": "Adresse e-mail",
+        "password": "Mot de passe",
+        "submit": "Se connecter",
+        "forgotPassword": "Mot de passe oublié ?"
+      }
+    },
+    "features": {
+      "title": "Nos Principales Fonctionnalités",
+      "talibTimer": {
+        "title": "TalibTimer",
+        "description": "Optimisez vos sessions d'étude et de pratique"
+      },
+      "surahSelector": {
+        "title": "Sélecteur de Sourate",
+        "description": "Diversifiez vos récitations de prières"
+      },
+      "surahMemorization": {
+        "title": "Mémorisation des Sourates",
+        "description": "Maintenez votre mémorisation avec la répétition espacée"
+      },
+      "duaTimeCalculator": {
+        "title": "Calculateur de Temps de Doua",
+        "description": "Calculez le dernier tiers de la nuit pour les invocations"
+      },
+      "mosqueTime": {
+        "title": "Horaires de Prière à la Mosquée",
+        "description": "Trouvez les horaires de prières en congrégation près de chez vous"
+      },
+      "futureFeatures": {
+        "title": "Fonctionnalités Futures",
+        "description": "De nombreuses fonctionnalités passionnantes à venir !"
+      }
+    },
+    "vision": {
+      "title": "Notre Vision",
+      "content": "Chez TalibHub, nous croyons que la technologie peut enrichir et faciliter la pratique de l'islam. Notre plateforme combine des fonctionnalités pratiques avec une interface intuitive pour créer une expérience unique et personnalisée pour chaque utilisateur."
+    },
+    "whyChoose": {
+      "title": "Pourquoi Choisir TalibHub ?",
+      "practical": {
+        "title": "Approche Pratique",
+        "description": "Nous nous concentrons sur l'application concrète des enseignements islamiques dans la vie quotidienne."
+      },
+      "personalization": {
+        "title": "Personnalisation",
+        "description": "Notre plateforme s'adapte à votre mode de vie et à vos objectifs personnels dans la pratique religieuse."
+      },
+      "community": {
+        "title": "Communauté",
+        "description": "Rejoignez une communauté mondiale de musulmans et partagez vos expériences et vos progrès."
+      },
+      "accessibility": {
+        "title": "Accessibilité Universelle",
+        "description": "TalibHub est accessible sur tous les appareils avec un navigateur web, sans avoir besoin d'installer une application spécifique."
+      }
+    },
+    "commitment": {
+      "title": "Notre Engagement",
+      "intro": "Chez TalibHub, nous nous engageons à fournir une plateforme gratuite accessible à tous. Notre modèle unique repose sur la générosité de nos utilisateurs :",
+      "freeFeatures": "Toutes les fonctionnalités sont gratuites : Nous croyons que l'accès à des outils de qualité pour la pratique de l'islam devrait être universel.",
+      "subscriptions": "Abonnements pour les altruistes : Notre espace abonnés est conçu pour ceux qui souhaitent contribuer à la diffusion et à l'utilisation de TalibHub comme bien commun.",
+      "community": "Développement communautaire : Nous encourageons la contribution et les retours de notre communauté d'utilisateurs pour améliorer continuellement nos services."
+    },
+    "footer": {
+      "rights": "TalibHub. Tous droits réservés."
+    }
+  },
+  "dashboard": {
+    "title": "Bienvenue sur votre tableau de bord",
+    "cards": {
+      "mosqueTime": "Horaires de Prière à la Mosquée",
+      "surahSelector": "Sélecteur de Sourate",
+      "surahMemorization": "Mémorisation des Sourates",
+      "duaTime": "Temps de Doua",
+      "talibTimer": "TalibTimer"
+    }
+  },
+  "apprentissage": {
+    "title": "Apprentissage",
+    "taskSelection": {
+      "title": "Sélection de tâche et session",
+      "selectTask": "Sélectionnez une tâche",
+      "previousSession": "Session précédente :",
+      "currentSession": "Session actuelle :",
+      "newSession": "Nouvelle Session"
+    },
+    "focusTimer": {
+      "title": "Minuteur de concentration"
+    },
+    "stopwatch": {
+      "title": "Chronomètre"
+    },
+    "manualStudy": {
+      "title": "Temps d'étude manuel",
+      "hours": "Heures :",
+      "minutes": "Minutes :",
+      "totalTime": "Temps total de travail :"
+    },
+    "counter": {
+      "title": "Compteur",
+      "selectTask": "Sélectionnez une tâche"
+    }
+  },
+  "statistics": {
+    "title": "Statistiques",
+    "daily": "Statistiques Journalières",
+    "weekly": "Statistiques Hebdomadaires",
+    "monthly": "Statistiques Mensuelles",
+    "yearly": "Statistiques Annuelles",
+    "task": "Tâche",
+    "timeMinutes": "Temps (min)",
+    "counts": "Comptages",
+    "viewDetails": "Voir les détails"
+  },
+  "todoLists": {
+    "title": "Liste de tâches",
+    "myTasks": "Mes Tâches",
+    "selectAll": "Tout sélectionner",
+    "deleteSelected": "Supprimer la sélection",
+    "addTask": "Ajouter une nouvelle tâche",
+    "addTaskButton": "Ajouter une Tâche",
+    "taskCounter": {
+      "singular": "({count})",
+      "plural": "({count})"
+    }
+  },
+  "surahmemorization": {
+    "title": "Mémorisation des sourates",
+    "navigation": {
+      "select": "Sélectionner Sourate",
+      "revise": "Réviser",
+      "history": "Historique"
+    },
+    "select": {
+      "title": "Sélection des sourates pour révision",
+      "search": "Rechercher des sourates",
+      "filterDefault": "Par défaut",
+      "filterMemorization": "Par niveau de mémorisation",
+      "filterAlphabetical": "Ordre alphabétique",
+      "filterNumerical": "Ordre numérique",
+      "surahs": "Sourates",
+      "level": "Niveau",
+      "lastRevised": "Dernière révision",
+      "save": "Enregistrer",
+      "startRevision": "Commencer la révision",
+      "counter": {
+        "singular": "{count} sourate sélectionnée",
+        "plural": "{count} sourates sélectionnées"
+      }
+    },
+    "revise": {
+      "showText": "Afficher le texte",
+      "hideText": "Masquer le texte",
+      "rateMemorization": "Comment évaluez-vous votre mémorisation de cette sourate ?",
+      "levels": {
+        "strong": "Fort",
+        "good": "Bon",
+        "moderate": "Moyen",
+        "weak": "Faible"
+      }
+    },
+    "history": {
+      "title": "Historique des révisions",
+      "chartTitle": "Distribution des Niveaux de Mémorisation",
+      "surahName": "Nom de la sourate",
+      "number": "Numéro",
+      "revisionDate": "Date de révision",
+      "level": "Niveau",
+      "nextRevision": "Prochaine révision",
+      "export": "Exporter",
+      "clear": "Effacer l'historique"
+    }
+  },
+  "mosquetime": {
+    "title": "Horaires de Prière en Congrégation à la Mosquée",
+    "subtitle": "Trouvez les horaires des prières en congrégation dans les mosquées près de chez vous",
+    "useLocation": "Utiliser ma localisation",
+    "selectCity": "Sélectionnez une ville",
+    "search": "Rechercher",
+    "loading": "Chargement des horaires de prière, veuillez patienter...",
+    "tabs": {
+      "single": "Mosquée Unique",
+      "all": "Toutes les Mosquées"
+    },
+    "selectMosque": "Sélectionnez une mosquée",
+    "sortButtons": {
+      "aToZ": "A à Z",
+      "zToA": "Z à A",
+      "nearest": "Les Plus Proches"
+    },
+    "disclaimer": "Ces horaires correspondent aux prières en congrégation à la mosquée et peuvent différer des horaires de prières individuels."
+  },
+  "notifications": {
+    "title": "Notifications",
+    "centerTitle": "Centre de Notifications",
+    "markAsRead": "Marquer comme lu"
+  },
+  "profile": {
+    "title": "Profil",
+    "personalInfo": "Informations Personnelles",
+    "username": "Pseudo :",
+    "lastName": "Nom :",
+    "firstName": "Prénom :",
+    "age": "Âge :",
+    "gender": "Sexe :",
+    "email": "Adresse e-mail :",
+    "update": "Mettre à jour",
+    "changePassword": "Changer le mot de passe",
+    "currentPassword": "Mot de passe actuel :",
+    "newPassword": "Nouveau mot de passe :",
+    "confirmNewPassword": "Confirmer le nouveau mot de passe :",
+    "showPassword": "Afficher le mot de passe",
+    "genderOptions": {
+      "select": "Sélectionnez le sexe",
+      "male": "Masculin",
+      "female": "Féminin"
+    }
+  },
+  "salatSurahSelector": {
+    "title": "Sélecteur de Sourate",
+    "recitationStats": "Statistiques de récitation",
+    "knownSurahs": "Sourates à réciter : {count}",
+    "progress": "Progrès : {current} / {total} sourates récitées",
+    "cycles": "Cycles de récitation complets : {count}",
+    "selectionForSalat": "Sélection pour Salat",
+    "selectSurahsButton": "Sélectionner des sourates pour Salat",
+    "firstRaka": "1ère raka:",
+    "secondRaka": "2ème raka:",
+    "selectSurahs": "Sélection des sourates à réciter",
+    "saveButton": "Sauvegarder les sourates à réciter",
+    "recitationHistory": "Historique des récitations",
+    "toggleHistory": "Afficher/Masquer l'historique"
+  },
+  "duaTimeCalculator": {
+    "title": "Calculateur de Temps de Doua",
+    "calculateTitle": "Calculer le Dernier Tiers de la Nuit pour Doua",
+    "useLocation": "Utiliser ma localisation",
+    "enterCity": "Ou entrez une ville :",
+    "cityPlaceholder": "Entrez une ville",
+    "submit": "Soumettre",
+    "calculationMethod": "Méthode de Calcul :",
+    "customMethod": {
+      "fajrAngle": "Angle de Fajr :",
+      "ishaAngle": "Angle de Isha :"
+    },
+    "automaticResult": "Résultat du Calcul Automatique",
+    "manualAdjustments": "Ajustements Manuels",
+    "fajrTime": "Heure de Fajr (HH:MM) :",
+    "maghribTime": "Heure de Maghrib (HH:MM) :",
+    "calculateManually": "Calculer Manuellement",
+    "manualResult": "Résultat des Ajustements Manuels",
+    "methods": {
+      "3": "Muslim World League",
+      "2": "Islamic Society of North America",
+      "5": "Egyptian General Authority of Survey",
+      "7": "Umm Al-Qura University, Makkah",
+      "1": "University of Islamic Sciences, Karachi",
+      "6": "Institute of Geophysics, University of Tehran",
+      "17": "Shia Ithna-Ashari, Leva Institute, Qum",
+      "8": "Région du Golfe",
+      "9": "Koweït",
+      "10": "Qatar",
+      "11": "Majlis Ugama Islam Singapura, Singapour",
+      "12": "Union Organisation islamique de France",
+      "13": "Diyanet İşleri Başkanliği, Turquie",
+      "18": "Administration Spirituelle des Musulmans de Russie",
+      "15": "Comité de Vision de la Lune",
+      "14": "Dubaï, Émirats Arabes Unis",
+      "19": "Jabatan Kemajuan Islam Malaysia (JAKIM)",
+      "16": "Tunisie",
+      "20": "Algérie",
+      "21": "Ministère des Affaires Religieuses de la République d'Indonésie",
+      "22": "Maroc",
+      "23": "Communidade Islâmica de Lisboa (Portugal)",
+      "24": "Personnalisé"
+    }
+  },
+  "price": {
+    "title": "Choisissez Votre Contribution",
+    "free": {
+      "title": "Plan Gratuit",
+      "description": "Accédez à toutes les fonctionnalités sans frais",
+      "price": "0€",
+      "period": "/mois",
+      "features": "Fonctionnalités principales de la plateforme",
+      "button": "Commencer"
+    },
+    "sustainer": {
+      "title": "Plan Soutien",
+      "description": "Contribuez à couvrir les coûts opérationnels et assurez la disponibilité de la plateforme pour tous.",
+      "price": "3€",
+      "period": "/mois",
+      "button": "Contribuer Maintenant",
+      "features": [
+        "Accès à toutes les fonctionnalités de la plateforme",
+        "Aide à maintenir la durabilité de la plateforme en couvrant les coûts opérationnels essentiels",
+        "Soutenez notre mission de maintenir la plateforme gratuite et accessible à tous les utilisateurs",
+        "Contribuez aux frais de serveur et de maintenance"
+      ]
+    },
+    "supporter": {
+      "title": "Plan Supporteur",
+      "description": "Aidez-nous à grandir, à nous améliorer et à innover en contribuant au-delà des coûts opérationnels.",
+      "price": "8€",
+      "period": "/mois",
+      "button": "Nous Soutenir",
+      "features": [
+        "Accès à toutes les fonctionnalités de la plateforme",
+        "Soutient le développement et la croissance de la plateforme, nous permettant d'ajouter de nouvelles fonctionnalités et d'améliorer l'expérience utilisateur",
+        "Contribuez à notre vision de créer une plateforme vibrante et innovante qui évolue continuellement",
+        "Votre générosité aide à financer de nouvelles initiatives et assure le succès à long terme des projets communautaires",
+        "Accès prioritaire aux nouvelles fonctionnalités et aux opportunités de test bêta",
+        "Reconnaissance en tant que supporteur clé dans notre communauté",
+        "Contenu exclusif et aperçus des développements futurs"
+      ]
+    },
+    "footnote": "Merci de considérer le soutien de notre plateforme. Vos contributions aident à maintenir la plateforme ouverte et à l'améliorer continuellement."
+  },
+  "aboutus": {
+    "title": "À propos de TalibHub",
+    "mission": {
+      "title": "Notre Mission",
+      "content": "Chez TalibHub, notre mission est de soutenir l'apprentissage et la pratique de l'islam au quotidien. Nous offrons aux musulmans du monde entier des outils modernes et efficaces pour approfondir leur foi et améliorer leur pratique religieuse."
+    },
+    "features": {
+      "title": "Nos Fonctionnalités",
+      "talibTimer": "TalibTimer : Gestion du temps d'étude avec technique Pomodoro, chronomètre et compteur",
+      "surahSelector": "SurahSelector : Diversification des sourates pour la prière",
+      "surahMemorization": "Surah Memorization : Maintien de la mémorisation des sourates",
+      "duaCalculator": "Dua Time Calculator : Calcul du dernier tiers de la nuit pour les invocations",
+      "mosquetime": "Mosquetime : Horaires des prières en congrégation dans les mosquées"
+    },
+    "values": {
+      "title": "Nos Valeurs",
+      "islamic": "Engagement envers les principes islamiques",
+      "innovation": "Innovation dans l'éducation religieuse",
+      "accessibility": "Accessibilité universelle",
+      "community": "Développement communautaire",
+      "improvement": "Amélioration continue de nos services"
+    },
+    "future": {
+      "title": "Notre Avenir",
+      "content": "TalibHub est en constante évolution. In Sha Allah, nous prévoyons d'enrichir notre plateforme avec de nombreuses nouvelles fonctionnalités innovantes pour mieux servir notre communauté d'utilisateurs."
+    },
+    "commitment": {
+      "title": "Notre Engagement",
+      "content": "TalibHub s'engage à fournir une plateforme gratuite et accessible à tous. Notre modèle unique repose sur la générosité de nos utilisateurs, avec des abonnements conçus pour les altruistes qui souhaitent contribuer au développement et à la propagation de la plateforme."
+    }
+  },
+  "contactform": {
+    "title": "Contactez-nous",
+    "subtitle": "Discutons de quelque chose de",
+    "highlight": "génial",
+    "together": "ensemble",
+    "email": "support@talibhub.com"
+  },
+  "common": {
+    "buttons": {
+      "save": "Enregistrer",
+      "cancel": "Annuler",
+      "delete": "Supprimer",
+      "edit": "Modifier",
+      "close": "Fermer",
+      "submit": "Soumettre",
+      "back": "Retour",
+      "next": "Suivant",
+      "previous": "Précédent"
+    },
+    "time": {
+      "hours": "heures",
+      "minutes": "minutes",
+      "seconds": "secondes"
+    }
+  }
+}

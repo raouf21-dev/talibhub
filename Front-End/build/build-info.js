@@ -1,7 +1,6 @@
 // Ce fichier est généré manuellement pour le débogage
 // Remplacer par un hash unique à chaque déploiement
-export const BUILD_HASH =
-  "debug" + new Date().getTime().toString().substring(0, 8);
+export const BUILD_HASH = "debug-stable-v1.0";
 export const BUILD_DATE = new Date().toISOString();
 
 console.log("build-info.js chargé - Hash actuel:", BUILD_HASH);

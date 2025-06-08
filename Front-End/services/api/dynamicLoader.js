@@ -6,6 +6,13 @@ class Loader {
     this.createStyles();
     this.createLoader();
     this.activeRequests = 0;
+    this.locked = false;
+    this.forceShown = false;
+    console.log("[LOADER] Initialisation du loader", {
+      activeRequests: this.activeRequests,
+      locked: this.locked,
+      forceShown: this.forceShown,
+    });
   }
 
   createStyles() {
@@ -47,7 +54,9 @@ class Loader {
   }
 
   createLoader() {
+    console.log("[LOADER] createLoader() appelé");
     if (!document.querySelector(".loader-container")) {
+      console.log("[LOADER] Création d'un nouveau loader");
       this.container = document.createElement("div");
       this.container.className = "loader-container";
 
@@ -56,22 +65,134 @@ class Loader {
 
       this.container.appendChild(this.loader);
       document.body.appendChild(this.container);
+      console.log("[LOADER] Nouveau loader créé et ajouté au DOM");
     } else {
+      console.log("[LOADER] Utilisation d'un loader existant");
       this.container = document.querySelector(".loader-container");
       this.loader = this.container.querySelector(".loader");
     }
+    console.log("[LOADER] État du loader après createLoader():", {
+      container: this.container,
+      display: this.container.style.display,
+      activeRequests: this.activeRequests,
+      locked: this.locked,
+    });
   }
 
   show() {
     this.activeRequests++;
     this.container.style.display = "flex";
+    console.log(
+      `[LOADER] show() appelé - activeRequests: ${this.activeRequests}, locked: ${this.locked}, forceShown: ${this.forceShown}, display: ${this.container.style.display}`
+    );
   }
 
   hide() {
     this.activeRequests--;
-    if (this.activeRequests <= 0) {
+    console.log(
+      `[LOADER] hide() appelé - activeRequests: ${this.activeRequests}, locked: ${this.locked}, forceShown: ${this.forceShown}`
+    );
+    if (this.activeRequests <= 0 && !this.locked && !this.forceShown) {
       this.activeRequests = 0;
       this.container.style.display = "none";
+      console.log("[LOADER] Le loader a été masqué");
+    } else {
+      console.log(
+        `[LOADER] Le loader reste affiché - raison: ${
+          this.locked
+            ? "verrouillé"
+            : this.forceShown
+            ? "forcé"
+            : "requêtes actives"
+        }`
+      );
+    }
+  }
+
+  forceShow() {
+    console.log("[LOADER] forceShow() appelé - état avant:", {
+      activeRequests: this.activeRequests,
+      locked: this.locked,
+      forceShown: this.forceShown,
+      display: this.container.style.display,
+    });
+    this.forceShown = true;
+    this.container.style.display = "flex";
+    console.log("[LOADER] Loader forcé à s'afficher - état après:", {
+      activeRequests: this.activeRequests,
+      locked: this.locked,
+      forceShown: this.forceShown,
+      display: this.container.style.display,
+    });
+  }
+
+  releaseForceShow() {
+    console.log("[LOADER] releaseForceShow() appelé - état avant:", {
+      activeRequests: this.activeRequests,
+      locked: this.locked,
+      forceShown: this.forceShown,
+      display: this.container.style.display,
+    });
+    this.forceShown = false;
+    if (this.activeRequests <= 0 && !this.locked) {
+      this.container.style.display = "none";
+      console.log("[LOADER] Loader libéré et masqué - état après:", {
+        activeRequests: this.activeRequests,
+        locked: this.locked,
+        forceShown: this.forceShown,
+        display: this.container.style.display,
+      });
+    } else {
+      console.log(
+        "[LOADER] Loader libéré mais toujours affiché (requêtes actives ou verrouillé) - état après:",
+        {
+          activeRequests: this.activeRequests,
+          locked: this.locked,
+          forceShown: this.forceShown,
+          display: this.container.style.display,
+        }
+      );
+    }
+  }
+
+  lock() {
+    console.log("[LOADER] lock() appelé - état avant:", {
+      activeRequests: this.activeRequests,
+      locked: this.locked,
+      display: this.container.style.display,
+    });
+    this.locked = true;
+    this.container.style.display = "flex";
+    console.log("[LOADER] Loader verrouillé (locked) - état après:", {
+      activeRequests: this.activeRequests,
+      locked: this.locked,
+      display: this.container.style.display,
+    });
+  }
+
+  unlock() {
+    console.log("[LOADER] unlock() appelé - état avant:", {
+      activeRequests: this.activeRequests,
+      locked: this.locked,
+      display: this.container.style.display,
+    });
+    this.locked = false;
+    if (this.activeRequests <= 0) {
+      this.container.style.display = "none";
+      console.log("[LOADER] Loader déverrouillé et masqué - état après:", {
+        activeRequests: this.activeRequests,
+        locked: this.locked,
+        display: this.container.style.display,
+      });
+    } else {
+      console.log(
+        "[LOADER] Loader déverrouillé mais toujours affiché (requêtes actives) - état après:",
+        {
+          activeRequests: this.activeRequests,
+          locked: this.locked,
+          display: this.container.style.display,
+        }
+      );
     }
   }
 }
@@ -112,6 +233,8 @@ class ApiService {
       method: options.method || "GET",
       hasToken: !!localStorage.getItem("token"),
       currentPath: window.location.pathname,
+      loaderLocked: loader.locked,
+      activeRequests: loader.activeRequests,
     });
 
     const url = endpoint.startsWith("http")
@@ -245,32 +368,62 @@ class ApiService {
   // Méthode pour les requêtes longues avec polling
   async longRunningRequest(endpoint, options = {}, statusCheckInterval = 2000) {
     try {
-      console.log(`[DEBUG] API Long Running Request démarré: ${endpoint}`);
+      console.log(`[API_LONG] Long Running Request démarré: ${endpoint}`, {
+        loaderState: {
+          locked: loader.locked,
+          activeRequests: loader.activeRequests,
+        },
+      });
 
       // Démarrer la requête
+      console.log(`[API_LONG] Envoi de la requête initiale à ${endpoint}`);
       const response = await this.request(endpoint, options);
-      console.log(`[DEBUG] API Initial Response:`, response);
+      console.log(`[API_LONG] Réponse initiale reçue:`, response, {
+        loaderState: {
+          locked: loader.locked,
+          activeRequests: loader.activeRequests,
+        },
+      });
 
       // Si le statut est "processing", démarrer le polling
       if (response && response.status === "processing" && response.requestId) {
         console.log(
-          `[DEBUG] API Polling démarré pour requestId: ${response.requestId}`
+          `[API_LONG] Démarrage du polling pour requestId: ${response.requestId}`,
+          {
+            loaderState: {
+              locked: loader.locked,
+              activeRequests: loader.activeRequests,
+            },
+          }
         );
 
         let pollingAttempts = 0;
         const MAX_POLLING_ATTEMPTS = 30; // Environ 1 minute avec intervalle de 2 secondes
 
         return new Promise((resolve, reject) => {
+          console.log(`[API_LONG] Promise de polling créée`);
           const checkStatus = async () => {
             try {
               pollingAttempts++;
               console.log(
-                `[DEBUG] API Polling attempt ${pollingAttempts}/${MAX_POLLING_ATTEMPTS}`
+                `[API_LONG] Tentative de polling ${pollingAttempts}/${MAX_POLLING_ATTEMPTS}`,
+                {
+                  loaderState: {
+                    locked: loader.locked,
+                    activeRequests: loader.activeRequests,
+                  },
+                }
               );
 
               if (pollingAttempts > MAX_POLLING_ATTEMPTS) {
                 console.warn(
-                  `[DEBUG] API Polling abandoned after ${MAX_POLLING_ATTEMPTS} attempts`
+                  `[API_LONG] Polling abandonné après ${MAX_POLLING_ATTEMPTS} tentatives`,
+                  {
+                    loaderState: {
+                      locked: loader.locked,
+                      activeRequests: loader.activeRequests,
+                    },
+                  }
                 );
                 resolve({
                   status: "timeout",
@@ -281,39 +434,80 @@ class ApiService {
               }
 
               const statusEndpoint = `/mosque-times/scraping-status/${response.requestId}`;
-              console.log(`[DEBUG] API Checking status at: ${statusEndpoint}`);
+              console.log(
+                `[API_LONG] Vérification du statut à: ${statusEndpoint}`
+              );
 
+              console.log(`[API_LONG] Appel GET pour vérifier le statut`);
               const statusResponse = await this.get(statusEndpoint);
-              console.log(`[DEBUG] API Status response:`, statusResponse);
+              console.log(
+                `[API_LONG] Réponse de statut reçue:`,
+                statusResponse,
+                {
+                  loaderState: {
+                    locked: loader.locked,
+                    activeRequests: loader.activeRequests,
+                  },
+                }
+              );
 
               if (statusResponse.status === "completed") {
                 console.log(
-                  `[DEBUG] API Polling completed successfully after ${pollingAttempts} attempts`
+                  `[API_LONG] Polling terminé avec succès après ${pollingAttempts} tentatives`,
+                  {
+                    loaderState: {
+                      locked: loader.locked,
+                      activeRequests: loader.activeRequests,
+                    },
+                  }
                 );
                 resolve(statusResponse);
               } else if (statusResponse.status === "failed") {
                 console.error(
-                  `[DEBUG] API Polling failed after ${pollingAttempts} attempts:`,
-                  statusResponse.error
+                  `[API_LONG] Polling échoué après ${pollingAttempts} tentatives:`,
+                  statusResponse.error,
+                  {
+                    loaderState: {
+                      locked: loader.locked,
+                      activeRequests: loader.activeRequests,
+                    },
+                  }
                 );
                 reject(
                   new Error(statusResponse.error || "Le scraping a échoué")
                 );
               } else {
                 // Continuer le polling
-                console.log(`[DEBUG] API Polling continuing...`);
+                console.log(`[API_LONG] Polling continue...`, {
+                  loaderState: {
+                    locked: loader.locked,
+                    activeRequests: loader.activeRequests,
+                  },
+                });
                 setTimeout(checkStatus, statusCheckInterval);
               }
             } catch (error) {
               console.error(
-                `[DEBUG] API Polling error on attempt ${pollingAttempts}:`,
-                error
+                `[API_LONG] Erreur lors de la tentative de polling ${pollingAttempts}:`,
+                error,
+                {
+                  loaderState: {
+                    locked: loader.locked,
+                    activeRequests: loader.activeRequests,
+                  },
+                }
               );
               // En cas d'erreur pendant le polling, on continue quand même
               // car le scraping peut continuer en arrière-plan
               if (pollingAttempts > 3) {
                 console.warn(
-                  `[DEBUG] API Polling continuing despite errors...`
+                  `[API_LONG] Polling continue malgré les erreurs...`,
+                  {
+                    loaderState: {
+                      locked: loader.locked,
+                      activeRequests: loader.activeRequests,
+                    },
+                  }
                 );
                 setTimeout(checkStatus, statusCheckInterval);
               } else {
@@ -323,17 +517,163 @@ class ApiService {
           };
 
           // Démarrer le polling
+          console.log(
+            `[API_LONG] Première vérification de polling planifiée dans ${statusCheckInterval}ms`
+          );
           setTimeout(checkStatus, statusCheckInterval);
         });
       }
 
       // Pour les requêtes normales, retourner directement la réponse
-      console.log(`[DEBUG] API Request completed directly (no polling)`);
+      console.log(`[API_LONG] Requête terminée directement (sans polling)`, {
+        loaderState: {
+          locked: loader.locked,
+          activeRequests: loader.activeRequests,
+        },
+      });
       return response;
     } catch (error) {
-      console.error(`[DEBUG] API Long Running Error: ${endpoint}`, error);
+      console.error(
+        `[API_LONG] Erreur lors de la requête longue: ${endpoint}`,
+        error,
+        {
+          loaderState: {
+            locked: loader.locked,
+            activeRequests: loader.activeRequests,
+          },
+        }
+      );
       throw error;
     }
+  }
+
+  // Nouvelles méthodes pour contrôler le verrouillage du loader
+  lockLoader() {
+    console.log("[API] lockLoader() appelé");
+    loader.lock();
+    return this;
+  }
+
+  unlockLoader() {
+    console.log("[API] unlockLoader() appelé");
+    loader.unlock();
+    return this;
+  }
+
+  // Méthode pour les opérations avec loader verrouillé
+  async withLockedLoader(asyncOperation) {
+    console.log(
+      "[API] withLockedLoader() - Début de l'opération avec loader verrouillé"
+    );
+    try {
+      this.lockLoader();
+      console.log(
+        "[API] withLockedLoader() - Loader verrouillé, exécution de l'opération"
+      );
+      const result = await asyncOperation();
+      console.log(
+        "[API] withLockedLoader() - Opération terminée avec succès, résultat:",
+        result
+      );
+      return result;
+    } catch (error) {
+      console.error(
+        "[API] withLockedLoader() - Erreur pendant l'opération:",
+        error
+      );
+      throw error;
+    } finally {
+      console.log(
+        "[API] withLockedLoader() - Finally block, déverrouillage du loader"
+      );
+      this.unlockLoader();
+    }
+  }
+
+  // Nouvelle version de longRunningRequest qui verrouille le loader
+  async longRunningRequestWithLockedLoader(
+    endpoint,
+    options = {},
+    statusCheckInterval = 2000
+  ) {
+    console.log(
+      "[API] longRunningRequestWithLockedLoader() appelé pour:",
+      endpoint
+    );
+    return this.withLockedLoader(() =>
+      this.longRunningRequest(endpoint, options, statusCheckInterval)
+    );
+  }
+
+  // Méthodes pour contrôler le verrouillage du loader
+  lockLoader() {
+    console.log("[API] lockLoader() appelé");
+    loader.lock();
+    return this;
+  }
+
+  unlockLoader() {
+    console.log("[API] unlockLoader() appelé");
+    loader.unlock();
+    return this;
+  }
+
+  // Nouvelles méthodes pour forcer l'affichage du loader
+  forceShowLoader() {
+    console.log("[API] forceShowLoader() appelé");
+    loader.forceShow();
+    return this;
+  }
+
+  releaseForceShowLoader() {
+    console.log("[API] releaseForceShowLoader() appelé");
+    loader.releaseForceShow();
+    return this;
+  }
+
+  // Méthode pour les opérations avec loader forcé à s'afficher
+  async withForcedLoader(asyncOperation) {
+    console.log(
+      "[API] withForcedLoader() - Début de l'opération avec loader forcé"
+    );
+    try {
+      this.forceShowLoader();
+      console.log(
+        "[API] withForcedLoader() - Loader forcé à s'afficher, exécution de l'opération"
+      );
+      const result = await asyncOperation();
+      console.log(
+        "[API] withForcedLoader() - Opération terminée avec succès, résultat:",
+        result
+      );
+      return result;
+    } catch (error) {
+      console.error(
+        "[API] withForcedLoader() - Erreur pendant l'opération:",
+        error
+      );
+      throw error;
+    } finally {
+      console.log(
+        "[API] withForcedLoader() - Finally block, libération du loader"
+      );
+      this.releaseForceShowLoader();
+    }
+  }
+
+  // Nouvelle version de longRunningRequest qui force l'affichage du loader
+  async longRunningRequestWithForcedLoader(
+    endpoint,
+    options = {},
+    statusCheckInterval = 2000
+  ) {
+    console.log(
+      "[API] longRunningRequestWithForcedLoader() appelé pour:",
+      endpoint
+    );
+    return this.withForcedLoader(() =>
+      this.longRunningRequest(endpoint, options, statusCheckInterval)
+    );
   }
 }
 

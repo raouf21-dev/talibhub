@@ -5,8 +5,8 @@ export const langConfig = {
   DEFAULT_LANG: "fr",
   SUPPORTED_LANGS: ["fr", "en"],
   HTML_FILES: {
-    fr: "index-fr.html",
-    en: "index-en.html",
+    fr: "index.html",
+    en: "index.html",
   },
   getUserLanguage() {
     const savedLang = localStorage.getItem("userLang");
@@ -47,6 +47,13 @@ export const API_BASE_URL = (() => {
   if (env === ENV.PROD) {
     return "https://www.talibhub.com/api"; // Toujours utiliser www en production
   } else {
+    // En développement, utiliser le port 4000 (backend) au lieu du port frontend
+    const isLocalhost =
+      window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1";
+    if (isLocalhost) {
+      return `http://localhost:4000${API_ROUTES[env]}`;
+    }
     return `${window.location.origin}${API_ROUTES[env]}`;
   }
 })();
@@ -101,10 +108,7 @@ export const API_CONFIG = {
       getRecitationStats: "/sourates/recitations/stats",
       saveRecitation: "/sourates/recitations",
     },
-    captcha: {
-      generate: "/captcha/generate",
-      verify: "/captcha/verify",
-    },
+
     data: {
       countries: (lang) => `/data/countries_${lang}.json`,
     },

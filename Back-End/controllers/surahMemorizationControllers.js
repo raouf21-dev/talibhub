@@ -6,7 +6,7 @@ const {
   clearRevisionHistory,
   saveKnownSurahs,
   getKnownSurahs,
-} = require('../models/surahMemorizationModel');
+} = require("../models/surahMemorizationModel");
 
 // Récupérer toutes les sourates
 const getSurahs = async (req, res) => {
@@ -15,8 +15,8 @@ const getSurahs = async (req, res) => {
     const surahs = await getSurahsByUser(userId);
     res.json({ surahs });
   } catch (error) {
-    console.error('Error fetching surahs:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error("Error fetching surahs:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
@@ -27,11 +27,16 @@ const updateSurah = async (req, res) => {
   const { memorizationLevel, lastRevisionDate } = req.body;
 
   try {
-    await updateSurahStatus(userId, surahNumber, memorizationLevel, lastRevisionDate);
-    res.json({ message: 'Surah updated successfully' });
+    await updateSurahStatus(
+      userId,
+      surahNumber,
+      memorizationLevel,
+      lastRevisionDate
+    );
+    res.json({ message: "Surah updated successfully" });
   } catch (error) {
-    console.error('Error updating surah:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error("Error updating surah:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
@@ -47,10 +52,10 @@ const updateSurahKnownStatus = async (req, res) => {
     } else {
       await saveKnownSurahs(userId, []);
     }
-    res.json({ message: 'Surah known status updated successfully' });
+    res.json({ message: "Surah known status updated successfully" });
   } catch (error) {
-    console.error('Error updating surah known status:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error("Error updating surah known status:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
@@ -61,8 +66,8 @@ const getHistory = async (req, res) => {
     const history = await getRevisionHistory(userId);
     res.json({ history });
   } catch (error) {
-    console.error('Error fetching history:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error("Error fetching history:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
@@ -71,10 +76,10 @@ const clearHistory = async (req, res) => {
   const userId = req.user.id;
   try {
     await clearRevisionHistory(userId);
-    res.json({ message: 'Revision history cleared successfully' });
+    res.json({ message: "Revision history cleared successfully" });
   } catch (error) {
-    console.error('Error clearing history:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error("Error clearing history:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
@@ -85,10 +90,10 @@ const saveKnownSurahsController = async (req, res) => {
 
   try {
     await saveKnownSurahs(userId, sourates);
-    res.json({ message: 'Known surahs saved successfully' });
+    res.json({ message: "Known surahs saved successfully" });
   } catch (error) {
-    console.error('Error saving known surahs:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error("Error saving known surahs:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
@@ -99,8 +104,8 @@ const getKnownSurahsController = async (req, res) => {
     const knownSurahs = await getKnownSurahs(userId);
     res.json({ knownSurahs });
   } catch (error) {
-    console.error('Error fetching known surahs:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error("Error fetching known surahs:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 

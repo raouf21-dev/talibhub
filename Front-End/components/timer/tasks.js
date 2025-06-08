@@ -111,7 +111,20 @@ function updateTaskSelect() {
   if (!taskSelect) return;
 
   const tasks = AppState.get("tasks.items") || [];
-  taskSelect.innerHTML = '<option value="">Sélectionnez une tâche</option>';
+
+  // Créer l'option par défaut avec l'attribut data-translate
+  const defaultOption = document.createElement("option");
+  defaultOption.value = "";
+  defaultOption.setAttribute("data-translate", "apprentissage.selectTask");
+  defaultOption.textContent = window.translationManager
+    ? window.translationManager.t("apprentissage.selectTask")
+    : "Sélectionnez une tâche";
+
+  // Vider le select et ajouter l'option par défaut
+  taskSelect.innerHTML = "";
+  taskSelect.appendChild(defaultOption);
+
+  // Ajouter les tâches
   tasks.forEach((task) => {
     const option = document.createElement("option");
     option.value = task.id;
@@ -304,6 +317,47 @@ function updateTasksCounter() {
   if (counter) {
     counter.textContent = `(${tasks.length})`;
   }
+}
+
+// Écouter les changements de langue pour mettre à jour l'option par défaut du task-select
+function setupTaskSelectLanguageObserver() {
+  if (
+    window.translationManager &&
+    typeof window.translationManager.onLanguageChange === "function"
+  ) {
+    console.log(
+      "[TASKS] Configuration de l'observateur de langue pour task-select"
+    );
+    window.translationManager.onLanguageChange(() => {
+      console.log(
+        "[TASKS] Changement de langue détecté - mise à jour de l'option par défaut"
+      );
+      // Mettre à jour l'option par défaut du task-select
+      const defaultOption = document.querySelector(
+        '#task-select option[data-translate="apprentissage.selectTask"]'
+      );
+      if (defaultOption) {
+        defaultOption.textContent = window.translationManager.t(
+          "apprentissage.selectTask"
+        );
+      }
+    });
+  } else {
+    console.log(
+      "[TASKS] TranslationManager non disponible, tentative dans 100ms"
+    );
+    setTimeout(setupTaskSelectLanguageObserver, 100);
+  }
+}
+
+// Initialiser l'observateur quand la page est chargée
+if (document.readyState === "loading") {
+  document.addEventListener(
+    "DOMContentLoaded",
+    setupTaskSelectLanguageObserver
+  );
+} else {
+  setupTaskSelectLanguageObserver();
 }
 
 export { initializeTasks, loadTasks };

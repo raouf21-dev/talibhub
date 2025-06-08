@@ -9,6 +9,8 @@ const allowedOrigins = {
     "https://www.talibhub.com",
     "http://localhost:4000", // Ajout de localhost pour les tests en mode production
     "http://127.0.0.1:4000", // Ajout de l'adresse IP locale pour les tests en mode production
+    "http://127.0.0.1:5500", // Live Server
+    "http://localhost:5500", // Live Server
   ],
 };
 

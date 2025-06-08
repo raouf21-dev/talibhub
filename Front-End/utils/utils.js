@@ -6,7 +6,7 @@ import {
   cleanupStatistics,
 } from "../components/statistics/statistics.js";
 
-import AppState from "../../services/state/state.js";
+import AppState from "../services/state/state.js";
 
 let currentPage = null; // Pour garder trace de la page actuelle
 
@@ -72,7 +72,7 @@ export async function navigateTo(pageId, addToHistory = true) {
     pageId = "welcomepage";
   }
 
-  // Si le pageId ressemble à un nom de fichier (ex: index-en.html), on le remplace par 'welcomepage'
+  // Si le pageId ressemble à un nom de fichier (ex: index.html), on le remplace par 'welcomepage'
   if (pageId.endsWith(".html")) {
     pageId = "welcomepage";
   }
@@ -99,15 +99,15 @@ export async function navigateTo(pageId, addToHistory = true) {
   // Table d'association des pages nécessitant un module dynamique
   const moduleLoaders = {
     welcomepage: async () => {
-      const mod = await import("../components/welcome/welcomePage.js");
-      await mod.initializeWelcomepage();
+      const mod = await import("../components/welcome/welcomePageTurnstile.js");
+      await mod.initializeWelcomepageWithTurnstile();
     },
     dashboard: async () => {
       const mod = await import("../components/navigation/dashboard.js");
       await mod.initializeDashboard();
     },
     mosquetime: async () => {
-      const mod = await import("../components/prayer/mosqueTime.js");
+      const mod = await import("../components/mosqueTime/mosqueTime.js");
       await mod.initializeMosqueTime();
     },
     profile: async () => {
@@ -220,13 +220,14 @@ export function updateNavVisibility(pageId) {
   }
 
   if (topNav) {
-    // Masquer la topnav uniquement sur welcomepage pour les non-connectés
-    const hideTopNav = pageId === "welcomepage" && !hasToken;
+    // Masquer la topnav sur welcomepage (peu importe l'état d'authentification)
+    // La topnav n'est nécessaire que sur les autres pages
+    const hideTopNav = pageId === "welcomepage";
     topNav.style.display = hideTopNav ? "none" : "flex";
   }
 
   console.log(
-    `Navigation visibility updated: pageId=${pageId}, topNav=${
+    `Navigation visibility updated: pageId=${pageId}, hasToken=${hasToken}, topNav=${
       topNav ? topNav.style.display : "N/A"
     }`
   );
@@ -343,7 +344,9 @@ export function loadInitialPage(pageId) {
     },
     mosquetime: async () => {
       try {
-        const mosqueModule = await import("../components/prayer/mosqueTime.js");
+        const mosqueModule = await import(
+          "../components/mosqueTime/mosqueTime.js"
+        );
         await mosqueModule.initializeMosqueTime();
       } catch (error) {
         console.error(

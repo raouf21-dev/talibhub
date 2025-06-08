@@ -5,7 +5,7 @@ console.log("Initialisation des tâches planifiées...");
 // require("./scrapers/autoScraping");
 
 // Gestion améliorée des tâches planifiées
-const { startRandomScraping } = require("./scrapers/autoScraping");
+const { startRandomScraping } = require("./scrapers/auto-scraping");
 
 // Stocker les références aux tâches pour pouvoir les arrêter si nécessaire
 const activeTasks = {};

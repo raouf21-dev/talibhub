@@ -11,10 +11,16 @@
 export function formatPrayerTime(time) {
   if (!time || time === "--:--") return "--:--";
 
+  // Filtrer les horaires invalides (00:00:00, 00:00, etc.)
+  if (time === "00:00:00" || time === "00:00" || time === "0:00")
+    return "--:--";
+
   // Si le format est HH:MM:SS, extraire uniquement HH:MM
   if (time.includes(":")) {
     const parts = time.split(":");
     if (parts.length >= 2) {
+      // Vérifier si c'est 00:00
+      if (parts[0] === "00" && parts[1] === "00") return "--:--";
       return `${parts[0]}:${parts[1]}`;
     }
   }

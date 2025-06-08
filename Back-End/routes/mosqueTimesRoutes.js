@@ -20,7 +20,31 @@ router.post(
   mosqueTimesController.reportMissingData
 );
 
-router.get("/scraping-status/:requestId", mosqueTimesController.checkScrapingStatus);
+router.get(
+  "/scraping-status/:requestId",
+  mosqueTimesController.checkScrapingStatus
+);
+router.get(
+  "/completion-status/:date",
+  mosqueTimesController.checkCompletionStatus
+);
+// Nouvelle route pour vérifier le statut du scraping en temps réel
+router.get(
+  "/scraping-status-realtime/:date",
+  mosqueTimesController.getScrapingStatus
+);
+
+// ✅ NOUVEAU: Route pour Long Polling - attendre la fin du scraping
+router.get(
+  "/wait-scraping-completion/:date",
+  mosqueTimesController.waitForScrapingCompletion
+);
+
+// Route publique pour déclencher le scraping automatique
+router.post("/scrape-all", mosqueTimesController.scrapeAllCities);
+
+// ✨ Route ultra-simple : scraper tout et attendre la fin complète
+router.get("/scrape-all-and-wait", mosqueTimesController.scrapeAllAndWait);
 
 // Routes protégées (avec authentification)
 const protectedRoutes = [
@@ -28,11 +52,6 @@ const protectedRoutes = [
     method: "post",
     path: "/scrape",
     handler: mosqueTimesController.manualScrape,
-  },
-  {
-    method: "post",
-    path: "/scrape-all",
-    handler: mosqueTimesController.scrapeAllCities,
   },
   {
     method: "post",

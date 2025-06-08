@@ -8,90 +8,90 @@ let chartInstances = {};
 
 // Translations object for internationalization
 const translations = {
-    fr: {
-        workTime: 'Temps de Travail (minutes)',
-        countNumber: 'Nombre de Comptages',
-        time: 'Temps (minutes)',
-        counts: 'Comptages',
-        viewDetails: 'Voir les détails',
-        hideDetails: 'Masquer les détails',
-        noData: 'Aucune donnée disponible',
-        unnamed: 'Sans nom',
-        task: 'Tâche',
-        timeMinutes: 'Temps (min)',
-        dailyStats: 'Statistiques Journalières',
-        weeklyStats: 'Statistiques Hebdomadaires',
-        monthlyStats: 'Statistiques Mensuelles',
-        yearlyStats: 'Statistiques Annuelles',
-        january: 'janvier',
-        february: 'février',
-        march: 'mars',
-        april: 'avril',
-        may: 'mai',
-        june: 'juin',
-        july: 'juillet',
-        august: 'août',
-        september: 'septembre',
-        october: 'octobre',
-        november: 'novembre',
-        december: 'décembre',
-        week: 'Semaine du',
-        noDataAvailable: 'Aucune donnée disponible',
-        invalidDate: 'Date invalide',
-        dataError: 'Erreur de chargement des données'
-    },
-    en: {
-        workTime: 'Working Time (minutes)',
-        countNumber: 'Number of Counts',
-        time: 'Time (minutes)',
-        counts: 'Counts',
-        viewDetails: 'View details',
-        hideDetails: 'Hide details',
-        noData: 'No data available',
-        unnamed: 'Unnamed',
-        task: 'Task',
-        timeMinutes: 'Time (min)',
-        dailyStats: 'Daily Statistics',
-        weeklyStats: 'Weekly Statistics',
-        monthlyStats: 'Monthly Statistics',
-        yearlyStats: 'Yearly Statistics',
-        january: 'January',
-        february: 'February',
-        march: 'March',
-        april: 'April',
-        may: 'May',
-        june: 'June',
-        july: 'July',
-        august: 'August',
-        september: 'September',
-        october: 'October',
-        november: 'November',
-        december: 'December',
-        week: 'Week of',
-        noDataAvailable: 'No data available',
-        invalidDate: 'Invalid date',
-        dataError: 'Data loading error'
-    }
+  fr: {
+    workTime: "Temps de Travail (minutes)",
+    countNumber: "Nombre de Comptages",
+    time: "Temps (minutes)",
+    counts: "Comptages",
+    viewDetails: "Voir les détails",
+    hideDetails: "Masquer les détails",
+    noData: "Aucune donnée disponible",
+    unnamed: "Sans nom",
+    task: "Tâche",
+    timeMinutes: "Temps (min)",
+    dailyStats: "Statistiques Journalières",
+    weeklyStats: "Statistiques Hebdomadaires",
+    monthlyStats: "Statistiques Mensuelles",
+    yearlyStats: "Statistiques Annuelles",
+    january: "janvier",
+    february: "février",
+    march: "mars",
+    april: "avril",
+    may: "mai",
+    june: "juin",
+    july: "juillet",
+    august: "août",
+    september: "septembre",
+    october: "octobre",
+    november: "novembre",
+    december: "décembre",
+    week: "Semaine du",
+    noDataAvailable: "Aucune donnée disponible",
+    invalidDate: "Date invalide",
+    dataError: "Erreur de chargement des données",
+  },
+  en: {
+    workTime: "Working Time (minutes)",
+    countNumber: "Number of Counts",
+    time: "Time (minutes)",
+    counts: "Counts",
+    viewDetails: "View details",
+    hideDetails: "Hide details",
+    noData: "No data available",
+    unnamed: "Unnamed",
+    task: "Task",
+    timeMinutes: "Time (min)",
+    dailyStats: "Daily Statistics",
+    weeklyStats: "Weekly Statistics",
+    monthlyStats: "Monthly Statistics",
+    yearlyStats: "Yearly Statistics",
+    january: "January",
+    february: "February",
+    march: "March",
+    april: "April",
+    may: "May",
+    june: "June",
+    july: "July",
+    august: "August",
+    september: "September",
+    october: "October",
+    november: "November",
+    december: "December",
+    week: "Week of",
+    noDataAvailable: "No data available",
+    invalidDate: "Invalid date",
+    dataError: "Data loading error",
+  },
 };
 
 /**
  * Chart visual configuration settings
  */
 const chartConfig = {
-    colors: {
-        time: {
-            background: 'rgba(54, 162, 235, 0.6)',
-            border: 'rgba(54, 162, 235, 1)'
-        },
-        count: {
-            background: 'rgba(75, 192, 192, 0.6)',
-            border: 'rgba(75, 192, 192, 1)'
-        }
+  colors: {
+    time: {
+      background: "rgba(54, 162, 235, 0.6)",
+      border: "rgba(54, 162, 235, 1)",
     },
-    dimensions: {
-        defaultHeight: '300px',
-        expandedHeight: '200px'
-    }
+    count: {
+      background: "rgba(75, 192, 192, 0.6)",
+      border: "rgba(75, 192, 192, 1)",
+    },
+  },
+  dimensions: {
+    defaultHeight: "300px",
+    expandedHeight: "200px",
+  },
 };
 
 /**
@@ -100,7 +100,7 @@ const chartConfig = {
  * @returns {boolean} True if date is valid
  */
 function isValidDate(date) {
-    return date instanceof Date && !isNaN(date.getTime());
+  return date instanceof Date && !isNaN(date.getTime());
 }
 
 /**
@@ -108,21 +108,21 @@ function isValidDate(date) {
  * @returns {string} Current language code ('fr' or 'en')
  */
 function getCurrentLanguage() {
-    const currentPath = window.location.pathname;
-    const storedLang = localStorage.getItem('userLang');
-    
-    if (currentPath.includes('index-fr.html') || currentPath.includes('/fr/')) {
-        return 'fr';
-    }
-    if (currentPath.includes('index-en.html') || currentPath.includes('/en/')) {
-        return 'en';
-    }
-    
-    if (storedLang === 'fr' || storedLang === 'en') {
-        return storedLang;
-    }
-    
-    return (navigator.language || navigator.userLanguage).startsWith('fr') ? 'fr' : 'en';
+  // Avec le nouveau système de traduction dynamique, utiliser d'abord le translationManager
+  if (typeof window.translationManager !== "undefined") {
+    return window.translationManager.currentLang;
+  }
+
+  // Fallback vers localStorage
+  const storedLang = localStorage.getItem("userLang");
+  if (storedLang === "fr" || storedLang === "en") {
+    return storedLang;
+  }
+
+  // Fallback vers la langue du navigateur
+  return (navigator.language || navigator.userLanguage).startsWith("fr")
+    ? "fr"
+    : "en";
 }
 
 /**
@@ -131,9 +131,9 @@ function getCurrentLanguage() {
  * @returns {string} Translated text or key if translation not found
  */
 function getTranslation(key) {
-    if (!key) return translations[getCurrentLanguage()].noDataAvailable;
-    const currentLang = getCurrentLanguage();
-    return translations[currentLang][key] || key;
+  if (!key) return translations[getCurrentLanguage()].noDataAvailable;
+  const currentLang = getCurrentLanguage();
+  return translations[currentLang][key] || key;
 }
 
 /**
@@ -142,11 +142,21 @@ function getTranslation(key) {
  * @returns {string|null} Month key or null if invalid
  */
 function getMonthKey(monthIndex) {
-    const months = [
-        'january', 'february', 'march', 'april', 'may', 'june',
-        'july', 'august', 'september', 'october', 'november', 'december'
-    ];
-    return monthIndex >= 0 && monthIndex < 12 ? months[monthIndex] : null;
+  const months = [
+    "january",
+    "february",
+    "march",
+    "april",
+    "may",
+    "june",
+    "july",
+    "august",
+    "september",
+    "october",
+    "november",
+    "december",
+  ];
+  return monthIndex >= 0 && monthIndex < 12 ? months[monthIndex] : null;
 }
 
 /**
@@ -155,9 +165,9 @@ function getMonthKey(monthIndex) {
  * @returns {number} Month index (0-11) or -1 if invalid
  */
 function safeGetMonth(date) {
-    if (!isValidDate(date)) return -1;
-    const month = date.getMonth();
-    return month >= 0 && month <= 11 ? month : -1;
+  if (!isValidDate(date)) return -1;
+  const month = date.getMonth();
+  return month >= 0 && month <= 11 ? month : -1;
 }
 
 /**
@@ -166,22 +176,22 @@ function safeGetMonth(date) {
  * @returns {Date|null} Objet Date ou null si invalide
  */
 function safeParseDate(dateStr) {
-    try {
-        // Gestion multi-formats de date
-        const parsed = new Date(dateStr);
-        if (isValidDate(parsed)) return parsed;
-        
-        // Fallback pour les formats localisés (séparation par /, - ou espace)
-        const parts = dateStr.split(/[\/\- ]/);
-        if (parts.length === 3) {
-            const [day, month, year] = parts;
-            const fallback = new Date(`${year}-${month}-${day}`);
-            return isValidDate(fallback) ? fallback : null;
-        }
-    } catch (error) {
-        console.error('safeParseDate error:', error);
+  try {
+    // Gestion multi-formats de date
+    const parsed = new Date(dateStr);
+    if (isValidDate(parsed)) return parsed;
+
+    // Fallback pour les formats localisés (séparation par /, - ou espace)
+    const parts = dateStr.split(/[\/\- ]/);
+    if (parts.length === 3) {
+      const [day, month, year] = parts;
+      const fallback = new Date(`${year}-${month}-${day}`);
+      return isValidDate(fallback) ? fallback : null;
     }
-    return null;
+  } catch (error) {
+    console.error("safeParseDate error:", error);
+  }
+  return null;
 }
 
 /**
@@ -190,41 +200,42 @@ function safeParseDate(dateStr) {
  * @returns {string} Formatted date string
  */
 function formatDate(date) {
-    if (!isValidDate(date)) {
-        console.warn('Invalid date passed to formatDate:', date);
-        return getTranslation('invalidDate');
-    }
+  if (!isValidDate(date)) {
+    console.warn("Invalid date passed to formatDate:", date);
+    return getTranslation("invalidDate");
+  }
 
-    const currentLang = getCurrentLanguage();
-    const day = date.getDate();
-    const monthIndex = safeGetMonth(date);
-    
-    if (monthIndex === -1) {
-        console.warn('Invalid month index in formatDate:', monthIndex);
-        return getTranslation('invalidDate');
-    }
-    
-    const year = date.getFullYear();
-    const monthKey = getMonthKey(monthIndex);
-    
-    if (!monthKey) {
-        console.warn('Invalid monthKey in formatDate:', monthKey);
-        return getTranslation('invalidDate');
-    }
-    
-    const monthName = getTranslation(monthKey);
-    
-    if (!monthName) {
-        console.warn('Translation not found for monthKey:', monthKey);
-        return getTranslation('invalidDate');
-    }
+  const currentLang = getCurrentLanguage();
+  const day = date.getDate();
+  const monthIndex = safeGetMonth(date);
 
-    if (currentLang === 'fr') {
-        return `${day} ${monthName.toLowerCase()} ${year}`;
-    } else {
-        const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
-        return `${capitalizedMonth} ${day}, ${year}`;
-    }
+  if (monthIndex === -1) {
+    console.warn("Invalid month index in formatDate:", monthIndex);
+    return getTranslation("invalidDate");
+  }
+
+  const year = date.getFullYear();
+  const monthKey = getMonthKey(monthIndex);
+
+  if (!monthKey) {
+    console.warn("Invalid monthKey in formatDate:", monthKey);
+    return getTranslation("invalidDate");
+  }
+
+  const monthName = getTranslation(monthKey);
+
+  if (!monthName) {
+    console.warn("Translation not found for monthKey:", monthKey);
+    return getTranslation("invalidDate");
+  }
+
+  if (currentLang === "fr") {
+    return `${day} ${monthName.toLowerCase()} ${year}`;
+  } else {
+    const capitalizedMonth =
+      monthName.charAt(0).toUpperCase() + monthName.slice(1);
+    return `${capitalizedMonth} ${day}, ${year}`;
+  }
 }
 
 /**
@@ -233,28 +244,28 @@ function formatDate(date) {
  * @returns {string} Formatted month and year
  */
 function formatMonthYear(date) {
-    if (!isValidDate(date)) {
-        console.warn('Invalid date passed to formatMonthYear:', date);
-        return getTranslation('invalidDate');
-    }
+  if (!isValidDate(date)) {
+    console.warn("Invalid date passed to formatMonthYear:", date);
+    return getTranslation("invalidDate");
+  }
 
-    const monthIndex = safeGetMonth(date);
-    if (monthIndex === -1) {
-        return getTranslation('invalidDate');
-    }
+  const monthIndex = safeGetMonth(date);
+  if (monthIndex === -1) {
+    return getTranslation("invalidDate");
+  }
 
-    const monthKey = getMonthKey(monthIndex);
-    if (!monthKey) {
-        return getTranslation('invalidDate');
-    }
+  const monthKey = getMonthKey(monthIndex);
+  if (!monthKey) {
+    return getTranslation("invalidDate");
+  }
 
-    const currentLang = getCurrentLanguage();
-    const monthName = getTranslation(monthKey);
-    const year = date.getFullYear();
-    
-    return currentLang === 'fr' 
-        ? `${monthName.toLowerCase()} ${year}`
-        : `${monthName.charAt(0).toUpperCase() + monthName.slice(1)} ${year}`;
+  const currentLang = getCurrentLanguage();
+  const monthName = getTranslation(monthKey);
+  const year = date.getFullYear();
+
+  return currentLang === "fr"
+    ? `${monthName.toLowerCase()} ${year}`
+    : `${monthName.charAt(0).toUpperCase() + monthName.slice(1)} ${year}`;
 }
 
 /**
@@ -263,18 +274,18 @@ function formatMonthYear(date) {
  * @returns {string} Formatted week period
  */
 function formatWeekPeriod(date) {
-    if (!isValidDate(date)) {
-        console.warn('Invalid date passed to formatWeekPeriod:', date);
-        return getTranslation('invalidDate');
-    }
+  if (!isValidDate(date)) {
+    console.warn("Invalid date passed to formatWeekPeriod:", date);
+    return getTranslation("invalidDate");
+  }
 
-    const formattedDate = formatDate(date);
-    if (formattedDate === getTranslation('invalidDate')) {
-        return getTranslation('invalidDate');
-    }
+  const formattedDate = formatDate(date);
+  if (formattedDate === getTranslation("invalidDate")) {
+    return getTranslation("invalidDate");
+  }
 
-    const weekText = getTranslation('week');
-    return `${weekText} ${formattedDate}`;
+  const weekText = getTranslation("week");
+  return `${weekText} ${formattedDate}`;
 }
 
 /**
@@ -283,31 +294,31 @@ function formatWeekPeriod(date) {
  * @returns {Array<string>} Translated labels
  */
 function translateChartLabels(labels) {
-    if (!Array.isArray(labels)) return [getTranslation('noDataAvailable')];
+  if (!Array.isArray(labels)) return [getTranslation("noDataAvailable")];
 
-    return labels.map(label => {
-        if (typeof label !== 'string') return label;
+  return labels.map((label) => {
+    if (typeof label !== "string") return label;
 
-        // Handle week format
-        if (label.includes('Semaine du') || label.includes('Week of')) {
-            const date = safeParseDate(label);
-            return date ? formatWeekPeriod(date) : label;
-        }
+    // Handle week format
+    if (label.includes("Semaine du") || label.includes("Week of")) {
+      const date = safeParseDate(label);
+      return date ? formatWeekPeriod(date) : label;
+    }
 
-        // Handle ISO date format
-        if (label.match(/\d{4}(-|\/)\d{2}(-|\/)\d{2}/)) {
-            const date = safeParseDate(label);
-            return date ? formatDate(date) : label;
-        }
+    // Handle ISO date format
+    if (label.match(/\d{4}(-|\/)\d{2}(-|\/)\d{2}/)) {
+      const date = safeParseDate(label);
+      return date ? formatDate(date) : label;
+    }
 
-        // Handle month-year format
-        if (label.match(/[A-Za-zÀ-ÿ]+\s+\d{4}/)) {
-            const date = safeParseDate(label);
-            return date ? formatMonthYear(date) : label;
-        }
+    // Handle month-year format
+    if (label.match(/[A-Za-zÀ-ÿ]+\s+\d{4}/)) {
+      const date = safeParseDate(label);
+      return date ? formatMonthYear(date) : label;
+    }
 
-        return label;
-    });
+    return label;
+  });
 }
 
 /**
@@ -315,66 +326,66 @@ function translateChartLabels(labels) {
  * @param {string} [type='bar'] - Chart type
  * @returns {Object} Chart configuration
  */
-function createChartConfig(type = 'bar') {
-    return {
-        type,
-        data: {
-            labels: [],
-            datasets: [
-                {
-                    label: getTranslation('workTime'),
-                    data: [],
-                    backgroundColor: chartConfig.colors.time.background,
-                    borderColor: chartConfig.colors.time.border,
-                    borderWidth: 1,
-                    yAxisID: 'y-time'
-                },
-                {
-                    label: getTranslation('countNumber'),
-                    data: [],
-                    backgroundColor: chartConfig.colors.count.background,
-                    borderColor: chartConfig.colors.count.border,
-                    borderWidth: 1,
-                    yAxisID: 'y-count'
-                }
-            ]
+function createChartConfig(type = "bar") {
+  return {
+    type,
+    data: {
+      labels: [],
+      datasets: [
+        {
+          label: getTranslation("workTime"),
+          data: [],
+          backgroundColor: chartConfig.colors.time.background,
+          borderColor: chartConfig.colors.time.border,
+          borderWidth: 1,
+          yAxisID: "y-time",
         },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            animation: {
-                duration: 500
-            },
-            scales: {
-                'y-time': {
-                    type: 'linear',
-                    position: 'left',
-                    beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: getTranslation('time')
-                    }
-                },
-                'y-count': {
-                    type: 'linear',
-                    position: 'right',
-                    beginAtZero: true,
-                    grid: {
-                        display: false
-                    },
-                    title: {
-                        display: true,
-                        text: getTranslation('counts')
-                    }
-                }
-            },
-            plugins: {
-                legend: {
-                    position: 'top'
-                }
-            }
-        }
-    };
+        {
+          label: getTranslation("countNumber"),
+          data: [],
+          backgroundColor: chartConfig.colors.count.background,
+          borderColor: chartConfig.colors.count.border,
+          borderWidth: 1,
+          yAxisID: "y-count",
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: {
+        duration: 500,
+      },
+      scales: {
+        "y-time": {
+          type: "linear",
+          position: "left",
+          beginAtZero: true,
+          title: {
+            display: true,
+            text: getTranslation("time"),
+          },
+        },
+        "y-count": {
+          type: "linear",
+          position: "right",
+          beginAtZero: true,
+          grid: {
+            display: false,
+          },
+          title: {
+            display: true,
+            text: getTranslation("counts"),
+          },
+        },
+      },
+      plugins: {
+        legend: {
+          position: "top",
+        },
+      },
+    },
+  };
 }
 
 /**
@@ -382,218 +393,225 @@ function createChartConfig(type = 'bar') {
  * @returns {string} Le fuseau horaire de l'utilisateur
  */
 function getUserTimezone() {
-    return Intl.DateTimeFormat().resolvedOptions().timeZone;
+  return Intl.DateTimeFormat().resolvedOptions().timeZone;
 }
 
 /**
  * Main ChartManager module
  */
 export const ChartManager = {
-    init() {
-        if (typeof Chart === 'undefined') {
-            throw new Error('Chart.js is not loaded!');
-        }
+  init() {
+    if (typeof Chart === "undefined") {
+      throw new Error("Chart.js is not loaded!");
+    }
 
-        this.destroy();
-        ['daily', 'weekly', 'monthly', 'yearly'].forEach(period => {
-            const canvas = document.getElementById(`${period}Chart`);
-            if (canvas) {
-                const ctx = canvas.getContext('2d');
-                chartInstances[period] = new Chart(ctx, createChartConfig());
-            }
-        });
+    this.destroy();
+    ["daily", "weekly", "monthly", "yearly"].forEach((period) => {
+      const canvas = document.getElementById(`${period}Chart`);
+      if (canvas) {
+        const ctx = canvas.getContext("2d");
+        chartInstances[period] = new Chart(ctx, createChartConfig());
+      }
+    });
 
-        this.setupEventListeners();
-        this.updateAllChartLabels();
-        this.updatePeriodTitles();
-        
-        return chartInstances;
-    },
+    this.setupEventListeners();
+    this.updateAllChartLabels();
+    this.updatePeriodTitles();
 
-    setupEventListeners() {
-        window.addEventListener('resize', () => {
-            Object.values(chartInstances).forEach(chart => {
-                if (chart?.canvas) chart.resize();
-            });
-        });
+    return chartInstances;
+  },
 
-        document.addEventListener('languageChanged', () => {
-            this.updateAllChartLabels();
-            this.updatePeriodTitles();
-        });
+  setupEventListeners() {
+    window.addEventListener("resize", () => {
+      Object.values(chartInstances).forEach((chart) => {
+        if (chart?.canvas) chart.resize();
+      });
+    });
 
-        document.querySelectorAll('.toggle-details-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const chartSection = e.target.closest('.chart-section');
-                const period = chartSection.querySelector('.period-navigation').dataset.period;
-                this.toggleTaskDetails(chartSection, period);
-            });
-        });
-    },
+    document.addEventListener("languageChanged", () => {
+      this.updateAllChartLabels();
+      this.updatePeriodTitles();
+    });
 
-    updateChart(period, labels, timeData, countData, taskDetails = []) {
-        const chart = chartInstances[period];
-        if (!chart) {
-            console.error(`No chart found for period ${period}`);
-            return;
-        }
+    document.querySelectorAll(".toggle-details-btn").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        const chartSection = e.target.closest(".chart-section");
+        const period =
+          chartSection.querySelector(".period-navigation").dataset.period;
+        this.toggleTaskDetails(chartSection, period);
+      });
+    });
+  },
 
-        try {
-            const translatedLabels = translateChartLabels(labels);
-            
-            chart.data.labels = translatedLabels;
-            chart.data.datasets[0].data = timeData;
-            chart.data.datasets[1].data = countData;
-            chart.update('active');
+  updateChart(period, labels, timeData, countData, taskDetails = []) {
+    const chart = chartInstances[period];
+    if (!chart) {
+      console.error(`No chart found for period ${period}`);
+      return;
+    }
 
-            const tbody = document.querySelector(`#${period}TaskDetails table tbody`);
-            if (tbody) {
-                if (taskDetails && taskDetails.length > 0) {
-                    tbody.innerHTML = taskDetails.map(task => `
+    try {
+      const translatedLabels = translateChartLabels(labels);
+
+      chart.data.labels = translatedLabels;
+      chart.data.datasets[0].data = timeData;
+      chart.data.datasets[1].data = countData;
+      chart.update("active");
+
+      const tbody = document.querySelector(`#${period}TaskDetails table tbody`);
+      if (tbody) {
+        if (taskDetails && taskDetails.length > 0) {
+          tbody.innerHTML = taskDetails
+            .map(
+              (task) => `
                         <tr>
-                            <td>${task.name || getTranslation('unnamed')}</td>
-                            <td>${Math.round(parseFloat(task.total_time) / 60)}</td>
+                            <td>${task.name || getTranslation("unnamed")}</td>
+                            <td>${Math.round(
+                              parseFloat(task.total_time) / 60
+                            )}</td>
                             <td>${task.total_count}</td>
                         </tr>
-                    `).join('');
-                } else {
-                    tbody.innerHTML = `
+                    `
+            )
+            .join("");
+        } else {
+          tbody.innerHTML = `
                         <tr>
                             <td colspan="3" class="text-center">
-                                ${getTranslation('noDataAvailable')}
+                                ${getTranslation("noDataAvailable")}
                             </td>
                         </tr>`;
-                }
-            }
-
-            this.updatePeriodTitles();
-        } catch (error) {
-            console.error('Error updating chart:', error);
-            if (chart) {
-                chart.data.labels = [getTranslation('noDataAvailable')];
-                chart.data.datasets[0].data = [0];
-                chart.data.datasets[1].data = [0];
-                chart.update('active');
-            }
         }
-    },
+      }
 
-    updateAllChartLabels() {
-        try {
-            document.querySelectorAll('[data-action]').forEach(element => {
-                const key = element.getAttribute('data-action');
-                if (translations[getCurrentLanguage()][key]) {
-                    element.textContent = getTranslation(key);
-                }
-            });
-
-            Object.entries(chartInstances).forEach(([period, chart]) => {
-                if (chart) {
-                    chart.data.datasets[0].label = getTranslation('workTime');
-                    chart.data.datasets[1].label = getTranslation('countNumber');
-                    
-                    chart.options.scales['y-time'].title.text = getTranslation('time');
-                    chart.options.scales['y-count'].title.text = getTranslation('counts');
-                    
-                    if (chart.data.labels.length > 0) {
-                        chart.data.labels = translateChartLabels(chart.data.labels);
-                    }
-                    
-                    chart.update('none');
-                }
-            });
-        } catch (error) {
-            console.error('Error updating chart labels:', error);
-        }
-    },
-
-    toggleTaskDetails(chartSection, period) {
-        try {
-            const isExpanded = chartSection.classList.toggle('details-visible');
-            
-            const button = chartSection.querySelector('.toggle-details-btn');
-            const buttonText = button.querySelector('span');
-            const buttonIcon = button.querySelector('svg');
-            
-            buttonText.textContent = isExpanded ? 
-                getTranslation('hideDetails') : 
-                getTranslation('viewDetails');
-            
-            buttonIcon.style.transform = isExpanded ? 'rotate(180deg)' : 'rotate(0)';
-            
-            const chartWrapper = chartSection.querySelector('.chart-wrapper');
-            void chartWrapper.offsetWidth; // Force reflow
-            
-            setTimeout(() => {
-                const chart = chartInstances[period];
-                if (chart) {
-                    chart.resize();
-                    chart.update('none');
-                }
-            }, 300);
-        } catch (error) {
-            console.error('Error toggling task details:', error);
-        }
-    },
-
-    updatePeriodTitles() {
-        try {
-            const periodDisplays = document.querySelectorAll('.period-display');
-            periodDisplays.forEach(display => {
-                const dateAttr = display.getAttribute('data-date');
-                
-                if (dateAttr) {
-                    const date = safeParseDate(dateAttr);
-                    if (!date) {
-                        display.textContent = getTranslation('invalidDate');
-                        return;
-                    }
-
-                    const period = display.closest('.period-navigation')?.dataset.period;
-                    if (!period) return;
-
-                    let newText;
-                    switch(period) {
-                        case 'weekly':
-                            newText = formatWeekPeriod(date);
-                            break;
-                        case 'monthly':
-                            newText = formatMonthYear(date);
-                            break;
-                        case 'yearly':
-                            newText = date.getFullYear().toString();
-                            break;
-                        default:
-                            newText = formatDate(date);
-                    }
-                    
-                    display.textContent = newText;
-                }
-            });
-        } catch (error) {
-            console.error('Error updating period titles:', error);
-        }
-    },
-
-    destroy() {
-        try {
-            Object.values(chartInstances).forEach(chart => {
-                if (chart) chart.destroy();
-            });
-            chartInstances = {};
-            
-            window.removeEventListener('resize', () => {
-                Object.values(chartInstances).forEach(chart => {
-                    if (chart?.canvas) chart.resize();
-                });
-            });
-            
-            document.removeEventListener('languageChanged', () => {
-                this.updateAllChartLabels();
-                this.updatePeriodTitles();
-            });
-        } catch (error) {
-            console.error('Error destroying charts:', error);
-        }
+      this.updatePeriodTitles();
+    } catch (error) {
+      console.error("Error updating chart:", error);
+      if (chart) {
+        chart.data.labels = [getTranslation("noDataAvailable")];
+        chart.data.datasets[0].data = [0];
+        chart.data.datasets[1].data = [0];
+        chart.update("active");
+      }
     }
+  },
+
+  updateAllChartLabels() {
+    try {
+      document.querySelectorAll("[data-action]").forEach((element) => {
+        const key = element.getAttribute("data-action");
+        if (translations[getCurrentLanguage()][key]) {
+          element.textContent = getTranslation(key);
+        }
+      });
+
+      Object.entries(chartInstances).forEach(([period, chart]) => {
+        if (chart) {
+          chart.data.datasets[0].label = getTranslation("workTime");
+          chart.data.datasets[1].label = getTranslation("countNumber");
+
+          chart.options.scales["y-time"].title.text = getTranslation("time");
+          chart.options.scales["y-count"].title.text = getTranslation("counts");
+
+          if (chart.data.labels.length > 0) {
+            chart.data.labels = translateChartLabels(chart.data.labels);
+          }
+
+          chart.update("none");
+        }
+      });
+    } catch (error) {
+      console.error("Error updating chart labels:", error);
+    }
+  },
+
+  toggleTaskDetails(chartSection, period) {
+    try {
+      const isExpanded = chartSection.classList.toggle("details-visible");
+
+      const button = chartSection.querySelector(".toggle-details-btn");
+      const buttonText = button.querySelector("span");
+      const buttonIcon = button.querySelector("svg");
+
+      buttonText.textContent = isExpanded
+        ? getTranslation("hideDetails")
+        : getTranslation("viewDetails");
+
+      buttonIcon.style.transform = isExpanded ? "rotate(180deg)" : "rotate(0)";
+
+      const chartWrapper = chartSection.querySelector(".chart-wrapper");
+      void chartWrapper.offsetWidth; // Force reflow
+
+      setTimeout(() => {
+        const chart = chartInstances[period];
+        if (chart) {
+          chart.resize();
+          chart.update("none");
+        }
+      }, 300);
+    } catch (error) {
+      console.error("Error toggling task details:", error);
+    }
+  },
+
+  updatePeriodTitles() {
+    try {
+      const periodDisplays = document.querySelectorAll(".period-display");
+      periodDisplays.forEach((display) => {
+        const dateAttr = display.getAttribute("data-date");
+
+        if (dateAttr) {
+          const date = safeParseDate(dateAttr);
+          if (!date) {
+            display.textContent = getTranslation("invalidDate");
+            return;
+          }
+
+          const period = display.closest(".period-navigation")?.dataset.period;
+          if (!period) return;
+
+          let newText;
+          switch (period) {
+            case "weekly":
+              newText = formatWeekPeriod(date);
+              break;
+            case "monthly":
+              newText = formatMonthYear(date);
+              break;
+            case "yearly":
+              newText = date.getFullYear().toString();
+              break;
+            default:
+              newText = formatDate(date);
+          }
+
+          display.textContent = newText;
+        }
+      });
+    } catch (error) {
+      console.error("Error updating period titles:", error);
+    }
+  },
+
+  destroy() {
+    try {
+      Object.values(chartInstances).forEach((chart) => {
+        if (chart) chart.destroy();
+      });
+      chartInstances = {};
+
+      window.removeEventListener("resize", () => {
+        Object.values(chartInstances).forEach((chart) => {
+          if (chart?.canvas) chart.resize();
+        });
+      });
+
+      document.removeEventListener("languageChanged", () => {
+        this.updateAllChartLabels();
+        this.updatePeriodTitles();
+      });
+    } catch (error) {
+      console.error("Error destroying charts:", error);
+    }
+  },
 };

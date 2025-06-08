@@ -44,6 +44,22 @@ const translations = {
           "Temps d'attente dépassé. Veuillez réessayer plus tard",
         "mosque.data.error":
           "Erreur lors de la récupération des horaires de prière",
+        "mosque.scraping.completed":
+          "Horaires mis à jour automatiquement avec succès",
+        "mosque.data.refreshed": "Données actualisées suite à la mise à jour",
+        "mosque.cache.cleared": "Cache mis à jour avec les nouvelles données",
+        "mosque.background.update": "Mise à jour en arrière-plan terminée",
+        "mosque.geolocation.searching": "Recherche de votre position...",
+        "mosque.data.updating": "Mise à jour des horaires en cours...",
+        "mosque.data.updating.background":
+          "Mise à jour des horaires lancée en arrière-plan...",
+        "mosque.scraping.started":
+          "Mise à jour automatique des horaires en cours...",
+        "mosque.data.refresh.failed": "Échec du rafraîchissement des données",
+        "mosque.scraping.incomplete": "Mise à jour incomplète des horaires",
+        "mosque.scraping.timeout":
+          "Délai dépassé pour la mise à jour des horaires",
+        "mosque.refresh.failed": "Erreur lors du rafraîchissement des données",
 
         // --- Duas ---
         "dua.times.loaded": "Horaires chargés avec succès",
@@ -112,8 +128,7 @@ const translations = {
         "profile.password.weak":
           "Le mot de passe doit contenir au moins 8 caractères, une majuscule, un chiffre et un caractère spécial",
 
-        "mosque.scrape.partial_error":
-          "Certaines mosquées n'ont pas pu être mises à jour",
+        "mosque.scrape.partial_error": "Some mosques could not be updated",
       },
 
       info: {
@@ -205,6 +220,10 @@ const translations = {
         "profile.password.incorrect": "Mot de passe actuel incorrect",
 
         "mosque.scrape.error": "Erreur lors de la mise à jour des horaires",
+        "mosque.scraping.failed":
+          "Échec de la mise à jour automatique des horaires",
+        "mosque.error.general":
+          "Erreur générale lors du traitement des mosquées",
       },
 
       confirm: {
@@ -266,11 +285,26 @@ const translations = {
         "mosque.location.found": "Nearest city found",
         "mosque.data.updated": "Prayer times updated successfully",
         "mosque.data.updating.background":
-          "Prayer times update started in background...",
+          "Prayer times update launched in background...",
         "mosque.data.waiting": "Waiting for prayer times data to be available",
         "mosque.data.ready": "Prayer times data is now available",
         "mosque.data.timeout": "Waiting time exceeded. Please try again later",
         "mosque.data.error": "Error while retrieving prayer times data",
+        "mosque.scraping.completed":
+          "Prayer times updated automatically successfully",
+        "mosque.data.refreshed": "Data refreshed after update",
+        "mosque.cache.cleared": "Cache updated with new data",
+        "mosque.background.update": "Background update completed",
+        "mosque.geolocation.searching": "Searching for your location...",
+        "mosque.data.updating": "Updating prayer times...",
+        "mosque.data.updating.background":
+          "Prayer times update launched in background...",
+        "mosque.scraping.started":
+          "Automatic prayer times update in progress...",
+        "mosque.data.refresh.failed": "Data refresh failed",
+        "mosque.scraping.incomplete": "Prayer times update incomplete",
+        "mosque.scraping.timeout": "Prayer times update timeout exceeded",
+        "mosque.refresh.failed": "Error during data refresh",
 
         // --- Duas ---
         "dua.times.loaded": "Prayer times loaded successfully",
@@ -333,8 +367,7 @@ const translations = {
         "profile.password.weak":
           "Password must contain at least 8 characters, one uppercase letter, one number and one special character",
 
-        "mosque.scrape.partial_error":
-          "Certaines mosquées n'ont pas pu être mises à jour",
+        "mosque.scrape.partial_error": "Some mosques could not be updated",
       },
 
       info: {
@@ -348,7 +381,7 @@ const translations = {
         "mosque.geolocation.searching": "Searching for your location...",
         "mosque.data.updating": "Updating prayer times...",
         "mosque.data.updating.background":
-          "Mise à jour des horaires lancée en arrière-plan...",
+          "Prayer times update launched in background...",
 
         // --- Duas ---
         "dua.geolocation.searching": "Searching for your location...",
@@ -418,7 +451,9 @@ const translations = {
         "profile.password.error": "Error changing password",
         "profile.password.incorrect": "Current password is incorrect",
 
-        "mosque.scrape.error": "Erreur lors de la mise à jour des horaires",
+        "mosque.scrape.error": "Error updating prayer times",
+        "mosque.scraping.failed": "Automatic prayer times update failed",
+        "mosque.error.general": "General error while processing mosques",
       },
 
       confirm: {

@@ -36,15 +36,10 @@ export async function initializeWelcomepage() {
     const authForms = document.getElementById("welcomepage-auth-forms");
     if (getStartedBtn && authForms) {
       getStartedBtn.addEventListener("click", () => {
-        // Masquer le bouton et afficher les formulaires d'authentification
         getStartedBtn.style.display = "none";
         authForms.classList.remove("hidden");
         authForms.style.display = "block";
-        // Optionnel : vous pouvez forcer l'activation d'un onglet, par exemple "signin"
-        // switchTab("signin");  // (si nécessaire, en vous assurant que switchTab est correctement importé/initialisé)
       });
-    } else {
-      console.warn("Welcome Page: Element(s) not found.");
     }
 
     // Initialisation du basculement des onglets pour le formulaire Sign In / Sign Up
@@ -54,9 +49,8 @@ export async function initializeWelcomepage() {
     const signinForm = document.getElementById("welcomepage-signinForm");
     if (signinForm) {
       signinForm.addEventListener("submit", async (e) => {
-        e.preventDefault(); // Empêche le rechargement de la page
+        e.preventDefault();
 
-        // Récupération des valeurs saisies
         const email = document
           .getElementById("welcomepage-signin-email")
           .value.trim();
@@ -64,29 +58,23 @@ export async function initializeWelcomepage() {
           .getElementById("welcomepage-signin-password")
           .value.trim();
 
-        // Vérification que les champs ne sont pas vides
         if (!email || !password) {
-          console.error("Veuillez remplir tous les champs.");
+          notificationService.show("auth.required.fields", "warning");
           return;
         }
 
-        // Appel à votre service d'authentification
         try {
           const result = await authService.login(email, password);
           if (result.success) {
-            // Sauvegarde du token et redirection vers le dashboard
             localStorage.setItem("token", result.token);
             await navigateTo("dashboard");
           } else {
-            console.error("Authentification échouée:", result.message);
             notificationService.show("auth.signin.error", "error");
           }
         } catch (error) {
-          console.error("Erreur lors de l'authentification :", error);
+          notificationService.show("auth.signin.error", "error");
         }
       });
-    } else {
-      console.warn("Formulaire Sign In non trouvé.");
     }
 
     // Initialisation de MosqueTime pour la page d'accueil
@@ -99,39 +87,19 @@ export async function initializeWelcomepage() {
         await welcomeMosqueTime.initialize();
       });
     } catch (error) {
-      console.error("WelcomePage: Error initializing MosqueTime:", error);
       notificationService.show("mosque.init.error", "error");
     }
-
-    // Pour les tests seulement - à supprimer en production
-    const debugButton = document.createElement('button');
-    debugButton.innerText = 'Forcer mise à jour';
-    debugButton.style.position = 'fixed';
-    debugButton.style.bottom = '10px';
-    debugButton.style.right = '10px';
-    debugButton.style.zIndex = '9999';
-    debugButton.style.fontSize = '10px';
-    debugButton.style.opacity = '0.5';
-    debugButton.addEventListener('click', () => {
-      console.log('Test: Force mise à jour');
-      localStorage.removeItem('build_hash');
-      window.location.reload();
-    });
-    document.body.appendChild(debugButton);
   } catch (error) {
-    console.warn("Erreur lors de l'initialisation de Feather:", error);
-    // Continuer malgré l'erreur
+    // Continuer malgré l'erreur de Feather
   }
 }
 
 // Fonction pour mettre à jour le contenu du formulaire d'inscription selon la langue
 function updateSignupContent(language) {
-  // Déterminer la langue (utiliser celle stockée dans localStorage si non spécifiée)
   const currentLang = language || localStorage.getItem("userLang") || "en";
 
   const signupTabContent = document.getElementById("welcomepage-signupTab");
   if (signupTabContent) {
-    // Messages selon la langue
     const messages = {
       fr: {
         title: "Inscriptions temporairement fermées",
@@ -149,7 +117,6 @@ function updateSignupContent(language) {
       },
     };
 
-    // Utiliser les messages dans la langue appropriée (défaut: anglais)
     const content = messages[currentLang] || messages.en;
 
     signupTabContent.innerHTML = `

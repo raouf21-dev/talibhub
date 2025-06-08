@@ -1,0 +1,16 @@
+{
+  "auth": {
+    "errors": {
+      "invalidEmail": "Adresse e-mail invalide",
+      "passwordMismatch": "Les mots de passe ne correspondent pas",
+      "loginFailed": "Connexion échouée. Vérifiez vos identifiants",
+      "accountCreated": "Compte créé avec succès",
+      "loggedOut": "Déconnexion réussie"
+    }
+  },
+  "general": {
+    "success": "Opération réussie",
+    "error": "Une erreur est survenue",
+    "loading": "Chargement en cours..."
+  }
+}

@@ -63,6 +63,23 @@ body {
   margin-top: 60px; /* Hauteur de la top-nav */
 }
 
+/* Masquer la topbar sur la page d'accueil */
+#welcomepage ~ .top-nav,
+#welcomepage.active ~ .top-nav,
+body:has(#welcomepage.active) .top-nav {
+  display: none;
+}
+
+/* Alternative plus simple : masquer directement sur welcomepage */
+body:has(.page:not(.page-no-welcome).active) .top-nav {
+  display: none;
+}
+
+/* Si la syntaxe :has n'est pas supportée, utiliser cette approche */
+.welcomepage-active .top-nav {
+  display: none;
+}
+
 .page.active {
   display: block;
   opacity: 1;
@@ -289,7 +306,32 @@ body {
   animation: slideDown 0.3s ease-out;
 }
 
-/* Styles pour le CAPTCHA */
+/* Styles pour Turnstile */
+.turnstile-container {
+  margin: 1rem 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 65px;
+}
+
+.captcha-info {
+  text-align: center;
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--gray-color);
+}
+
+.captcha-info a {
+  color: var(--secondary-color);
+  text-decoration: none;
+}
+
+.captcha-info a:hover {
+  text-decoration: underline;
+}
+
+/* Styles pour le CAPTCHA (système existant, à garder pour compatibilité) */
 .captcha-group {
   grid-column: 1 / -1;
   margin-bottom: 20px;

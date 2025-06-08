@@ -41,6 +41,7 @@ const cspDirectives = {
     "https://unpkg.com",
     "https://cdnjs.cloudflare.com",
     "https://cdn.jsdelivr.net",
+    "https://challenges.cloudflare.com",
     "https://www.talibhub.com",
     "http://www.talibhub.com",
     ...(isProd ? [] : ["http://localhost:*"]),
@@ -66,6 +67,7 @@ const cspDirectives = {
     "'self'",
     "https://api.example.com",
     "https://api.aladhan.com",
+    "https://challenges.cloudflare.com",
     "https://www.talibhub.com",
     "http://www.talibhub.com",
     "https://talibhub.com",
@@ -74,7 +76,12 @@ const cspDirectives = {
   ],
   objectSrc: ["'none'"],
   mediaSrc: ["'self'"],
-  frameSrc: ["'self'", "https://www.talibhub.com", "http://www.talibhub.com"],
+  frameSrc: [
+    "'self'",
+    "https://challenges.cloudflare.com",
+    "https://www.talibhub.com",
+    "http://www.talibhub.com",
+  ],
 };
 
 app.use(
@@ -131,6 +138,10 @@ app.use(
   "/services",
   express.static(path.join(__dirname, "../Front-End/services"))
 );
+app.use(
+  "/translations",
+  express.static(path.join(__dirname, "../Front-End/translations"))
+);
 app.use(express.static(path.join(__dirname, "../Front-End")));
 
 // Modifier la route pour le favicon
@@ -155,7 +166,7 @@ const sourateRoutes = require("./routes/souratesRoutes");
 const statisticsRoutes = require("./routes/statisticsRoutes");
 const mosqueTimesRoutes = require("./routes/mosqueTimesRoutes");
 const surahMemorizationRoutes = require("./routes/surahMemorizationRoutes");
-const captchaRoutes = require("./routes/captchaRoutes");
+const turnstileRoutes = require("./routes/turnstileRoutes");
 const duaTimeRoutes = require("./routes/duaTimeRoutes");
 
 // Routes API (après le middleware)
@@ -168,7 +179,7 @@ app.use("/api/session", sessionRoutes);
 app.use("/api/sourates", sourateRoutes);
 app.use("/api/statistics", statisticsRoutes);
 app.use("/api/surah-memorization", surahMemorizationRoutes);
-app.use("/api/captcha", captchaRoutes);
+app.use("/api/turnstile", turnstileRoutes);
 app.use("/api/dua-time", duaTimeRoutes);
 
 // Ajouter une route pour stocker les horaires dans les cookies
@@ -218,12 +229,8 @@ app.get("*", (req, res, next) => {
   // Ne pas traiter les requêtes pour des fichiers statiques (avec extension)
   if (req.url.includes(".")) return next();
 
-  // Déterminer la langue de l'utilisateur
-  const userLang =
-    req.acceptsLanguages(langConfig.SUPPORTED_LANGS) || langConfig.DEFAULT_LANG;
-
-  // Envoyer le fichier HTML correspondant
-  res.sendFile(path.join(__dirname, `../Front-End/index-${userLang}.html`));
+  // Toujours servir index.html et laisser JavaScript gérer les langues
+  res.sendFile(path.join(__dirname, "../Front-End/index.html"));
 });
 
 app.get("/services/state/state.js", (req, res, next) => {

@@ -1,0 +1,2094 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <title>TalibTimer</title>
+    <meta
+      name="TalibTimer"
+      content="TalibTimer aide les utilisateurs à améliorer leur productivité grâce à la technique Pomodoro, offrant des minuteurs personnalisables, des statistiques détaillées, des rappels et des listes de tâches pour une gestion optimale du temps."
+    />
+
+    <!-- Feuilles de style principales -->
+    <link rel="stylesheet" href="/styles.css" />
+
+    <!-- Bibliothèques principales depuis cdnjs -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+
+    <!-- FullCalendar depuis unpkg -->
+    <script src="https://unpkg.com/fullcalendar@6.1.8/index.global.min.js"></script>
+
+    <!-- Balises alternate pour le SEO multilingue -->
+    <link
+      rel="alternate"
+      hreflang="fr"
+      href="https://votre-site.com/index-fr.html"
+    />
+    <link
+      rel="alternate"
+      hreflang="en"
+      href="https://votre-site.com/index-en.html"
+    />
+
+    <!-- Feather Icons -->
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+
+    <!-- Ajouter ce script au début du <head> -->
+    <script>
+      // Intercepter les redirections codées en dur
+      (function () {
+        console.log("[DEBUG] Vérification des redirections codées en dur");
+
+        // Vérifier les balises meta refresh
+        document.addEventListener("DOMContentLoaded", function () {
+          const metaTags = document.querySelectorAll(
+            'meta[http-equiv="refresh"]'
+          );
+          metaTags.forEach((tag) => {
+            const content = tag.getAttribute("content");
+            if (content && content.includes("/login")) {
+              console.warn(
+                "[DEBUG] Meta refresh vers /login détecté et bloqué"
+              );
+              tag.setAttribute(
+                "content",
+                content.replace("/login", "/welcomepage")
+              );
+            }
+          });
+        });
+      })();
+    </script>
+  </head>
+
+  <body>
+    <nav class="top-nav">
+      <!-- Gauche: Hamburger -->
+      <div class="hamburger-btn" id="hamburgerBtn">☰</div>
+
+      <!-- Centre: Logo -->
+      <div class="app-branding">
+        <h1>TalibHub(Beta)</h1>
+      </div>
+
+      <!-- Droite: Profil -->
+      <div class="profile-section">
+        <button id="profile-button" class="profile-button">
+          <span id="username-display">User</span>
+          <i class="profile-icon">▼</i>
+        </button>
+        <div id="profile-dropdown" class="profile-dropdown">
+          <a href="#" class="dropdown-item" data-destination="profile"
+            >Profile</a
+          >
+          <a href="#" class="dropdown-item" data-destination="notifications"
+            >Notifications</a
+          >
+          <a href="#" class="dropdown-item" data-destination="price"
+            >Contribution</a
+          >
+          <a href="#" class="dropdown-item" data-destination="contactform"
+            >Contact</a
+          >
+          <a href="#" class="dropdown-item" data-destination="aboutus"
+            >À propos de nous</a
+          >
+          <div class="dropdown-divider"></div>
+          <div class="dropdown-item">
+            <div class="theme-toggle">
+              <span>Thème</span>
+              <label class="switch">
+                <input type="checkbox" id="theme-toggle" />
+                <span class="slider round"></span>
+              </label>
+            </div>
+          </div>
+          <div class="dropdown-item">
+            <div class="language-selector">
+              <button class="lang-btn" data-lang="fr">🇫🇷</button>
+              <button class="lang-btn" data-lang="en">🇬🇧</button>
+            </div>
+          </div>
+          <div class="dropdown-divider"></div>
+          <a href="#" class="dropdown-item" id="logoutBtn">Logout</a>
+        </div>
+      </div>
+    </nav>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <header id="nav">
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+          <h1>TalibHub(Beta)</h1>
+          <button class="sidebar-close-btn" id="sidebarCloseBtn">×</button>
+        </div>
+        <nav>
+          <ul class="nav-list">
+            <li>
+              <a href="#" class="nav-link" data-destination="dashboard"
+                >Tableau de bord</a
+              >
+            </li>
+            <li>
+              <a href="#" class="nav-link" data-destination="todoLists"
+                >Listes de Tâches</a
+              >
+            </li>
+            <li>
+              <a href="#" class="nav-link" data-destination="apprentissage"
+                >TalibTimer</a
+              >
+              <ul class="subnav">
+                <li>
+                  <a href="#" class="nav-link" data-destination="statistics"
+                    >&#8226; Statistiques</a
+                  >
+                </li>
+              </ul>
+            </li>
+            <li>
+              <a href="#" class="nav-link" data-destination="salatSurahSelector"
+                >Sélecteur de Sourate</a
+              >
+            </li>
+            <li>
+              <a href="#" class="nav-link" data-destination="duaTimeCalculator"
+                >Temps de Doua</a
+              >
+            </li>
+            <li>
+              <a href="#" class="nav-link" data-destination="surahmemorization"
+                >Mémorisation des Sourates</a
+              >
+            </li>
+            <li>
+              <a href="#" class="nav-link" data-destination="mosquetime"
+                >Horaires de Prière à la Mosquée</a
+              >
+            </li>
+            <li class="nav-list-divider"></li>
+            <!-- Pour séparer visuellement -->
+          </ul>
+        </nav>
+      </aside>
+    </header>
+
+    <section id="welcomepage" class="page">
+      <header class="welcomepage-header">
+        <h1>TalibHub(Beta)</h1>
+        <!-- Language Selector -->
+        <section class="language-selector">
+          <button class="lang-btn" data-lang="fr" title="Français">🇫🇷</button>
+          <button class="lang-btn" data-lang="en" title="English">🇬🇧</button>
+        </section>
+      </header>
+
+      <div class="welcomepage-container">
+        <div id="welcomepage-hero" class="welcomepage-hero">
+          <h2>Bienvenue sur TalibHub</h2>
+          <p>
+            Votre plateforme innovante pour l'apprentissage et la pratique
+            islamique
+          </p>
+          <button id="welcomepage-getStartedBtn" class="welcomepage-btn">
+            Commencer
+          </button>
+        </div>
+
+        <div id="welcomepage-auth-forms" class="welcomepage-auth-forms hidden">
+          <div class="welcomepage-card">
+            <div class="welcomepage-tabs">
+              <button class="welcomepage-tab-btn" data-tab="signup">
+                Inscription
+              </button>
+              <button class="welcomepage-tab-btn active" data-tab="signin">
+                Connexion
+              </button>
+            </div>
+            <div class="welcomepage-tab-content" id="welcomepage-signupTab">
+              <form id="welcomepage-signupForm">
+                <!-- Champ honeypot caché -->
+                <div
+                  style="
+                    opacity: 0;
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    height: 0;
+                    width: 0;
+                    z-index: -1;
+                    pointer-events: none;
+                  "
+                >
+                  <input
+                    type="text"
+                    name="website"
+                    id="welcomepage-website"
+                    autocomplete="off"
+                    tabindex="-1"
+                    aria-hidden="true"
+                  />
+                </div>
+
+                <!-- Champ caché pour le timing -->
+                <input type="hidden" id="form-start-time" value="" />
+
+                <div class="form-grid">
+                  <div class="welcomepage-form-group">
+                    <label for="welcomepage-username">Pseudo</label>
+                    <input type="text" id="welcomepage-username" required />
+                  </div>
+                  <div class="welcomepage-form-group">
+                    <label for="welcomepage-firstName">Prénom</label>
+                    <input type="text" id="welcomepage-firstName" required />
+                  </div>
+                  <div class="welcomepage-form-group">
+                    <label for="welcomepage-lastName">Nom</label>
+                    <input type="text" id="welcomepage-lastName" required />
+                  </div>
+                  <div class="welcomepage-form-group">
+                    <label for="welcomepage-age">Âge</label>
+                    <input type="number" id="welcomepage-age" required />
+                  </div>
+                  <div class="welcomepage-form-group">
+                    <label for="welcomepage-gender">Sexe</label>
+                    <select id="welcomepage-gender" required>
+                      <option value="">Sélectionner</option>
+                      <option value="male">Masculin</option>
+                      <option value="female">Féminin</option>
+                    </select>
+                  </div>
+                  <div class="welcomepage-form-group">
+                    <label for="welcomepage-country">Pays</label>
+                    <input
+                      type="text"
+                      id="welcomepage-country"
+                      required
+                      autocomplete="off"
+                    />
+                    <div
+                      id="country-list"
+                      role="listbox"
+                      aria-label="Liste des pays"
+                    >
+                      <!-- Les éléments de la liste des pays seront insérés ici dynamiquement -->
+                    </div>
+                  </div>
+                  <div class="welcomepage-form-group">
+                    <label for="welcomepage-email">Adresse e-mail</label>
+                    <input
+                      type="email"
+                      id="welcomepage-email"
+                      name="email"
+                      required
+                      autocomplete="email"
+                    />
+                  </div>
+                  <div class="welcomepage-form-group">
+                    <label for="welcomepage-confirmEmail"
+                      >Confirmer l'adresse e-mail</label
+                    >
+                    <input
+                      type="email"
+                      id="welcomepage-confirmEmail"
+                      name="confirmEmail"
+                      required
+                      autocomplete="off"
+                    />
+                  </div>
+                  <div class="welcomepage-form-group">
+                    <label for="welcomepage-password">Mot de passe</label>
+                    <input type="password" id="welcomepage-password" required />
+                  </div>
+                  <div class="welcomepage-form-group">
+                    <label for="welcomepage-confirmPassword"
+                      >Confirmer le mot de passe</label
+                    >
+                    <input
+                      type="password"
+                      id="welcomepage-confirmPassword"
+                      required
+                    />
+                  </div>
+                  <div class="welcomepage-form-group terms-group">
+                    <div class="terms-checkbox-container">
+                      <input
+                        type="checkbox"
+                        id="welcomepage-terms"
+                        name="terms"
+                        required
+                      />
+                      <label for="welcomepage-terms">
+                        J'accepte les
+                        <a
+                          href="/terms.html"
+                          target="_blank"
+                          class="terms-link"
+                          style="
+                            color: #000;
+                            font-size: 1.1rem;
+                            font-weight: 500;
+                          "
+                          >Conditions Générales d'Utilisation</a
+                        >
+                      </label>
+                    </div>
+                  </div>
+                  <div class="welcomepage-form-group captcha-group">
+                    <label for="welcomepage-captcha"
+                      >Vérification de sécurité</label
+                    >
+                    <!-- Container pour Turnstile -->
+                    <div
+                      id="turnstile-container"
+                      class="turnstile-container"
+                    ></div>
+
+                    <!-- Information sur la protection -->
+                    <div class="captcha-info">
+                      <small
+                        >Protégé par Cloudflare Turnstile -
+                        <a
+                          href="https://www.cloudflare.com/privacypolicy/"
+                          target="_blank"
+                          >Confidentialité</a
+                        >
+                        -
+                        <a
+                          href="https://www.cloudflare.com/website-terms/"
+                          target="_blank"
+                          >Conditions</a
+                        >
+                      </small>
+                    </div>
+                  </div>
+                </div>
+                <button
+                  type="submit"
+                  class="welcomepage-btn welcomepage-btn-primary"
+                >
+                  Créer un compte
+                </button>
+              </form>
+            </div>
+            <div
+              class="welcomepage-tab-content active"
+              id="welcomepage-signinTab"
+            >
+              <form id="welcomepage-signinForm">
+                <h3>Connexion</h3>
+                <div class="form-grid">
+                  <div class="welcomepage-form-group">
+                    <label for="welcomepage-signin-email">Adresse e-mail</label>
+                    <input
+                      type="email"
+                      id="welcomepage-signin-email"
+                      required
+                    />
+                  </div>
+                  <div class="welcomepage-form-group">
+                    <label for="welcomepage-signin-password"
+                      >Mot de passe</label
+                    >
+                    <input
+                      type="password"
+                      id="welcomepage-signin-password"
+                      required
+                    />
+                  </div>
+                </div>
+                <button
+                  type="submit"
+                  class="welcomepage-btn welcomepage-btn-primary"
+                >
+                  Se connecter
+                </button>
+                <p>
+                  <a href="./forgot-password.html">Mot de passe oublié ?</a>
+                </p>
+              </form>
+            </div>
+          </div>
+        </div>
+        <div id="welcomepage-mosque-time" class="welcomepage-mosque-time">
+          <!-- Mosque Time sera inséré ici -->
+        </div>
+        <div id="welcomepage-features" class="welcomepage-features">
+          <h2>Nos Principales Fonctionnalités</h2>
+          <div class="welcomepage-features-grid">
+            <div class="welcomepage-feature-card">
+              <h3>TalibTimer</h3>
+              <p>Optimisez vos sessions d'étude et de pratique</p>
+            </div>
+            <div class="welcomepage-feature-card">
+              <h3>Sélecteur de Sourate</h3>
+              <p>Diversifiez vos récitations de prières</p>
+            </div>
+            <div class="welcomepage-feature-card">
+              <h3>Mémorisation des Sourates</h3>
+              <p>Maintenez votre mémorisation avec la répétition espacée</p>
+            </div>
+            <div class="welcomepage-feature-card">
+              <h3>Calculateur de Temps de Doua</h3>
+              <p>Calculez le dernier tiers de la nuit pour les invocations</p>
+            </div>
+            <div class="welcomepage-feature-card">
+              <h3>Horaires de Prière à la Mosquée</h3>
+              <p>
+                Trouvez les horaires de prières en congrégation près de chez
+                vous
+              </p>
+            </div>
+            <div class="welcomepage-feature-card">
+              <h3>Fonctionnalités Futures</h3>
+              <p>De nombreuses fonctionnalités passionnantes à venir !</p>
+            </div>
+          </div>
+        </div>
+
+        <div id="welcomepage-vision" class="welcomepage-vision">
+          <h2>Notre Vision</h2>
+          <p>
+            Chez TalibHub, nous croyons que la technologie peut enrichir et
+            faciliter la pratique de l'islam. Notre plateforme combine des
+            fonctionnalités pratiques avec une interface intuitive pour créer
+            une expérience unique et personnalisée pour chaque utilisateur.
+          </p>
+        </div>
+
+        <div id="welcomepage-why-choose" class="welcomepage-why-choose">
+          <h2>Pourquoi Choisir TalibHub ?</h2>
+          <div class="welcomepage-why-choose-grid">
+            <div class="welcomepage-why-choose-card">
+              <h3>Approche Pratique</h3>
+              <p>
+                Nous nous concentrons sur l'application concrète des
+                enseignements islamiques dans la vie quotidienne.
+              </p>
+            </div>
+            <div class="welcomepage-why-choose-card">
+              <h3>Personnalisation</h3>
+              <p>
+                Notre plateforme s'adapte à votre mode de vie et à vos objectifs
+                personnels dans la pratique religieuse.
+              </p>
+            </div>
+            <div class="welcomepage-why-choose-card">
+              <h3>Communauté</h3>
+              <p>
+                Rejoignez une communauté mondiale de musulmans et partagez vos
+                expériences et vos progrès.
+              </p>
+            </div>
+            <div class="welcomepage-why-choose-card">
+              <h3>Accessibilité Universelle</h3>
+              <p>
+                TalibHub est accessible sur tous les appareils avec un
+                navigateur web, sans avoir besoin d'installer une application
+                spécifique.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div id="welcomepage-commitment" class="welcomepage-commitment">
+          <h2>Notre Engagement</h2>
+          <p>
+            Chez TalibHub, nous nous engageons à fournir une plateforme gratuite
+            accessible à tous. Notre modèle unique repose sur la générosité de
+            nos utilisateurs :
+          </p>
+          <ul>
+            <li>
+              Toutes les fonctionnalités sont gratuites : Nous croyons que
+              l'accès à des outils de qualité pour la pratique de l'islam
+              devrait être universel.
+            </li>
+            <li>
+              Abonnements pour les altruistes : Notre espace abonnés est conçu
+              pour ceux qui souhaitent contribuer à la diffusion et à
+              l'utilisation de TalibHub comme bien commun.
+            </li>
+            <li>
+              Développement communautaire : Nous encourageons la contribution et
+              les retours de notre communauté d'utilisateurs pour améliorer
+              continuellement nos services.
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <footer class="welcomepage-footer">
+        <p>
+          &copy;
+          <script>
+            document.write(new Date().getFullYear());
+          </script>
+          TalibHub. Tous droits réservés.
+        </p>
+      </footer>
+    </section>
+
+    <section id="dashboard" class="page page-no-welcome">
+      <main class="dashboard-main-content">
+        <h1>Bienvenue sur votre tableau de bord</h1>
+        <div class="dashboard-card-grid">
+          <div class="dashboard-card" data-destination="mosquetime">
+            <img
+              src="./assets/icons/DashboardIcones/mosque_icone1.svg"
+              alt="Icône Mosquée"
+            />
+            <h2>Horaires de Prière à la Mosquée</h2>
+          </div>
+          <div class="dashboard-card" data-destination="salatSurahSelector">
+            <img
+              src="./assets/icons/DashboardIcones/carpet_icone1.svg"
+              alt="Icône Tapis"
+            />
+            <h2>Sélecteur de Sourate</h2>
+          </div>
+
+          <div class="dashboard-card" data-destination="surahmemorization">
+            <img
+              src="./assets/icons/DashboardIcones/brain_icone1.svg"
+              alt="Icône Mémorisation des Sourates"
+            />
+            <h2>Mémorisation des Sourates</h2>
+          </div>
+          <div class="dashboard-card" data-destination="duaTimeCalculator">
+            <img
+              src="./assets/icons/DashboardIcones/hands_prayer_icon1.svg"
+              alt="Icône Doua"
+            />
+            <h2>Temps de Doua</h2>
+          </div>
+          <div class="dashboard-card" data-destination="apprentissage">
+            <img
+              src="./assets/icons/DashboardIcones/clock_icone1.svg"
+              alt="Icône Horloge"
+            />
+            <h2>TalibTimer</h2>
+          </div>
+        </div>
+      </main>
+    </section>
+
+    <section id="apprentissage" class="page page-no-welcome">
+      <h1>Apprentissage</h1>
+
+      <!-- Task Selection -->
+      <div class="timers-container">
+        <div class="timer">
+          <h2>Sélection de tâche et session</h2>
+          <div class="timer-content">
+            <select id="task-select">
+              <option value="">Sélectionnez une tâche</option>
+            </select>
+            <div id="session-info">
+              <p>
+                Session précédente : <span id="previous-sessions-count">0</span>
+              </p>
+              <p>Session actuelle : <span id="current-session-id">0</span></p>
+            </div>
+            <div class="button-group">
+              <button
+                class="session-button"
+                id="start-new-session"
+                data-action="start-new-session"
+              >
+                Nouvelle Session
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Timer Group -->
+      <div class="timers-container">
+        <!-- Focus Timer -->
+        <div class="timer">
+          <h2>Minuteur de concentration</h2>
+          <div class="timer-content">
+            <!-- Div qui affiche le minuteur-->
+            <div id="focus-timer-control"></div>
+            <div class="button-group">
+              <button
+                class="control-button"
+                id="start_stop"
+                data-action="toggle-timer"
+              >
+                <img
+                  src="./assets/icons/ButtonsIcone/Start_icone.png"
+                  alt="Icône Démarrer"
+                />
+              </button>
+              <button
+                class="control-button"
+                id="reset"
+                data-action="reset-timer"
+              >
+                <img
+                  src="./assets/icons/ButtonsIcone/Restart_icone.png"
+                  alt="Icône Redémarrer"
+                />
+              </button>
+              <button
+                id="save-button-session"
+                class="control-button"
+                data-action="save-session-data"
+              >
+                <img
+                  src="./assets/icons/ButtonsIcone/Save_icone.png"
+                  alt="Icône Enregistrer"
+                />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stopwatch -->
+        <div class="timer">
+          <h2>Chronomètre</h2>
+          <div class="timer-content">
+            <p id="stopwatch-time" class="time_displayed">00:00:00</p>
+            <div class="button-group">
+              <button
+                class="control-button"
+                id="stopwatch-start"
+                data-action="toggle-stopwatch"
+              >
+                <img
+                  src="./assets/icons/ButtonsIcone/Start_icone.png"
+                  alt="Icône Démarrer"
+                />
+              </button>
+              <button
+                class="control-button"
+                id="stopwatch-reset"
+                data-action="reset-stopwatch"
+              >
+                <img
+                  src="./assets/icons/ButtonsIcone/Restart_icone.png"
+                  alt="Icône Redémarrer"
+                />
+              </button>
+              <button
+                id="save-button-session"
+                class="control-button"
+                data-action="save-session-data"
+              >
+                <img
+                  src="./assets/icons/ButtonsIcone/Save_icone.png"
+                  alt="Icône Enregistrer"
+                />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Manual Study Time -->
+        <div class="timer">
+          <h2>Temps d'étude manuel</h2>
+          <div class="timer-content">
+            <div id="manual-time-container">
+              <div>
+                <label for="manual-hours">Heures :</label>
+                <input
+                  type="number"
+                  id="manual-hours"
+                  min="0"
+                  placeholder="0"
+                />
+              </div>
+              <div>
+                <label for="manual-minutes">Minutes :</label>
+                <input
+                  type="number"
+                  id="manual-minutes"
+                  min="0"
+                  max="59"
+                  placeholder="0"
+                />
+              </div>
+            </div>
+            <p class="total-time">
+              Temps total de travail :
+              <span id="total-work-time">00:00:00</span>
+            </p>
+            <div class="button-group">
+              <button
+                id="save-button-session"
+                class="control-button"
+                data-action="save-session-data"
+              >
+                <img
+                  src="./assets/icons/ButtonsIcone/Save_icone.png"
+                  alt="Icône Enregistrer"
+                />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Counter -->
+      <div class="timers-container">
+        <div class="timer">
+          <h2>Compteur</h2>
+          <div class="timer-content">
+            <h3 id="counter-task-title">Sélectionnez une tâche</h3>
+            <p id="counter-value">0</p>
+            <div class="button-group">
+              <button
+                class="counter-button"
+                data-action="change-counter"
+                data-value="-1"
+              >
+                -1
+              </button>
+              <button
+                class="counter-button"
+                data-action="change-counter"
+                data-value="1"
+              >
+                +1
+              </button>
+              <button
+                class="counter-button"
+                data-action="change-counter"
+                data-value="3"
+              >
+                +3
+              </button>
+              <button
+                class="counter-button"
+                data-action="change-counter"
+                data-value="5"
+              >
+                +5
+              </button>
+              <button
+                class="counter-button"
+                data-action="change-counter"
+                data-value="10"
+              >
+                +10
+              </button>
+              <button
+                id="save-button-session"
+                class="counter-button"
+                data-action="save-session-data"
+              >
+                <img
+                  src="./assets/icons/ButtonsIcone/Save_icone.png"
+                  alt="Icône Enregistrer"
+                />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="statistics" class="page page-no-welcome">
+      <h1>Statistiques</h1>
+      <div class="statistics-container">
+        <!-- Statistiques Journalières -->
+        <div class="chart-section">
+          <div class="stats-header">
+            <div class="title-area">
+              <h2 data-action="dailyStats">Statistiques Journalières</h2>
+            </div>
+            <div class="period-navigation" data-period="daily">
+              <button class="nav-btn prev">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+              </button>
+              <span id="daily-period" class="period-display"></span>
+              <button class="nav-btn next">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="chart-content">
+            <div class="chart-wrapper">
+              <canvas id="dailyChart"></canvas>
+            </div>
+            <div class="task-details-section" id="dailyTaskDetails">
+              <table class="task-details-table">
+                <thead>
+                  <tr>
+                    <th data-action="task">Tâche</th>
+                    <th data-action="timeMinutes">Temps (min)</th>
+                    <th data-action="counts">Comptages</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+            <button class="toggle-details-btn">
+              <span data-action="viewDetails">Voir les détails</span>
+              <svg width="12" height="12" viewBox="0 0 24 24">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Statistiques Hebdomadaires -->
+        <div class="chart-section">
+          <div class="stats-header">
+            <div class="title-area">
+              <h2 data-action="weeklyStats">Statistiques Hebdomadaires</h2>
+            </div>
+            <div class="period-navigation" data-period="weekly">
+              <button class="nav-btn prev">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+              </button>
+              <span id="weekly-period" class="period-display"></span>
+              <button class="nav-btn next">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="chart-content">
+            <div class="chart-wrapper">
+              <canvas id="weeklyChart"></canvas>
+            </div>
+            <div class="task-details-section" id="weeklyTaskDetails">
+              <table class="task-details-table">
+                <thead>
+                  <tr>
+                    <th data-action="task">Tâche</th>
+                    <th data-action="timeMinutes">Temps (min)</th>
+                    <th data-action="counts">Comptages</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+            <button class="toggle-details-btn">
+              <span data-action="viewDetails">Voir les détails</span>
+              <svg width="12" height="12" viewBox="0 0 24 24">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Statistiques Mensuelles -->
+        <div class="chart-section">
+          <div class="stats-header">
+            <div class="title-area">
+              <h2 data-action="monthlyStats">Statistiques Mensuelles</h2>
+            </div>
+            <div class="period-navigation" data-period="monthly">
+              <button class="nav-btn prev">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+              </button>
+              <span id="monthly-period" class="period-display"></span>
+              <button class="nav-btn next">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="chart-content">
+            <div class="chart-wrapper">
+              <canvas id="monthlyChart"></canvas>
+            </div>
+            <div class="task-details-section" id="monthlyTaskDetails">
+              <table class="task-details-table">
+                <thead>
+                  <tr>
+                    <th data-action="task">Tâche</th>
+                    <th data-action="timeMinutes">Temps (min)</th>
+                    <th data-action="counts">Comptages</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+            <button class="toggle-details-btn">
+              <span data-action="viewDetails">Voir les détails</span>
+              <svg width="12" height="12" viewBox="0 0 24 24">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Statistiques Annuelles -->
+        <div class="chart-section">
+          <div class="stats-header">
+            <div class="title-area">
+              <h2 data-action="yearlyStats">Statistiques Annuelles</h2>
+            </div>
+            <div class="period-navigation" data-period="yearly">
+              <button class="nav-btn prev">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+              </button>
+              <span id="yearly-period" class="period-display"></span>
+              <button class="nav-btn next">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="chart-content">
+            <div class="chart-wrapper">
+              <canvas id="yearlyChart"></canvas>
+            </div>
+            <div class="task-details-section" id="yearlyTaskDetails">
+              <table class="task-details-table">
+                <thead>
+                  <tr>
+                    <th data-action="task">Tâche</th>
+                    <th data-action="timeMinutes">Temps (min)</th>
+                    <th data-action="counts">Comptages</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+            <button class="toggle-details-btn">
+              <span data-action="viewDetails">Voir les détails</span>
+              <svg width="12" height="12" viewBox="0 0 24 24">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="todoLists" class="page page-no-welcome">
+      <h1>Liste de tâches</h1>
+      <div class="todo-card">
+        <div class="todo-card-header">
+          <div class="todo-card-header-content">
+            <h2 class="todo-card-title">
+              Mes Tâches
+              <span id="tasks-counter" class="tasks-counter">(0)</span>
+            </h2>
+            <div class="todo-header-actions">
+              <label class="select-all-container">
+                <input
+                  type="checkbox"
+                  id="select-all-tasks"
+                  class="todo-checkbox"
+                />
+                <span class="select-all-label">Tout sélectionner</span>
+              </label>
+              <button
+                id="delete-selected"
+                class="todo-delete-selected-btn"
+                disabled
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path
+                    d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+                  ></path>
+                </svg>
+                <span>Supprimer la sélection</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="todo-card-content">
+          <div class="todo-input-group">
+            <input
+              type="text"
+              id="todo-new-task"
+              class="todo-input"
+              placeholder="Ajouter une nouvelle tâche"
+            />
+            <button id="todo-add-task" class="todo-btn">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              <span class="sr-only">Ajouter une Tâche</span>
+            </button>
+          </div>
+          <ul id="todo-task-list" class="todo-list">
+            <!-- Les tâches seront générées dynamiquement ici -->
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="surahmemorization" class="page page-no-welcome">
+      <h1>Mémorisation des sourates</h1>
+
+      <div id="quran-app-container">
+        <!-- Navigation -->
+        <div class="quran-app-nav">
+          <button
+            id="quran-app-nav-button-select"
+            class="quran-app-nav-button"
+            data-target="select"
+          >
+            Sélectionner Sourate
+          </button>
+          <button
+            id="quran-app-nav-button-revise"
+            class="quran-app-nav-button"
+            data-target="revise"
+          >
+            Réviser
+          </button>
+          <button
+            id="quran-app-nav-button-history"
+            class="quran-app-nav-button"
+            data-target="history"
+          >
+            Historique
+          </button>
+        </div>
+
+        <!-- Section Select Surahs -->
+        <div id="surahmemorization-select" class="quran-app-section">
+          <h2 class="surahmemorization-title">
+            Sélection des sourates pour révision
+          </h2>
+
+          <!-- Search and Filter -->
+          <div class="surahmemorization-search-filter">
+            <input
+              type="text"
+              id="surahmemorization-search"
+              class="surahmemorization-input"
+              placeholder="Rechercher des sourates"
+            />
+            <select
+              id="surahmemorization-filter"
+              class="surahmemorization-select"
+            >
+              <option value="default">Par défaut</option>
+              <option value="memorization">Par niveau de mémorisation</option>
+              <option value="alphabetical">Ordre alphabétique</option>
+              <option value="numerical">Ordre numérique</option>
+            </select>
+          </div>
+
+          <!-- List of Surahs with Scroll Box -->
+          <div id="surahmemorization-list-container">
+            <div class="surahmemorization-headers">
+              <div class="header-left">
+                <span>Sourates</span>
+              </div>
+              <div class="header-center">
+                <span>Niveau</span>
+              </div>
+              <div class="header-right">
+                <span>Dernière révision</span>
+              </div>
+            </div>
+
+            <div id="surahmemorization-list">
+              <!-- List items will be injected here by JavaScript -->
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="surahmemorization-summary">
+            <!--<button
+            id="surahmemorization-toggle-all"
+            class="surahmemorization-button"
+          >
+            Tout sélectionner
+          </button> -->
+            <span id="surahmemorization-count" class="surahmemorization-count">
+              0 sourates sélectionnées
+            </span>
+            <!-- Save Button -->
+            <button
+              id="surahmemorization-save"
+              class="surahmemorization-button"
+            >
+              Enregistrer
+            </button>
+            <!-- Start Revision Button -->
+            <button
+              id="surahmemorization-start"
+              class="surahmemorization-button"
+              disabled
+            >
+              Commencer la révision
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div
+        id="surahmemorization-revise"
+        class="quran-app-section"
+        style="display: none"
+      >
+        <h1
+          id="surahmemorization-current-title"
+          class="surahmemorization-title"
+        >
+          Al-Fatihah
+        </h1>
+        <p id="surahmemorization-progress">Sourate 1 sur 5</p>
+        <div class="surahmemorization-progress-bar">
+          <div class="surahmemorization-progress-bar-fill"></div>
+        </div>
+        <div
+          id="surahmemorization-text"
+          class="surahmemorization-text"
+          style="display: none"
+        ></div>
+        <button id="surahmemorization-toggle-text">
+          <span class="icon">👁</span> Afficher le texte
+        </button>
+        <h2 style="text-align: center; margin-top: 20px">
+          Comment évaluez-vous votre mémorisation de cette sourate ?
+        </h2>
+        <div id="surahmemorization-evaluation">
+          <button class="surahmemorization-eval-btn" data-level="Strong">
+            Fort
+          </button>
+          <button class="surahmemorization-eval-btn" data-level="Good">
+            Bon
+          </button>
+          <button class="surahmemorization-eval-btn" data-level="Moderate">
+            Moyen
+          </button>
+          <button class="surahmemorization-eval-btn" data-level="Weak">
+            Faible
+          </button>
+        </div>
+      </div>
+
+      <div
+        id="surahmemorization-history"
+        class="quran-app-section"
+        style="display: none"
+      >
+        <h1 class="surahmemorization-title">Historique des révisions</h1>
+        <div class="surahmemorization-charts">
+          <div class="chart-container">
+            <h3 class="chart-title">
+              Distribution des Niveaux de Mémorisation
+            </h3>
+            <div class="chart-area">
+              <canvas id="surahmemorization-performance-chart"></canvas>
+            </div>
+          </div>
+        </div>
+        <table
+          id="surahmemorization-history-table"
+          class="surahmemorization-table"
+        >
+          <thead>
+            <tr>
+              <th>Nom de la sourate</th>
+              <th>Numéro</th>
+              <th>Date de révision</th>
+              <th>Niveau</th>
+              <th>Prochaine révision</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <div class="surahmemorization-actions">
+          <button
+            id="surahmemorization-export"
+            class="surahmemorization-button"
+          >
+            Exporter
+          </button>
+          <button id="surahmemorization-clear" class="surahmemorization-button">
+            Effacer l'historique
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section id="mosquetime" class="page page-no-welcome">
+      <div class="mosquetime-card">
+        <header class="mosquetime-header">
+          <h1 class="mosquetime-title">
+            Horaires de Prière en Congrégation à la Mosquée
+          </h1>
+          <p class="mosquetime-subtitle">
+            Trouvez les horaires des prières en congrégation dans les mosquées
+            près de chez vous
+          </p>
+        </header>
+
+        <div class="mosquetime-content">
+          <div class="mosquetime-location-search">
+            <button id="mosquetime-use-location" class="mosquetime-button">
+              <i class="fas fa-map-marker-alt"></i> Utiliser ma localisation
+            </button>
+            <select id="mosquetime-location-select" class="mosquetime-select">
+              <option value="">Sélectionnez une ville</option>
+            </select>
+            <button id="mosquetime-search" class="mosquetime-button">
+              Rechercher
+            </button>
+          </div>
+
+          <div id="mosquetime-loading" style="display: none">
+            Chargement des horaires de prière, veuillez patienter...
+          </div>
+
+          <div
+            id="mosquetime-error"
+            class="mosquetime-error"
+            style="display: none"
+          ></div>
+
+          <div class="mosquetime-date-display">
+            <h2 id="mosquetime-city-date"></h2>
+          </div>
+
+          <div class="mosquetime-tabs">
+            <div class="mosquetime-tab active" data-tab="single">
+              Mosquée Unique
+            </div>
+            <div class="mosquetime-tab" data-tab="all">Toutes les Mosquées</div>
+          </div>
+
+          <!-- Vue Mosquée Unique -->
+          <div
+            id="mosquetime-single-mosque"
+            class="mosquetime-tab-content"
+            style="display: block"
+          >
+            <select id="mosquetime-mosque-select" class="mosquetime-select">
+              <option value="">Sélectionnez une mosquée</option>
+            </select>
+            <div id="mosquetime-single-content"></div>
+          </div>
+
+          <!-- Vue Toutes les Mosquées -->
+          <div
+            id="mosquetime-all-mosques"
+            class="mosquetime-tab-content"
+            style="display: none"
+          >
+            <div class="mosquetime-sort-buttons">
+              <button id="mosquetime-sort-asc" class="mosquetime-button">
+                A à Z
+              </button>
+              <button id="mosquetime-sort-desc" class="mosquetime-button">
+                Z à A
+              </button>
+              <button id="mosquetime-sort-nearest" class="mosquetime-button">
+                Les Plus Proches
+              </button>
+            </div>
+            <div id="mosquetime-all-mosques-list">
+              <!-- Cartes de mosquées ajoutées dynamiquement -->
+            </div>
+          </div>
+
+          <p class="mosquetime-disclaimer">
+            Ces horaires correspondent aux prières en congrégation à la mosquée
+            et peuvent différer des horaires de prières individuels.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section id="notifications" class="page page-no-welcome">
+      <div class="notifications-container">
+        <h1 class="notifications-title">Notifications</h1>
+        <div class="notifications-card">
+          <div class="notifications-card-header">
+            <h2 class="notifications-card-title">
+              <i data-feather="bell" class="notifications-icon"></i>
+              Centre de Notifications
+            </h2>
+          </div>
+          <div class="notifications-card-content">
+            <ul id="notifications-list" class="notifications-list">
+              <!-- Les notifications seront insérées ici dynamiquement -->
+            </ul>
+          </div>
+        </div>
+      </div>
+      <template id="notification-template">
+        <li class="notification-item">
+          <div class="notification-content">
+            <div class="notification-icon"></div>
+            <div class="notification-text">
+              <p class="notification-message"></p>
+              <p class="notification-date"></p>
+            </div>
+          </div>
+          <div class="notification-actions">
+            <button class="notification-read-btn">Marquer comme lu</button>
+            <button class="notification-delete-btn">
+              <i data-feather="x" class="notification-delete-icon"></i>
+            </button>
+          </div>
+        </li>
+      </template>
+    </section>
+
+    <section id="profile" class="page page-no-welcome">
+      <h1>Profil</h1>
+      <div id="profileForm">
+        <h2>Informations Personnelles</h2>
+        <form>
+          <label for="usernameprofil">Pseudo :</label>
+          <input
+            type="text"
+            id="usernameprofil"
+            name="pseudo"
+            placeholder="pseudo"
+            required
+          />
+
+          <label for="last-nameprofil">Nom :</label>
+          <input
+            type="text"
+            id="last-nameprofil"
+            name="last-name"
+            placeholder="Nom"
+            required
+          />
+
+          <label for="first-nameprofil">Prénom :</label>
+          <input
+            type="text"
+            id="first-nameprofil"
+            name="first-name"
+            placeholder="Prénom"
+            required
+          />
+
+          <label for="ageprofil">Âge :</label>
+          <input
+            type="number"
+            id="ageprofil"
+            name="age"
+            placeholder="Âge"
+            required
+          />
+
+          <label for="genderprofil">Sexe :</label>
+          <select id="genderprofil" name="gender" required>
+            <option value="">Sélectionnez le sexe</option>
+            <option value="male">Masculin</option>
+            <option value="female">Féminin</option>
+          </select>
+
+          <label for="emailprofil">Adresse e-mail :</label>
+          <input
+            type="email"
+            id="emailprofil"
+            name="email"
+            placeholder="Adresse e-mail"
+            required
+          />
+
+          <button type="submit">Mettre à jour</button>
+        </form>
+      </div>
+      <div id="passwordChangeForm">
+        <h2>Changer le mot de passe</h2>
+        <form>
+          <label for="current-password">Mot de passe actuel :</label>
+          <input
+            type="password"
+            id="current-password"
+            name="current-password"
+            required
+          />
+
+          <label for="new-password">Nouveau mot de passe :</label>
+          <input
+            type="password"
+            id="new-password"
+            name="new-password"
+            required
+          />
+
+          <label for="confirm-new-password"
+            >Confirmer le nouveau mot de passe :</label
+          >
+          <input
+            type="password"
+            id="confirm-new-password"
+            name="confirm-new-password"
+            required
+          />
+
+          <label>
+            <input type="checkbox" id="showNewPasswordToggle" /> Afficher le mot
+            de passe
+          </label>
+
+          <button type="submit">Changer le mot de passe</button>
+        </form>
+      </div>
+    </section>
+
+    <section id="salatSurahSelector" class="page page-no-welcome">
+      <h1>Sélecteur de Sourate</h1>
+      <div class="surahselector-row">
+        <div class="surahselector-card">
+          <h2>Statistiques de récitation</h2>
+          <div>
+            <div id="knownSouratesCount">Sourates à réciter : 0</div>
+            <div id="recitationProgress">Progrès : 0 / 0 sourates récitées</div>
+            <div id="recitationCyclesCount">
+              Cycles de récitation complets : 0
+            </div>
+          </div>
+        </div>
+        <div class="surahselector-card">
+          <h2>Sélection pour Salat</h2>
+          <div>
+            <button data-action="select-random-sourates">
+              Sélectionner des sourates pour Salat
+            </button>
+            <div>
+              <p>1ère raka: <span id="firstRaka"></span></p>
+              <p>2ème raka: <span id="secondRaka"></span></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="surahselector-row">
+        <div class="surahselector-card">
+          <h2>Sélection des sourates à réciter</h2>
+          <div>
+            <div id="sourateList">
+              <!-- La liste des sourates sera générée ici dynamiquement -->
+            </div>
+            <button data-action="save-known-sourates">
+              Sauvegarder les sourates à réciter
+            </button>
+          </div>
+        </div>
+
+        <div class="surahselector-card">
+          <h2>Historique des récitations</h2>
+          <div>
+            <button data-action="toggle-recitation-history">
+              Afficher/Masquer l'historique
+            </button>
+            <div id="recitationHistoryContainer" style="display: none">
+              <div id="recitationHistory">
+                <!-- L'historique sera généré ici dynamiquement -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="duaTimeCalculator" class="page page-no-welcome">
+      <h1>Calculateur de Temps de Doua</h1>
+      <div class="dua-calculator-row">
+        <div class="dua-calculator-card">
+          <h2 class="dua-calculator-title">
+            Calculer le Dernier Tiers de la Nuit pour Doua
+          </h2>
+          <div class="dua-calculator-content">
+            <button
+              id="duaLocationBtn"
+              class="dua-btn"
+              data-action="get-dua-location"
+            >
+              Utiliser ma localisation
+            </button>
+            <label for="duaCityInput" class="dua-input-label">
+              Ou entrez une ville :
+            </label>
+            <input
+              type="text"
+              id="duaCityInput"
+              class="dua-input-field"
+              placeholder="Entrez une ville"
+            />
+            <button
+              id="duaCitySubmitBtn"
+              class="dua-btn"
+              data-action="use-dua-city"
+            >
+              Soumettre
+            </button>
+            <label for="duaMethodSelect" class="dua-input-label">
+              Méthode de Calcul :
+            </label>
+            <select id="duaMethodSelect" class="dua-select-field">
+              <option value="3">Muslim World League</option>
+              <option value="2">Islamic Society of North America</option>
+              <option value="5">Egyptian General Authority of Survey</option>
+              <option value="7">Umm Al-Qura University, Makkah</option>
+              <option value="1">University of Islamic Sciences, Karachi</option>
+              <option value="6">
+                Institute of Geophysics, University of Tehran
+              </option>
+              <option value="17">Shia Ithna-Ashari, Leva Institute, Qum</option>
+              <option value="8">Région du Golfe</option>
+              <option value="9">Koweït</option>
+              <option value="10">Qatar</option>
+              <option value="11">
+                Majlis Ugama Islam Singapura, Singapour
+              </option>
+              <option value="12">Union Organisation islamique de France</option>
+              <option value="13">Diyanet İşleri Başkanliği, Turquie</option>
+              <option value="18">
+                Administration Spirituelle des Musulmans de Russie
+              </option>
+              <option value="15">Comité de Vision de la Lune</option>
+              <option value="14">Dubaï, Émirats Arabes Unis</option>
+              <option value="19">
+                Jabatan Kemajuan Islam Malaysia (JAKIM)
+              </option>
+              <option value="16">Tunisie</option>
+              <option value="20">Algérie</option>
+              <option value="21">
+                Ministère des Affaires Religieuses de la République d'Indonésie
+              </option>
+              <option value="22">Maroc</option>
+              <option value="23">
+                Communidade Islâmica de Lisboa (Portugal)
+              </option>
+              <option value="24">Personnalisé</option>
+            </select>
+            <div id="duaCustomMethod">
+              <label for="duaFajrAngleInput" class="dua-input-label">
+                Angle de Fajr :
+              </label>
+              <input
+                type="number"
+                id="duaFajrAngleInput"
+                class="dua-input-field"
+                placeholder="ex., 18"
+              />
+              <label for="duaIshaAngleInput" class="dua-input-label">
+                Angle de Isha :
+              </label>
+              <input
+                type="number"
+                id="duaIshaAngleInput"
+                class="dua-input-field"
+                placeholder="ex., 17"
+              />
+            </div>
+          </div>
+        </div>
+        <div class="dua-calculator-card">
+          <h2 class="dua-calculator-title">Résultat du Calcul Automatique</h2>
+          <div class="dua-calculator-content">
+            <div id="duaAutomaticResult" class="dua-result-box">
+              <p id="duaAutoFajrTime"></p>
+              <p id="duaAutoMaghribTime"></p>
+              <p id="duaAutoIshaEnd"></p>
+              <p id="duaAutoLastThird"></p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="dua-calculator-row">
+        <div class="dua-calculator-card">
+          <h2 class="dua-calculator-title">Ajustements Manuels</h2>
+          <div class="dua-calculator-content">
+            <label for="duaManualFajrInput" class="dua-input-label">
+              Heure de Fajr (HH:MM) :
+            </label>
+            <input
+              type="time"
+              id="duaManualFajrInput"
+              class="dua-input-field"
+            />
+            <label for="duaManualMaghribInput" class="dua-input-label">
+              Heure de Maghrib (HH:MM) :
+            </label>
+            <input
+              type="time"
+              id="duaManualMaghribInput"
+              class="dua-input-field"
+            />
+            <button
+              id="duaManualCalcBtn"
+              class="dua-btn"
+              data-action="calculate-dua-manually"
+            >
+              Calculer Manuellement
+            </button>
+          </div>
+        </div>
+        <div class="dua-calculator-card">
+          <h2 class="dua-calculator-title">Résultat des Ajustements Manuels</h2>
+          <div class="dua-calculator-content">
+            <div id="duaManualResult" class="dua-result-box">
+              <p id="duaManualFajrTime"></p>
+              <p id="duaManualMaghribTime"></p>
+              <p id="duaManualIshaEnd"></p>
+              <p id="duaManualLastThird"></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="price" class="page page-no-welcome">
+      <div class="price-container">
+        <h1 class="price-title">Choisissez Votre Contribution</h1>
+        <div class="price-plans-container">
+          <div class="price-card" id="price-free">
+            <div class="price-card-header">
+              <h2 class="price-card-title">Plan Gratuit</h2>
+              <p class="price-card-description">
+                Accédez à toutes les fonctionnalités sans frais
+              </p>
+            </div>
+            <div class="price-card-content">
+              <p class="price-amount">
+                0€<span class="price-period">/mois</span>
+              </p>
+              <ul class="price-features-list">
+                <li class="price-feature-item">
+                  <span class="price-check-icon">✓</span> Fonctionnalités
+                  principales de la plateforme
+                </li>
+              </ul>
+            </div>
+            <div class="price-card-footer">
+              <a href="#" class="price-button">Commencer</a>
+            </div>
+          </div>
+          <div class="price-card" id="price-normal">
+            <div class="price-card-header">
+              <h2 class="price-card-title">Plan Soutien</h2>
+              <p class="price-card-description">
+                Contribuez à couvrir les coûts opérationnels et assurez la
+                disponibilité de la plateforme pour tous.
+              </p>
+            </div>
+            <div class="price-card-content">
+              <p class="price-amount">
+                3€<span class="price-period">/mois</span>
+              </p>
+              <ul class="price-features-list">
+                <li class="price-feature-item">
+                  <span class="price-check-icon">✓</span> Accès à toutes les
+                  fonctionnalités de la plateforme
+                </li>
+                <li class="price-feature-item">
+                  <span class="price-check-icon">✓</span> Aide à maintenir la
+                  durabilité de la plateforme en couvrant les coûts
+                  opérationnels essentiels
+                </li>
+                <li class="price-feature-item">
+                  <span class="price-check-icon">✓</span> Soutenez notre mission
+                  de maintenir la plateforme gratuite et accessible à tous les
+                  utilisateurs
+                </li>
+                <li class="price-feature-item">
+                  <span class="price-check-icon">✓</span> Contribuez aux frais
+                  de serveur et de maintenance
+                </li>
+              </ul>
+            </div>
+            <div class="price-card-footer">
+              <a href="#" class="price-button">Contribuer Maintenant</a>
+            </div>
+          </div>
+          <div class="price-card" id="price-generous">
+            <div class="price-card-header">
+              <h2 class="price-card-title">Plan Supporteur</h2>
+              <p class="price-card-description">
+                Aidez-nous à grandir, à nous améliorer et à innover en
+                contribuant au-delà des coûts opérationnels.
+              </p>
+            </div>
+            <div class="price-card-content">
+              <p class="price-amount">
+                8€<span class="price-period">/mois</span>
+              </p>
+              <ul class="price-features-list">
+                <li class="price-feature-item">
+                  <span class="price-check-icon">✓</span> Accès à toutes les
+                  fonctionnalités de la plateforme
+                </li>
+                <li class="price-feature-item">
+                  <span class="price-check-icon">✓</span> Soutient le
+                  développement et la croissance de la plateforme, nous
+                  permettant d'ajouter de nouvelles fonctionnalités et
+                  d'améliorer l'expérience utilisateur
+                </li>
+                <li class="price-feature-item">
+                  <span class="price-check-icon">✓</span> Contribuez à notre
+                  vision de créer une plateforme vibrante et innovante qui
+                  évolue continuellement
+                </li>
+                <li class="price-feature-item">
+                  <span class="price-check-icon">✓</span> Votre générosité aide
+                  à financer de nouvelles initiatives et assure le succès à long
+                  terme des projets communautaires
+                </li>
+                <li class="price-feature-item">
+                  <span class="price-check-icon">✓</span> Accès prioritaire aux
+                  nouvelles fonctionnalités et aux opportunités de test bêta
+                </li>
+                <li class="price-feature-item">
+                  <span class="price-check-icon">✓</span> Reconnaissance en tant
+                  que supporteur clé dans notre communauté
+                </li>
+                <li class="price-feature-item">
+                  <span class="price-check-icon">✓</span> Contenu exclusif et
+                  aperçus des développements futurs
+                </li>
+              </ul>
+            </div>
+            <div class="price-card-footer">
+              <a href="#" class="price-button">Nous Soutenir</a>
+            </div>
+          </div>
+        </div>
+        <p class="price-footnote">
+          Merci de considérer le soutien de notre plateforme. Vos contributions
+          aident à maintenir la plateforme ouverte et à l'améliorer
+          continuellement.
+        </p>
+      </div>
+    </section>
+
+    <section id="aboutus" class="page page-no-welcome">
+      <div class="aboutus-wrapper">
+        <h1 class="aboutus-title">À propos de TalibHub</h1>
+
+        <div class="aboutus-card" id="aboutus-mission">
+          <div class="aboutus-card-header">
+            <h2 class="aboutus-card-title">Notre Mission</h2>
+          </div>
+          <div class="aboutus-card-content">
+            <p>
+              Chez TalibHub, notre mission est de soutenir l'apprentissage et la
+              pratique de l'islam au quotidien. Nous offrons aux musulmans du
+              monde entier des outils modernes et efficaces pour approfondir
+              leur foi et améliorer leur pratique religieuse.
+            </p>
+          </div>
+        </div>
+
+        <div class="aboutus-grid aboutus-grid-cols-2">
+          <div class="aboutus-card" id="aboutus-features">
+            <div class="aboutus-card-header">
+              <h2 class="aboutus-card-title">Nos Fonctionnalités</h2>
+            </div>
+            <div class="aboutus-card-content">
+              <ul class="aboutus-list">
+                <li>
+                  TalibTimer : Gestion du temps d'étude avec technique Pomodoro,
+                  chronomètre et compteur
+                </li>
+                <li>
+                  SurahSelector : Diversification des sourates pour la prière
+                </li>
+                <li>
+                  Surah Memorization : Maintien de la mémorisation des sourates
+                </li>
+                <li>
+                  Dua Time Calculator : Calcul du dernier tiers de la nuit pour
+                  les invocations
+                </li>
+                <li>
+                  Mosquetime : Horaires des prières en congrégation dans les
+                  mosquées
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="aboutus-card" id="aboutus-values">
+            <div class="aboutus-card-header">
+              <h2 class="aboutus-card-title">Nos Valeurs</h2>
+            </div>
+            <div class="aboutus-card-content">
+              <ul class="aboutus-list">
+                <li>Engagement envers les principes islamiques</li>
+                <li>Innovation dans l'éducation religieuse</li>
+                <li>Accessibilité universelle</li>
+                <li>Développement communautaire</li>
+                <li>Amélioration continue de nos services</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="aboutus-card" id="aboutus-future">
+          <div class="aboutus-card-header">
+            <h2 class="aboutus-card-title">Notre Avenir</h2>
+          </div>
+          <div class="aboutus-card-content">
+            <p>
+              TalibHub est en constante évolution. In Sha Allah, nous prévoyons
+              d'enrichir notre plateforme avec de nombreuses nouvelles
+              fonctionnalités innovantes pour mieux servir notre communauté
+              d'utilisateurs.
+            </p>
+          </div>
+        </div>
+
+        <div class="aboutus-card" id="aboutus-commitment">
+          <div class="aboutus-card-header">
+            <h2 class="aboutus-card-title">Notre Engagement</h2>
+          </div>
+          <div class="aboutus-card-content">
+            <p>
+              TalibHub s'engage à fournir une plateforme gratuite et accessible
+              à tous. Notre modèle unique repose sur la générosité de nos
+              utilisateurs, avec des abonnements conçus pour les altruistes qui
+              souhaitent contribuer au développement et à la propagation de la
+              plateforme.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="contactform" class="page page-no-welcome">
+      <h1>Contactez-nous</h1>
+      <div class="contactform-wrapper">
+        <div class="contactform-container">
+          <div class="contactform-left-column">
+            <h2 class="contactform-title">
+              Discutons<br />de quelque chose de
+              <span class="contactform-highlight">génial</span><br />ensemble
+            </h2>
+            <div class="contactform-info">
+              <p class="contactform-info-item">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <line x1="22" y1="2" x2="11" y2="13"></line>
+                  <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+                support@talibhub.com
+              </p>
+            </div>
+            <div class="contactform-social-buttons">
+              <button class="contactform-social-button" aria-label="Facebook">
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"
+                  ></path>
+                </svg>
+              </button>
+              <button class="contactform-social-button" aria-label="Instagram">
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                  <path
+                    d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"
+                  ></path>
+                  <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                </svg>
+              </button>
+              <button class="contactform-social-button" aria-label="Twitter">
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"
+                  ></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <script type="module" src="main.js"></script>
+    <script type="module" src="services/auth/authService.js"></script>
+    <script type="module" src="components/navigation/navigation.js"></script>
+    <script type="module" src="components/user/profile.js"></script>
+    <script type="module" src="components/timer/tasks.js"></script>
+    <script type="module" src="components/timer/timer.js"></script>
+    <script type="module" src="components/quran/surahSelector.js"></script>
+    <script type="module" src="components/prayer/duaTimeCalculator.js"></script>
+    <script type="module" src="components/mosqueTime/mosqueTime.js"></script>
+    <script type="module" src="components/quran/surahMemorization.js"></script>
+    <script
+      type="module"
+      src="components/notifications/notifications.js"
+    ></script>
+    <script type="module" src="utils/utils.js"></script>
+    <script type="module" src="utils/transLanguages.js"></script>
+    <script type="module" src="components/auth/botTracker.js"></script>
+
+    <script type="module" src="config/apiConfig.js"></script>
+    <script type="module" src="services/api/dynamicLoader.js"></script>
+    <script type="module" src="components/navigation/topnav.js"></script>
+    <script type="module" src="components/statistics/statistics.js"></script>
+    <script type="module" src="components/statistics/charts.js"></script>
+    <script type="module" src="components/welcome/welcomePage.js"></script>
+    <script type="module" src="services/state/state.js"></script>
+    <script type="module" src="config/constants.js"></script>
+    <script
+      type="module"
+      src="services/notifications/translatNotifications.js"
+    ></script>
+    <script type="module" src="services/cache/cacheService.js"></script>
+    <script type="module" src="services/cache/cacheCountries.js"></script>
+    <script type="module" src="components/auth/terms.js"></script>
+    <script type="module" src="utils/version.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Attendre un court instant pour s'assurer que Feather est chargé
+        setTimeout(function () {
+          if (window.feather && typeof window.feather.replace === "function") {
+            window.feather.replace();
+          }
+        }, 100);
+      });
+    </script>
+  </body>
+</html>
