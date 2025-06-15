@@ -15,6 +15,31 @@ CREATE TABLE users (
 ALTER TABLE users ADD COLUMN reset_password_token VARCHAR(255);
 ALTER TABLE users ADD COLUMN reset_password_expires TIMESTAMP;
 
+-- Modifications OAuth pour l'authentification sociale
+ALTER TABLE users ADD COLUMN oauth_provider VARCHAR(20);
+ALTER TABLE users ADD COLUMN oauth_id VARCHAR(255);
+ALTER TABLE users ADD COLUMN oauth_email VARCHAR(320);
+ALTER TABLE users ADD COLUMN oauth_profile_data JSONB;
+ALTER TABLE users ADD COLUMN is_oauth_user BOOLEAN DEFAULT FALSE;
+
+-- Modifier la colonne password pour la rendre nullable (pour les utilisateurs OAuth)
+ALTER TABLE users ALTER COLUMN password DROP NOT NULL;
+
+-- Contraintes OAuth pour assurer l'intégrité des données
+ALTER TABLE users ADD CONSTRAINT unique_oauth_provider_id 
+    UNIQUE (oauth_provider, oauth_id);
+
+-- Index OAuth pour améliorer les performances
+CREATE INDEX idx_users_oauth_provider ON users(oauth_provider);
+CREATE INDEX idx_users_oauth_id ON users(oauth_id);
+CREATE INDEX idx_users_oauth_email ON users(oauth_email);
+CREATE INDEX idx_users_is_oauth_user ON users(is_oauth_user);
+
+-- Mettre à jour les utilisateurs existants (non-OAuth)
+UPDATE users 
+SET is_oauth_user = FALSE
+WHERE is_oauth_user IS NULL;
+
 ----------------------------
 
 CREATE TABLE tasks (
@@ -25,7 +50,7 @@ CREATE TABLE tasks (
 
  CREATE TABLE sessions (
      id SERIAL PRIMARY KEY,
-     task_id INTEGER NOT NULL,
+     task_id INTEGER,
      user_id INTEGER NOT NULL,
      total_work_time INTEGER NOT NULL DEFAULT 0,
      timer_time INTEGER NOT NULL DEFAULT 0,
@@ -33,7 +58,8 @@ CREATE TABLE tasks (
      counter_value INTEGER NOT NULL DEFAULT 0,--     
      created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
      updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-     FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE,
+     task_name_snapshot VARCHAR(255),
+     FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE SET NULL,
      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
@@ -80,11 +106,34 @@ CREATE TABLE sourates (
     arabic VARCHAR(255) NOT NULL
 );
 
+-- Table pour le système de mémorisation des sourates (flashcards)
+CREATE TABLE surah_memorization (
+    id SERIAL PRIMARY KEY,
+    user_id INT REFERENCES users(id) ON DELETE CASCADE,
+    surah_number INT REFERENCES sourates(number) ON DELETE CASCADE,
+    memorization_level VARCHAR(20), -- Strong, Good, Moderate, Weak
+    last_revision_date DATE DEFAULT CURRENT_DATE,
+    next_revision_date DATE,
+    is_available_for_revision BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (user_id, surah_number)
+);
+
+-- Index pour améliorer les performances
+CREATE INDEX idx_surah_memorization_user_id ON surah_memorization(user_id);
+CREATE INDEX idx_surah_memorization_next_revision ON surah_memorization(next_revision_date) WHERE is_available_for_revision = TRUE;
+
+-- Table des sourates connues (pour le système de récitation dans surahSelector.js)
 CREATE TABLE known_sourates (
     user_id INT REFERENCES users(id) ON DELETE CASCADE,
     sourate_number INT REFERENCES sourates(number) ON DELETE CASCADE,
     PRIMARY KEY (user_id, sourate_number)
 );
+
+-- Migration : Si la table surah_memorization existe déjà avec is_known, renommer la colonne
+-- Commenter/décommenter selon le besoin
+-- ALTER TABLE surah_memorization RENAME COLUMN is_known TO is_available_for_revision;
 
 -- Table pour suivre les récitations individuelles
 CREATE TABLE sourate_recitations (
@@ -295,3 +344,70 @@ surah_memorization_pkey PRIMARY KEY (id)
 Indexes :
 UNIQUE INDEX surah_memorization_pkey USING BTREE (id)
 UNIQUE INDEX unique_user_surah USING BTREE (user_id, surah_number)
+
+-- Instructions pour corriger la préservation des statistiques après suppression de tâches
+
+-- 1. Modifier la contrainte de clé étrangère pour préserver les sessions
+-- Supprimer l'ancienne contrainte CASCADE
+ALTER TABLE sessions DROP CONSTRAINT sessions_task_id_fkey;
+
+-- Ajouter une colonne pour sauvegarder le nom de la tâche
+ALTER TABLE sessions ADD COLUMN task_name_snapshot VARCHAR(255);
+
+-- Mettre à jour les sessions existantes avec le nom actuel de leur tâche
+UPDATE sessions 
+SET task_name_snapshot = t.name 
+FROM tasks t 
+WHERE sessions.task_id = t.id AND sessions.task_name_snapshot IS NULL;
+
+-- Modifier task_id pour permettre NULL (sessions orphelines)
+ALTER TABLE sessions ALTER COLUMN task_id DROP NOT NULL;
+
+-- Ajouter nouvelle contrainte qui préserve les sessions quand une tâche est supprimée
+ALTER TABLE sessions ADD CONSTRAINT sessions_task_id_fkey 
+    FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE SET NULL;
+
+-- Créer un index pour améliorer les performances des requêtes de statistiques
+CREATE INDEX idx_sessions_created_at ON sessions(created_at);
+CREATE INDEX idx_sessions_user_id_created_at ON sessions(user_id, created_at);
+
+-- 2. Créer un trigger pour automatiquement sauvegarder le nom de la tâche lors de l'insertion
+CREATE OR REPLACE FUNCTION save_task_name_snapshot()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Si task_id n'est pas NULL, récupérer le nom de la tâche
+    IF NEW.task_id IS NOT NULL THEN
+        SELECT name INTO NEW.task_name_snapshot 
+        FROM tasks 
+        WHERE id = NEW.task_id;
+    END IF;
+    
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Attacher le trigger à la table sessions
+CREATE TRIGGER trigger_save_task_name_snapshot
+    BEFORE INSERT OR UPDATE ON sessions
+    FOR EACH ROW
+    EXECUTE FUNCTION save_task_name_snapshot();
+
+-- 3. Créer également un trigger pour mettre à jour le snapshot si le nom de la tâche change
+CREATE OR REPLACE FUNCTION update_task_name_snapshots()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Mettre à jour tous les snapshots des sessions liées à cette tâche
+    UPDATE sessions 
+    SET task_name_snapshot = NEW.name
+    WHERE task_id = NEW.id;
+    
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Attacher le trigger à la table tasks
+CREATE TRIGGER trigger_update_task_name_snapshots
+    AFTER UPDATE OF name ON tasks
+    FOR EACH ROW
+    WHEN (OLD.name IS DISTINCT FROM NEW.name)
+    EXECUTE FUNCTION update_task_name_snapshots();

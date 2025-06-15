@@ -8,7 +8,7 @@ import { APP_VERSION } from "./utils/version.js";
 import { BUILD_HASH, checkBuildHash } from "./build/build-info.js";
 
 // Importation du système de traductions
-import translationManager from "./utils/translations.js";
+import { translationManager } from "./translations/TranslationManager.js";
 
 // Note: Les imports de utils.js sont supprimés pour éviter les dépendances circulaires
 // Ces fonctions seront importées dynamiquement quand nécessaire
@@ -142,9 +142,12 @@ async function initializeApp() {
     window.showUpdateNotification = true;
   }
 
+  // Initialiser le système de traduction en premier
+  console.log("🌐 Initialisation du système de traduction...");
+  await translationManager.init();
+
   // Détermine la langue et la définit dans le document.
-  const userLang =
-    localStorage.getItem("userLang") || navigator.language.split("-")[0];
+  const userLang = translationManager.getCurrentLanguage();
   document.documentElement.lang = userLang;
 
   // Récupère la page actuelle depuis l'URL
@@ -194,6 +197,10 @@ async function initializeApp() {
     await navigateTo("welcomepage");
     await initializeAuth();
   }
+
+  // Forcer la mise à jour des traductions après l'initialisation
+  console.log("🔄 Mise à jour finale des traductions...");
+  translationManager.updateDOM();
 
   // Gestion des événements de navigation
   document.querySelectorAll("[data-destination]").forEach((element) => {
@@ -266,5 +273,20 @@ window.addEventListener("error", (event) => {
   console.error("Erreur globale:", event.error);
 });
 
+// Rendre le translationManager disponible globalement
+window.translationManager = translationManager;
+
+// Helpers globaux pour les traductions (raccourcis pratiques)
+window.t = (key, defaultValue) =>
+  translationManager.translate(key, defaultValue);
+window.tn = (key, variables, defaultValue) =>
+  translationManager.translateNotification(key, variables, defaultValue);
+window.tSuccess = (key, variables) =>
+  translationManager.success(key, variables);
+window.tError = (key, variables) => translationManager.error(key, variables);
+window.tInfo = (key, variables) => translationManager.info(key, variables);
+window.tWarning = (key, variables) =>
+  translationManager.warning(key, variables);
+
 // Exportation pour utilisation dans d'autres fichiers si nécessaire
-export { authService, CacheService };
+export { authService, CacheService, translationManager };

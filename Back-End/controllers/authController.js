@@ -212,9 +212,18 @@ exports.verify = async (req, res) => {
 
 exports.getProfile = async (req, res) => {
   try {
+    console.log("🔍 getProfile appelé - Headers:", req.headers);
+    console.log("🍪 Cookies reçus:", req.cookies);
+    console.log("🔐 Cookies signés:", req.signedCookies);
+    console.log("👤 User from middleware:", req.user);
+
     const userId = req.user.id;
     const user = await userModel.getUserById(userId);
-    if (!user) return res.status(404).json({ message: "User not found" });
+
+    if (!user) {
+      console.log("❌ Utilisateur non trouvé avec ID:", userId);
+      return res.status(404).json({ message: "User not found" });
+    }
 
     const userProfile = {
       id: user.id,
@@ -225,9 +234,16 @@ exports.getProfile = async (req, res) => {
       age: user.age,
       gender: user.gender,
     };
+
+    console.log("✅ Profil utilisateur retourné:", {
+      id: userProfile.id,
+      username: userProfile.username,
+      email: userProfile.email,
+    });
+
     res.status(200).json(userProfile);
   } catch (error) {
-    console.error("Error in getProfile:", error);
+    console.error("❌ Error in getProfile:", error);
     res.status(500).json({ message: "Server error" });
   }
 };

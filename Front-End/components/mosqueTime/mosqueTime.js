@@ -72,6 +72,18 @@ export class MosqueTimeManager {
       this.updateInterface();
     }
 
+    // 🔧 NOUVEAU : Protection contre appels multiples
+    this.isProcessingCitySelection = false;
+    this.debounceTimeout = null;
+    this.lastProcessedCity = null;
+    this.lastProcessedTime = 0;
+
+    // 🔧 INITIALISER les références des event handlers
+    this._citySelectHandler = null;
+    this._searchButtonHandler = null;
+    this._locationButtonHandler = null;
+    this._tabHandlers = [];
+
     console.log("MosqueTimeManager: Constructor completed");
   }
 
@@ -361,25 +373,25 @@ export class MosqueTimeManager {
 
           if (hasValidTimes) {
             hasSomeTimes = true;
-            console.log(
-              `[DEBUG] WelcomeMosqueTime: Mosquée ${mosque.id} (${mosque.name}) a des horaires valides`,
-              mosque.prayerTimes
-            );
+            //console.log(
+            //  `[DEBUG] WelcomeMosqueTime: Mosquée ${mosque.id} (${mosque.name}) a des horaires valides`,
+            //  mosque.prayerTimes
+            //);
           } else {
             hasMissingTimes = true;
-            console.warn(
-              `[DEBUG] WelcomeMosqueTime: Mosquée ${mosque.id} (${mosque.name}) a des horaires invalides (00:00:00)`,
-              mosque.prayerTimes
-            );
+            //console.warn(
+            //  `[DEBUG] WelcomeMosqueTime: Mosquée ${mosque.id} (${mosque.name}) a des horaires invalides (00:00:00)`,
+            //  mosque.prayerTimes
+            //);
           }
         }
       });
 
       // Si aucune mosquée n'a d'horaires, c'est probablement un problème
       if (hasMissingTimes && !hasSomeTimes) {
-        console.warn(
-          "[DEBUG] WelcomeMosqueTime: Problème détecté - mosquées sans horaires"
-        );
+        //console.warn(
+        //  "[DEBUG] WelcomeMosqueTime: Problème détecté - mosquées sans horaires"
+        //);
 
         try {
           // Supprimer les données en cache pour forcer une récupération complète
@@ -387,19 +399,19 @@ export class MosqueTimeManager {
 
           // Réessayer de charger les données
           const cityName = this.selectedCity;
-          console.log(
-            "[DEBUG] WelcomeMosqueTime: Tentative de récupération complète pour",
-            cityName
-          );
+          //console.log(
+          //  "[DEBUG] WelcomeMosqueTime: Tentative de récupération complète pour",
+          //  cityName
+          //);
 
           // Simuler un clic sur le bouton de recherche pour relancer le processus
           const searchBtn = document.getElementById(
             "welcome-mosquetime-search"
           );
           if (searchBtn) {
-            console.log(
-              "[DEBUG] WelcomeMosqueTime: Relance automatique de la recherche"
-            );
+            //console.log(
+            //  "[DEBUG] WelcomeMosqueTime: Relance automatique de la recherche"
+            //);
             searchBtn.click();
           } else {
             // Essayer de récupérer les données directement
@@ -442,10 +454,10 @@ export class MosqueTimeManager {
             }
           }
         } catch (error) {
-          console.error(
-            "[DEBUG] WelcomeMosqueTime: Erreur lors de la récupération des données:",
-            error
-          );
+          //  console.error(
+          //  "[DEBUG] WelcomeMosqueTime: Erreur lors de la récupération des données:",
+          //  error
+          //);
         }
       }
     }
@@ -587,20 +599,86 @@ export class MosqueTimeManager {
     document.head.appendChild(styleElement);
   }
 
+  // 🔧 NOUVELLE MÉTHODE : Nettoyer les anciens listeners
+  cleanupEventListeners() {
+    console.log("MosqueTimeManager: Cleaning up event listeners");
+
+    // Nettoyer le listener de sélection de ville
+    if (this._citySelectHandler) {
+      const citySelect = this.isWelcomePage
+        ? document.getElementById("welcome-mosquetime-city")
+        : document.getElementById("mosquetime-location-select");
+      if (citySelect) {
+        console.log("MosqueTimeManager: Removing city select listener");
+        citySelect.removeEventListener("change", this._citySelectHandler);
+        this._citySelectHandler = null;
+      }
+    }
+
+    // Nettoyer le listener du bouton de recherche
+    if (this._searchButtonHandler) {
+      const searchButton = this.isWelcomePage
+        ? document.getElementById("welcome-mosquetime-search")
+        : document.getElementById("mosquetime-search");
+      if (searchButton) {
+        console.log("MosqueTimeManager: Removing search button listener");
+        searchButton.removeEventListener("click", this._searchButtonHandler);
+        this._searchButtonHandler = null;
+      }
+    }
+
+    // Nettoyer le listener du bouton de localisation
+    if (this._locationButtonHandler) {
+      const locationButton = this.isWelcomePage
+        ? document.getElementById("welcome-mosquetime-location")
+        : document.getElementById("mosquetime-use-location");
+      if (locationButton) {
+        console.log("MosqueTimeManager: Removing location button listener");
+        locationButton.removeEventListener(
+          "click",
+          this._locationButtonHandler
+        );
+        this._locationButtonHandler = null;
+      }
+    }
+
+    // 🔧 NOUVEAU : Nettoyer aussi les listeners des onglets qui peuvent se dupliquer
+    if (this._tabHandlers) {
+      const tabs = document.querySelectorAll(".mosquetime-tab");
+      tabs.forEach((tab, index) => {
+        if (this._tabHandlers[index]) {
+          console.log(`MosqueTimeManager: Removing tab listener ${index}`);
+          tab.removeEventListener("click", this._tabHandlers[index]);
+        }
+      });
+      this._tabHandlers = [];
+    }
+  }
+
   setupEventListeners() {
     console.log("MosqueTimeManager: Setting up event listeners");
+
+    // 🔧 NETTOYER les anciens listeners avant d'en créer de nouveaux
+    this.cleanupEventListeners();
 
     // Gestion des onglets
     const tabs = document.querySelectorAll(".mosquetime-tab");
     console.log("MosqueTimeManager: Found tabs:", tabs.length);
 
-    tabs.forEach((tab) => {
-      tab.addEventListener("click", () => {
+    // 🔧 INITIALISER le tableau des handlers d'onglets
+    this._tabHandlers = [];
+
+    tabs.forEach((tab, index) => {
+      // 🔧 CRÉER et stocker chaque handler d'onglet
+      const tabHandler = () => {
         console.log("MosqueTimeManager: Tab clicked:", tab.dataset.tab);
         tabs.forEach((t) => t.classList.remove("active"));
         tab.classList.add("active");
         this.switchTab(tab.dataset.tab);
-      });
+      };
+
+      this._tabHandlers[index] = tabHandler;
+      tab.addEventListener("click", tabHandler);
     });
 
     // Déterminer les IDs selon le mode
@@ -675,36 +753,68 @@ export class MosqueTimeManager {
     );
 
     if (citySelect) {
-      citySelect.addEventListener("change", async (e) => {
+      // 🔧 CRÉER et stocker le handler pour pouvoir le supprimer plus tard
+      this._citySelectHandler = async (e) => {
         const selectedCity = e.target.value;
         console.log("MosqueTimeManager: City selected:", selectedCity);
         if (selectedCity) {
-          await this.handleCitySelection(selectedCity);
+          // 🔧 UTILISER le debouncing au lieu d'appel direct
+          this.debouncedHandleCitySelection(selectedCity);
         }
-      });
+      };
+
+      citySelect.addEventListener("change", this._citySelectHandler);
     }
 
     // Gestion de la géolocalisation
     const locationButton = document.getElementById(locationButtonId);
     if (locationButton) {
-      locationButton.addEventListener("click", () =>
-        this.handleLocationRequest()
-      );
+      // 🔧 CRÉER et stocker le handler
+      this._locationButtonHandler = () => this.handleLocationRequest();
+      locationButton.addEventListener("click", this._locationButtonHandler);
     }
 
     // Ajout du gestionnaire pour le bouton Search
     const searchButton = document.getElementById(searchButtonId);
     if (searchButton) {
-      searchButton.addEventListener("click", () => {
+      // 🔧 CRÉER et stocker le handler
+      this._searchButtonHandler = () => {
         const citySelect = document.getElementById(citySelectId);
         if (citySelect && citySelect.value) {
-          this.handleCitySelection(citySelect.value);
+          // 🔧 UTILISER le debouncing pour le bouton search aussi
+          this.debouncedHandleCitySelection(citySelect.value, 100); // Plus court pour bouton
         }
-      });
+      };
+
+      searchButton.addEventListener("click", this._searchButtonHandler);
     }
 
     // Mise à jour de l'affichage de la date et de la ville
     this.updateDateDisplay();
+  }
+
+  // 🔧 NOUVELLE MÉTHODE : Nettoyage complet de l'instance
+  destroy() {
+    console.log("MosqueTimeManager: Destroying instance");
+
+    // Nettoyer les event listeners
+    this.cleanupEventListeners();
+
+    // Nettoyer les timeouts
+    if (this.debounceTimeout) {
+      clearTimeout(this.debounceTimeout);
+      this.debounceTimeout = null;
+    }
+
+    // Nettoyer les listeners de langue
+    if (this.languageEventHandler && window.languageManager) {
+      window.languageManager.off("languageChanged", this.languageEventHandler);
+    }
+
+    // Réinitialiser les propriétés
+    this.isProcessingCitySelection = false;
+    this.lastProcessedCity = null;
+    this.lastProcessedTime = 0;
   }
 
   // Méthode pour obtenir la position actuelle via la géolocalisation
@@ -733,7 +843,8 @@ export class MosqueTimeManager {
       );
 
       if (nearestCity) {
-        await this.handleCitySelection(nearestCity, true);
+        // 🔧 UTILISER debouncing pour géolocalisation
+        this.debouncedHandleCitySelection(nearestCity, 200);
         if (typeof notificationService !== "undefined") {
           notificationService.show("mosque.location.found", "success");
         }
@@ -828,7 +939,8 @@ export class MosqueTimeManager {
             lastCity
           );
           citySelect.value = lastCity;
-          await this.handleCitySelection(lastCity);
+          // 🔧 UTILISER le debouncing pour le chargement initial aussi
+          this.debouncedHandleCitySelection(lastCity, 500); // Plus long pour l'initialisation
         }
       } else {
         console.error(
@@ -972,16 +1084,16 @@ export class MosqueTimeManager {
 
         if (hasValidTimes) {
           hasSomeTimes = true;
-          console.log(
-            `[DEBUG] WelcomeMosqueTime: Mosquée ${mosque.id} (${mosque.name}) a des horaires valides`,
-            mosque.prayerTimes
-          );
+          //console.log(
+          //`[DEBUG] WelcomeMosqueTime: Mosquée ${mosque.id} (${mosque.name}) a des horaires valides`,
+          //mosque.prayerTimes
+          //);
         } else {
           hasMissingTimes = true;
-          console.warn(
-            `[DEBUG] WelcomeMosqueTime: Mosquée ${mosque.id} (${mosque.name}) a des horaires invalides (00:00:00)`,
-            mosque.prayerTimes
-          );
+          // console.warn(
+          //  `[DEBUG] WelcomeMosqueTime: Mosquée ${mosque.id} (${mosque.name}) a des horaires invalides (00:00:00)`,
+          //  mosque.prayerTimes
+          //);
         }
       }
     });
@@ -1195,9 +1307,49 @@ export class MosqueTimeManager {
     `;
   }
 
-  // Méthode pour gérer la sélection de ville selon le mode
+  // 🔧 NOUVELLE MÉTHODE : Debouncing pour la sélection de ville
+  debouncedHandleCitySelection(cityName, delay = 300) {
+    // Annuler le timeout précédent s'il existe
+    if (this.debounceTimeout) {
+      clearTimeout(this.debounceTimeout);
+    }
+
+    // Programmer un nouveau timeout
+    this.debounceTimeout = setTimeout(() => {
+      this.handleCitySelection(cityName);
+    }, delay);
+  }
+
   async handleCitySelection(cityName) {
     try {
+      // 🔧 PROTECTION AVANCÉE : Éviter les appels multiples
+      const now = Date.now();
+      const timeSinceLastCall = now - this.lastProcessedTime;
+
+      // Si même ville et appelée récemment (< 1 seconde), ignorer
+      if (this.lastProcessedCity === cityName && timeSinceLastCall < 1000) {
+        console.log(
+          `[DEBUG] MosqueTimeManager: Appel ignoré pour ${cityName} - récemment traité`
+        );
+        return;
+      }
+
+      // Si une sélection est déjà en cours pour cette ville, ignorer
+      if (
+        this.isProcessingCitySelection &&
+        this.lastProcessedCity === cityName
+      ) {
+        console.log(
+          `[DEBUG] MosqueTimeManager: Appel ignoré pour ${cityName} - traitement en cours`
+        );
+        return;
+      }
+
+      // Marquer le début du traitement
+      this.isProcessingCitySelection = true;
+      this.lastProcessedCity = cityName;
+      this.lastProcessedTime = now;
+
       console.log(
         "[DEBUG] MosqueTimeManager: Handling city selection for",
         cityName
@@ -1225,6 +1377,14 @@ export class MosqueTimeManager {
         this.displayAllMosques();
         this.updateDateDisplay(cityName);
         mosqueTimesStorageService.saveLastSelectedCity(cityName);
+
+        // 🔧 NOTIFICATION CONDITIONNELLE : Seulement si pas récemment affichée
+        if (timeSinceLastCall > 2000) {
+          // 2 secondes de grâce
+          notificationService.show("mosque.city.selected", "success");
+        }
+
+        this.isProcessingCitySelection = false;
         return;
       }
 
@@ -1251,28 +1411,15 @@ export class MosqueTimeManager {
             "[DEBUG] WelcomeMosqueTime: No mosques found for city",
             cityName
           );
+          this.isProcessingCitySelection = false;
           return;
         }
 
         // Charger les horaires
-        console.log(
-          "[DEBUG] WelcomeMosqueTime: Appel API pour les horaires:",
-          `/mosque-times/cities/${encodeURIComponent(
-            cityName
-          )}/date/${date}/prayer-times`
-        );
         const prayerTimesData = await api.get(
           `/mosque-times/cities/${encodeURIComponent(
             cityName
           )}/date/${date}/prayer-times`
-        );
-        console.log(
-          "[DEBUG] WelcomeMosqueTime: Horaires reçus:",
-          prayerTimesData
-        );
-        console.log(
-          "[DEBUG] WelcomeMosqueTime: prayerTimes disponible:",
-          !!prayerTimesData?.prayerTimes
         );
 
         // Associer les horaires aux mosquées
@@ -1280,22 +1427,11 @@ export class MosqueTimeManager {
           const prayerTime = prayerTimesData.prayerTimes?.find(
             (pt) => String(pt.mosque_id) === String(mosque.id)
           );
-          console.log(
-            "[DEBUG] WelcomeMosqueTime: Horaire pour mosquée",
-            mosque.id,
-            "trouvé:",
-            !!prayerTime
-          );
           return {
             ...mosque,
             prayerTimes: prayerTime || null,
           };
         });
-
-        console.log(
-          "[DEBUG] WelcomeMosqueTime: Mosquées traitées:",
-          this.currentMosques
-        );
 
         // ✅ NOUVEAU : Vérification intelligente et retry automatique
         const mosquesWithoutTimes = this.currentMosques.filter(
@@ -1305,26 +1441,12 @@ export class MosqueTimeManager {
         const percentageMissing =
           (mosquesWithoutTimes.length / totalMosques) * 100;
 
-        console.log(
-          `[DEBUG] WelcomeMosqueTime: ${
-            mosquesWithoutTimes.length
-          }/${totalMosques} mosquées sans horaires (${percentageMissing.toFixed(
-            1
-          )}%)`
-        );
-
         // Si plus de 20% des mosquées manquent d'horaires, faire un retry après 3 secondes
         if (percentageMissing > 20 && !this._hasRetriedForCity) {
-          console.log(
-            "[DEBUG] WelcomeMosqueTime: Trop de mosquées sans horaires, retry automatique dans 3 secondes..."
-          );
           this._hasRetriedForCity = true;
 
           setTimeout(async () => {
             try {
-              console.log(
-                "[DEBUG] WelcomeMosqueTime: Retry - nouvelle tentative de récupération des horaires"
-              );
               const retryPrayerTimesData = await api.get(
                 `/mosque-times/cities/${encodeURIComponent(
                   cityName
@@ -1349,14 +1471,8 @@ export class MosqueTimeManager {
               const newMosquesWithoutTimes = this.currentMosques.filter(
                 (mosque) => !mosque.prayerTimes
               );
-              console.log(
-                `[DEBUG] WelcomeMosqueTime: Après retry: ${newMosquesWithoutTimes.length}/${totalMosques} mosquées sans horaires`
-              );
             } catch (retryError) {
-              console.error(
-                "[DEBUG] WelcomeMosqueTime: Erreur lors du retry:",
-                retryError
-              );
+              // Handle retry error
             }
           }, 3000);
         } else {
@@ -1384,6 +1500,7 @@ export class MosqueTimeManager {
           currentMosques: this.currentMosques,
         });
 
+        // 🔧 NOTIFICATION UNIQUE : Seulement afficher une fois
         notificationService.show("mosque.city.selected", "success");
       } catch (error) {
         console.warn(
@@ -1393,11 +1510,10 @@ export class MosqueTimeManager {
         this.displayDefaultState();
       }
     } catch (error) {
-      console.warn(
-        "[DEBUG] WelcomeMosqueTime: Error in city selection:",
-        error
-      );
-      this.displayDefaultState();
+      console.error("MosqueTimeManager: Error in handleCitySelection:", error);
+    } finally {
+      // 🔧 TOUJOURS libérer le verrou
+      this.isProcessingCitySelection = false;
     }
   }
 

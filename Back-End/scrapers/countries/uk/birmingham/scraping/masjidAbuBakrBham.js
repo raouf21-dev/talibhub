@@ -1,21 +1,20 @@
 const {
-
-/**
- * ✅ SCRAPER OPTIMISÉ
- * Configuration automatique via browser-manager :
- * - Viewport 1920x1080
- * - User agent aléatoire  
- * - Comportement humain
- * - Interception ressources (images, CSS, fonts)
- */
-/**
- * ✅ SCRAPER OPTIMISÉ
- * Configuration automatique via browser-manager :
- * - Viewport 1920x1080
- * - User agent aléatoire
- * - Comportement humain
- * - Interception ressources (images, CSS, fonts)
- */
+  /**
+   * ✅ SCRAPER OPTIMISÉ
+   * Configuration automatique via browser-manager :
+   * - Viewport 1920x1080
+   * - User agent aléatoire
+   * - Comportement humain
+   * - Interception ressources (images, CSS, fonts)
+   */
+  /**
+   * ✅ SCRAPER OPTIMISÉ
+   * Configuration automatique via browser-manager :
+   * - Viewport 1920x1080
+   * - User agent aléatoire
+   * - Comportement humain
+   * - Interception ressources (images, CSS, fonts)
+   */
   createOptimizedScraper,
 } = require("../../../../utils/scraper-template");
 const {
@@ -38,7 +37,6 @@ const humanBehavior = require("../../../../utils/human-behavior");
  * - Interception ressources (images, CSS, fonts)
  */
 const scrapeAbuBakr = createOptimizedScraper(async (page) => {
-
   await page.goto("https://abubakrbillesley.co.uk", {
     waitUntil: "networkidle2",
     timeout: 30000,

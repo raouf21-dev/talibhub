@@ -58,33 +58,33 @@ class ScraperManager {
     // Pour maintenir la compatibilité avec l'ancien système,
     // on peut garder un mapping de base pour les mosquées existantes
     const legacyMapping = {
-      // ✅ MOSQUÉES DE WALSALL (5 mosquées - IDs 1, 2, 3, 19, 20)
-      aishaMosque: 1,
-      masjidAbuBakr: 2, // Walsall
-      masjidAlAqsa: 3,
-      masjidAlfarouq: 19,
-      masjidEUsman: 20,
+      // ✅ MOSQUÉES DE WALSALL (5 mosquées - IDs 1, 2, 3, 19, 20) - CORRIGÉ ✅
+      aishaMosque: 1, // Aisha Mosque
+      masjidAlfarouq: 2, // Masjif Al-farooq ✅ CORRIGÉ
+      masjidAbuBakr: 3, // Masjid Abubakr ✅ CORRIGÉ
+      masjidEUsman: 19, // Masjid-E-Usman
+      masjidAlAqsa: 20, // Masjid Al-Aqsa ✅ CORRIGÉ
 
-      // ✅ MOSQUÉES DE BIRMINGHAM (19 mosquées - IDs 4-18, 21-24)
-      amanahMasjid: 4,
-      arRahmaCentre: 5,
-      bournvilleMasjid: 6,
-      centralMosque: 7,
-      greenLaneMasjid: 8,
-      hallGreenMosque: 9,
-      jameMasjid: 10,
-      sparkbrookMasjid: 11,
-      mahmudSabirMasjid: 12,
-      masjidAnnoor: 13,
-      masjidAsSunnahAnNabawiyyah: 14,
-      masjidEHamza: 15,
-      masjidEsaIbnMaryama: 16,
-      masjidSulayman: 17,
-      kingsHeathMosque: 18,
-      masjidUmar: 21,
-      muslimStudentsHouse: 22,
-      qubaIsmalicCenter: 23,
-      masjidAbuBakrBham: 24,
+      // ✅ MOSQUÉES DE BIRMINGHAM (19 mosquées - IDs 4-18, 21-24) - CORRIGÉ ✅
+      greenLaneMasjid: 4, // Green Lane Masjid ✅ CORRIGÉ
+      centralMosque: 5, // Central Mosque ✅ CORRECT
+      qubaIsmalicCenter: 6, // Quba Islamic Centre ✅ CORRIGÉ
+      muslimStudentsHouse: 7, // Muslim Students House Masjid & Community Centre ✅ CORRIGÉ
+      arRahmaCentre: 8, // Arrahma Islamic Centre ✅ CORRECT
+      masjidUmar: 9, // Masjid Umar ✅ CORRIGÉ
+      amanahMasjid: 10, // Amanah Masjid ✅ CORRIGÉ
+      sparkbrookMasjid: 11, // UKIM Sparkbrook Islamic Centre & Masjid
+      masjidEHamza: 12, // Masjid Hamza
+      masjidSulayman: 13, // Masjid Sulayman Bin Dawud
+      masjidEsaIbnMaryama: 14, // Masjid Esa Ibn Maryam
+      hallGreenMosque: 15, // Hall Green Mosque ✅ CORRIGÉ
+      kingsHeathMosque: 16, // Kings Heath Mosque ✅ CORRIGÉ
+      bournvilleMasjid: 17, // Bournville Masjid and Community Centre ✅ CORRIGÉ
+      masjidAsSunnahAnNabawiyyah: 18, // Masjid As-Sunnah An-Nabawiyyah ✅ CORRIGÉ
+      jameMasjid: 21, // Jame Masjid ✅ CORRIGÉ
+      masjidAnnoor: 22, // An-Noor Masjid & Community Centre ✅ CORRIGÉ
+      mahmudSabirMasjid: 23, // MahmudSabir (Al Furqan) Masjid ✅ CORRIGÉ
+      masjidAbuBakrBham: 24, // Masjid-e-Abu Bakr ✅ CORRIGÉ
     };
 
     // Mapper d'abord les mosquées connues

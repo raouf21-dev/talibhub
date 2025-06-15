@@ -74,26 +74,20 @@ export async function initializeWelcomepageWithTurnstile() {
         try {
           // Vérification Turnstile
           if (!turnstileHandler) {
-            notificationService.show("CAPTCHA non initialisé", "error");
+            notificationService.show("auth.captcha.notinitialized", "error");
             return;
           }
 
           const token = turnstileHandler.getToken();
           if (!token) {
-            notificationService.show(
-              "Veuillez compléter la vérification CAPTCHA",
-              "warning"
-            );
+            notificationService.show("auth.captcha.incomplete", "warning");
             return;
           }
 
           const isTurnstileValid = await turnstileHandler.verify();
 
           if (!isTurnstileValid) {
-            notificationService.show(
-              "Échec de la vérification CAPTCHA",
-              "error"
-            );
+            notificationService.show("auth.captcha.failed", "error");
             turnstileHandler.reset();
             return;
           }
@@ -135,24 +129,21 @@ export async function initializeWelcomepageWithTurnstile() {
           const result = await authService.register(formData);
 
           if (result.success) {
-            notificationService.show(
-              "Inscription réussie ! Veuillez vérifier votre email.",
-              "success"
-            );
+            notificationService.show("auth.signup.emailverify", "success");
             // Optionnel : rediriger vers la page de connexion
             document
               .querySelector('.welcomepage-tab-btn[data-tab="signin"]')
               .click();
           } else {
             notificationService.show(
-              result.message || "Erreur lors de l'inscription",
+              result.message || "auth.signup.error",
               "error"
             );
             turnstileHandler.reset();
           }
         } catch (error) {
           console.error("Erreur inscription:", error);
-          notificationService.show("Erreur lors de l'inscription", "error");
+          notificationService.show("auth.signup.error", "error");
           if (turnstileHandler) {
             turnstileHandler.reset();
           }
@@ -174,7 +165,7 @@ export async function initializeWelcomepageWithTurnstile() {
           .value.trim();
 
         if (!email || !password) {
-          notificationService.show("Tous les champs sont requis", "warning");
+          notificationService.show("auth.required.fields", "warning");
           return;
         }
 
@@ -184,10 +175,10 @@ export async function initializeWelcomepageWithTurnstile() {
             localStorage.setItem("token", result.token);
             await navigateTo("dashboard");
           } else {
-            notificationService.show("Erreur de connexion", "error");
+            notificationService.show("auth.signin.error", "error");
           }
         } catch (error) {
-          notificationService.show("Erreur de connexion", "error");
+          notificationService.show("auth.signin.error", "error");
         }
       });
     }
@@ -198,18 +189,15 @@ export async function initializeWelcomepageWithTurnstile() {
     });
 
     document.addEventListener("turnstile-error", () => {
-      notificationService.show("Erreur CAPTCHA", "error");
+      notificationService.show("auth.captcha.error", "error");
     });
 
     document.addEventListener("turnstile-expired", () => {
-      notificationService.show("CAPTCHA expiré, veuillez réessayer", "warning");
+      notificationService.show("auth.captcha.expired", "warning");
     });
 
     document.addEventListener("turnstile-timeout", () => {
-      notificationService.show(
-        "CAPTCHA timeout, veuillez réessayer",
-        "warning"
-      );
+      notificationService.show("auth.captcha.timeout", "warning");
     });
 
     // Initialisation de MosqueTime pour la page d'accueil
@@ -217,11 +205,21 @@ export async function initializeWelcomepageWithTurnstile() {
       const welcomeMosqueTime = new WelcomeMosqueTime();
       await welcomeMosqueTime.initialize();
 
+      // 🔧 CORRECTION : Ne PAS ré-initialiser, juste mettre à jour l'interface
       document.addEventListener("languageChanged", async () => {
-        await welcomeMosqueTime.initialize();
+        console.log(
+          "WelcomePageTurnstile: Language changed - updating interface"
+        );
+        // Mettre à jour seulement les textes et l'interface, pas les event listeners
+        welcomeMosqueTime.texts = welcomeMosqueTime.getLocalizedTexts();
+        welcomeMosqueTime.updateInterface();
+        // Optionnel : mettre à jour l'affichage si une ville est sélectionnée
+        if (welcomeMosqueTime.selectedCity) {
+          welcomeMosqueTime.updateDateDisplay(welcomeMosqueTime.selectedCity);
+        }
       });
     } catch (error) {
-      notificationService.show("Erreur d'initialisation", "error");
+      notificationService.show("mosque.init.error", "error");
     }
   } catch (error) {
     console.error("Erreur initialisation page d'accueil:", error);
@@ -243,34 +241,27 @@ function validateFormData(data) {
 
   for (const field of requiredFields) {
     if (!data[field]) {
-      notificationService.show(`Le champ ${field} est requis`, "warning");
+      notificationService.show("auth.field.required", "warning", 3000, {
+        field,
+      });
       return false;
     }
   }
 
   // Validation email
   if (data.email !== data.confirmEmail) {
-    notificationService.show(
-      "Les adresses email ne correspondent pas",
-      "warning"
-    );
+    notificationService.show("auth.email.mismatch", "warning");
     return false;
   }
 
   // Validation mot de passe
   if (data.password !== data.confirmPassword) {
-    notificationService.show(
-      "Les mots de passe ne correspondent pas",
-      "warning"
-    );
+    notificationService.show("auth.password.mismatch", "warning");
     return false;
   }
 
   if (data.password.length < 8) {
-    notificationService.show(
-      "Le mot de passe doit contenir au moins 8 caractères",
-      "warning"
-    );
+    notificationService.show("auth.password.minlength", "warning");
     return false;
   }
 
@@ -285,4 +276,3 @@ function validateFormData(data) {
 
   return true;
 }
- 

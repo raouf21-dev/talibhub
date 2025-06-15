@@ -3,6 +3,7 @@ import { escapeHTML } from "../../utils/utils.js";
 import { api } from "../../services/api/dynamicLoader.js";
 import { notificationService } from "../../services/notifications/notificationService.js";
 import AppState from "../../services/state/state.js";
+import { translationManager } from "../../translations/TranslationManager.js";
 
 const appState = AppState;
 let isInitialized = false;
@@ -112,13 +113,13 @@ function updateTaskSelect() {
 
   const tasks = AppState.get("tasks.items") || [];
 
-  // Créer l'option par défaut avec l'attribut data-translate
+  // Créer l'option par défaut avec traduction
   const defaultOption = document.createElement("option");
   defaultOption.value = "";
-  defaultOption.setAttribute("data-translate", "apprentissage.selectTask");
-  defaultOption.textContent = window.translationManager
-    ? window.translationManager.t("apprentissage.selectTask")
-    : "Sélectionnez une tâche";
+  defaultOption.textContent = translationManager.t(
+    "content.task.selectTask",
+    "Sélectionnez une tâche"
+  );
 
   // Vider le select et ajouter l'option par défaut
   taskSelect.innerHTML = "";
@@ -321,33 +322,24 @@ function updateTasksCounter() {
 
 // Écouter les changements de langue pour mettre à jour l'option par défaut du task-select
 function setupTaskSelectLanguageObserver() {
-  if (
-    window.translationManager &&
-    typeof window.translationManager.onLanguageChange === "function"
-  ) {
     console.log(
       "[TASKS] Configuration de l'observateur de langue pour task-select"
     );
-    window.translationManager.onLanguageChange(() => {
+  translationManager.onLanguageChange(() => {
       console.log(
         "[TASKS] Changement de langue détecté - mise à jour de l'option par défaut"
       );
       // Mettre à jour l'option par défaut du task-select
       const defaultOption = document.querySelector(
-        '#task-select option[data-translate="apprentissage.selectTask"]'
+      '#task-select option[value=""]'
       );
       if (defaultOption) {
-        defaultOption.textContent = window.translationManager.t(
-          "apprentissage.selectTask"
+      defaultOption.textContent = translationManager.t(
+        "content.task.selectTask",
+        "Sélectionnez une tâche"
         );
       }
     });
-  } else {
-    console.log(
-      "[TASKS] TranslationManager non disponible, tentative dans 100ms"
-    );
-    setTimeout(setupTaskSelectLanguageObserver, 100);
-  }
 }
 
 // Initialiser l'observateur quand la page est chargée

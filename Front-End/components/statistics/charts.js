@@ -4,75 +4,11 @@
  * @module ChartManager
  */
 
+import { translationManager } from "../../translations/TranslationManager.js";
+
 let chartInstances = {};
 
-// Translations object for internationalization
-const translations = {
-  fr: {
-    workTime: "Temps de Travail (minutes)",
-    countNumber: "Nombre de Comptages",
-    time: "Temps (minutes)",
-    counts: "Comptages",
-    viewDetails: "Voir les détails",
-    hideDetails: "Masquer les détails",
-    noData: "Aucune donnée disponible",
-    unnamed: "Sans nom",
-    task: "Tâche",
-    timeMinutes: "Temps (min)",
-    dailyStats: "Statistiques Journalières",
-    weeklyStats: "Statistiques Hebdomadaires",
-    monthlyStats: "Statistiques Mensuelles",
-    yearlyStats: "Statistiques Annuelles",
-    january: "janvier",
-    february: "février",
-    march: "mars",
-    april: "avril",
-    may: "mai",
-    june: "juin",
-    july: "juillet",
-    august: "août",
-    september: "septembre",
-    october: "octobre",
-    november: "novembre",
-    december: "décembre",
-    week: "Semaine du",
-    noDataAvailable: "Aucune donnée disponible",
-    invalidDate: "Date invalide",
-    dataError: "Erreur de chargement des données",
-  },
-  en: {
-    workTime: "Working Time (minutes)",
-    countNumber: "Number of Counts",
-    time: "Time (minutes)",
-    counts: "Counts",
-    viewDetails: "View details",
-    hideDetails: "Hide details",
-    noData: "No data available",
-    unnamed: "Unnamed",
-    task: "Task",
-    timeMinutes: "Time (min)",
-    dailyStats: "Daily Statistics",
-    weeklyStats: "Weekly Statistics",
-    monthlyStats: "Monthly Statistics",
-    yearlyStats: "Yearly Statistics",
-    january: "January",
-    february: "February",
-    march: "March",
-    april: "April",
-    may: "May",
-    june: "June",
-    july: "July",
-    august: "August",
-    september: "September",
-    october: "October",
-    november: "November",
-    december: "December",
-    week: "Week of",
-    noDataAvailable: "No data available",
-    invalidDate: "Invalid date",
-    dataError: "Data loading error",
-  },
-};
+// Les traductions sont maintenant gérées par le nouveau système de traductions
 
 /**
  * Chart visual configuration settings
@@ -104,40 +40,29 @@ function isValidDate(date) {
 }
 
 /**
- * Gets the current language based on various factors
+ * Gets the current language based on the new translation system
  * @returns {string} Current language code ('fr' or 'en')
  */
 function getCurrentLanguage() {
-  // Avec le nouveau système de traduction dynamique, utiliser d'abord le translationManager
-  if (typeof window.translationManager !== "undefined") {
-    return window.translationManager.currentLang;
-  }
-
-  // Fallback vers localStorage
-  const storedLang = localStorage.getItem("userLang");
-  if (storedLang === "fr" || storedLang === "en") {
-    return storedLang;
-  }
-
-  // Fallback vers la langue du navigateur
-  return (navigator.language || navigator.userLanguage).startsWith("fr")
-    ? "fr"
-    : "en";
+  return translationManager.currentLang;
 }
 
 /**
- * Gets translation for a specific key
+ * Gets translation for a specific key using the new translation system
  * @param {string} key - Translation key
  * @returns {string} Translated text or key if translation not found
  */
 function getTranslation(key) {
-  if (!key) return translations[getCurrentLanguage()].noDataAvailable;
-  const currentLang = getCurrentLanguage();
-  return translations[currentLang][key] || key;
+  if (!key)
+    return translationManager.t(
+      "content.charts.noDataAvailable",
+      "No data available"
+    );
+  return translationManager.t(`content.charts.${key}`, key);
 }
 
 /**
- * Gets month key from index
+ * Gets month key from index for translations
  * @param {number} monthIndex - Month index (0-11)
  * @returns {string|null} Month key or null if invalid
  */
@@ -433,11 +358,35 @@ export const ChartManager = {
       this.updatePeriodTitles();
     });
 
-    document.querySelectorAll(".toggle-details-btn").forEach((btn) => {
+    const toggleButtons = document.querySelectorAll(".toggle-details-btn");
+    console.debug(
+      `[ChartManager] setupEventListeners: Found ${toggleButtons.length} toggle-details-btn elements`
+    );
+
+    toggleButtons.forEach((btn, index) => {
+      console.debug(
+        `[ChartManager] setupEventListeners: Setting up listener for button ${
+          index + 1
+        }`
+      );
       btn.addEventListener("click", (e) => {
+        console.debug(`[ChartManager] toggle-details-btn clicked:`, e.target);
         const chartSection = e.target.closest(".chart-section");
-        const period =
-          chartSection.querySelector(".period-navigation").dataset.period;
+        if (!chartSection) {
+          console.error(
+            `[ChartManager] No chart-section found for clicked button`
+          );
+          return;
+        }
+        const periodNav = chartSection.querySelector(".period-navigation");
+        if (!periodNav) {
+          console.error(
+            `[ChartManager] No period-navigation found in chart-section`
+          );
+          return;
+        }
+        const period = periodNav.dataset.period;
+        console.debug(`[ChartManager] Toggling details for period: ${period}`);
         this.toggleTaskDetails(chartSection, period);
       });
     });

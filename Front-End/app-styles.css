@@ -1,0 +1,6142 @@
+/*
+========================================
+TALIBHUB - STYLES OPTIMISÉS
+========================================
+Structure:
+- Variables CSS globales
+- Base et Reset
+- Dashboard
+- Navigation (à venir)
+- Welcome Page (à venir)
+- Profile (à venir)
+- Mosque Time (à venir)
+- Apprentissage/Timer (à venir)
+- Autres composants (à venir)
+========================================
+*/
+
+/* ========================================
+   VARIABLES CSS GLOBALES
+======================================== */
+:root {
+  /* === COULEURS PRINCIPALES === */
+  --primary-color: #274c77;
+  --secondary-color: #6096ba;
+  --tertiary-color: #a3cef1;
+  --background-color: #e7ecef;
+  --text-color: #274c77;
+  --card-background: #ffffff;
+  --border-color: #a3cef1;
+  --gray-color: #8b8c89;
+
+  /* === COULEURS SUPPLÉMENTAIRES === */
+  --success-color: #28a745;
+  --error-color: #dc3545;
+  --warning-color: #ffc107;
+  --info-color: #17a2b8;
+
+  /* === TYPOGRAPHIE === */
+  --main-font: "Poppins", sans-serif;
+  --h1-size: 2rem;
+  --h2-size: 1.5rem;
+  --h3-size: 1.25rem;
+  --text-size: 1rem;
+  --small-text-size: 0.875rem;
+  --title-line-height: 1.4;
+  --text-line-height: 1.6;
+
+  /* === BREAKPOINTS === */
+  --breakpoint-xs: 480px;
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1200px;
+  --breakpoint-xxl: 1245px;
+
+  /* === ESPACEMENTS === */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-xxl: 3rem;
+
+  /* === LAYOUT === */
+  --sidebar-width: 400px; /* Beaucoup plus large comme sur les screenshots */
+  --topnav-height: 60px;
+
+  /* === OMBRES === */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 8px 12px rgba(0, 0, 0, 0.15);
+
+  /* === TRANSITIONS === */
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.3s ease;
+  --transition-slow: 0.5s ease;
+
+  /* === BORDURES === */
+  --border-radius-sm: 0.25rem;
+  --border-radius-md: 0.5rem;
+  --border-radius-lg: 0.75rem;
+  --border-radius-xl: 1rem;
+}
+
+/* ========================================
+   BASE ET RESET
+======================================== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--main-font);
+  background-color: var(--background-color);
+  color: var(--text-color);
+  line-height: var(--text-line-height);
+  min-height: 100vh;
+  margin: 0;
+  overflow: hidden;
+  transition: background-color var(--transition-normal),
+    color var(--transition-normal);
+}
+
+.page {
+  display: none;
+  opacity: 0;
+  transition: opacity var(--transition-slow);
+  height: 100vh;
+  overflow-y: auto;
+  padding-bottom: 5rem;
+}
+
+.page-no-welcome {
+  margin-top: 1rem; /* Plus de topnav, donc plus de marge */
+}
+
+.page.active {
+  display: block;
+  opacity: 1;
+}
+
+/* ========================================
+   HOME BUTTON (RESPONSIVE)
+======================================== */
+
+/* Bouton home pour revenir au dashboard en mode responsive */
+.home-button {
+  position: fixed;
+  top: var(--spacing-lg);
+  left: var(--spacing-md);
+  z-index: 1001;
+  background-color: var(--card-background);
+  border: 2px solid var(--primary-color);
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-xs);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: none; /* Masqué par défaut */
+  box-shadow: var(--shadow-md);
+  opacity: 0.85; /* Légèrement transparent pour être discret */
+}
+
+.home-button:hover {
+  background-color: var(--primary-color);
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 4px 15px rgba(39, 76, 119, 0.3);
+  opacity: 1;
+}
+
+.home-button:hover .home-icon {
+  color: var(--card-background);
+}
+
+.home-button:active {
+  transform: translateY(0px) scale(0.95);
+}
+
+.home-icon {
+  width: 18px; /* Réduit de ~30% (de 26px à 18px) */
+  height: 18px;
+  color: var(--primary-color);
+  transition: all var(--transition-fast);
+  stroke-width: 2.5;
+}
+
+/* S'assurer que le bouton home est masqué en mode desktop */
+@media (min-width: 1025px) {
+  .home-button {
+    display: none !important;
+  }
+}
+
+/* Afficher le bouton home seulement en mode responsive quand la sidebar disparaît */
+@media (max-width: 1024px) {
+  .home-button {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Animation d'apparition douce */
+  .home-button {
+    animation: fadeInScale 0.4s ease-out;
+  }
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 0.85;
+    transform: scale(1);
+  }
+}
+
+/* Pour très petits écrans, ajuster encore la taille */
+@media (max-width: 480px) {
+  .home-button {
+    top: var(--spacing-sm);
+    left: var(--spacing-sm);
+    padding: calc(var(--spacing-xs) * 0.8);
+  }
+
+  .home-icon {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+/* ========================================
+   DASHBOARD
+======================================== */
+
+/* === Layout Principal === */
+.dashboard-main-content {
+  margin-left: var(--sidebar-width);
+  padding: var(--spacing-xl);
+  min-height: 100vh;
+  background-color: var(--background-color);
+  position: relative;
+}
+
+/* === Style standard pour tous les titres h1 des pages === */
+.page h1,
+.dashboard-main-content h1 {
+  text-align: center !important;
+  font-size: var(--h1-size) !important;
+  font-family: var(--main-font) !important;
+  color: var(--primary-color) !important;
+  margin-bottom: var(--spacing-xl) !important;
+  font-weight: 600 !important;
+}
+
+/* === Boutons TopNav intégrés dans le Dashboard === */
+.dashboard-topnav-buttons {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+  z-index: 10;
+}
+
+/* === Messaging Button intégré === */
+.dashboard-messaging-link {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  text-decoration: none;
+  position: relative;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--border-radius-md);
+  transition: background-color var(--transition-fast);
+  background-color: var(--background-color);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+  color: var(--text-color);
+  font-family: var(--main-font);
+}
+
+.dashboard-messaging-link:hover {
+  background-color: var(--secondary-color);
+  border-color: var(--secondary-color);
+}
+
+.dashboard-messaging-link:hover .messaging-icon {
+  color: var(--card-background);
+}
+
+.dashboard-messaging-icon {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  color: var(--text-color);
+  transition: color var(--transition-fast);
+}
+
+/* === Message Counter intégré === */
+.dashboard-messaging-count {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background-color: var(--error-color);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: bold;
+  border-radius: 50%;
+  min-width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: bounce 2s infinite;
+  box-shadow: var(--shadow-sm);
+}
+
+/* === Profile Section intégrée === */
+.dashboard-profile-section {
+  position: relative;
+}
+
+.dashboard-profile-button {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  background-color: var(--background-color);
+  border: 1px solid var(--border-color);
+  padding: var(--spacing-sm) var(--spacing-md);
+  cursor: pointer;
+  border-radius: var(--border-radius-md);
+  color: var(--text-color);
+  font-family: var(--main-font);
+  font-size: var(--text-size);
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+}
+
+.dashboard-profile-settings-icon {
+  width: 20px;
+  height: 20px;
+  color: var(--text-color);
+  transition: color var(--transition-fast);
+}
+
+.dashboard-profile-button:hover {
+  background-color: var(--secondary-color);
+  border-color: var(--secondary-color);
+  color: var(--card-background);
+}
+
+.dashboard-profile-icon {
+  font-size: 0.8rem;
+  transition: transform var(--transition-fast);
+}
+
+.dashboard-profile-section:hover .dashboard-profile-icon {
+  transform: rotate(180deg);
+}
+
+/* === Profile Dropdown intégré === */
+.dashboard-profile-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: var(--card-background);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-lg);
+  min-width: 200px;
+  z-index: 100;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: opacity var(--transition-fast), visibility var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.dashboard-profile-dropdown.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+/* === Contrôles Menu (pour mobile) === */
+.dashboard-menu-btn {
+  display: none;
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  padding: var(--spacing-sm);
+  border-radius: var(--border-radius-md);
+  cursor: pointer;
+  margin-bottom: var(--spacing-md);
+}
+
+/* === Grille des Cartes === */
+.dashboard-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--spacing-xl);
+  margin: 0;
+}
+
+/* === Cartes Dashboard === */
+.dashboard-card {
+  background-color: var(--card-background);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-lg);
+  text-align: center;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: transform var(--transition-fast),
+    box-shadow var(--transition-fast);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.dashboard-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.dashboard-card img {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  margin-bottom: var(--spacing-sm);
+}
+
+.dashboard-card h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--primary-color);
+  margin: 0;
+  line-height: var(--title-line-height);
+}
+
+/* ========================================
+   DASHBOARD - RESPONSIVE
+======================================== */
+
+/* === Breakpoint XXL (1245px) === */
+@media (max-width: 1245px) {
+  .dashboard-card h2 {
+    font-size: 1rem;
+  }
+}
+
+/* === Breakpoint XL (1200px) === */
+@media (max-width: 1200px) {
+  .dashboard-main-content {
+    padding: var(--spacing-lg);
+    grid-template-columns: 1fr 300px;
+  }
+}
+
+/* === Responsive des boutons intégrés === */
+@media (max-width: 1024px) {
+  .dashboard-topnav-buttons {
+    gap: var(--spacing-md);
+  }
+
+  .dashboard-main-content {
+    margin-left: 0;
+    padding: var(--spacing-md);
+  }
+
+  .page h1,
+  .dashboard-main-content h1 {
+    font-size: 1.375rem !important;
+    font-family: var(--main-font) !important;
+    text-align: center !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-topnav-buttons {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+
+  .dashboard-messaging-link,
+  .dashboard-profile-button {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: var(--small-text-size);
+  }
+
+  .dashboard-profile-dropdown {
+    right: 0;
+    left: auto;
+    min-width: 180px;
+  }
+}
+
+/* === Grille des Cartes === */
+.dashboard-card-grid {
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.dashboard-card h2 {
+  font-size: 1rem;
+}
+
+.dashboard-menu-btn {
+  display: block;
+}
+
+/* Styles pour sidebar mobile (si nécessaire) */
+.dashboard-sidebar {
+  transform: translateX(-100%);
+}
+
+.dashboard-sidebar.open {
+  transform: translateX(0);
+}
+
+.dashboard-close-btn {
+  display: block;
+}
+
+/* === Grille des Cartes === */
+.dashboard-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--spacing-xl);
+  margin: 0;
+}
+
+/* === Breakpoint MD (768px) === */
+@media (max-width: 768px) {
+  .dashboard-card h2 {
+    font-size: 0.9rem;
+  }
+
+  .dashboard-card-grid {
+    gap: var(--spacing-sm);
+  }
+
+  .dashboard-main-content {
+    padding: var(--spacing-sm);
+  }
+
+  /* === MosqueTime Welcome Responsive LG === */
+  .welcome-mosquetime-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .welcome-mosquetime-controls {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+
+  .welcomepage-mosque-time .mosquetime-location-search,
+  .welcome-mosquetime-location-search {
+    flex-direction: column;
+    gap: var(--spacing-md);
+  }
+
+  .welcomepage-mosque-time .prayer-times-grid,
+  .welcomepage-mosque-time .additional-times-grid {
+    gap: 0.5rem;
+    padding: 6px 0;
+  }
+
+  .welcomepage-mosque-time .prayer-item {
+    padding: 0.65rem;
+  }
+}
+
+/* === Breakpoint MD (768px) === */
+@media (max-width: 768px) {
+  .welcomepage-container {
+    width: 95vw;
+  }
+
+  .mosquetime-sort-buttons {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .mosquetime-sort-buttons .mosquetime-button {
+    width: 100%;
+    font-size: var(--font-size-sm);
+  }
+
+  .mosquetime-card {
+    width: 100%;
+    padding: 0;
+  }
+
+  .welcomepage-mosque-time .mosque-name {
+    font-size: 1rem;
+    padding: var(--spacing-xs) var(--spacing-xs) 0 var(--spacing-xs);
+    margin: 0 0 0 var(--spacing-xs);
+  }
+
+  .welcomepage-mosque-time .mosque-address {
+    font-size: 0.8rem;
+    margin: 0 0 var(--spacing-xs) var(--spacing-xs);
+  }
+
+  #welcome-mosquetime-grid {
+    width: 100%;
+    padding: 0;
+  }
+
+  #welcome-mosquetime-grid .mosquetime-mosque-card {
+    width: 100%;
+    padding: var(--spacing-sm);
+    margin: var(--spacing-xs);
+  }
+
+  .mosquetime-location-search {
+    padding: var(--spacing-sm) 0;
+    flex-direction: column;
+    gap: var(--spacing-md);
+  }
+
+  .welcomepage-mosque-time .mosquetime-content {
+    padding: 0;
+  }
+
+  .welcomepage-mosque-time .mosquetime-location-search {
+    flex-direction: column;
+    gap: var(--spacing-md);
+  }
+
+  .welcomepage-mosque-time .mosquetime-sort-buttons {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+
+  .welcomepage-mosque-time .mosquetime-sort-buttons .mosquetime-button {
+    width: 100%;
+    font-size: var(--font-size-sm);
+  }
+
+  .mosque-prayer-times .prayer-times-grid {
+    padding-top: var(--spacing-xs);
+  }
+
+  .welcomepage-mosque-time .mosque-header {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-md);
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .welcomepage-mosque-time .mosque-info {
+    flex: 1;
+  }
+
+  .welcomepage-mosque-time .prayer-times-grid,
+  .welcomepage-mosque-time .additional-times-grid {
+    grid-template-columns: repeat(5, 1fr);
+    background: var(--card-background);
+    border-radius: var(--border-radius);
+    margin-bottom: 0;
+  }
+}
+
+/* === Breakpoint XS (480px) === */
+@media (max-width: 480px) {
+  .dashboard-card-grid {
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: var(--spacing-sm);
+  }
+
+  .dashboard-card h2 {
+    font-size: 0.7rem;
+  }
+
+  .dashboard-card {
+    padding: var(--spacing-sm);
+  }
+
+  .dashboard-card img {
+    width: 48px;
+    height: 48px;
+  }
+}
+
+/* ========================================
+   NAVIGATION - TOP NAV & SIDEBAR
+======================================== */
+
+/* ========================================
+   TOP NAV MASQUÉE - ÉLÉMENTS INTÉGRÉS AU DASHBOARD
+======================================== */
+
+.top-nav {
+  display: none !important;
+}
+
+/* === Actions de la TopNav (Messaging + Profile) === */
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-lg);
+}
+
+/* === Messaging Button === */
+.messaging-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  position: relative;
+  padding: var(--spacing-sm);
+  border-radius: var(--border-radius-md);
+  transition: background-color var(--transition-fast);
+  background-color: var(--background-color);
+  border: 1px solid var(--border-color);
+}
+
+.messaging-link:hover {
+  background-color: var(--secondary-color);
+  border-color: var(--secondary-color);
+}
+
+.messaging-link:hover .messaging-icon {
+  color: var(--card-background);
+}
+
+.messaging-icon {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  color: var(--text-color);
+  transition: color var(--transition-fast);
+}
+
+/* === Message Counter === */
+.messaging-count {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background-color: var(--error-color);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: bold;
+  border-radius: 50%;
+  min-width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: bounce 2s infinite;
+  box-shadow: var(--shadow-sm);
+}
+
+@keyframes bounce {
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-4px);
+  }
+  60% {
+    transform: translateY(-2px);
+  }
+}
+
+/* === Profile Section === */
+.profile-section {
+  position: relative;
+}
+
+.profile-button {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  background-color: var(--background-color);
+  border: 1px solid var(--border-color);
+  padding: var(--spacing-sm) var(--spacing-md);
+  cursor: pointer;
+  border-radius: var(--border-radius-md);
+  color: var(--text-color);
+  font-family: var(--main-font);
+  font-size: var(--text-size);
+  transition: all var(--transition-fast);
+}
+
+.profile-button:hover {
+  background-color: var(--secondary-color);
+  border-color: var(--secondary-color);
+  color: var(--card-background);
+}
+
+.profile-icon {
+  font-size: 0.8rem;
+  transition: transform var(--transition-fast);
+}
+
+.profile-section:hover .profile-icon {
+  transform: rotate(180deg);
+}
+
+/* === Profile Dropdown === */
+.profile-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: var(--card-background);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-lg);
+  min-width: 200px;
+  z-index: 100;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: opacity var(--transition-fast), visibility var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.profile-dropdown.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.dropdown-item {
+  padding: 0.75rem var(--spacing-md);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--text-color);
+  text-decoration: none;
+  transition: background-color var(--transition-fast);
+}
+
+.dropdown-item:hover {
+  background-color: var(--background-color);
+}
+
+.dropdown-divider {
+  border-top: 1px solid var(--border-color);
+  margin: var(--spacing-sm) 0;
+}
+
+/* === Theme Toggle === */
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 24px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--gray-color);
+  transition: var(--transition-normal);
+  border-radius: 24px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: var(--card-background);
+  transition: var(--transition-normal);
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: var(--primary-color);
+}
+
+input:checked + .slider:before {
+  transform: translateX(24px);
+}
+
+/* === Language Selector dans Dropdown === */
+.dropdown-item .language-selector {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-md);
+}
+
+.dropdown-item .language-selector .lang-btn {
+  font-size: 1.8rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--spacing-sm);
+  min-width: 40px;
+  min-height: 40px;
+  border-radius: var(--border-radius-sm);
+  transition: all var(--transition-fast);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dropdown-item .language-selector .lang-btn:hover {
+  background-color: rgba(0, 123, 255, 0.1);
+  transform: scale(1.05);
+}
+
+.dropdown-item .language-selector .lang-btn.active {
+  background-color: var(--tertiary-color);
+}
+
+/* === Styles de la TopNav supprimés car masquée === */
+
+/* ========================================
+   SIDEBAR MODERNE (Style DataDrop Dashboard)
+======================================== */
+
+/* === Sidebar Layout === */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: var(--sidebar-width);
+  height: 100vh;
+  background-color: var(--card-background);
+  border-right: 1px solid var(--border-color);
+  box-shadow: var(--shadow-lg);
+  z-index: 98;
+  transform: translateX(0);
+  transition: transform var(--transition-normal);
+  overflow-y: auto;
+}
+
+/* === Header moderne sans couleur de fond === */
+.sidebar-header {
+  background-color: var(--card-background);
+  color: var(--primary-color);
+  padding: var(--spacing-xl) var(--spacing-md) var(--spacing-lg);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.sidebar-header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+.sidebar-close-btn {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text-color);
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: var(--spacing-xs);
+  line-height: 1;
+}
+
+/* === Section Analytics === */
+.sidebar-section {
+  padding: var(--spacing-md) 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.sidebar-section-title {
+  font-size: var(--small-text-size);
+  font-weight: 600;
+  color: var(--gray-color);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0 var(--spacing-md) var(--spacing-sm);
+  margin: 0;
+}
+
+/* === Navigation List === */
+.nav-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.nav-list li {
+  /* Supprimé border-bottom pour un look plus moderne */
+}
+
+.nav-list a {
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-md) var(--spacing-lg);
+  color: var(--text-color);
+  text-decoration: none;
+  transition: all var(--transition-fast);
+  font-weight: 500;
+  border-radius: 0;
+  margin: 0 var(--spacing-sm);
+  border-radius: var(--border-radius-md);
+}
+
+.nav-list a:hover {
+  background-color: var(--background-color);
+  color: var(--primary-color);
+  transform: translateX(4px);
+}
+
+.nav-list a.active {
+  background-color: var(--secondary-color);
+  color: var(--card-background);
+}
+
+/* === Icons SVG pour les liens === */
+.nav-list a::before {
+  content: "";
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  margin-right: var(--spacing-sm);
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  flex-shrink: 0;
+}
+
+.nav-list a[data-destination="dashboard"]::before {
+  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5v6h8V5" /></svg>');
+}
+
+.nav-list a[data-destination="todoLists"]::before {
+  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>');
+}
+
+.nav-list a[data-destination="apprentissage"]::before {
+  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>');
+}
+
+.nav-list a[data-destination="statistics"]::before {
+  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>');
+}
+
+.nav-list a[data-destination="salatSurahSelector"]::before {
+  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>');
+}
+
+.nav-list a[data-destination="duaTimeCalculator"]::before {
+  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg>');
+}
+
+.nav-list a[data-destination="surahmemorization"]::before {
+  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>');
+}
+
+.nav-list a[data-destination="mosquetime"]::before {
+  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>');
+}
+
+/* === Subnav === */
+.subnav {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  background-color: transparent;
+}
+
+.subnav a {
+  padding-left: calc(var(--spacing-lg) * 2);
+  font-size: var(--small-text-size);
+  font-weight: 400;
+  color: var(--gray-color);
+}
+
+.subnav a::before {
+  content: "•";
+  margin-right: var(--spacing-sm);
+}
+
+/* === Sidebar Overlay === */
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 97;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--transition-normal),
+    visibility var(--transition-normal);
+}
+
+.sidebar-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* === Nav List Divider === */
+.nav-list-divider {
+  height: 1px;
+  background-color: var(--border-color);
+  margin: var(--spacing-sm) 0;
+}
+
+/* ========================================
+   NAVIGATION - RESPONSIVE
+======================================== */
+
+/* === Breakpoint SM (640px) === */
+@media (max-width: 640px) {
+  .app-branding h1 {
+    font-size: 1.125rem;
+  }
+
+  .profile-button {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: var(--small-text-size);
+  }
+}
+
+/* === Hamburger pour mobile === */
+.hamburger-btn {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: var(--spacing-sm);
+  line-height: 1;
+  color: var(--text-color);
+  transition: color var(--transition-fast);
+  position: absolute;
+  left: var(--spacing-md);
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.hamburger-btn:hover {
+  color: var(--primary-color);
+}
+
+/* === Breakpoint LG (1024px) === */
+@media (max-width: 1024px) {
+  .top-nav {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    left: 0; /* Prend toute la largeur en mobile */
+    justify-content: space-between;
+  }
+
+  .hamburger-btn {
+    display: block;
+  }
+
+  .sidebar {
+    transform: translateX(-100%);
+  }
+
+  .sidebar.active {
+    transform: translateX(0);
+  }
+
+  .sidebar-close-btn {
+    display: block;
+  }
+
+  .sidebar-overlay.active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  body.menu-open {
+    overflow: hidden;
+  }
+}
+
+/* ========================================
+   WELCOME PAGE
+======================================== */
+
+/* === Welcome Page Layout === */
+#welcomepage {
+  padding-bottom: 0;
+}
+
+.welcomepage-container {
+  width: 75vw;
+  margin: 0 auto;
+  padding: var(--spacing-xl) var(--spacing-md);
+}
+
+/* === Welcome Header === */
+.welcomepage-header {
+  background-color: var(--secondary-color);
+  color: var(--card-background);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-md);
+}
+
+/* === Language Selector dans Header === */
+.welcomepage-header .language-selector {
+  display: flex;
+  gap: 10px;
+}
+
+.welcomepage-header .language-selector .lang-btn {
+  font-size: 3em;
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  transition: transform var(--transition-fast);
+}
+
+.welcomepage-header .language-selector .lang-btn:hover {
+  transform: scale(1.1);
+}
+
+.welcomepage-header .language-selector .lang-btn:focus {
+  outline: none;
+}
+
+/* === Hero Section === */
+.welcomepage-hero {
+  text-align: center;
+  margin-bottom: 10rem;
+}
+
+.welcomepage-hero h2 {
+  color: var(--primary-color);
+  font-size: 3rem;
+  margin-bottom: var(--spacing-sm);
+  font-weight: 700;
+}
+
+.welcomepage-hero p {
+  color: var(--secondary-color);
+  font-size: 2rem;
+  margin-bottom: var(--spacing-lg);
+  line-height: var(--title-line-height);
+}
+
+.welcomepage-btn {
+  background-color: var(--primary-color);
+  color: var(--card-background);
+  border: none;
+  margin-top: 50px;
+  padding: var(--spacing-md) var(--spacing-xl);
+  font-size: 1.75rem;
+  cursor: pointer;
+  border-radius: 15px;
+  font-family: var(--main-font);
+  font-weight: 500;
+  transition: background-color var(--transition-normal);
+}
+
+.welcomepage-btn:hover {
+  background-color: var(--secondary-color);
+}
+
+.welcomepage-btn-primary {
+  background-color: var(--primary-color);
+  color: var(--card-background);
+  border: none;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border-radius: var(--border-radius-md);
+  cursor: pointer;
+  font-family: var(--main-font);
+  font-size: var(--text-size);
+  transition: background-color var(--transition-normal);
+}
+
+.welcomepage-btn-primary:hover {
+  background-color: var(--secondary-color);
+}
+
+/* === Auth Forms === */
+.welcomepage-auth-forms {
+  margin-bottom: var(--spacing-xxl);
+  max-width: 90vw;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.welcomepage-card {
+  background-color: var(--card-background);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-xl);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-color);
+}
+
+/* === Tabs System === */
+.welcomepage-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: var(--spacing-lg);
+}
+
+.welcomepage-tab-btn {
+  flex: 1;
+  padding: var(--spacing-md);
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: var(--text-size);
+  color: var(--text-color);
+  font-family: var(--main-font);
+  transition: color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.welcomepage-tab-btn.active {
+  border-bottom: 2px solid var(--primary-color);
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+.welcomepage-tab-btn.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: var(--background-color);
+}
+
+.welcomepage-tab-content {
+  display: none;
+}
+
+.welcomepage-tab-content.active {
+  display: block;
+}
+
+/* === Form Layout === */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.welcomepage-form-group {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.welcomepage-form-group label {
+  margin-bottom: var(--spacing-sm);
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.welcomepage-form-group input,
+.welcomepage-form-group select {
+  width: 100%;
+  padding: var(--spacing-sm);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--text-size);
+  font-family: var(--main-font);
+  transition: border-color var(--transition-fast);
+}
+
+.welcomepage-form-group input:focus,
+.welcomepage-form-group select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+/* === Email Validation === */
+#welcomepage-email:valid,
+#welcomepage-confirmEmail:valid {
+  border-color: var(--success-color);
+}
+
+#welcomepage-email:invalid,
+#welcomepage-confirmEmail:invalid {
+  border-color: var(--error-color);
+}
+
+/* === Country List Dropdown === */
+#country-list,
+#oauth-country-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid var(--border-color);
+  background-color: var(--card-background);
+  display: none;
+  z-index: 1000;
+  border-radius: var(--border-radius-sm);
+  box-shadow: var(--shadow-md);
+}
+
+.country-item {
+  padding: var(--spacing-sm);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.country-item:hover {
+  background-color: var(--background-color);
+}
+
+/* === OAuth Country Field Optionnel === */
+#oauth-country {
+  color: var(--gray-color);
+}
+
+#oauth-country::placeholder {
+  color: var(--gray-color);
+  font-style: italic;
+}
+
+.welcomepage-form-group:has(#oauth-country) label {
+  color: var(--gray-color);
+  font-style: italic;
+}
+
+/* === Terms Checkbox === */
+.terms-group {
+  grid-column: 1 / -1;
+  margin: var(--spacing-md) 0;
+  padding: var(--spacing-md);
+  background-color: var(--card-background);
+  border-radius: var(--border-radius-lg);
+  border: 1px solid var(--border-color);
+}
+
+.terms-checkbox-container {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  position: relative;
+}
+
+.terms-checkbox-container input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  cursor: pointer;
+  border: 2px solid var(--primary-color);
+  border-radius: var(--border-radius-sm);
+  appearance: none;
+  -webkit-appearance: none;
+  background-color: var(--card-background);
+  transition: all var(--transition-fast);
+}
+
+.terms-checkbox-container input[type="checkbox"]:checked {
+  background-color: var(--primary-color);
+  position: relative;
+}
+
+.terms-checkbox-container input[type="checkbox"]:checked::after {
+  content: "✓";
+  position: absolute;
+  color: var(--card-background);
+  font-size: 14px;
+  left: 4px;
+  top: 0px;
+}
+
+.terms-checkbox-container label {
+  font-size: 0.95rem;
+  color: var(--text-color);
+  cursor: pointer;
+  user-select: none;
+}
+
+.terms-link {
+  color: #000;
+  text-decoration: none;
+  font-size: 1.1rem;
+  font-weight: bolder;
+  transition: all var(--transition-fast);
+}
+
+.terms-link:hover {
+  color: var(--primary-color);
+  text-decoration: underline;
+}
+
+/* === Signup Button State === */
+#welcomepage-signupForm button[type="submit"] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transition: all var(--transition-normal);
+}
+
+#welcomepage-signupForm button[type="submit"].enabled {
+  opacity: 1;
+  cursor: pointer;
+}
+
+/* === Captcha Styles === */
+.captcha-group {
+  grid-column: 1 / -1;
+}
+
+.turnstile-container {
+  display: flex;
+  justify-content: center;
+  margin: var(--spacing-md) 0;
+  padding: var(--spacing-md);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-md);
+  background-color: var(--background-color);
+}
+
+.captcha-info {
+  text-align: center;
+  margin-top: var(--spacing-sm);
+  font-size: var(--small-text-size);
+  color: var(--gray-color);
+}
+
+.captcha-info a {
+  color: var(--secondary-color);
+  text-decoration: none;
+}
+
+.captcha-info a:hover {
+  text-decoration: underline;
+}
+
+/* === Content Sections === */
+.welcomepage-features,
+.welcomepage-vision,
+.welcomepage-why-choose,
+.welcomepage-commitment {
+  margin-bottom: 9rem;
+}
+
+.welcomepage-features h2,
+.welcomepage-why-choose h2 {
+  color: var(--primary-color);
+  font-size: 2.5rem;
+  margin-bottom: var(--spacing-xl);
+  text-align: center;
+  font-weight: 700;
+}
+
+.welcomepage-vision h2,
+.welcomepage-commitment h2 {
+  color: var(--primary-color);
+  font-size: 2.5rem;
+  margin-bottom: var(--spacing-sm);
+  font-weight: 700;
+}
+
+/* === Content Paragraphs === */
+.welcomepage-hero p,
+.welcomepage-features p,
+.welcomepage-vision p,
+.welcomepage-why-choose p,
+.welcomepage-commitment p {
+  color: var(--primary-color);
+  font-size: 1.5rem;
+  margin-bottom: var(--spacing-xl);
+  line-height: var(--text-line-height);
+}
+
+.welcomepage-vision p,
+.welcomepage-commitment p,
+.welcomepage-commitment li {
+  color: var(--text-color);
+  margin-bottom: var(--spacing-md);
+  font-size: 1.3rem;
+}
+
+/* === Grids === */
+.welcomepage-features-grid,
+.welcomepage-why-choose-grid {
+  display: grid;
+  gap: var(--spacing-xl);
+}
+
+.welcomepage-features-grid {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.welcomepage-why-choose-grid {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+/* === Cards === */
+.welcomepage-feature-card,
+.welcomepage-why-choose-card {
+  background-color: var(--card-background);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-color);
+  transition: transform var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.welcomepage-feature-card:hover,
+.welcomepage-why-choose-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.welcomepage-feature-card h3,
+.welcomepage-why-choose-card h3 {
+  color: var(--text-color);
+  font-size: var(--h2-size);
+  margin-bottom: var(--spacing-sm);
+  font-weight: 600;
+}
+
+.welcomepage-feature-card p,
+.welcomepage-why-choose-card p {
+  color: var(--text-color);
+  margin-bottom: 0;
+  font-size: 1.3rem;
+  line-height: var(--text-line-height);
+}
+
+/* === Lists === */
+.welcomepage-commitment ul {
+  list-style-type: none;
+  padding-left: var(--spacing-md);
+}
+
+.welcomepage-commitment li:before {
+  content: "•";
+  color: var(--primary-color);
+  display: inline-block;
+  width: 1em;
+  margin-left: -1em;
+  font-weight: bold;
+}
+
+/* === Footer === */
+.welcomepage-footer {
+  background-color: var(--secondary-color);
+  color: var(--card-background);
+  text-align: center;
+  padding: var(--spacing-xl);
+  margin-top: var(--spacing-xxl);
+  font-size: var(--text-size);
+}
+
+/* === Hidden Utility === */
+.hidden {
+  display: none;
+}
+
+/* === Signup Closed Message === */
+.signup-closed-message {
+  background-color: var(--warning-color);
+  color: var(--text-color);
+  padding: var(--spacing-lg);
+  border-radius: var(--border-radius-md);
+  text-align: center;
+  margin: var(--spacing-lg) 0;
+}
+
+.signup-closed-message h3 {
+  margin-bottom: var(--spacing-sm);
+  font-size: var(--h3-size);
+}
+
+.signup-closed-message p {
+  margin: 0;
+  font-size: var(--text-size);
+}
+
+/* ========================================
+   WELCOME PAGE - MOSQUETIME INTEGRATION
+======================================== */
+
+/* Styles pour MosqueTime sur la page d'accueil */
+.welcomepage-mosque-time {
+  padding: 0;
+  margin: 0;
+  background: var(--card-background);
+  border-radius: 12px;
+  box-shadow: var(--shadow-card);
+}
+
+/* === MosqueTime Header complet (titre + sous-titre) === */
+.welcomepage-mosque-time .mosquetime-header {
+  background-color: var(--secondary-color);
+  color: var(--card-background);
+  padding: 20px;
+  border-radius: 12px 12px 0 0;
+}
+
+.welcomepage-mosque-time .mosquetime-title {
+  margin: 0;
+  font-size: 24px;
+}
+
+.welcomepage-mosque-time .mosquetime-subtitle {
+  margin: 5px 0 0;
+  font-size: 14px;
+}
+
+/* === MosqueTime Content Container === */
+.welcomepage-mosque-time .mosquetime-content {
+  padding: 20px;
+}
+
+/* === Location Search === */
+.welcomepage-mosque-time .mosquetime-location-search {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.welcomepage-mosque-time .mosquetime-select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-family: var(--main-font);
+}
+
+.welcomepage-mosque-time .mosquetime-button {
+  background-color: var(--secondary-color);
+  color: var(--card-background);
+  border: none;
+  padding: 10px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: var(--main-font);
+}
+
+.welcomepage-mosque-time .mosquetime-button:hover {
+  background-color: var(--primary-color);
+}
+
+/* === Date Display === */
+.welcomepage-mosque-time .mosquetime-date-display {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+/* === Tabs === */
+.welcomepage-mosque-time .mosquetime-tabs {
+  display: flex;
+  margin-bottom: 20px;
+  background-color: var(--background-color);
+  border-radius: 8px;
+  padding: 4px;
+}
+
+.welcomepage-mosque-time .mosquetime-tab {
+  flex: 1;
+  text-align: center;
+  padding: 9px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.welcomepage-mosque-time .mosquetime-tab.active {
+  background-color: var(--secondary-color);
+  color: var(--card-background);
+}
+
+/* === Sort Buttons === */
+.welcomepage-mosque-time .mosquetime-sort-buttons {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+  justify-content: center;
+}
+
+.welcome-mosquetime-section {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.welcome-mosquetime-header {
+  margin-bottom: 2rem;
+}
+
+.welcome-mosquetime-title {
+  font-size: 1.5rem;
+  color: var(--text-color);
+  margin-bottom: 1rem;
+}
+
+.welcome-mosquetime-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.welcome-mosquetime-location-search {
+  display: flex;
+  gap: 1rem;
+  flex: 1;
+}
+
+.welcome-mosquetime-btn {
+  padding: 0.5rem 1rem;
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.welcome-mosquetime-btn:hover {
+  background: var(--secondary-color);
+}
+
+.welcome-btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  background: var(--primary-color);
+  color: var(--card-background);
+  cursor: pointer;
+}
+
+.welcome-btn:hover {
+  background: var(--secondary-color);
+}
+
+.welcome-mosquetime-select {
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: white;
+}
+
+.welcome-mosquetime-tabs {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.welcome-mosquetime-tab {
+  padding: 0.5rem 1rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+}
+
+.welcome-mosquetime-tab.active {
+  border-bottom-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.welcome-mosquetime-content {
+  background: var(--card-background);
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: var(--shadow-light);
+}
+
+.welcome-mosquetime-card {
+  background: var(--card-background);
+  border-radius: 12px;
+  padding: 20px;
+  margin: 20px 0;
+  box-shadow: var(--shadow-light);
+}
+
+/* Grille des mosquées */
+.welcome-mosquetime-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+/* Styles pour les cartes de mosquées */
+.welcome-mosquetime-mosque-card {
+  background: var(--card-background);
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  margin-bottom: 1rem;
+}
+
+.welcome-mosquetime-prayer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.welcome-mosquetime-prayer-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.5rem;
+  background: var(--background-color);
+  border-radius: 4px;
+}
+
+.prayer-time {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+.prayer-times-grid {
+  padding: 10px 0;
+}
+
+.welcomepage-mosque-time .prayer-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.75rem;
+  margin-top: 3px;
+  text-align: center;
+  border-radius: 6px;
+}
+
+.welcomepage-mosque-time .mosquetime-mosque-card {
+  background: var(--card-background);
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* === Container Scrollable pour les mosquées === */
+.welcomepage-mosque-time .scrollable-content {
+  max-height: 600px;
+  overflow-y: auto;
+  padding-right: 5px;
+}
+
+.welcomepage-mosque-time .mosquetime-mosque-card {
+  max-height: 400px;
+  overflow-y: auto;
+  background-color: var(--card-background);
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.welcomepage-mosque-time .mosquetime-tab-content {
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+#welcome-mosquetime-grid {
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.welcomepage-mosque-time .mosque-list-container {
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.welcomepage-mosque-time .mosque-header {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.welcomepage-mosque-time .mosque-info {
+  flex: 1;
+}
+
+.welcomepage-mosque-time .mosque-name {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-color);
+  margin-bottom: 0.5rem;
+}
+
+.welcomepage-mosque-time .mosque-address {
+  font-size: 0.875rem;
+  color: var(--gray-color);
+  margin: 0;
+}
+
+#welcome-mosquetime-grid {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 1rem;
+}
+
+.welcomepage-mosque-time .mosquetime-card {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+.welcomepage-mosque-time .mosquetime-content {
+  width: 100%;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.mosquetime-card .mosquetime-content {
+  padding: 20px;
+}
+
+.mosque-prayer-times {
+  border-top: 1px solid var(--secondary-color);
+  margin-top: 1rem;
+}
+
+/* === Disclaimer centré === */
+.welcomepage-mosque-time .mosquetime-disclaimer {
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--gray-color);
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-sm);
+}
+
+.welcomepage-mosque-time .prayer-times-grid,
+.welcomepage-mosque-time .additional-times-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.5rem;
+  padding: 10px 0;
+  margin: 0;
+  background: var(--card-background);
+  border-radius: 8px;
+}
+
+/* === Styles Prayer Label et Jamaa Time === */
+.prayer-label {
+  font-size: 14px;
+  color: var(--text-color);
+  margin-bottom: 4px;
+  font-weight: 500;
+  order: 1;
+}
+
+.jamaa-time {
+  font-size: 16px;
+  color: var(--primary-color);
+  font-weight: bold;
+  order: 2;
+  margin-top: 2px;
+}
+
+.additional-times-grid,
+.welcomepage-mosque-time .additional-times-grid {
+  position: relative;
+  opacity: 0.6;
+  background-color: #f5f5f5;
+  border-radius: 6px;
+}
+
+/* Ligne horizontale qui traverse la section */
+.additional-times-grid::before,
+.welcomepage-mosque-time .additional-times-grid::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background-color: #9e9e9e;
+  z-index: 1;
+}
+
+/* Texte "Coming soon" superposé au centre */
+.additional-times-grid::after,
+.welcomepage-mosque-time .additional-times-grid::after {
+  content: "Coming soon";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #f5f5f5;
+  padding: 0 10px;
+  font-size: 0.8rem;
+  color: #666;
+  z-index: 2;
+}
+
+/* Ajustement pour les éléments à l'intérieur de la grille désactivée */
+.additional-times-grid .prayer-item,
+.welcomepage-mosque-time .additional-times-grid .prayer-item {
+  position: relative;
+  z-index: 0;
+}
+
+/* Version française du texte si la langue est en français */
+html[lang="fr"] .additional-times-grid::after,
+html[lang="fr"] .welcomepage-mosque-time .additional-times-grid::after {
+  content: "Bientôt disponible";
+}
+
+/* ========================================
+   WELCOME PAGE - RESPONSIVE
+======================================== */
+
+/* === Breakpoint XL (1200px) === */
+@media (max-width: 1200px) {
+  .welcomepage-auth-forms {
+    max-width: 85vw;
+  }
+
+  #welcomepage-features {
+    margin-left: auto;
+  }
+
+  .welcomepage-features p,
+  .welcomepage-vision p,
+  .welcomepage-why-choose p,
+  .welcomepage-commitment p {
+    text-align: left;
+  }
+
+  /* === MosqueTime Welcome Responsive XL === */
+  .mosquetime-card,
+  .welcomepage-mosque-time .mosquetime-card {
+    width: 100%;
+    margin: 0 0 var(--spacing-md) 0;
+    padding: var(--spacing-md);
+  }
+
+  .prayer-times-grid,
+  .additional-times-grid,
+  .welcomepage-mosque-time .prayer-times-grid,
+  .welcomepage-mosque-time .additional-times-grid {
+    gap: 0.75rem;
+    padding: 8px 0;
+  }
+}
+
+/* === Breakpoint LG (1024px) === */
+@media (max-width: 1024px) {
+  .welcomepage-features-grid,
+  .welcomepage-why-choose-grid,
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .welcomepage-hero h2 {
+    font-size: 2rem;
+  }
+
+  .welcomepage-features h2,
+  .welcomepage-vision h2,
+  .welcomepage-why-choose h2,
+  .welcomepage-commitment h2 {
+    font-size: 1.75rem;
+    text-align: center;
+  }
+
+  .welcomepage-features p,
+  .welcomepage-vision p,
+  .welcomepage-why-choose p,
+  .welcomepage-commitment p {
+    text-align: center;
+  }
+
+  .welcomepage-features,
+  .welcomepage-vision,
+  .welcomepage-why-choose,
+  .welcomepage-commitment {
+    margin-bottom: 6rem;
+  }
+}
+
+/* === Breakpoint XS (480px) === */
+@media (max-width: 480px) {
+  .welcomepage-container {
+    width: 99vw;
+    padding: 0.5rem;
+  }
+
+  .welcomepage-header {
+    flex-direction: column;
+    gap: var(--spacing-md);
+    text-align: center;
+  }
+
+  .welcomepage-header .language-selector .lang-btn {
+    font-size: 2rem;
+  }
+
+  .welcomepage-hero h2 {
+    font-size: 1.5rem;
+  }
+
+  .welcomepage-hero p {
+    font-size: 1.25rem;
+  }
+
+  .welcomepage-btn {
+    font-size: 1.25rem;
+    padding: var(--spacing-sm) var(--spacing-md);
+    margin-top: var(--spacing-lg);
+  }
+
+  .welcomepage-auth-forms {
+    max-width: 95vw;
+  }
+
+  .welcomepage-card {
+    padding: var(--spacing-md);
+  }
+
+  .welcomepage-features-grid,
+  .welcomepage-why-choose-grid {
+    gap: var(--spacing-md);
+  }
+
+  .welcomepage-feature-card,
+  .welcomepage-why-choose-card {
+    margin: 0 var(--spacing-md);
+    padding: var(--spacing-md);
+  }
+
+  .welcomepage-features h2,
+  .welcomepage-vision h2,
+  .welcomepage-why-choose h2,
+  .welcomepage-commitment h2 {
+    font-size: 1.5rem;
+  }
+
+  .welcomepage-features p,
+  .welcomepage-vision p,
+  .welcomepage-why-choose p,
+  .welcomepage-commitment p {
+    font-size: 1.125rem;
+  }
+
+  .welcomepage-feature-card h3,
+  .welcomepage-why-choose-card h3 {
+    font-size: 1.125rem;
+  }
+
+  .welcomepage-feature-card p,
+  .welcomepage-why-choose-card p {
+    font-size: 1rem;
+  }
+
+  .welcomepage-features,
+  .welcomepage-vision,
+  .welcomepage-why-choose,
+  .welcomepage-commitment {
+    margin-bottom: var(--spacing-xxl);
+  }
+
+  .welcomepage-footer {
+    padding: var(--spacing-md);
+    font-size: var(--small-text-size);
+  }
+
+  /* Animation pulse pour mobile */
+  @keyframes pulse {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.05);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  .welcomepage-hero {
+    animation: pulse 3s ease-in-out infinite;
+  }
+
+  /* === MosqueTime Welcome Responsive XS === */
+  .welcomepage-mosque-time .mosquetime-location-search,
+  .welcome-mosquetime-location-search {
+    flex-direction: column;
+    gap: var(--spacing-md);
+  }
+
+  .mosquetime-sort-buttons,
+  .welcomepage-mosque-time .mosquetime-sort-buttons {
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+
+  .mosquetime-sort-buttons .mosquetime-button {
+    width: 100%;
+    font-size: var(--font-size-sm);
+    padding: var(--spacing-xs) var(--spacing-sm);
+  }
+
+  .welcomepage-mosque-time .prayer-times-grid,
+  .welcomepage-mosque-time .additional-times-grid {
+    gap: 0.3rem;
+    padding: 5px 0;
+  }
+
+  /* === MosqueTime Mobile Ultra-Compact === */
+  .welcomepage-mosque-time {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  .welcomepage-mosque-time .mosquetime-content {
+    padding: 0;
+  }
+
+  .welcomepage-mosque-time .mosquetime-mosque-card {
+    width: 100%;
+    padding: 3px;
+    margin: 0;
+  }
+
+  .welcomepage-mosque-time .prayer-times-grid,
+  .welcomepage-mosque-time .additional-times-grid {
+    gap: 8px;
+    padding: 5px 0;
+  }
+
+  .welcomepage-mosque-time .prayer-item {
+    padding: 0.1rem;
+  }
+
+  .prayer-label {
+    font-size: 0.7rem;
+  }
+
+  .jamaa-time {
+    font-size: 0.8rem;
+  }
+
+  .welcomepage-mosque-time .mosquetime-title {
+    font-size: 1.25rem;
+    text-align: center;
+  }
+
+  .welcomepage-mosque-time .mosquetime-subtitle {
+    font-size: 0.75rem;
+  }
+
+  .mosque-prayer-times {
+    margin-top: 0.25rem;
+  }
+
+  #welcome-mosquetime-grid {
+    width: 100%;
+    padding: 0;
+  }
+
+  .welcomepage-mosque-time .mosque-name {
+    font-size: 16px;
+    padding: 0.25rem 0.25rem 0 0.25rem;
+    margin: 0 0 0 0.3rem;
+  }
+
+  .welcomepage-mosque-time .mosque-address {
+    font-size: 0.8rem;
+    margin: 0 0 0.25rem 0.3rem;
+  }
+
+  .welcomepage-mosque-time .mosquetime-title {
+    font-size: 19px;
+  }
+
+  .welcomepage-mosque-time .mosquetime-subtitle {
+    font-size: 12px;
+  }
+
+  #welcome-mosquetime-city-date {
+    font-size: 16px;
+  }
+
+  .welcomepage-mosque-time .mosque-name {
+    font-size: 1rem;
+    padding: var(--spacing-xs) var(--spacing-xs) 0 var(--spacing-xs);
+    margin: 0 0 0 var(--spacing-xs);
+  }
+
+  .welcomepage-mosque-time .mosque-address {
+    font-size: 0.8rem;
+    margin: 0 0 var(--spacing-xs) var(--spacing-xs);
+  }
+
+  #welcome-mosquetime-grid {
+    width: 100%;
+    padding: 0;
+  }
+
+  #welcome-mosquetime-grid .mosquetime-mosque-card {
+    width: 100%;
+    padding: var(--spacing-sm);
+    margin: var(--spacing-xs);
+  }
+
+  .welcomepage-mosque-time .mosquetime-content {
+    padding: 0;
+  }
+
+  .mosque-prayer-times {
+    padding-top: var(--spacing-xs);
+  }
+}
+
+/* ========================================
+   APPRENTISSAGE/TIMER SECTION
+======================================== */
+
+/* === Layout principal TalibTimer === */
+#talibtimer {
+  margin-left: 260px;
+}
+
+#apprentissage {
+  margin-left: 400px;
+  padding: 1rem;
+  background-color: #e7ecef;
+  min-height: 100vh;
+  font-family: Arial, sans-serif;
+  color: #274c77;
+}
+
+/* === En-tête === */
+
+/* === Timer Cards === */
+.timer {
+  background-color: #ffffff;
+  border-radius: 0.5rem;
+  border: 1px solid #e0e0e0;
+  margin-bottom: 1rem;
+  overflow: hidden;
+  box-shadow: 0 1px 2px #6096ba;
+}
+
+.timer h2 {
+  background-color: #6096ba8a;
+  color: #274c77;
+  padding: 0.75rem;
+  font-size: 1.1rem;
+  margin: 0;
+  box-shadow: 0 1px 2px #6096ba;
+}
+
+/* === Timer Containers === */
+.timers-container:nth-of-type(2) {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+/* === Timer Content === */
+.timer-content {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  min-height: 200px;
+}
+
+/* === Task Selection === */
+#task-select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+  background-color: #ffffff;
+  color: #274c77;
+}
+
+#session-info {
+  margin: 1rem 0;
+  text-align: center;
+}
+
+/* === Temps affichés === */
+.time_displayed {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #274c77;
+  margin: 1.5rem 0;
+}
+
+/* === Groupement des boutons === */
+.button-group {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  align-items: center;
+  margin: 1rem 0;
+  flex-wrap: wrap;
+}
+
+/* === Style commun pour tous les boutons === */
+.button-group button {
+  width: 45px;
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #6096ba;
+  background-color: #ffffff;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0.5rem;
+}
+
+.button-group button:hover {
+  background-color: #6096ba;
+}
+
+.button-group button:hover img {
+  filter: brightness(0) invert(1);
+}
+
+.button-group button img {
+  height: 25px;
+  width: auto;
+  transition: filter 0.2s ease;
+}
+
+/* === Boutons du compteur === */
+.button-group .counter-button {
+  min-width: 60px;
+  padding: 0.5rem 1rem;
+}
+
+/* === Boutons de sauvegarde === */
+#save-button-session {
+  margin-left: 1.5vw;
+  background-color: #6096ba;
+}
+
+/* === Manual Time === */
+#manual-time-container {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  align-items: center;
+  margin: 1rem 0;
+  width: 100%;
+}
+
+#manual-time-container div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#manual-time-container label {
+  margin-bottom: 0.5rem;
+  color: #274c77;
+}
+
+#manual-time-container input {
+  width: 80px;
+  padding: 0.5rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 0.5rem;
+  text-align: center;
+}
+
+.total-time {
+  margin: 1rem 0;
+  color: #274c77;
+}
+
+/* === Counter === */
+#counter-task-title {
+  color: #274c77;
+  margin: 1rem 0;
+}
+
+#counter-value {
+  font-size: 2.5rem;
+  color: #274c77;
+  margin: 1rem 0;
+}
+
+/* === Timer Settings === */
+.timer-settings {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  background: #6096ba;
+  border-radius: 8px;
+}
+
+.timer-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.timer-input-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.timer-input {
+  width: 70px;
+  padding: 0.5rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  background: #e7ecef;
+  color: #274c77;
+  font-size: 1rem;
+  text-align: center;
+}
+
+.timer-input:focus {
+  outline: none;
+  border-color: #274c77;
+  box-shadow: 0 0 0 2px rgba(39, 76, 119, 0.2);
+}
+
+.timer-input-suffix {
+  color: #8b8c89;
+  font-size: 0.9rem;
+}
+
+/* ========================================
+   APPRENTISSAGE RESPONSIVE DESIGN
+======================================== */
+
+/* === Breakpoint LG (1024px) === */
+@media (max-width: 1024px) {
+  #apprentissage {
+    margin-left: 0;
+  }
+
+  .timers-container:nth-of-type(2) {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* === Breakpoint XS (480px) === */
+@media (max-width: 480px) {
+  .timer {
+    margin-bottom: 0.5rem;
+  }
+
+  .timer h2 {
+    padding: 0.25rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .time_displayed {
+    font-size: 2rem;
+    margin: 0.25rem;
+  }
+
+  .button-group {
+    flex-direction: row;
+    margin: 0.15rem;
+  }
+
+  #manual-time-container {
+    flex-direction: column;
+    gap: 1rem;
+    margin: 0;
+  }
+
+  .timer-content {
+    padding: 0.25rem;
+    min-height: 130px;
+  }
+
+  .total-time {
+    margin: 0;
+  }
+}
+
+/* ========================================
+   STATISTICS SECTION
+======================================== */
+
+/* === Page Statistics (base) === */
+.page#statistics {
+  background-color: #e7ecef;
+  min-height: 100vh;
+  padding: 1.5rem;
+  box-sizing: border-box;
+  transition: margin-left 0.3s ease;
+}
+
+@media (min-width: 1024px) {
+  .page#statistics {
+    margin-left: 400px;
+    padding: 2rem;
+  }
+}
+
+/* === Statistics Container - Grid Layout === */
+.statistics-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  padding: 0.5rem;
+}
+
+/* === Chart Section === */
+.chart-section {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  height: auto;
+  min-height: 400px;
+}
+
+/* === Stats Header === */
+.stats-header {
+  background-color: #6096ba8a;
+  padding: 0.75rem 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--primary-color);
+}
+
+.title-area {
+  display: flex;
+  align-items: center;
+}
+
+.title-area h2 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+/* === Period Navigation === */
+.period-navigation {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.period-display {
+  min-width: 100px;
+  text-align: center;
+  font-weight: 500;
+  padding: 0.25rem 0.5rem;
+  color: white;
+  font-size: 0.9rem;
+}
+
+.nav-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 4px;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.nav-btn:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+.nav-btn svg {
+  width: 16px;
+  height: 16px;
+  color: white;
+}
+
+.nav-btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.nav-btn:disabled {
+  pointer-events: none;
+}
+
+/* === Chart Content Container === */
+.chart-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+/* === Chart Wrapper === */
+.chart-wrapper {
+  height: 300px; /* defaultHeight */
+  transition: height 0.3s ease-out;
+  position: relative;
+  padding: 1rem;
+  background-color: white;
+}
+
+/* Quand les détails sont visibles */
+.chart-section.details-visible .chart-wrapper {
+  height: 200px; /* Hauteur réduite quand les détails sont visibles */
+}
+
+/* === Task Details Section === */
+.task-details-section {
+  height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: height 0.3s ease-out, opacity 0.3s ease-out;
+}
+
+/* Quand les détails sont visibles */
+.chart-section.details-visible .task-details-section {
+  height: 200px;
+  opacity: 1;
+}
+
+.task-details-section.expanded {
+  max-height: 200px;
+  padding: 1rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* === Table Styles === */
+.task-details-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0;
+}
+
+.task-details-table th,
+.task-details-table td {
+  padding: 0.5rem;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.task-details-table th {
+  font-weight: 600;
+  color: #274c77;
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* === Toggle Button === */
+.toggle-details-btn {
+  width: 100%;
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background-color: #f0f0f0;
+  border: none;
+  cursor: pointer;
+}
+
+.toggle-details-btn:hover {
+  background-color: #e0e0e0;
+}
+
+.toggle-details-btn svg {
+  transition: transform 0.3s ease-out;
+}
+
+/* === Chart Legend & Loading States === */
+.chartjs-tooltip {
+  background: rgba(0, 0, 0, 0.8) !important;
+  border-radius: 4px !important;
+  color: white !important;
+  padding: 6px 10px !important;
+  font-size: 0.85rem !important;
+}
+
+.chart-wrapper.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 150px;
+}
+
+.chart-wrapper.loading::after {
+  content: "Chargement...";
+  color: #274c77;
+  font-size: 0.85rem;
+}
+
+/* === Bouton de suppression de l'historique === */
+.delete-history-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0rem auto;
+  padding: 0.5rem 0;
+  text-align: center;
+  position: relative;
+}
+
+/* Centrage tenant compte de la sidebar sur desktop - même logique que .page#statistics */
+@media (min-width: 1024px) {
+  .delete-history-container {
+    margin-left: 350px;
+    margin-right: auto;
+    width: 100% !important;
+  }
+}
+
+.delete-history-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 49px;
+  height: 49px;
+  background-color: #dc3545;
+  color: white;
+  border: 2px solid #dc3545;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0.5rem;
+  position: relative;
+}
+
+.delete-history-btn:hover {
+  background-color: #c82333;
+  border-color: #c82333;
+  transform: translateY(-1px);
+}
+
+.delete-history-btn:active {
+  background-color: #b21e2f;
+  border-color: #b21e2f;
+  transform: translateY(0);
+}
+
+.delete-history-btn svg {
+  width: 28px;
+  height: 28px;
+  stroke-width: 2;
+}
+
+/* === Responsive Adjustments === */
+@media (max-width: 1200px) {
+  .statistics-container {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  .chart-wrapper {
+    min-height: 250px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .page#statistics {
+    margin-left: 0;
+  }
+
+  .delete-history-container {
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .statistics-container {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .page#statistics {
+    padding: 1rem;
+  }
+
+  .chart-wrapper {
+    min-height: 300px;
+  }
+
+  .delete-history-container {
+    margin: 1.5rem auto;
+    padding: 0.75rem 0;
+  }
+
+  .delete-history-btn {
+    width: 42px;
+    height: 42px;
+  }
+
+  .delete-history-btn svg {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .page#statistics {
+    padding: 0.5rem;
+  }
+
+  .stats-header {
+    padding: 0.5rem;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .period-navigation {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .title-area h2 {
+    font-size: 1rem;
+  }
+
+  .chart-wrapper {
+    min-height: 250px;
+    padding: 0.75rem;
+  }
+
+  .task-details-section.expanded {
+    max-height: 300px;
+  }
+
+  .delete-history-container {
+    margin: 1rem auto;
+    padding: 0.5rem 0;
+  }
+
+  .delete-history-btn {
+    width: 38px;
+    height: 38px;
+  }
+
+  .delete-history-btn svg {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+/* ========================================
+   TODO LISTS SECTION
+======================================== */
+
+/* === Container principal Todo Lists === */
+#todoLists {
+  font-family: Arial, sans-serif;
+  background-color: #e7ecef;
+  color: #274c77;
+  padding: 1rem;
+  margin-left: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* === Card Styles === */
+.todo-card {
+  width: 100%;
+  max-width: 65vw;
+  margin: 0 auto;
+  background-color: white;
+  box-shadow: 0 1px 2px #6096ba;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.todo-card-header {
+  background-color: #6096ba8a;
+  color: #274c77;
+  padding: 1rem;
+}
+
+.todo-card-title {
+  font-size: 1.25rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+}
+
+.todo-card-content {
+  padding: 1rem;
+}
+
+/* === Input Group === */
+.todo-input-group {
+  display: flex;
+  margin-bottom: 1rem;
+}
+
+.todo-input {
+  flex-grow: 1;
+  margin-right: 0.5rem;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 0.25rem;
+}
+
+.todo-btn {
+  background-color: #274c77;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+}
+
+.todo-btn:hover {
+  background-color: #6096ba;
+}
+
+.todo-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.todo-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem;
+  background-color: #e7ecef57;
+  border-radius: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.todo-item-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* Ajoute un espacement uniforme entre la checkbox et le label */
+  flex: 1;
+}
+
+.todo-item label {
+  display: inline-flex; /* Changé de flex à inline-flex */
+  align-items: center;
+  margin: 0; /* Supprime la marge à gauche */
+}
+
+.todo-item.completed label {
+  text-decoration: line-through;
+  color: #8b8c89;
+}
+
+.todo-checkbox {
+  width: 1.5rem;
+  height: 1.5rem;
+  margin: 0 0.5rem;
+  cursor: pointer;
+}
+
+.todo-checkbox:checked::after {
+  content: "✓";
+  font-size: 1.2rem;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #274c77;
+}
+
+.todo-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.todo-delete-btn,
+.todo-rename-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  margin-left: 0.5rem;
+}
+
+.todo-delete-btn {
+  color: #ff0000;
+}
+
+.todo-delete-btn:hover {
+  background-color: #ffeeee;
+}
+
+.todo-rename-btn {
+  color: #274c77;
+}
+
+.todo-rename-btn:hover {
+  background-color: #e7ecef;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* === Header Content avec Actions === */
+.todo-card-header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.tasks-counter {
+  font-size: var(--small-text-size);
+  margin-left: 0.5rem;
+  color: var(--primary-color);
+}
+
+.todo-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.select-all-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--primary-color);
+  cursor: pointer;
+}
+
+.select-all-label {
+  font-size: var(--small-text-size);
+}
+
+.todo-delete-selected-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: #ff4444;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.todo-delete-selected-btn:not([disabled]) {
+  opacity: 1;
+}
+
+.todo-delete-selected-btn:not([disabled]):hover {
+  background-color: #ff0000;
+}
+
+.todo-delete-selected-btn[disabled] {
+  cursor: not-allowed;
+}
+
+/* === Responsive Design === */
+@media (max-width: 1024px) {
+  #todoLists {
+    margin-left: auto;
+    margin-right: auto;
+    width: 90vw;
+  }
+
+  .todo-card {
+    max-width: 90vw;
+  }
+}
+
+@media (min-width: 640px) {
+  #todoLists {
+    padding: 2rem;
+  }
+
+  h1 {
+    font-size: var(--h1-size);
+  }
+
+  .todo-card-title {
+    font-size: 1.5rem;
+  }
+
+  .todo-card-content {
+    padding: 1.5rem;
+  }
+}
+
+/* ========================================
+   6. MESSAGING SECTION
+   ======================================== */
+
+/* Main messaging page */
+#messaging {
+  margin-left: var(--sidebar-width);
+  padding: var(--spacing-md);
+  min-height: 100vh;
+  max-width: 98vw;
+  background-color: var(--background-color);
+  color: var(--primary-color);
+  font-family: var(--font-family);
+}
+
+/* Container and layout */
+.messaging-container {
+  max-width: 65vw;
+  margin: 0 auto;
+}
+
+/* Messaging card */
+.messaging-card {
+  background-color: var(--card-background);
+  border: 1px solid var(--accent-color);
+  border-radius: var(--border-radius-xl);
+  overflow: hidden;
+}
+
+.messaging-card-header {
+  background-color: var(--secondary-color);
+  color: var(--text-light);
+  padding: var(--spacing-md);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.messaging-card-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  margin: 0;
+}
+
+/* Action buttons */
+.messaging-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.messaging-action-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: var(--text-light);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: calc(var(--border-radius) / 2);
+  cursor: pointer;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: calc(var(--spacing-xs) / 2);
+  transition: var(--transition);
+}
+
+.messaging-action-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Card content */
+.messaging-card-content {
+  padding: var(--spacing-md);
+}
+
+.messaging-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Message items */
+.message-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius);
+  margin-bottom: var(--spacing-md);
+  border: 1px solid #e9ecef;
+  transition: var(--transition);
+  cursor: pointer;
+}
+
+.message-item:hover {
+  border-color: var(--secondary-color);
+  box-shadow: var(--shadow-sm);
+}
+
+.message-item:last-child {
+  margin-bottom: 0;
+}
+
+.message-item.read {
+  opacity: 0.7;
+  background-color: #f8f9fa;
+}
+
+/* Message content layout */
+.message-content {
+  display: flex;
+  align-items: flex-start;
+  flex-grow: 1;
+}
+
+.message-icon {
+  margin-right: calc(var(--spacing-sm) + var(--spacing-xs));
+  flex-shrink: 0;
+}
+
+.message-text {
+  flex-grow: 1;
+}
+
+.message-title {
+  font-weight: 600;
+  margin: 0 0 calc(var(--spacing-xs) / 2) 0;
+  color: var(--primary-color);
+  font-size: 1rem;
+}
+
+.message-content {
+  font-weight: 400;
+  margin: 0 0 calc(var(--spacing-xs) / 2) 0;
+  color: #495057;
+}
+
+.message-date {
+  font-size: 0.75rem;
+  color: #8b8c89;
+  margin: 0;
+}
+
+/* Message actions */
+.message-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.message-read-btn {
+  background-color: transparent;
+  border: 1px solid var(--secondary-color);
+  color: var(--secondary-color);
+  padding: calc(var(--spacing-xs) / 2) var(--spacing-sm);
+  border-radius: calc(var(--border-radius) / 2);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.message-read-btn:hover {
+  background-color: var(--secondary-color);
+  color: var(--text-light);
+}
+
+.message-delete-btn {
+  background-color: transparent;
+  border: none;
+  color: #ff4d4d;
+  cursor: pointer;
+  padding: calc(var(--spacing-xs) / 2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: calc(var(--border-radius) / 2);
+  transition: var(--transition);
+}
+
+.message-delete-btn:hover {
+  background-color: #ffe6e6;
+}
+
+/* Responsive design */
+@media (max-width: 1024px) {
+  #messaging {
+    margin-left: auto;
+    margin-right: auto;
+    width: 95vw;
+    max-width: 1500px;
+  }
+
+  .messaging-container {
+    width: 90vw;
+    max-width: 90vw;
+  }
+
+  .messaging-actions {
+    flex-direction: column;
+    gap: calc(var(--spacing-xs) / 2);
+  }
+
+  .messaging-action-btn {
+    font-size: 0.75rem;
+    padding: calc(var(--spacing-xs) / 2) var(--spacing-sm);
+  }
+}
+
+@media (max-width: 640px) {
+  #messaging {
+    padding-left: 0;
+    padding-bottom: calc(var(--spacing-xxl) + var(--spacing-md));
+  }
+
+  .messaging-title {
+    font-size: var(--h1-size);
+  }
+
+  .messaging-card-title {
+    font-size: 1.25rem;
+  }
+
+  .messaging-container {
+    width: 95vw;
+    max-width: 95vw;
+  }
+
+  .messaging-card-header {
+    flex-direction: column;
+    gap: var(--spacing-md);
+    align-items: flex-start;
+  }
+
+  .messaging-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .messaging-card-content {
+    width: 100%;
+    padding: calc(var(--spacing-xs) / 2) 0;
+  }
+
+  .message-item {
+    padding: var(--spacing-md) var(--spacing-sm);
+    border-radius: var(--border-radius);
+    margin-bottom: var(--spacing-sm);
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .message-content {
+    width: 100%;
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .message-title {
+    font-size: 0.9rem;
+  }
+
+  .message-content {
+    font-size: 0.85rem;
+  }
+
+  .message-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .message-read-btn {
+    font-size: 0.75rem;
+    padding: calc(var(--spacing-xs) / 4) calc(var(--spacing-xs) / 2);
+  }
+
+  .messaging-count {
+    width: 20px;
+    height: 20px;
+    font-size: 10px;
+    top: -8px;
+    right: -8px;
+    line-height: 1;
+    border: 1px solid var(--background-color);
+  }
+}
+
+/* ========================================
+   7. PROFILE SECTION (à ajouter ensuite)
+   ======================================== */
+
+/* =======================================
+   CONTACT FORM SECTION
+   ======================================= */
+
+/* Base Layout */
+#contactform {
+  font-family: Arial, sans-serif;
+  background-color: var(--background-color);
+  min-height: 100vh;
+  padding: 3rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: var(--text-color);
+}
+
+/* Contact Form Title */
+
+/* Layout Components */
+.contactform-wrapper {
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.contactform-container {
+  background-color: var(--card-background);
+  border: 1px solid var(--border-color);
+  border-radius: 1rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.contactform-left-column {
+  padding: 3rem;
+}
+
+/* Contact Title Section */
+.contactform-title {
+  color: var(--primary-color);
+  font-size: 2rem;
+  line-height: 1.4;
+  margin-bottom: 2.5rem;
+}
+
+.contactform-highlight {
+  color: var(--secondary-color);
+  font-weight: bold;
+}
+
+/* Contact Information */
+.contactform-info {
+  margin-bottom: 2.5rem;
+}
+
+.contactform-info-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: var(--text-color);
+  font-size: 1.1rem;
+  margin-bottom: 1.5rem;
+}
+
+.contactform-info-item svg {
+  color: var(--secondary-color);
+}
+
+/* Social Buttons */
+.contactform-social-buttons {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.contactform-social-button {
+  background: none;
+  border: 2px solid var(--border-color);
+  border-radius: 0.75rem;
+  padding: 0.75rem;
+  color: var(--secondary-color);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.contactform-social-button:hover {
+  background-color: var(--secondary-color);
+  color: var(--card-background);
+  border-color: var(--secondary-color);
+  transform: translateY(-2px);
+}
+
+/* =======================================
+   CONTACT FORM RESPONSIVE
+   ======================================= */
+
+/* Breakpoint: 1245px */
+@media (max-width: 1245px) {
+  #contactform {
+    padding: 2.5rem 1.8rem;
+  }
+
+  .contactform-title {
+    font-size: 1.9rem;
+  }
+
+  .contactform-left-column {
+    padding: 2.8rem;
+  }
+}
+
+/* Breakpoint: 1200px */
+@media (max-width: 1200px) {
+  .contactform-container {
+    max-width: 480px;
+  }
+
+  .contactform-left-column {
+    padding: 2.5rem;
+  }
+}
+
+/* Breakpoint: 1024px - Sidebar Hidden */
+@media (max-width: 1024px) {
+  #contactform {
+    margin-left: 0;
+    width: 100%;
+    padding: 2rem 1.5rem;
+  }
+
+  .contactform-wrapper {
+    max-width: 460px;
+  }
+}
+
+/* Breakpoint: 768px */
+@media (max-width: 768px) {
+  #contactform {
+    padding: 2rem 1.5rem;
+  }
+
+  .contactform-container {
+    margin: 0 0.5rem;
+  }
+
+  .contactform-title {
+    font-size: 1.7rem;
+  }
+
+  .contactform-info-item {
+    font-size: 1rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .contactform-social-buttons {
+    gap: 1.2rem;
+    justify-content: center;
+  }
+}
+
+/* Breakpoint: 640px */
+@media (max-width: 640px) {
+  #contactform {
+    padding: 2rem 1rem;
+  }
+
+  #contactform h1 {
+    font-size: var(--h1-size);
+    margin-bottom: 2rem;
+  }
+
+  .contactform-title {
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .contactform-left-column {
+    padding: 2rem;
+  }
+
+  .contactform-info-item {
+    font-size: 1rem;
+  }
+}
+
+/* Breakpoint: 480px */
+@media (max-width: 480px) {
+  #contactform {
+    padding: 1.5rem 0.8rem;
+    min-height: calc(100vh - 2rem);
+  }
+
+  #contactform h1 {
+    font-size: calc(var(--h1-size) * 0.8);
+    margin-bottom: 1.5rem;
+  }
+
+  .contactform-wrapper {
+    max-width: 100%;
+  }
+
+  .contactform-container {
+    margin: 0;
+    border-radius: 0.8rem;
+  }
+
+  .contactform-left-column {
+    padding: 1.5rem;
+  }
+
+  .contactform-title {
+    font-size: 1.3rem;
+    margin-bottom: 1.5rem;
+    line-height: 1.3;
+  }
+
+  .contactform-info {
+    margin-bottom: 2rem;
+  }
+
+  .contactform-info-item {
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+  }
+
+  .contactform-social-buttons {
+    gap: 1rem;
+  }
+
+  .contactform-social-button {
+    min-width: 36px;
+    min-height: 36px;
+    padding: 0.6rem;
+  }
+}
+
+/* Desktop with Sidebar */
+@media (min-width: 1024px) {
+  #contactform {
+    margin-left: var(--sidebar-width);
+    width: calc(100% - var(--sidebar-width));
+  }
+}
+
+/* =======================================
+   ABOUT US SECTION
+   ======================================= */
+
+/* Base Layout */
+#aboutus {
+  width: 100%;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-family: Arial, sans-serif;
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+
+.aboutus-wrapper {
+  padding: 2rem;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Main Title */
+
+/* Cards Layout */
+.aboutus-card {
+  background-color: var(--card-background);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  margin-bottom: 2rem;
+  width: 100%;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.aboutus-card-header {
+  background-color: var(--secondary-color);
+  color: var(--card-background);
+  padding: 1rem;
+}
+
+.aboutus-card-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.aboutus-card-content {
+  padding: 1.5rem;
+  color: var(--text-color);
+}
+
+/* Grid System */
+.aboutus-grid {
+  display: grid;
+  gap: 2rem;
+  margin: 2rem 0;
+  width: 100%;
+}
+
+.aboutus-list {
+  list-style-type: disc;
+  list-style-position: inside;
+  margin: 0;
+  padding: 0;
+}
+
+.aboutus-list li {
+  margin-bottom: 0.5rem;
+  line-height: 1.5;
+}
+
+/* Responsive Design - Desktop 1245px */
+@media (min-width: 1245px) {
+  #aboutus {
+    margin-left: var(--sidebar-width);
+    width: calc(100% - var(--sidebar-width));
+  }
+
+  .aboutus-wrapper {
+    padding: 2rem;
+    max-width: 1200px;
+  }
+
+  .aboutus-grid-cols-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .aboutus-grid-cols-4 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Desktop 1024px */
+@media (min-width: 1024px) and (max-width: 1244px) {
+  #aboutus {
+    margin-left: var(--sidebar-width);
+    width: calc(100% - var(--sidebar-width));
+  }
+
+  .aboutus-wrapper {
+    padding: 2rem;
+    max-width: 1200px;
+  }
+
+  .aboutus-grid-cols-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .aboutus-grid-cols-4 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Tablette et petits écrans */
+@media (max-width: 1023px) {
+  #aboutus {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .aboutus-wrapper {
+    padding: 1.5rem;
+  }
+
+  .aboutus-title {
+    font-size: 2rem;
+  }
+
+  .aboutus-grid-cols-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Mobile */
+@media (max-width: 767px) {
+  #aboutus {
+    width: 95vw;
+  }
+
+  .aboutus-wrapper {
+    padding-left: 0rem;
+    width: 95vw;
+  }
+
+  .aboutus-title {
+    font-size: 1.75rem;
+  }
+
+  .aboutus-card-title {
+    font-size: 1.25rem;
+  }
+
+  .aboutus-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .aboutus-list li {
+    font-size: 0.95rem;
+  }
+
+  .aboutus-card-content p {
+    font-size: 0.95rem;
+  }
+}
+
+/* =======================================
+   PRICE SECTION
+   ======================================= */
+
+/* Base Layout */
+#price {
+  background-color: #e7ecef;
+  color: #274c77;
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family: Arial, sans-serif;
+}
+
+.price-container {
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+/* Main Title */
+
+/* Plans Container */
+.price-plans-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  justify-content: center;
+  align-items: stretch;
+}
+
+/* Price Cards */
+.price-card {
+  background-color: white;
+  border: 1px solid #a3cef1;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.price-card-header {
+  background-color: #6096ba;
+  color: white;
+  padding: 1.5rem;
+}
+
+.price-card-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin: 0;
+}
+
+.price-card-description {
+  color: #e7ecef;
+  margin-top: 0.5rem;
+}
+
+.price-card-content {
+  padding: 1.5rem;
+  flex-grow: 1;
+}
+
+/* Price Amount */
+.price-amount {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  color: #274c77;
+}
+
+.price-period {
+  font-size: 1rem;
+  font-weight: normal;
+}
+
+/* Features List */
+.price-features-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.price-feature-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  color: #8b8c89;
+}
+
+.price-check-icon {
+  margin-right: 0.5rem;
+  color: #6096ba;
+}
+
+/* Footer and Button */
+.price-card-footer {
+  padding: 1.5rem;
+}
+
+.price-button {
+  display: block;
+  width: 100%;
+  padding: 0.75rem;
+  background-color: #274c77;
+  color: white;
+  text-align: center;
+  text-decoration: none;
+  border: none;
+  border-radius: 0.25rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.price-button:hover {
+  background-color: #6096ba;
+}
+
+/* Footnote */
+.price-footnote {
+  text-align: center;
+  margin-top: 3rem;
+  color: #8b8c89;
+}
+
+/* Responsive Design - Desktop 1245px */
+@media (min-width: 1245px) {
+  #price {
+    margin-left: var(--sidebar-width);
+  }
+
+  .price-plans-container {
+    flex-direction: row;
+  }
+
+  .price-card {
+    width: 33.333%;
+  }
+
+  #price-pro {
+    transform: scale(1.05);
+  }
+}
+
+/* Desktop 1024px */
+@media (min-width: 1024px) and (max-width: 1244px) {
+  #price {
+    margin-left: var(--sidebar-width);
+  }
+
+  .price-plans-container {
+    flex-direction: row;
+  }
+
+  .price-card {
+    width: 33.333%;
+  }
+
+  #price-pro {
+    transform: scale(1.05);
+  }
+}
+
+/* Tablette et petits écrans */
+@media (max-width: 1023px) {
+  #price {
+    margin-left: auto;
+    margin-right: auto;
+    width: 90vw;
+    max-width: 1500px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  #price {
+    width: 97vw;
+  }
+
+  .price-container {
+    width: 90vw;
+    padding: 0;
+    padding-bottom: 2rem;
+  }
+
+  .price-title {
+    font-size: 1.75rem;
+    margin-bottom: 1rem;
+  }
+}
+
+/* ========================================
+   SURAH SELECTOR
+======================================== */
+
+#salatSurahSelector {
+  font-family: Arial, sans-serif;
+  min-height: 100vh;
+  background-color: #e7ecef;
+  color: #274c77;
+  padding: 1rem;
+}
+
+/* Desktop avec sidebar */
+@media (min-width: 1025px) {
+  #salatSurahSelector {
+    margin-left: 400px;
+  }
+}
+
+.surahselector-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+}
+
+.surahselector-card {
+  background-color: white;
+  border: 1px solid #a3cef1;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  flex-basis: calc(50% - 1rem);
+  margin-bottom: 2rem;
+}
+
+#salatSurahSelector h2 {
+  font-size: 1.25rem;
+  font-weight: bold;
+  margin: 0;
+  background-color: #6096ba8a;
+  color: var(--primary-color);
+  padding: 1rem;
+}
+
+.surahselector-card > div {
+  padding: 1rem;
+}
+
+#salatSurahSelector #sourateList {
+  height: 200px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+#salatSurahSelector .sourate-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+#salatSurahSelector .sourate-item input {
+  margin-right: 0.5rem;
+}
+
+#salatSurahSelector button:not(.home-button) {
+  background-color: #274c77;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  margin: 1rem;
+  display: block;
+}
+
+#salatSurahSelector button:hover {
+  background-color: #6096ba;
+}
+
+#salatSurahSelector #recitationHistory {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+#knownSouratesCount,
+#recitationCyclesCount,
+#recitationProgress,
+.surahselector-card p {
+  font-size: 1.25rem;
+}
+
+@media (max-width: 1024px) {
+  #salatSurahSelector {
+    margin-left: auto;
+    margin-right: auto;
+    width: 90vw;
+    max-width: 1500px;
+  }
+}
+
+@media (max-width: 768px) {
+  .surahselector-card {
+    flex-basis: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  #salatSurahSelector {
+    padding: 0.5rem;
+  }
+
+  .surahselector-card {
+    margin-bottom: 1rem;
+  }
+
+  #salatSurahSelector h2 {
+    font-size: 1.1rem;
+  }
+
+  #salatSurahSelector button {
+    padding: 0.4rem 0.8rem;
+    margin: 0.5rem;
+    width: calc(100% - 1rem);
+  }
+}
+
+/* ========================================
+   DUA TIME CALCULATOR
+======================================== */
+
+#duaTimeCalculator {
+  min-height: 100vh;
+  background-color: #e7ecef;
+  color: #274c77;
+  padding: 1rem;
+  margin-left: 400px;
+}
+
+.dua-calculator-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+}
+
+.dua-calculator-card {
+  background-color: white;
+  border: 1px solid #a3cef1;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  flex-basis: calc(50% - 1rem);
+  margin-bottom: 2rem;
+}
+
+.dua-calculator-title {
+  font-size: 1.25rem;
+  font-weight: bold;
+  margin: 0;
+  background-color: #6096ba8a;
+  color: var(--primary-color);
+  padding: 1rem;
+}
+
+.dua-calculator-content {
+  padding: 1rem;
+}
+
+.dua-input-field,
+.dua-select-field {
+  width: 100%;
+  padding: 0.5rem;
+  margin: 0.5rem 0;
+  border: 1px solid #a3cef1;
+  border-radius: 0.25rem;
+}
+
+.dua-btn {
+  background-color: #274c77;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  width: calc(100% - 2rem);
+  margin: 1rem 0;
+  display: block;
+}
+
+.dua-btn:hover {
+  background-color: #6096ba;
+}
+
+.dua-result-box {
+  background-color: #e7ecef;
+  padding: 1rem;
+  border-radius: 0.25rem;
+  margin-top: 1rem;
+}
+
+.dua-section-title {
+  color: #274c77;
+  font-size: 1.1rem;
+  margin-top: 1rem;
+}
+
+#duaCustomMethod {
+  display: none;
+}
+
+@media (max-width: 1024px) {
+  #duaTimeCalculator {
+    margin-left: auto;
+    margin-right: auto;
+    width: 90vw;
+    max-width: 1500px;
+  }
+}
+
+@media (max-width: 768px) {
+  .dua-calculator-card {
+    flex-basis: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  #duaTimeCalculator {
+    padding: 0.5rem;
+  }
+
+  .dua-calculator-card {
+    margin-bottom: 1rem;
+  }
+
+  .dua-calculator-title {
+    font-size: 1.1rem;
+  }
+
+  .dua-btn {
+    padding: 0.4rem 0.8rem;
+    margin: 0.5rem 0;
+    width: calc(100% - 1rem);
+  }
+}
+
+/* ========================================
+   MOSQUETIME PAGE
+======================================== */
+
+#mosquetime {
+  margin-left: 400px;
+  font-family: var(--main-font);
+}
+
+.mosquetime-card {
+  max-width: 800px;
+  background-color: var(--card-background);
+  margin-right: auto;
+  margin-left: auto;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.mosquetime-header {
+  background-color: var(--secondary-color);
+  color: white;
+  padding: 20px;
+}
+
+.mosquetime-title {
+  margin: 0;
+  font-size: 24px;
+}
+
+.mosquetime-subtitle {
+  margin: 5px 0 0;
+  font-size: 14px;
+}
+
+.mosquetime-location-search {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.mosquetime-select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-family: var(--main-font);
+}
+
+.mosquetime-button {
+  background-color: var(--secondary-color);
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: var(--main-font);
+}
+
+.mosquetime-button:hover {
+  background-color: var(--primary-color);
+}
+
+.mosquetime-date-display {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.mosquetime-tabs {
+  display: flex;
+  margin-bottom: 20px;
+  background-color: var(--background-color);
+  border-radius: 8px;
+  padding: 4px;
+}
+
+.mosquetime-tab {
+  flex: 1;
+  text-align: center;
+  padding: 9px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.mosquetime-tab.active {
+  background-color: var(--secondary-color);
+  color: white;
+}
+
+.mosquetime-mosque-card {
+  background-color: var(--card-background);
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Styles de base pour mosque-header */
+.mosque-header {
+  display: flex;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #eaeaea;
+  width: 100%;
+}
+
+/* Styles spécifiques pour All Mosques */
+#mosquetime-all-mosques .mosque-header {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+#mosquetime-all-mosques .mosque-image {
+  flex-shrink: 0;
+}
+
+#mosquetime-all-mosques .mosque-info {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+#mosquetime-all-mosques .mosque-name {
+  margin: 0 0 4px 0;
+}
+
+#mosquetime-all-mosques .mosque-address {
+  margin: 0;
+  font-size: 14px;
+  color: #666;
+  font-style: italic;
+}
+
+/* Styles spécifiques pour Single Mosque */
+#mosquetime-single-mosque .mosque-header {
+  align-items: flex-start;
+}
+
+#mosquetime-single-mosque .mosque-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+#mosquetime-single-mosque .mosque-image {
+  margin-right: 12px;
+}
+
+.mosque-image {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  background-color: var(--background-color);
+  flex-shrink: 0;
+}
+
+.mosque-name {
+  font-size: 18px;
+  color: var(--text-color);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.mosque-address {
+  color: var(--gray-color);
+  font-size: 0.875rem;
+  margin: 0.5rem 0;
+}
+
+.prayer-item {
+  text-align: center;
+}
+
+.prayer-label {
+  font-size: 14px;
+  color: var(--text-color);
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.jamaa-time {
+  font-size: 16px;
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+.mosquetime-error {
+  background-color: #fee2e2;
+  color: #dc2626;
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 16px;
+  display: none;
+}
+
+.mosquetime-disclaimer {
+  font-style: italic;
+  color: var(--gray-color);
+  font-size: 14px;
+  margin-top: 20px;
+  text-align: center;
+}
+
+/* Styles spécifiques pour Single Mosque */
+#mosquetime-single-mosque .mosquetime-mosque-card {
+  margin-top: 16px;
+}
+
+#mosquetime-mosque-select {
+  margin-bottom: 16px;
+}
+
+.scrollable-content {
+  max-height: 600px;
+  overflow-y: auto;
+  padding-right: 5px; /* Espace pour la barre de défilement */
+}
+
+.mosquetime-mosque-card {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.mosquetime-tab-content {
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+#welcome-mosquetime-grid {
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.mosque-prayer-times {
+  border-top: 1px solid var(--secondary-color);
+  margin-top: 1rem;
+}
+
+.prayer-times-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  background: white;
+  border-radius: 8px;
+  margin-bottom: 0rem;
+}
+
+/* Media Queries */
+@media (max-width: 1024px) {
+  #mosquetime {
+    margin-left: auto;
+    margin-right: auto;
+    width: 90vw;
+    max-width: 1500px;
+  }
+}
+
+/* Rendre les éléments responsifs */
+@media (max-width: 768px) {
+  .welcomepage-container {
+    width: 95vw;
+  }
+
+  .mosquetime-sort-buttons {
+    margin-bottom: 0.5rem;
+  }
+
+  .mosquetime-card {
+    width: 100%;
+    padding: 0;
+  }
+
+  .welcomepage-mosque-time .mosque-name {
+    font-size: 1rem;
+    padding: 0.25rem 0.25rem 0 0.25rem;
+    margin: 0 0 0 0.3rem;
+  }
+
+  .welcomepage-mosque-time .mosque-address {
+    font-size: 0.8rem;
+    margin: 0 0 0.25rem 0.3rem;
+  }
+
+  #welcome-mosquetime-grid {
+    width: 100%;
+    padding: 0rem;
+  }
+
+  #welcome-mosquetime-grid .mosquetime-mosque-card {
+    width: 100%;
+    padding: 0.65rem;
+    margin: 0.35rem;
+  }
+
+  .mosquetime-location-search {
+    padding: 0.5rem 0;
+  }
+
+  .welcomepage-mosque-time .mosquetime-content {
+    padding: 0rem;
+  }
+
+  .welcomepage-mosque-time .mosquetime-location-search {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .welcomepage-mosque-time .mosquetime-sort-buttons {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .mosque-prayer-times .prayer-times-grid {
+    padding-top: 5px;
+  }
+}
+
+/* Aligner les styles avec MosqueTime */
+.welcomepage-mosque-time .mosque-header {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.welcomepage-mosque-time .mosque-info {
+  flex: 1;
+}
+
+.welcomepage-mosque-time .prayer-times-grid,
+.welcomepage-mosque-time .additional-times-grid,
+.mosquetime-mosque-card .prayer-times-grid,
+.mosquetime-mosque-card .additional-times-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  background: white;
+  border-radius: 8px;
+  margin-bottom: 0rem;
+}
+
+/* Harmoniser les styles entre MosqueTime et WelcomeMosqueTime */
+
+/* Media queries communes pour les deux versions */
+@media (max-width: 1200px) {
+  .mosquetime-card,
+  .welcomepage-mosque-time .mosquetime-card {
+    width: 100%;
+    margin: 0 0 1rem 0;
+    padding: 1rem;
+  }
+
+  .prayer-times-grid,
+  .additional-times-grid,
+  .welcomepage-mosque-time .prayer-times-grid,
+  .welcomepage-mosque-time .additional-times-grid {
+    gap: 0.75rem; /* Réduire l'espacement */
+  }
+}
+
+@media (max-width: 768px) {
+  .mosquetime-location-search,
+  .welcomepage-mosque-time .mosquetime-location-search {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .welcomepage-mosque-time .prayer-item {
+    padding: 0.5rem;
+    box-shadow: none;
+  }
+
+  .prayer-label {
+    font-size: 0.9rem;
+  }
+
+  .mosquetime-location-search {
+    flex-direction: column;
+  }
+
+  .welcomepage-mosque-time .mosque-prayer-times .prayer-times-grid,
+  .welcomepage-mosque-time .mosque-prayer-times .additional-times-grid {
+    padding: 0 0 10px 0;
+    margin: 0;
+  }
+
+  .jamaa-time {
+    font-size: 1rem;
+  }
+
+  .mosquetime-title {
+    font-size: 19px;
+  }
+
+  .mosquetime-subtitle {
+    font-size: 12px;
+  }
+
+  #mosquetime-city-date {
+    font-size: 16px;
+  }
+
+  .welcomepage-mosque-time .mosquetime-location-search {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .welcomepage-mosque-time .mosquetime-sort-buttons {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .welcomepage-mosque-time .mosquetime-title {
+    font-size: 1.1rem;
+  }
+
+  .welcomepage-mosque-time .mosquetime-subtitle {
+    font-size: 0.85rem;
+  }
+
+  #welcome-mosquetime-city-date {
+    font-size: 0.9rem;
+  }
+
+  #mosquetime {
+    margin-left: 0;
+  }
+
+  .mosquetime-header {
+    padding: 0.75rem;
+  }
+
+  .mosquetime-tabs {
+    padding: 2px;
+  }
+
+  .mosquetime-select {
+    font-size: 0.9rem;
+  }
+
+  .prayer-label {
+    font-size: 0.8rem;
+  }
+
+  .prayer-times-grid,
+  .additional-times-grid {
+    gap: 0.25rem;
+  }
+
+  .prayer-item {
+    padding: 0.5rem 0.25rem;
+  }
+
+  .mosque-name {
+    font-size: 1rem;
+  }
+
+  .mosquetime-error {
+    font-size: 0.85rem;
+  }
+
+  .mosquetime-content {
+    padding: 0.5rem;
+  }
+
+  .mosque-list-container {
+    padding: 0.5rem;
+  }
+
+  .mosquetime-mosque-card {
+    padding: 0.75rem;
+    margin: 0.5rem 0;
+  }
+
+  .mosquetime-card .mosquetime-content {
+    padding: 0.5rem;
+  }
+
+  #mosquetime {
+    margin-left: 0;
+  }
+
+  .welcomepage-mosque-time .mosquetime-subtitle {
+    font-size: 0.8rem;
+  }
+
+  .mosque-prayer-times {
+    margin-top: 0.5rem;
+  }
+
+  .welcomepage-mosque-time .prayer-item {
+    padding: 0.5rem 0.25rem;
+  }
+}
+
+/* ========================================
+   SURAH MEMORIZATION
+======================================== */
+
+#surahmemorization {
+  margin-left: 400px;
+}
+
+#quran-app-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+/* Navigation */
+.quran-app-nav {
+  position: sticky;
+  background-color: #6096ba;
+  padding: 10px;
+  display: flex;
+  justify-content: space-around;
+  border-radius: 8px 8px 0 0;
+}
+
+.quran-app-nav-button {
+  background-color: transparent;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 5px 10px;
+}
+
+.quran-app-nav-button:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Sections principales */
+.quran-app-section {
+  padding: 20px;
+}
+
+.surahmemorization-title {
+  color: #274c77;
+  margin-top: 0;
+  margin-bottom: 20px;
+}
+
+/* Recherche et filtres */
+.surahmemorization-search-filter {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.surahmemorization-input,
+.surahmemorization-select {
+  padding: 8px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  width: 100%;
+}
+
+/* Liste des sourates */
+#surahmemorization-list-container {
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+  max-height: calc(100vh - 400px);
+  overflow-y: auto;
+  position: relative;
+}
+
+/* En-têtes du tableau */
+.surahmemorization-headers {
+  display: grid;
+  grid-template-columns: minmax(200px, 1fr) 160px 120px;
+  gap: 20px;
+  align-items: center;
+  padding: 12px 16px;
+  background-color: white;
+  border-bottom: 1px solid #e5e7eb;
+  font-weight: 600;
+  color: #374151;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+/* Alignement des colonnes */
+.header-left,
+.item-left {
+  display: flex;
+  align-items: center;
+}
+
+.header-center,
+.item-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.header-right,
+.item-right {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+/* Items de la liste */
+.surahmemorization-item {
+  display: grid;
+  grid-template-columns: minmax(200px, 1fr) 160px 120px;
+  gap: 20px;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  background-color: white;
+}
+
+.surahmemorization-item:hover {
+  background-color: #f8f9fa;
+}
+
+/* Styles des éléments */
+.item-left input[type="checkbox"] {
+  margin-right: 12px;
+}
+
+.surah-name {
+  font-weight: 500;
+  margin-right: 4px;
+}
+
+.surah-number {
+  color: #666;
+}
+
+/* Badges de niveau */
+.memorization-level {
+  padding: 6px 16px;
+  border-radius: 50px;
+  font-size: 0.875rem;
+  color: white;
+  min-width: 90px;
+  text-align: center;
+  display: inline-block;
+}
+
+.surahmemorization-level-strong {
+  background-color: #22c55e;
+}
+.surahmemorization-level-good {
+  background-color: #3b82f6;
+}
+.surahmemorization-level-moderate {
+  background-color: #eab308;
+}
+.surahmemorization-level-weak {
+  background-color: #ef4444;
+}
+.surahmemorization-level-na {
+  background-color: #9ca3af;
+}
+
+/* Zone des actions */
+.surahmemorization-summary {
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: white;
+  padding: 16px;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  z-index: 10;
+}
+
+/* Boutons et compteur */
+.surahmemorization-button {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.surahmemorization-button:not(:disabled):hover {
+  background-color: #1e3a8a;
+  transform: translateY(-1px);
+}
+
+.surahmemorization-button:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.surahmemorization-count {
+  padding: 8px 16px;
+  color: #374151;
+  font-size: 0.875rem;
+  white-space: nowrap;
+}
+
+/* Section de révision */
+#surahmemorization-revise {
+  max-width: 1000px;
+  max-height: 85vh;
+  width: 90vw;
+  margin: 0 auto;
+  background-color: white;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+#surahmemorization-progress {
+  background-color: #5b9bd5;
+  color: white;
+  padding: 10px 20px;
+  margin: 0;
+  text-align: center;
+  font-size: 16px;
+}
+
+/* Barre de progression */
+.surahmemorization-progress-bar {
+  background-color: #e0e0e0;
+  height: 10px;
+  margin-top: 10px;
+}
+
+/* Boutons d'évaluation */
+#surahmemorization-evaluation {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 0 20px 20px;
+}
+
+.surahmemorization-eval-btn {
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.surahmemorization-eval-btn[data-level="Strong"] {
+  background-color: #22c55e;
+}
+.surahmemorization-eval-btn[data-level="Good"] {
+  background-color: #3b82f6;
+}
+.surahmemorization-eval-btn[data-level="Moderate"] {
+  background-color: #eab308;
+}
+.surahmemorization-eval-btn[data-level="Weak"] {
+  background-color: #ef4444;
+}
+
+.surahmemorization-eval-btn::before {
+  content: "★";
+  margin-right: 5px;
+}
+
+/* Section des graphiques mise à jour - agrandie pour contenir directement le graphique */
+.surahmemorization-charts {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 16px; /* Réduit pour laisser plus d'espace au graphique */
+  margin: 0 auto 24px;
+  max-width: 1200px;
+  min-height: 600px; /* Augmenté pour plus de place */
+  background-color: white;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+/* Canvas du graphique directement dans le container */
+.surahmemorization-charts canvas {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  min-width: 500px; /* Taille minimale pour assurer la lisibilité */
+  min-height: 500px;
+}
+
+/* Container pour le graphique - styles de compatibilité */
+.chart-container {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  width: 100%;
+  height: 500px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Titre du graphique */
+.chart-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--card-background);
+  background-color: var(--secondary-color);
+  text-align: center;
+  margin-bottom: 20px;
+  padding: 12px 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+/* Zone de canvas */
+.chart-area {
+  flex: 1;
+  position: relative;
+  width: 100%;
+  min-height: 0;
+}
+
+/* Style du canvas */
+#surahmemorization-performance-chart {
+  max-height: 400px;
+}
+
+/* Légende */
+.chart-legend {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 16px;
+  margin-top: 20px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+  color: #4b5563;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background-color: #f3f4f6;
+}
+
+.legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+}
+
+/* Table d'historique */
+.surahmemorization-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.surahmemorization-table th,
+.surahmemorization-table td {
+  text-align: left;
+  padding: 8px;
+  border-bottom: 1px solid #ddd;
+}
+
+.surahmemorization-table th {
+  background-color: #f2f2f2;
+  font-weight: 600;
+}
+
+/* Media Queries */
+@media (max-width: 1024px) {
+  #surahmemorization {
+    margin-left: auto;
+    margin-right: auto;
+    width: 98vw;
+  }
+
+  #quran-app-container {
+    width: 90vw;
+  }
+
+  .surahmemorization-charts {
+    max-width: 95vw;
+    min-height: 400px;
+  }
+
+  .surahmemorization-charts canvas {
+    min-width: 300px;
+    min-height: 300px;
+  }
+
+  .chart-container {
+    height: 400px;
+  }
+}
+
+@media (max-width: 768px) {
+  #quran-app-container {
+    width: 95vw;
+  }
+
+  .surahmemorization-title {
+    font-size: 1.25rem;
+  }
+
+  .surahmemorization-item,
+  .surahmemorization-headers {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    text-align: center;
+  }
+
+  .memorization-level {
+    min-width: 80px;
+    font-size: 0.75rem;
+  }
+
+  .surahmemorization-summary {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .surahmemorization-button {
+    font-size: 0.75rem;
+    padding: 6px 12px;
+  }
+
+  .surahmemorization-count {
+    font-size: 0.75rem;
+  }
+
+  .surahmemorization-search-filter {
+    grid-template-columns: 1fr;
+  }
+
+  .surahmemorization-charts {
+    max-width: 100vw;
+    min-height: 300px;
+  }
+
+  .surahmemorization-charts canvas {
+    min-width: 200px;
+    min-height: 200px;
+  }
+
+  .chart-container {
+    height: 300px;
+  }
+
+  .chart-title {
+    font-size: 1rem;
+  }
+
+  .legend-item {
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .surahmemorization-charts {
+    max-width: 100vw;
+    min-height: 250px;
+  }
+
+  .surahmemorization-charts canvas {
+    min-width: 180px;
+    min-height: 180px;
+  }
+
+  .chart-container {
+    height: 250px;
+  }
+
+  .chart-title {
+    font-size: 0.875rem;
+  }
+
+  .chart-legend {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .surahmemorization-table th,
+  .surahmemorization-table td {
+    font-size: 0.75rem;
+    padding: 4px;
+  }
+}
+
+.quick-selection-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 16px;
+  background-color: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.quick-selection-buttons button {
+  background-color: var(--secondary-color);
+  color: white;
+  border: none;
+  padding: 4px 8px;
+  border-radius: var(--border-radius-sm);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.quick-selection-buttons button:hover {
+  background-color: #2563eb;
+  transform: translateY(-1px);
+}
+
+.quick-selection-buttons button i {
+  font-size: 0.75rem;
+}
+
+@media (max-width: 768px) {
+  .quick-selection-buttons {
+    flex-direction: column;
+  }
+
+  .quick-selection-buttons button {
+    font-size: 0.75rem;
+    padding: 6px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .quick-selection-buttons button {
+    font-size: 0.625rem;
+  }
+}
+
+/* ========================================
+   SURAH MEMORIZATION - TEXT & AUDIO
+======================================== */
+
+.surahmemorization-text {
+  background-color: #f8f9fa;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 20px;
+  margin: 20px 0;
+  font-family: "Amiri", "Times New Roman", serif;
+  text-align: right;
+  direction: rtl;
+  /* Container fixe avec scroll */
+  height: 400px;
+  max-height: 50vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  /* Responsive */
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  /* Animation douce pour l'apparition */
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+/* Indicateur de scroll */
+.surahmemorization-text[data-scrollable="true"]::after {
+  content: attr(data-scroll-text);
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(96, 150, 186, 0.9);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 15px;
+  font-size: 0.8rem;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  direction: ltr;
+  text-align: center;
+  pointer-events: none;
+  opacity: 0;
+  animation: fadeInOut 3s ease-in-out;
+}
+
+@keyframes fadeInOut {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  20%,
+  80% {
+    opacity: 1;
+  }
+}
+
+.surah-verse {
+  margin-bottom: 6px; /* Réduit de 12px à 6px */
+  padding: 4px 0; /* Réduit de 8px à 4px */
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 1.5rem; /* Augmenté de 1.1rem à 1.3rem */
+  line-height: 1.6; /* Ajusté pour un meilleur espacement */
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.verse-number {
+  color: #6096ba;
+  font-weight: bold;
+  font-size: 1.3rem; /* 1rem * 1.3 = 1.3rem */
+  min-width: 39px; /* 30px * 1.3 = 39px */
+  text-align: right;
+  flex-shrink: 0;
+  direction: ltr;
+  background-color: #f0f7ff;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-top: 2px;
+  order: 2; /* Placer le numéro à droite */
+}
+
+.verse-text {
+  flex: 1;
+  text-align: right;
+  direction: rtl;
+  font-family: "Amiri", "Times New Roman", serif;
+  order: 1; /* Placer le texte à gauche mais aligné à droite */
+  line-height: 2.5; /* Espacement entre lignes augmenté pour le texte arabe */
+}
+
+.verse-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  order: 2; /* Placer les contrôles à droite */
+}
+
+.verse-audio-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  background-color: #f0f7ff;
+  border: 1px solid #e0e7ff;
+  min-width: 36px; /* 28px * 1.3 = 36.4px ≈ 36px */
+  height: 36px; /* 28px * 1.3 = 36.4px ≈ 36px */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.verse-audio-btn:hover {
+  background-color: #dbeafe;
+  border-color: #6096ba;
+  transform: scale(1.05);
+}
+
+.verse-audio-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.verse-audio-btn.loading {
+  background-color: #fef3c7;
+  border-color: #f59e0b;
+}
+
+.verse-audio-btn.playing {
+  background-color: #dcfce7;
+  border-color: #16a34a;
+  animation: pulse 2s infinite;
+}
+
+.audio-icon {
+  font-size: 1.17rem; /* 0.9rem * 1.3 = 1.17rem */
+  transition: transform 0.2s ease;
+}
+
+.verse-audio-btn:hover .audio-icon {
+  transform: scale(1.1);
+}
+
+/* Animation pour le verset en cours de lecture */
+.verse-playing {
+  background-color: #fef3c7;
+  border-left: 4px solid #f59e0b;
+  padding-left: 16px;
+  animation: highlightVerse 1s ease-in-out;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes highlightVerse {
+  from {
+    background-color: #fbbf24;
+  }
+  to {
+    background-color: #fef3c7;
+  }
+}
+
+.surah-verse:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.surah-error {
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  padding: 16px;
+  color: #991b1b;
+  text-align: center;
+  direction: ltr;
+}
+
+.surah-error p {
+  margin: 4px 0;
+  font-size: 0.95rem;
+}
+
+/* Bouton toggle text avec état de chargement */
+#surahmemorization-toggle-text {
+  background-color: var(--secondary-color);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  margin: 10px 0;
+  cursor: pointer;
+  font-size: 0.9rem;
+  display: block;
+  width: auto;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#surahmemorization-toggle-text:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+}
+
+#surahmemorization-toggle-text:not(:disabled):hover {
+  background-color: #4a5568;
+}
+
+/* Styles de scroll personnalisés */
+.surahmemorization-text::-webkit-scrollbar {
+  width: 8px;
+}
+
+.surahmemorization-text::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.surahmemorization-text::-webkit-scrollbar-thumb {
+  background: #6096ba;
+  border-radius: 4px;
+}
+
+.surahmemorization-text::-webkit-scrollbar-thumb:hover {
+  background: #4a7ba7;
+}
+
+@media (max-width: 768px) {
+  .surahmemorization-text {
+    padding: 15px;
+    margin: 15px 0;
+    height: 350px; /* Légèrement réduit sur mobile */
+    max-height: 45vh;
+  }
+
+  .surah-verse {
+    font-size: 1.4rem; /* Légèrement réduit sur mobile mais toujours plus gros */
+    margin-bottom: 5px;
+    padding: 3px 0;
+    gap: 8px;
+  }
+
+  .verse-number {
+    font-size: 1.2rem;
+    min-width: 36px;
+  }
+
+  .verse-controls {
+    gap: 6px;
+  }
+
+  .verse-audio-btn {
+    min-width: 32px;
+    height: 32px;
+  }
+
+  .audio-icon {
+    font-size: 1rem;
+  }
+
+  .surah-error p {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .surahmemorization-text {
+    padding: 12px;
+    margin: 12px 0;
+    height: 300px; /* Plus compact sur très petit écran */
+    max-height: 40vh;
+  }
+
+  .surah-verse {
+    font-size: 1.3rem; /* Encore légèrement réduit */
+    margin-bottom: 4px;
+    padding: 2px 0;
+    gap: 6px;
+  }
+
+  .verse-number {
+    font-size: 1.1rem;
+    min-width: 32px;
+    padding: 1px 4px;
+  }
+
+  .verse-controls {
+    gap: 4px;
+  }
+
+  .verse-audio-btn {
+    min-width: 28px;
+    height: 28px;
+  }
+
+  .audio-icon {
+    font-size: 0.9rem;
+  }
+}
+
+/* ========================================
+   PROFILE PAGE
+======================================== */
+
+#profile {
+  margin-left: 400px;
+  padding: 20px;
+  max-width: 100vw;
+  background-color: #e7ecef;
+  color: #274c77;
+  line-height: 1.6;
+}
+
+#profile h2 {
+  color: #fff;
+  background-color: #6096ba;
+  padding: 10px 15px;
+  margin: 0;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
+#profile h2::before {
+  content: "";
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+#profileForm h2::before {
+  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="white"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>');
+}
+
+#passwordChangeForm h2::before {
+  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="white"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 0 1 2-2V9a2 2 0 0 1 2-2H6a2 2 0 0 1-2 2v6a2 2 0 0 1-2 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>');
+}
+
+/* Formulaires */
+#profileForm,
+#passwordChangeForm {
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  margin-bottom: 30px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  width: 65vw;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#profileForm form,
+#passwordChangeForm form {
+  padding: 20px;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: #555;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="email"],
+input[type="password"],
+select {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  background-color: #f9f9f9;
+}
+
+select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23555' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 30px;
+}
+
+button[type="submit"] {
+  background-color: #274c77;
+  color: #ffffff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  width: 100%;
+  margin-top: 10px;
+}
+
+button[type="submit"]:hover {
+  background-color: #6096ba;
+}
+
+/* Styles spécifiques */
+#profileForm form {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 9px;
+}
+
+#profileForm form label,
+#profileForm form input,
+#profileForm form select,
+#profileForm form button {
+  grid-column: span 1;
+}
+
+#profileForm form button {
+  grid-column: span 2;
+}
+
+#passwordChangeForm form {
+  display: flex;
+  flex-direction: column;
+}
+
+#showNewPasswordToggle {
+  margin-right: 10px;
+}
+
+@media (max-width: 1024px) {
+  #profile {
+    margin-left: auto;
+    margin-right: auto;
+    width: 98vw;
+  }
+
+  #profileForm,
+  #passwordChangeForm {
+    width: 90vw;
+  }
+}
+
+@media (max-width: 600px) {
+  #profile {
+    padding-left: 0rem;
+  }
+
+  #profile.page {
+    padding: 10px;
+  }
+
+  #profileForm form {
+    grid-template-columns: 1fr;
+  }
+
+  #profileForm form button {
+    grid-column: span 1;
+  }
+}
+
+/* === Styles pour le modal OAuth de complétion de profil === */
+.oauth-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+}
+
+.oauth-modal {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  max-width: 500px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.oauth-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.oauth-modal-header h3 {
+  margin: 0;
+  color: #333;
+}
+
+.oauth-modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #999;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.oauth-modal-close:hover {
+  color: #333;
+}
+
+.oauth-modal-body {
+  padding: 20px;
+}
+
+.oauth-modal .form-grid {
+  display: grid;
+  gap: 15px;
+}
+
+.oauth-modal .form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.oauth-modal .form-group label {
+  margin-bottom: 5px;
+  font-weight: 500;
+  color: #333;
+}
+
+.oauth-modal .form-group input,
+.oauth-modal .form-group select {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.oauth-modal .form-group input:focus,
+.oauth-modal .form-group select:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.oauth-modal .btn {
+  width: 100%;
+  padding: 12px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 20px;
+}
+
+.oauth-modal .btn:hover {
+  background-color: #0056b3;
+}
+
+/* Styles pour la liste des pays dans le modal */
+.oauth-modal #oauth-country-list {
+  position: absolute;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 10001;
+  width: calc(100% - 2px);
+  display: none;
+}
+
+.oauth-modal .country-item {
+  padding: 10px;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
+}
+
+.oauth-modal .country-item:hover {
+  background-color: #f5f5f5;
+}
+
+.oauth-modal .country-item:last-child {
+  border-bottom: none;
+}

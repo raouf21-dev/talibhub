@@ -11,6 +11,7 @@ import TermsHandler from "./terms.js";
 import { notificationService } from "../../services/notifications/notificationService.js";
 import { authService } from "../../services/auth/authService.js";
 import { countriesCache } from "../../services/cache/cacheCountries.js"; // Cache global pour les pays
+import { oauthHandler } from "./oauth.js"; // Gestionnaire OAuth
 
 // Flag global pour empêcher une double initialisation du champ "pays"
 let isCountryInputInitialized = false;
@@ -24,10 +25,16 @@ let termsHandler;
    INITIALISATION DE L'AUTH
    ========================= */
 function initializeAuth() {
+  console.log("🔧 DÉMARRAGE initializeAuth()");
+
   initializeAuthForms();
   initializeTabToggle();
   initializeCountryInput(); // Appelé une seule fois grâce au flag
   termsHandler = new TermsHandler();
+
+  // 🔥 CRITIQUE: Vérifier les callbacks OAuth
+  console.log("🔍 Vérification callback OAuth...");
+  oauthHandler.checkAuthCallback();
 }
 
 /* ------------------ Initialisation des formulaires d'authentification ------------------ */
@@ -107,6 +114,10 @@ function showAuthForms() {
     // Forcer l'affichage de l'onglet "Sign In" (ou "Sign Up" selon votre choix) en synchronisant les onglets
     // Par exemple, ici on choisit d'activer "signin" :
     switchTab("signin");
+
+    // 🔥 INITIALISATION OAUTH - CRITIQUE !
+    console.log("🔄 Initialisation OAuth après affichage des formulaires...");
+    oauthHandler.init();
   }
 }
 

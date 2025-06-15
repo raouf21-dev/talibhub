@@ -1,27 +1,29 @@
 // Script Node.js pour générer le fichier build-info.js
-const fs = require('fs');
-const crypto = require('crypto');
-const path = require('path');
+const fs = require("fs");
+const crypto = require("crypto");
+const path = require("path");
 
 // Générer un hash basé sur le contenu des fichiers JS principaux
 function generateHash() {
   const files = [
     // Liste des fichiers principaux à surveiller pour les changements
-    './main.js',
-    './services/notifications/notificationService.js',
+    "./main.js",
+    "./services/notifications/notificationService.js",
+    "./components/messaging/messageCenter.js",
+    "./translations/TranslationManager.js",
     // Ajoutez d'autres fichiers importants
   ];
-  
-  let content = '';
-  files.forEach(file => {
+
+  let content = "";
+  files.forEach((file) => {
     try {
-      content += fs.readFileSync(path.resolve(__dirname, '..', file), 'utf8');
+      content += fs.readFileSync(path.resolve(__dirname, "..", file), "utf8");
     } catch (err) {
       console.error(`Erreur lors de la lecture du fichier ${file}:`, err);
     }
   });
-  
-  return crypto.createHash('md5').update(content).digest('hex').substring(0, 8);
+
+  return crypto.createHash("md5").update(content).digest("hex").substring(0, 8);
 }
 
 // Générer le contenu du fichier
@@ -50,8 +52,8 @@ export function checkBuildHash(clearDataCallback) {
 `;
 
 // Écrire le fichier
-const outputPath = path.resolve(__dirname, '../build/build-info.js');
+const outputPath = path.resolve(__dirname, "../build/build-info.js");
 fs.mkdirSync(path.dirname(outputPath), { recursive: true });
 fs.writeFileSync(outputPath, fileContent);
 
-console.log(`Fichier build-info.js généré avec succès. Hash: ${hash}`); 
+console.log(`Fichier build-info.js généré avec succès. Hash: ${hash}`);

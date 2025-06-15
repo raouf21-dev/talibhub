@@ -1,0 +1,352 @@
+/* OAuth Styles */
+
+/* Conteneur principal OAuth */
+.oauth-container {
+  margin: 20px 0;
+  padding: 0;
+}
+
+/* Séparateur "ou" */
+.oauth-divider {
+  text-align: center;
+  margin: 20px 0 15px 0;
+  position: relative;
+}
+
+.oauth-divider::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--border-color, #e0e0e0);
+}
+
+.oauth-divider span {
+  background: var(--background-color, #fff);
+  padding: 0 15px;
+  color: var(--text-secondary, #666);
+  font-size: 0.9rem;
+  position: relative;
+  z-index: 1;
+}
+
+/* Conteneur des boutons OAuth */
+.oauth-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 768px) {
+  .oauth-buttons {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}
+
+/* Boutons OAuth */
+.oauth-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border: 2px solid var(--border-color, #e0e0e0);
+  border-radius: 8px;
+  background: var(--background-color, #fff);
+  color: var(--text-primary, #333);
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  min-height: 44px;
+}
+
+.oauth-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: var(--primary-color, #007bff);
+}
+
+.oauth-btn:active {
+  transform: translateY(0);
+}
+
+/* Icônes OAuth */
+.oauth-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+/* Couleurs spécifiques par provider */
+.oauth-google {
+  border-color: #db4437;
+}
+
+.oauth-google:hover {
+  background: #db4437;
+  color: white;
+  border-color: #db4437;
+}
+
+.oauth-microsoft {
+  border-color: #0078d4;
+}
+
+.oauth-microsoft:hover {
+  background: #0078d4;
+  color: white;
+  border-color: #0078d4;
+}
+
+.oauth-github {
+  border-color: #333;
+}
+
+.oauth-github:hover {
+  background: #333;
+  color: white;
+  border-color: #333;
+}
+
+.oauth-facebook {
+  border-color: #1877f2;
+}
+
+.oauth-facebook:hover {
+  background: #1877f2;
+  color: white;
+  border-color: #1877f2;
+}
+
+/* Formulaire de complétion de profil OAuth */
+#oauth-profile-completion {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+#oauth-profile-completion .welcomepage-card {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+#oauth-profile-completion h3 {
+  color: var(--primary-color, #007bff);
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+#oauth-profile-completion p {
+  text-align: center;
+  color: var(--text-secondary, #666);
+  margin-bottom: 25px;
+}
+
+/* Ajustements pour le formulaire OAuth dans la grille */
+#oauth-profile-completion .form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+#oauth-profile-completion .welcomepage-form-group:nth-child(1),
+#oauth-profile-completion .welcomepage-form-group:nth-child(6) {
+  grid-column: 1 / -1; /* Username et Country prennent toute la largeur */
+}
+
+@media (max-width: 768px) {
+  #oauth-profile-completion .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  #oauth-profile-completion .welcomepage-form-group:nth-child(1),
+  #oauth-profile-completion .welcomepage-form-group:nth-child(6) {
+    grid-column: 1;
+  }
+}
+
+/* Style pour la liste de pays dans le formulaire OAuth */
+#oauth-country-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--background-color, #fff);
+  border: 1px solid var(--border-color, #e0e0e0);
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1000;
+  display: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+#oauth-country-list .country-item {
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  border-bottom: 1px solid var(--border-light, #f0f0f0);
+}
+
+#oauth-country-list .country-item:hover {
+  background: var(--hover-color, #f8f9fa);
+}
+
+#oauth-country-list .country-item:last-child {
+  border-bottom: none;
+}
+
+/* Position relative pour le conteneur du champ pays */
+#oauth-profile-completion .welcomepage-form-group {
+  position: relative;
+}
+
+/* Animation de fondu */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* États de chargement pour les boutons OAuth */
+.oauth-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.oauth-btn.loading {
+  position: relative;
+  color: transparent;
+}
+
+.oauth-btn.loading::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 20px;
+  height: 20px;
+  border: 2px solid currentColor;
+  border-top: 2px solid transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+/* Mode sombre */
+[data-theme="dark"] .oauth-btn {
+  background: var(--dark-bg-secondary, #2a2a2a);
+  border-color: var(--dark-border, #444);
+  color: var(--dark-text-primary, #e0e0e0);
+}
+
+[data-theme="dark"] .oauth-divider::before {
+  background: var(--dark-border, #444);
+}
+
+[data-theme="dark"] .oauth-divider span {
+  background: var(--dark-bg-primary, #1a1a1a);
+  color: var(--dark-text-secondary, #999);
+}
+
+[data-theme="dark"] #oauth-country-list {
+  background: var(--dark-bg-secondary, #2a2a2a);
+  border-color: var(--dark-border, #444);
+}
+
+[data-theme="dark"] #oauth-country-list .country-item:hover {
+  background: var(--dark-hover, #333);
+}
+
+/* Responsive pour petits écrans */
+@media (max-width: 480px) {
+  .oauth-btn {
+    padding: 10px 12px;
+    font-size: 0.85rem;
+    min-height: 40px;
+  }
+
+  .oauth-icon {
+    width: 18px;
+    height: 18px;
+  }
+
+  .oauth-buttons {
+    gap: 6px;
+  }
+}
+
+/* Accessibilité */
+.oauth-btn:focus {
+  outline: 2px solid var(--primary-color, #007bff);
+  outline-offset: 2px;
+}
+
+/* États d'erreur */
+.oauth-btn.error {
+  border-color: var(--error-color, #dc3545);
+  background: var(--error-light, #f8d7da);
+  color: var(--error-color, #dc3545);
+}
+
+/* Message d'information pour OAuth */
+.oauth-info {
+  background: var(--info-light, #d1ecf1);
+  border: 1px solid var(--info-color, #bee5eb);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 15px 0;
+  font-size: 0.9rem;
+  color: var(--info-dark, #0c5460);
+}
+
+.oauth-info .oauth-info-icon {
+  display: inline-block;
+  margin-right: 8px;
+  font-weight: bold;
+}
+
+/* Animation d'entrée pour les boutons OAuth */
+.oauth-buttons .oauth-btn {
+  animation: slideInUp 0.3s ease-out forwards;
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.oauth-buttons .oauth-btn:nth-child(1) {
+  animation-delay: 0.1s;
+}
+.oauth-buttons .oauth-btn:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.oauth-buttons .oauth-btn:nth-child(3) {
+  animation-delay: 0.3s;
+}
+.oauth-buttons .oauth-btn:nth-child(4) {
+  animation-delay: 0.4s;
+}
+
+@keyframes slideInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

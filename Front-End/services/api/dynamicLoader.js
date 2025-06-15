@@ -82,16 +82,16 @@ class Loader {
   show() {
     this.activeRequests++;
     this.container.style.display = "flex";
-    console.log(
-      `[LOADER] show() appelé - activeRequests: ${this.activeRequests}, locked: ${this.locked}, forceShown: ${this.forceShown}, display: ${this.container.style.display}`
-    );
+    //console.log(
+    //  `[LOADER] show() appelé - activeRequests: ${this.activeRequests}, locked: ${this.locked}, forceShown: ${this.forceShown}, display: ${this.container.style.display}`
+    //);
   }
 
   hide() {
     this.activeRequests--;
-    console.log(
-      `[LOADER] hide() appelé - activeRequests: ${this.activeRequests}, locked: ${this.locked}, forceShown: ${this.forceShown}`
-    );
+    //console.log(
+    //  `[LOADER] hide() appelé - activeRequests: ${this.activeRequests}, locked: ${this.locked}, forceShown: ${this.forceShown}`
+    //);
     if (this.activeRequests <= 0 && !this.locked && !this.forceShown) {
       this.activeRequests = 0;
       this.container.style.display = "none";
@@ -110,12 +110,12 @@ class Loader {
   }
 
   forceShow() {
-    console.log("[LOADER] forceShow() appelé - état avant:", {
-      activeRequests: this.activeRequests,
-      locked: this.locked,
-      forceShown: this.forceShown,
-      display: this.container.style.display,
-    });
+      //console.log("[LOADER] forceShow() appelé - état avant:", {
+      //activeRequests: this.activeRequests,
+      //locked: this.locked,
+      //forceShown: this.forceShown,
+      //display: this.container.style.display,
+    //});
     this.forceShown = true;
     this.container.style.display = "flex";
     console.log("[LOADER] Loader forcé à s'afficher - état après:", {
@@ -156,43 +156,43 @@ class Loader {
   }
 
   lock() {
-    console.log("[LOADER] lock() appelé - état avant:", {
-      activeRequests: this.activeRequests,
-      locked: this.locked,
-      display: this.container.style.display,
-    });
-    this.locked = true;
-    this.container.style.display = "flex";
-    console.log("[LOADER] Loader verrouillé (locked) - état après:", {
-      activeRequests: this.activeRequests,
-      locked: this.locked,
-      display: this.container.style.display,
-    });
+    //    console.log("[LOADER] lock() appelé - état avant:", {
+      //activeRequests: this.activeRequests,
+      //locked: this.locked,
+      //display: this.container.style.display,
+    //});
+    //this.locked = true;
+    //this.container.style.display = "flex";
+    //console.log("[LOADER] Loader verrouillé (locked) - état après:", {
+      //activeRequests: this.activeRequests,
+      //locked: this.locked,
+      //display: this.container.style.display,
+    //});
   }
 
   unlock() {
-    console.log("[LOADER] unlock() appelé - état avant:", {
-      activeRequests: this.activeRequests,
-      locked: this.locked,
-      display: this.container.style.display,
-    });
+    //console.log("[LOADER] unlock() appelé - état avant:", {
+      //activeRequests: this.activeRequests,
+      //locked: this.locked,
+      //display: this.container.style.display,
+    //});
     this.locked = false;
     if (this.activeRequests <= 0) {
       this.container.style.display = "none";
-      console.log("[LOADER] Loader déverrouillé et masqué - état après:", {
-        activeRequests: this.activeRequests,
-        locked: this.locked,
-        display: this.container.style.display,
-      });
+      //console.log("[LOADER] Loader déverrouillé et masqué - état après:", {
+        //activeRequests: this.activeRequests,
+        //locked: this.locked,
+        //display: this.container.style.display,
+      //});
     } else {
-      console.log(
-        "[LOADER] Loader déverrouillé mais toujours affiché (requêtes actives) - état après:",
-        {
-          activeRequests: this.activeRequests,
-          locked: this.locked,
-          display: this.container.style.display,
-        }
-      );
+      //console.log(
+        //"[LOADER] Loader déverrouillé mais toujours affiché (requêtes actives) - état après:",
+        //{
+          //activeRequests: this.activeRequests,
+          //locked: this.locked,
+          //display: this.container.style.display,
+        //}
+      //);
     }
   }
 }
@@ -228,14 +228,14 @@ class ApiService {
   }
 
   async request(endpoint, options = {}) {
-    console.log("[DEBUG] API Request - Début:", {
-      endpoint,
-      method: options.method || "GET",
-      hasToken: !!localStorage.getItem("token"),
-      currentPath: window.location.pathname,
-      loaderLocked: loader.locked,
-      activeRequests: loader.activeRequests,
-    });
+    //console.log("[DEBUG] API Request - Début:", {
+      //endpoint,
+      //method: options.method || "GET",
+      //hasToken: !!localStorage.getItem("token"),
+      //currentPath: window.location.pathname,
+      //loaderLocked: loader.locked,
+      //activeRequests: loader.activeRequests,
+    //});
 
     const url = endpoint.startsWith("http")
       ? endpoint
@@ -255,35 +255,35 @@ class ApiService {
 
       // Log spécial pour les appels mosque-times
       if (endpoint.includes("mosque-times")) {
-        console.log("[DEBUG] API Request mosque-times - URL complète:", url);
-        console.log(
-          "[DEBUG] API Request mosque-times - Configuration:",
-          config
-        );
+        //console.log("[DEBUG] API Request mosque-times - URL complète:", url);
+        //console.log(
+        //  "[DEBUG] API Request mosque-times - Configuration:",
+          //config
+        //);
       }
 
       const response = await fetch(url, config);
 
       // Log spécial pour les réponses mosque-times
       if (endpoint.includes("mosque-times")) {
-        console.log(
-          "[DEBUG] API Response mosque-times - Status:",
-          response.status
-        );
-        console.log(
-          "[DEBUG] API Response mosque-times - Headers:",
-          Object.fromEntries(response.headers.entries())
-        );
+        //console.log(
+        //  "[DEBUG] API Response mosque-times - Status:",
+        //  response.status
+        //);
+        //console.log(
+        //    "[DEBUG] API Response mosque-times - Headers:",
+        //  Object.fromEntries(response.headers.entries())
+        //);
       }
 
       if (response.status === 401) {
-        console.warn("[DEBUG] API 401 - Détails complets:", {
-          endpoint,
-          currentPath: window.location.pathname,
-          referrer: document.referrer,
-          hasToken: !!localStorage.getItem("token"),
-          stack: new Error().stack,
-        });
+        //console.warn("[DEBUG] API 401 - Détails complets:", {
+          //endpoint,
+          //currentPath: window.location.pathname,
+          //referrer: document.referrer,
+          //hasToken: !!localStorage.getItem("token"),
+          //stack: new Error().stack,
+        //});
 
         // Éviter une boucle de redirection si on est déjà sur welcomepage
         // ou si on travaille avec des données de mosquée publiques
@@ -296,25 +296,25 @@ class ApiService {
           window.location.href = "/welcomepage";
           return;
         } else {
-          console.warn(
-            "[DEBUG] API 401 - Redirection évitée pour éviter une boucle"
-          );
-          throw new Error(
-            "Unauthorized but redirection avoided to prevent loop"
-          );
+          //console.warn(
+          //  "[DEBUG] API 401 - Redirection évitée pour éviter une boucle"
+          //);
+          //throw new Error(
+          //  "Unauthorized but redirection avoided to prevent loop"
+          //);
         }
       }
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        console.error(`[DEBUG] API Erreur HTTP ${response.status}:`, {
-          endpoint,
-          errorData,
-          headers: Object.fromEntries(response.headers.entries()),
-        });
-        throw new Error(
-          errorData.message || `HTTP error! status: ${response.status}`
-        );
+        //console.error(`[DEBUG] API Erreur HTTP ${response.status}:`, {
+          //endpoint,
+          //errorData,
+          //headers: Object.fromEntries(response.headers.entries()),
+        //});
+        //  throw new Error(
+        //  errorData.message || `HTTP error! status: ${response.status}`
+        //);
       }
 
       const responseData = await response.json();

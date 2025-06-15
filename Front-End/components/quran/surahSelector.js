@@ -3,6 +3,7 @@
 import { navigateTo } from "../../utils/utils.js";
 import { api } from "../../services/api/dynamicLoader.js";
 import { notificationService } from "../../services/notifications/notificationService.js";
+import { translationManager } from "../../translations/TranslationManager.js";
 
 // --- Variables globales ---
 const sourates = [];
@@ -443,37 +444,29 @@ function updateRecitationInfo(data) {
   // Sauvegarder les stats pour les changements de langue
   window.lastRecitationStats = data;
 
-  // Obtenir le gestionnaire de traductions
-  const translationManager = window.translationManager;
+  // Utiliser le nouveau gestionnaire de traductions
 
   // Mise à jour des cycles
-  if (cyclesElement && translationManager) {
+  if (cyclesElement) {
     const cycles = data.complete_cycles || data.cycles || 0;
-    translationManager.updateDynamicElement(
-      "recitationCyclesCount",
-      "surahselector.cyclesText",
-      { cycles }
-    );
-  } else if (cyclesElement) {
-    // Fallback en cas d'absence du gestionnaire de traductions
-    const cycles = data.complete_cycles || data.cycles || 0;
-    cyclesElement.innerHTML = `Complete Recitation Cycles: <strong>${cycles}</strong>`;
+    const cyclesText = translationManager
+      .t("content.surah.cycles", "Complete Recitation Cycles: {cycles}")
+      .replace("{cycles}", `<strong>${cycles}</strong>`);
+    cyclesElement.innerHTML = cyclesText;
   }
 
   // Mise à jour de la progression
-  if (progressElement && translationManager) {
+  if (progressElement) {
     const recited = data.recited_at_least_once || 0;
     const total = data.total_known || 0;
-    translationManager.updateDynamicElement(
-      "recitationProgress",
-      "surahselector.progressText",
-      { recited, total }
-    );
-  } else if (progressElement) {
-    // Fallback en cas d'absence du gestionnaire de traductions
-    const recited = data.recited_at_least_once || 0;
-    const total = data.total_known || 0;
-    progressElement.innerHTML = `Progress: <strong>${recited} / ${total}</strong> surahs recited`;
+    const progressText = translationManager
+      .t(
+        "content.surah.progress",
+        "Progress: {recited} / {total} surahs recited"
+      )
+      .replace("{recited}", `<strong>${recited}</strong>`)
+      .replace("{total}", `<strong>${total}</strong>`);
+    progressElement.innerHTML = progressText;
   }
 }
 

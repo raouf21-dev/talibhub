@@ -55,13 +55,13 @@ export async function navigateTo(pageId, addToHistory = true) {
   // Ajouter un identifiant unique pour chaque appel
   const navigationId = Math.random().toString(36).substr(2, 9);
 
-  console.log(`[DEBUG] NavigateTo #${navigationId} - Début`, {
-    pageId,
-    addToHistory,
-    currentPath: window.location.pathname,
-    stack: new Error().stack,
-    time: new Date().toISOString(),
-  });
+  //console.log(`[DEBUG] NavigateTo #${navigationId} - Début`, {
+  //pageId,
+  //addToHistory,
+  //currentPath: window.location.pathname,
+  //stack: new Error().stack,
+  //time: new Date().toISOString(),
+  //});
 
   // Bloquer toute navigation vers login
   if (pageId === "login") {
@@ -226,11 +226,11 @@ export function updateNavVisibility(pageId) {
     topNav.style.display = hideTopNav ? "none" : "flex";
   }
 
-  console.log(
-    `Navigation visibility updated: pageId=${pageId}, hasToken=${hasToken}, topNav=${
-      topNav ? topNav.style.display : "N/A"
-    }`
-  );
+  //console.log(
+  //  `Navigation visibility updated: pageId=${pageId}, hasToken=${hasToken}, topNav=${
+  //    topNav ? topNav.style.display : "N/A"
+  //  }`
+  //);
 }
 
 /**
@@ -477,3 +477,5 @@ export function updateDOMIfExists(id, value) {
 window.addEventListener("error", (event) => {
   console.error("Erreur globale:", event.error);
 });
+
+  

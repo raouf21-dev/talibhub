@@ -1,0 +1,293 @@
+{
+  "surah": {
+    "overdue": {
+      "selected": "Overdue surahs selected"
+    },
+    "level": {
+      "selected": "Level {level} surahs selected"
+    },
+    "all": {
+      "selected": "All surahs selected"
+    },
+    "selection": {
+      "cleared": "Selection cleared",
+      "in_progress": "Selection in progress",
+      "error": "Error during selection"
+    },
+    "none": {
+      "selected": "No surah selected"
+    },
+    "quick": {
+      "toReview": "To review: {count}",
+      "selectAll": "Select all",
+      "clearAll": "Clear all"
+    },
+    "revision": {
+      "complete": "Revision completed successfully"
+    },
+    "update": {
+      "error": "Error updating"
+    },
+    "export": {
+      "success": "Data exported successfully",
+      "error": "Error exporting data"
+    },
+    "history": {
+      "cleared": "History cleared successfully",
+      "clear": {
+        "error": "Error clearing history"
+      },
+      "load": {
+        "error": "Error loading history"
+      },
+      "error": "Error loading history"
+    },
+    "load_error": "Error loading surahs",
+    "saved": "Surahs saved successfully",
+    "save_error": "Error saving surahs",
+    "select_one": "Please select at least one surah",
+    "cycle_complete": "Recitation cycle completed",
+    "new_cycle": "New cycle started",
+    "selected": "Surahs selected",
+    "audioError": "Error loading audio"
+  },
+  "mosque": {
+    "init": {
+      "error": "Mosque initialization error"
+    },
+    "scraping": {
+      "started": "Data retrieval in progress...",
+      "completed": "Data retrieved successfully",
+      "failed": "Data retrieval failed"
+    },
+    "city": {
+      "selected": "City selected successfully",
+      "error": "Error selecting city"
+    },
+    "error": {
+      "general": "General processing error"
+    },
+    "cache": {
+      "cleared": "Cache cleared successfully"
+    },
+    "data": {
+      "refreshed": "Data refreshed",
+      "updating": "Updating data...",
+      "updated": "Data updated successfully",
+      "error": "Error loading data",
+      "partial": "Partial data loaded"
+    },
+    "background": {
+      "update": "Background update completed"
+    },
+    "refresh": {
+      "failed": "Data refresh failed"
+    },
+    "scrape": {
+      "error": "Error retrieving data"
+    },
+    "geolocation": {
+      "unsupported": "Geolocation not supported by this browser",
+      "searching": "Searching for your location...",
+      "error": "Geolocation error"
+    },
+    "location": {
+      "found": "Location found successfully"
+    },
+    "nearest": {
+      "error": "Error finding nearby mosques"
+    },
+    "load": {
+      "error": "Error loading data"
+    }
+  },
+  "location": {
+    "error": "Geolocation error"
+  },
+  "dua": {
+    "geolocation": {
+      "unsupported": "Geolocation not supported by this browser",
+      "searching": "Searching for your location...",
+      "denied": "Geolocation denied",
+      "unavailable": "Position unavailable",
+      "timeout": "Geolocation timeout exceeded",
+      "error": "Geolocation error"
+    },
+    "times": {
+      "loaded": "Times loaded successfully",
+      "error": "Error calculating times",
+      "calculating": "Calculating times..."
+    },
+    "city": {
+      "empty": "Please enter a city name",
+      "notfound": "City not found"
+    },
+    "angles": {
+      "required": "Please select calculation angles"
+    },
+    "calculation": {
+      "success": "Calculation completed successfully"
+    }
+  },
+  "session": {
+    "select_task_before_start": "Please select a task before starting",
+    "cache": {
+      "save_error": "Error saving session cache"
+    },
+    "restored": "Previous session restored",
+    "init_error": "Error initializing session",
+    "required": "A session is required for this action",
+    "saved": "Session saved successfully",
+    "save_error": "Error saving session",
+    "load_error": "Error loading session",
+    "no_data": "No data to save",
+    "minimum_duration": "Session must last at least 1 minute to be saved",
+    "started_for_task": "Session started for selected task"
+  },
+  "timer": {
+    "settings": {
+      "load_error": "Error loading timer settings",
+      "save_error": "Error saving settings"
+    },
+    "manual": {
+      "time_added": "Manual time added successfully"
+    },
+    "work": {
+      "session_started": "Work session started",
+      "complete": "Work session completed"
+    },
+    "break": {
+      "session_started": "Break session started",
+      "complete": "Break session completed"
+    },
+    "invalid_duration": "Invalid duration (1-120 minutes)",
+    "duration_updated": "Timer duration updated",
+    "save_error": "Error saving timer"
+  },
+  "stopwatch": {
+    "reset": {
+      "success": "Stopwatch reset successfully",
+      "confirm": "Are you sure you want to reset the stopwatch?"
+    }
+  },
+  "time": {
+    "invalid": "Invalid time entered"
+  },
+  "task": {
+    "empty": "Task name cannot be empty",
+    "exists": "This task already exists",
+    "added": "Task added successfully",
+    "deleted": "Task deleted successfully",
+    "updated": "Task updated successfully",
+    "add": {
+      "error": "Error adding task"
+    },
+    "delete": {
+      "error": "Error deleting task",
+      "confirm": "Are you sure you want to delete this task?"
+    },
+    "update": {
+      "error": "Error updating task"
+    }
+  },
+  "tasks": {
+    "deleted": "Tasks deleted successfully",
+    "delete": {
+      "error": "Error deleting tasks",
+      "confirm": "Are you sure you want to delete the selected tasks?"
+    },
+    "load": {
+      "error": "Error loading tasks"
+    }
+  },
+  "common": {
+    "buttons": {
+      "confirm": "Confirm",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "save": "Save",
+      "ok": "OK"
+    }
+  },
+  "auth": {
+    "required": {
+      "fields": "Please fill in all required fields"
+    },
+    "email": {
+      "mismatch": "Email addresses do not match"
+    },
+    "password": {
+      "mismatch": "Passwords do not match",
+      "minlength": "Password must be at least 8 characters long"
+    },
+    "terms": {
+      "required": "You must accept the terms of use"
+    },
+    "captcha": {
+      "required": "Please complete the security verification",
+      "notinitialized": "Captcha not initialized",
+      "incomplete": "Please complete the captcha",
+      "failed": "Captcha failed",
+      "error": "Captcha error",
+      "expired": "Captcha expired",
+      "timeout": "Captcha timeout exceeded"
+    },
+    "signin": {
+      "error": "Sign in error",
+      "success": "Sign in successful"
+    },
+    "signup": {
+      "success": "Sign up successful",
+      "error": "Sign up error",
+      "emailverify": "Verification email sent"
+    },
+    "form": {
+      "validating": "Validating form..."
+    },
+    "field": {
+      "required": "The {field} field is required"
+    },
+    "country": {
+      "notfound": "Country not found"
+    }
+  },
+  "profile": {
+    "auth": {
+      "required": "Authentication required"
+    },
+    "load": {
+      "success": "Profile loaded successfully",
+      "error": "Error loading profile"
+    },
+    "update": {
+      "success": "Profile updated successfully",
+      "error": "Error updating profile"
+    },
+    "password": {
+      "weak": "Password too weak",
+      "mismatch": "Passwords do not match",
+      "success": "Password changed successfully",
+      "incorrect": "Current password incorrect",
+      "error": "Error changing password"
+    }
+  },
+  "mosquetime": {
+    "init": {
+      "error": "Mosque section initialization error",
+      "failed": "Mosque section initialization failed"
+    }
+  },
+  "statistics": {
+    "confirm": {
+      "delete_all_history": "Warning! This action is irreversible. Are you absolutely certain you want to permanently delete all your learning history? All your statistics and session data will be lost forever."
+    },
+    "delete": {
+      "error": "An error occurred while deleting the history",
+      "success": "History deleted successfully"
+    },
+    "buttons": {
+      "confirm": "Delete permanently",
+      "cancel": "Cancel"
+    }
+  }
+}

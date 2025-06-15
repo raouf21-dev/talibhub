@@ -1,0 +1,297 @@
+{
+  "surah": {
+    "overdue": {
+      "selected": "Sourates en retard sélectionnées"
+    },
+    "level": {
+      "selected": "Sourates niveau {level} sélectionnées"
+    },
+    "all": {
+      "selected": "Toutes les sourates sélectionnées"
+    },
+    "selection": {
+      "cleared": "Sélection effacée",
+      "in_progress": "Sélection en cours",
+      "error": "Erreur lors de la sélection"
+    },
+    "none": {
+      "selected": "Aucune sourate sélectionnée"
+    },
+    "quick": {
+      "toReview": "À réviser : {count}",
+      "selectAll": "Tout sélectionner",
+      "clearAll": "Tout désélectionner"
+    },
+    "revision": {
+      "complete": "Révision terminée avec succès"
+    },
+    "update": {
+      "error": "Erreur lors de la mise à jour"
+    },
+    "export": {
+      "success": "Données exportées avec succès",
+      "error": "Erreur lors de l'exportation"
+    },
+    "history": {
+      "cleared": "Historique effacé avec succès",
+      "clear": {
+        "error": "Erreur lors de l'effacement de l'historique"
+      },
+      "load": {
+        "error": "Erreur lors du chargement de l'historique"
+      },
+      "error": "Erreur lors du chargement de l'historique"
+    },
+    "load_error": "Erreur lors du chargement des sourates",
+    "saved": "Sourates sauvegardées avec succès",
+    "save_error": "Erreur lors de la sauvegarde des sourates",
+    "select_one": "Veuillez sélectionner au moins une sourate",
+    "cycle_complete": "Cycle de récitation terminé",
+    "new_cycle": "Nouveau cycle commencé",
+    "selected": "Sourates sélectionnées",
+    "audioError": "Erreur lors du chargement de l'audio"
+  },
+  "mosque": {
+    "init": {
+      "error": "Erreur d'initialisation des mosquées"
+    },
+    "scraping": {
+      "started": "Récupération des données en cours...",
+      "completed": "Données récupérées avec succès",
+      "failed": "Échec de la récupération des données"
+    },
+    "city": {
+      "selected": "Ville sélectionnée avec succès",
+      "error": "Erreur lors de la sélection de la ville"
+    },
+    "error": {
+      "general": "Erreur générale lors du traitement"
+    },
+    "cache": {
+      "cleared": "Cache effacé avec succès"
+    },
+    "data": {
+      "refreshed": "Données actualisées",
+      "updating": "Mise à jour des données...",
+      "updated": "Données mises à jour avec succès",
+      "error": "Erreur lors du chargement des données",
+      "partial": "Données partielles chargées"
+    },
+    "background": {
+      "update": "Mise à jour en arrière-plan terminée"
+    },
+    "refresh": {
+      "failed": "Échec de l'actualisation des données"
+    },
+    "scrape": {
+      "error": "Erreur lors de la récupération des données"
+    },
+    "geolocation": {
+      "unsupported": "Géolocalisation non supportée par ce navigateur",
+      "searching": "Recherche de votre position...",
+      "error": "Erreur de géolocalisation"
+    },
+    "location": {
+      "found": "Position trouvée avec succès"
+    },
+    "nearest": {
+      "error": "Erreur lors de la recherche de mosquées proches"
+    },
+    "load": {
+      "error": "Erreur lors du chargement"
+    }
+  },
+  "location": {
+    "error": "Erreur de géolocalisation"
+  },
+  "dua": {
+    "geolocation": {
+      "unsupported": "Géolocalisation non supportée par ce navigateur",
+      "searching": "Recherche de votre position...",
+      "denied": "Géolocalisation refusée",
+      "unavailable": "Position non disponible",
+      "timeout": "Délai de géolocalisation dépassé",
+      "error": "Erreur de géolocalisation"
+    },
+    "times": {
+      "loaded": "Horaires chargés avec succès",
+      "error": "Erreur lors du calcul des horaires",
+      "calculating": "Calcul des horaires en cours..."
+    },
+    "city": {
+      "empty": "Veuillez saisir le nom d'une ville",
+      "notfound": "Ville non trouvée"
+    },
+    "angles": {
+      "required": "Veuillez sélectionner les angles de calcul"
+    },
+    "calculation": {
+      "success": "Calcul terminé avec succès"
+    }
+  },
+  "session": {
+    "select_task_before_start": "Veuillez sélectionner une tâche avant de commencer",
+    "cache": {
+      "save_error": "Erreur lors de la sauvegarde du cache de session"
+    },
+    "restored": "Session précédente restaurée",
+    "init_error": "Erreur lors de l'initialisation de la session",
+    "required": "Une session est requise pour cette action",
+    "saved": "Session sauvegardée avec succès",
+    "save_error": "Erreur lors de la sauvegarde de la session",
+    "load_error": "Erreur lors du chargement de la session",
+    "no_data": "Aucune donnée à sauvegarder",
+    "minimum_duration": "La session doit durer au minimum 1 minute pour être sauvegardée",
+    "started_for_task": "Session démarrée pour la tâche sélectionnée"
+  },
+  "timer": {
+    "settings": {
+      "load_error": "Erreur lors du chargement des paramètres du timer",
+      "save_error": "Erreur lors de la sauvegarde des paramètres"
+    },
+    "manual": {
+      "time_added": "Temps manuel ajouté avec succès"
+    },
+    "work": {
+      "session_started": "Session de travail commencée",
+      "complete": "Session de travail terminée"
+    },
+    "break": {
+      "session_started": "Session de pause commencée",
+      "complete": "Session de pause terminée"
+    },
+    "invalid_duration": "Durée invalide (1-120 minutes)",
+    "duration_updated": "Durée du timer mise à jour",
+    "save_error": "Erreur lors de la sauvegarde du timer"
+  },
+  "stopwatch": {
+    "reset": {
+      "success": "Chronomètre remis à zéro",
+      "confirm": "Êtes-vous sûr de vouloir remettre le chronomètre à zéro ?"
+    }
+  },
+  "time": {
+    "invalid": "Temps invalide saisi"
+  },
+  "task": {
+    "empty": "Le nom de la tâche ne peut pas être vide",
+    "exists": "Cette tâche existe déjà",
+    "added": "Tâche ajoutée avec succès",
+    "deleted": "Tâche supprimée avec succès",
+    "updated": "Tâche mise à jour avec succès",
+    "add": {
+      "error": "Erreur lors de l'ajout de la tâche"
+    },
+    "delete": {
+      "error": "Erreur lors de la suppression de la tâche",
+      "confirm": "Êtes-vous sûr de vouloir supprimer cette tâche ?"
+    },
+    "update": {
+      "error": "Erreur lors de la mise à jour de la tâche"
+    }
+  },
+  "tasks": {
+    "deleted": "Tâches supprimées avec succès",
+    "delete": {
+      "error": "Erreur lors de la suppression des tâches",
+      "confirm": "Êtes-vous sûr de vouloir supprimer les tâches sélectionnées ?"
+    },
+    "load": {
+      "error": "Erreur lors du chargement des tâches"
+    }
+  },
+  "common": {
+    "buttons": {
+      "confirm": "Confirmer",
+      "cancel": "Annuler",
+      "delete": "Supprimer",
+      "save": "Sauvegarder",
+      "ok": "OK"
+    }
+  },
+  "auth": {
+    "required": {
+      "fields": "Veuillez remplir tous les champs requis"
+    },
+    "email": {
+      "mismatch": "Les adresses e-mail ne correspondent pas"
+    },
+    "password": {
+      "mismatch": "Les mots de passe ne correspondent pas",
+      "minlength": "Le mot de passe doit contenir au moins 8 caractères"
+    },
+    "terms": {
+      "required": "Vous devez accepter les conditions d'utilisation"
+    },
+    "captcha": {
+      "required": "Veuillez compléter la vérification de sécurité",
+      "notinitialized": "Captcha non initialisé",
+      "incomplete": "Veuillez compléter le captcha",
+      "failed": "Échec du captcha",
+      "error": "Erreur du captcha",
+      "expired": "Captcha expiré",
+      "timeout": "Délai du captcha dépassé"
+    },
+    "signin": {
+      "error": "Erreur de connexion",
+      "success": "Connexion réussie"
+    },
+    "signup": {
+      "success": "Inscription réussie",
+      "error": "Erreur d'inscription",
+      "emailverify": "Email de vérification envoyé"
+    },
+    "form": {
+      "validating": "Validation du formulaire..."
+    },
+    "field": {
+      "required": "Le champ {field} est requis"
+    },
+    "country": {
+      "notfound": "Pays non trouvé"
+    }
+  },
+  "statistics": {
+    "confirm": {
+      "delete_all_history": "Attention ! Cette action est irréversible. Êtes-vous absolument certain(e) de vouloir supprimer définitivement tout votre historique d'apprentissage ? Toutes vos statistiques et données de sessions seront perdues à jamais."
+    },
+    "delete": {
+      "error": "Une erreur est survenue lors de la suppression de l'historique",
+      "success": "Historique supprimé avec succès"
+    },
+    "delete_all_history": {
+      "success": "Historique supprimé avec succès",
+      "error": "Erreur lors de la suppression de l'historique"
+    },
+    "buttons": {
+      "confirm": "Supprimer définitivement",
+      "cancel": "Annuler"
+    }
+  },
+  "profile": {
+    "auth": {
+      "required": "Authentification requise"
+    },
+    "load": {
+      "success": "Profil chargé avec succès",
+      "error": "Erreur lors du chargement du profil"
+    },
+    "update": {
+      "success": "Profil mis à jour avec succès",
+      "error": "Erreur lors de la mise à jour du profil"
+    },
+    "password": {
+      "weak": "Mot de passe trop faible",
+      "mismatch": "Les mots de passe ne correspondent pas",
+      "success": "Mot de passe modifié avec succès",
+      "incorrect": "Mot de passe actuel incorrect",
+      "error": "Erreur lors du changement de mot de passe"
+    }
+  },
+  "mosquetime": {
+    "init": {
+      "error": "Erreur d'initialisation de la section mosquées",
+      "failed": "Échec de l'initialisation de la section mosquées"
+    }
+  }
+}

@@ -1,6 +1,7 @@
 // duaTimeCalculator.js
 import { api } from "../../services/api/dynamicLoader.js";
 import { notificationService } from "../../services/notifications/notificationService.js";
+import { translationManager } from "../../translations/TranslationManager.js";
 
 export class DuaTimeCalculator {
   constructor() {
@@ -40,24 +41,14 @@ export class DuaTimeCalculator {
 
   // --- Écouter les changements de langue (pattern standard) ---
   setupLanguageObserver() {
-    if (
-      window.translationManager &&
-      typeof window.translationManager.onLanguageChange === "function"
-    ) {
       console.log("[DUA] Configuration de l'observateur de langue");
-      window.translationManager.onLanguageChange((newLang) => {
+    translationManager.onLanguageChange((newLang) => {
         console.log("[DUA] Changement de langue détecté");
         // Retraduire les résultats s'ils existent
         if (this.currentResults) {
           this.updateTimeDisplayTranslated(this.currentResults);
         }
       });
-    } else {
-      console.log(
-        "[DUA] TranslationManager non disponible, tentative dans 100ms"
-      );
-      setTimeout(() => this.setupLanguageObserver(), 100);
-    }
   }
 
   // Gestion centralisée du clic sur la section du calculateur
@@ -276,28 +267,20 @@ export class DuaTimeCalculator {
     const { type, Fajr, Maghrib, lastThirdStart, ishaEnd } = results;
     const prefix = type === "auto" ? "duaAuto" : "duaManual";
 
-    // Utiliser le système de traduction
-    const fajrText = window.translationManager
-      ? window.translationManager.t("duaTimeCalculator.results.fajr", "Fajr")
-      : "Fajr";
-    const maghribText = window.translationManager
-      ? window.translationManager.t(
-          "duaTimeCalculator.results.maghrib",
+    // Utiliser le nouveau système de traduction
+    const fajrText = translationManager.t("content.dua.results.fajr", "Fajr");
+    const maghribText = translationManager.t(
+      "content.dua.results.maghrib",
           "Maghrib"
-        )
-      : "Maghrib";
-    const ishaEndText = window.translationManager
-      ? window.translationManager.t(
-          "duaTimeCalculator.results.ishaEnd",
+    );
+    const ishaEndText = translationManager.t(
+      "content.dua.results.ishaEnd",
           "End of Isha time"
-        )
-      : "End of Isha time";
-    const lastThirdText = window.translationManager
-      ? window.translationManager.t(
-          "duaTimeCalculator.results.lastThird",
+    );
+    const lastThirdText = translationManager.t(
+      "content.dua.results.lastThird",
           "Last third of the night starts at"
-        )
-      : "Last third of the night starts at";
+    );
 
     document.getElementById(
       `${prefix}FajrTime`

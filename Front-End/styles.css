@@ -667,58 +667,61 @@ body:has(.page:not(.page-no-welcome).active) .top-nav {
 /* ===================== */
 /*     CLOCHE NOTIF      */
 /* ===================== */
-.notifications-link {
+.messaging-link {
   display: flex;
   align-items: center;
   justify-content: center;
   text-decoration: none;
+  position: relative;
 }
 
-.notifications-icon {
-  width: 24px;
-  height: 24px;
+.messaging-icon {
+  width: 28px; /* Augmenté de 24px à 28px (+1.2x) */
+  height: 28px;
   cursor: pointer;
   color: var(--primary-color);
 }
 
-/* Animation cloche sur hover */
-#notificationBell:hover .notifications-icon {
-  animation: ring 0.5s ease-in-out;
+/* Compteur de messages non lus */
+.messaging-count {
+  position: absolute;
+  top: -10px; /* Plus haut pour plus de visibilité */
+  right: -10px; /* Plus à droite pour plus de visibilité */
+  background: #dc3545;
+  color: white;
+  border-radius: 50%;
+  width: 22px; /* Légèrement plus grand */
+  height: 22px;
+  font-size: 11px; /* Légèrement plus petit pour rester lisible */
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  line-height: 1.86; /* Force line-height à 1 pour un centrage parfait */
+  text-align: center; /* Centrage horizontal supplémentaire */
+  border: 2px solid var(--background-color); /* Bordure pour plus de contraste */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2); /* Ombre pour plus de visibilité */
 }
 
-@keyframes ring {
-  0% {
-    transform: rotate(0);
-  }
-  10% {
-    transform: rotate(15deg);
-  }
-  20% {
-    transform: rotate(-10deg);
-  }
-  30% {
-    transform: rotate(10deg);
+/* Animation enveloppe sur hover */
+#messagingButton:hover .messaging-icon {
+  animation: bounce 0.5s ease-in-out;
+}
+
+@keyframes bounce {
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
+    transform: translateY(0);
   }
   40% {
-    transform: rotate(-10deg);
-  }
-  50% {
-    transform: rotate(5deg);
+    transform: translateY(-10px);
   }
   60% {
-    transform: rotate(-5deg);
-  }
-  70% {
-    transform: rotate(3deg);
-  }
-  80% {
-    transform: rotate(-3deg);
-  }
-  90% {
-    transform: rotate(2deg);
-  }
-  100% {
-    transform: rotate(0);
+    transform: translateY(-5px);
   }
 }
 
@@ -844,9 +847,34 @@ input:checked + .slider:before {
   border: none;
   cursor: pointer;
   padding: 0.25rem;
+  min-width: 32px;
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 .lang-btn:hover {
   transform: scale(1.1);
+}
+
+/* Styles spécifiques pour les boutons de langue dans le dropdown de navigation */
+.dropdown-item .language-selector .lang-btn {
+  font-size: 1.8rem;
+  padding: 0.5rem;
+  min-width: 40px;
+  min-height: 40px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.dropdown-item .language-selector .lang-btn:hover {
+  background-color: rgba(0, 123, 255, 0.1);
+  transform: scale(1.05);
+}
+
+.dropdown-item .language-selector .lang-btn.active {
+  background-color: rgba(0, 123, 255, 0.2);
+  border: 2px solid #007bff;
 }
 
 /* Exemple Responsive */
@@ -1158,12 +1186,6 @@ input:checked + .slider:before {
 }
 
 /* En-tête */
-#apprentissage h1 {
-  text-align: center;
-  font-size: var(--h1-size);
-  color: var(--primary-color);
-  margin-bottom: 1rem;
-}
 
 /* Timer Cards */
 .timer {
@@ -1273,19 +1295,6 @@ input:checked + .slider:before {
 #save-button-session {
   margin-left: 1.5vw;
   background-color: #6096ba;
-}
-
-/* Bouton nouvelle session */
-.session-button {
-  padding: 0.75rem 1.5rem;
-  width: auto !important;
-  height: auto !important;
-  background-color: var(--secondary-color) !important;
-  color: white;
-}
-
-.session-button:hover {
-  background-color: var(--primary-color) !important;
 }
 
 /* Manual Time */
@@ -1436,14 +1445,6 @@ input:checked + .slider:before {
   display: flex;
   flex-direction: column;
   align-items: center;
-}
-
-#todoLists h1 {
-  font-size: var(--h1-size);
-  font-family: var(--main-font);
-  margin-bottom: 1rem;
-  width: 100%;
-  text-align: center;
 }
 
 /* Card Styles */
@@ -1672,10 +1673,6 @@ input:checked + .slider:before {
     padding: 2rem;
   }
 
-  h1 {
-    font-size: var(--h1-size);
-  }
-
   .todo-card-title {
     font-size: 1.5rem;
   }
@@ -1693,11 +1690,6 @@ input:checked + .slider:before {
   padding: 1.5rem;
   box-sizing: border-box;
   transition: margin-left 0.3s ease;
-}
-
-#statistics h1 {
-  font-size: var(--h1-size);
-  text-align: center;
 }
 
 @media (min-width: 1024px) {
@@ -1965,6 +1957,94 @@ input:checked + .slider:before {
   }
 }
 
+/* Bouton de suppression de l'historique */
+.delete-history-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0rem auto;
+  padding: 0.5rem 0;
+  text-align: center;
+  position: relative;
+}
+
+/* Centrage tenant compte de la sidebar sur desktop - même logique que .page#statistics */
+@media (min-width: 1024px) {
+  .delete-history-container {
+    margin-left: 350px;
+    margin-right: auto;
+    width: 100% !important;
+  }
+}
+
+.delete-history-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 49px;
+  height: 49px;
+  background-color: #dc3545;
+  color: white;
+  border: 2px solid #dc3545;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0.5rem;
+  position: relative;
+}
+
+.delete-history-btn:hover {
+  background-color: #c82333;
+  border-color: #c82333;
+  transform: translateY(-1px);
+}
+
+.delete-history-btn:active {
+  background-color: #b21e2f;
+  border-color: #b21e2f;
+  transform: translateY(0);
+}
+
+.delete-history-btn svg {
+  width: 28px;
+  height: 28px;
+  stroke-width: 2;
+}
+
+@media (max-width: 768px) {
+  .delete-history-container {
+    margin: 1.5rem auto;
+    padding: 0.75rem 0;
+  }
+
+  .delete-history-btn {
+    width: 42px;
+    height: 42px;
+  }
+
+  .delete-history-btn svg {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .delete-history-container {
+    margin: 1rem auto;
+    padding: 0.5rem 0;
+  }
+
+  .delete-history-btn {
+    width: 38px;
+    height: 38px;
+  }
+
+  .delete-history-btn svg {
+    width: 20px;
+    height: 20px;
+  }
+}
+
 /*SurahSelector*/
 
 #salatSurahSelector {
@@ -1974,11 +2054,6 @@ input:checked + .slider:before {
   color: #274c77;
   padding: 1rem;
   margin-left: 250px;
-}
-
-#salatSurahSelector h1 {
-  font-size: var(--h1-size);
-  text-align: center;
 }
 
 .surahselector-row {
@@ -2099,11 +2174,6 @@ input:checked + .slider:before {
   color: #274c77;
   padding: 1rem;
   margin-left: 250px;
-}
-
-#duaTimeCalculator h1 {
-  font-size: var(--h1-size);
-  text-align: center;
 }
 
 .dua-calculator-row {
@@ -2360,9 +2430,9 @@ input:checked + .slider:before {
   }
 }
 
-/*Notifications*/
+/*Messagerie*/
 
-#notifications {
+#messaging {
   font-family: Arial, sans-serif;
   background-color: #e7ecef;
   color: #274c77;
@@ -2372,12 +2442,12 @@ input:checked + .slider:before {
   max-width: 98vw;
 }
 
-.notifications-container {
+.messaging-container {
   max-width: 65vw;
   margin: 0 auto;
 }
 
-.notifications-title {
+.messaging-title {
   font-size: 2rem;
   font-weight: bold;
   text-align: center;
@@ -2385,20 +2455,23 @@ input:checked + .slider:before {
   color: #274c77;
 }
 
-.notifications-card {
+.messaging-card {
   background-color: white;
   border: 1px solid #a3cef1;
   border-radius: 0.5rem;
   overflow: hidden;
 }
 
-.notifications-card-header {
+.messaging-card-header {
   background-color: #6096ba;
   color: white;
   padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.notifications-card-title {
+.messaging-card-title {
   font-size: 1.5rem;
   font-weight: bold;
   display: flex;
@@ -2406,80 +2479,122 @@ input:checked + .slider:before {
   margin: 0;
 }
 
-.notifications-icon {
-  margin-right: 0.5rem;
+.messaging-actions {
+  display: flex;
+  gap: 0.5rem;
 }
 
-.notifications-card-content {
+.messaging-action-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  transition: all 0.2s ease;
+}
+
+.messaging-action-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.messaging-card-content {
   padding: 1rem;
 }
 
-.notifications-list {
+.messaging-list {
   list-style-type: none;
   padding: 0;
   margin: 0;
 }
 
-.notification-item {
+.message-item {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  padding: 0.75rem;
+  padding: 1rem;
   border-radius: 0.5rem;
   margin-bottom: 1rem;
+  border: 1px solid #e9ecef;
+  transition: all 0.2s ease;
+  cursor: pointer;
 }
 
-.notification-item:last-child {
+.message-item:hover {
+  border-color: #6096ba;
+  box-shadow: 0 2px 4px rgba(96, 150, 186, 0.1);
+}
+
+.message-item:last-child {
   margin-bottom: 0;
 }
 
-.notification-content {
-  display: flex;
-  align-items: flex-start;
+.message-item.read {
+  opacity: 0.7;
+  background-color: #f8f9fa;
 }
 
-.notification-icon {
+.message-content {
+  display: flex;
+  align-items: flex-start;
+  flex-grow: 1;
+}
+
+.message-icon {
   margin-right: 0.75rem;
   flex-shrink: 0;
 }
 
-.notification-text {
+.message-text {
   flex-grow: 1;
 }
 
-.notification-message {
-  font-weight: 500;
+.message-title {
+  font-weight: 600;
   margin: 0 0 0.25rem 0;
+  color: #274c77;
+  font-size: 1rem;
 }
 
-.notification-date {
-  font-size: 0.875rem;
+.message-content {
+  font-weight: 400;
+  margin: 0 0 0.25rem 0;
+  color: #495057;
+}
+
+.message-date {
+  font-size: 0.75rem;
   color: #8b8c89;
   margin: 0;
 }
 
-.notification-actions {
+.message-actions {
   display: flex;
   align-items: center;
+  gap: 0.5rem;
 }
 
-.notification-read-btn {
+.message-read-btn {
   background-color: transparent;
   border: 1px solid #6096ba;
   color: #6096ba;
   padding: 0.25rem 0.5rem;
   border-radius: 0.25rem;
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   cursor: pointer;
-  margin-right: 0.5rem;
+  transition: all 0.2s ease;
 }
 
-.notification-read-btn:hover {
-  background-color: #a3cef1;
+.message-read-btn:hover {
+  background-color: #6096ba;
   color: white;
 }
 
-.notification-delete-btn {
+.message-delete-btn {
   background-color: transparent;
   border: none;
   color: #ff4d4d;
@@ -2488,72 +2603,112 @@ input:checked + .slider:before {
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: 0.25rem;
+  transition: all 0.2s ease;
 }
 
-.notification-delete-btn:hover {
+.message-delete-btn:hover {
   background-color: #ffe6e6;
 }
 
-.notification-item.read {
-  background-color: #f1f5f9;
-}
-
-.notification-item.read .notification-message {
-  color: #8b8c89;
-}
-
 @media (max-width: 1024px) {
-  #notifications {
+  #messaging {
     margin-left: auto;
     margin-right: auto;
     width: 95vw;
-    max-width: 1500px; /* Vous pouvez ajuster cette valeur selon vos besoins */
+    max-width: 1500px;
   }
 
-  .notifications-container {
+  .messaging-container {
     width: 90vw;
     max-width: 90vw;
+  }
+
+  .messaging-actions {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .messaging-action-btn {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
   }
 }
 
 @media (max-width: 640px) {
-  #notifications {
+  #messaging {
     padding-left: 0rem;
     padding-bottom: 7rem;
   }
 
-  .notifications-title {
+  .messaging-title {
     font-size: 2rem;
   }
 
-  .notifications-card-title {
-    font-size: 1.5rem;
+  .messaging-card-title {
+    font-size: 1.25rem;
   }
 
-  .notifications-container {
+  .messaging-container {
     width: 95vw;
     max-width: 95vw;
   }
 
-  .notifications-card-content {
+  .messaging-card-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  .messaging-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .messaging-card-content {
     width: 100%;
     padding: 0.25rem 0rem;
   }
 
-  .notification-item {
-    padding: 1rem 0rem 1rem 0rem;
+  .message-item {
+    padding: 1rem 0.5rem;
     border-radius: 0.5rem;
+    margin-bottom: 0.5rem;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .message-content {
+    width: 100%;
     margin-bottom: 0.5rem;
   }
 
-  .notification-message {
+  .message-title {
+    font-size: 0.9rem;
+  }
+
+  .message-content {
     font-size: 0.85rem;
   }
 
-  .notification-read-btn {
-    font-size: 0.85rem;
+  .message-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .message-read-btn {
+    font-size: 0.75rem;
     padding: 0.15rem 0.25rem;
-    margin-right: 0rem;
+  }
+
+  .messaging-count {
+    width: 20px;
+    height: 20px;
+    font-size: 10px;
+    top: -8px;
+    right: -8px;
+    line-height: 1; /* Force line-height à 1 pour un centrage parfait */
+    border: 1px solid var(--background-color); /* Bordure plus fine sur mobile */
   }
 }
 
@@ -2566,13 +2721,6 @@ input:checked + .slider:before {
   background-color: #e7ecef;
   color: #274c77;
   line-height: 1.6;
-}
-
-#profile h1 {
-  color: #274c77;
-  text-align: center;
-  font-size: var(--h1-size);
-  margin-bottom: 20px;
 }
 
 #profile h2 {
@@ -2737,13 +2885,6 @@ button[type="submit"]:hover {
   display: flex;
   flex-direction: column;
   align-items: center;
-}
-
-#contactform h1 {
-  text-align: center;
-  color: var(--primary-color);
-  font-size: var(--h1-size);
-  margin-bottom: 3rem;
 }
 
 .contactform-wrapper {
@@ -3010,13 +3151,6 @@ button[type="submit"]:hover {
   margin-left: 250px;
 }
 
-#surahmemorization h1 {
-  margin: 1rem 0;
-  text-align: center;
-  font-size: var(--h1-size);
-  color: var(--primary-color);
-}
-
 #quran-app-container {
   max-width: 1000px;
   margin: 0 auto;
@@ -3253,12 +3387,6 @@ button[type="submit"]:hover {
   margin-top: 10px;
 }
 
-.surahmemorization-progress-bar-fill {
-  background-color: #333;
-  height: 100%;
-  width: 20%;
-}
-
 /* Boutons d'évaluation */
 #surahmemorization-evaluation {
   display: grid;
@@ -3297,18 +3425,33 @@ button[type="submit"]:hover {
   margin-right: 5px;
 }
 
-/* Section des graphiques mise à jour */
+/* Section des graphiques mise à jour - agrandie pour contenir directement le graphique */
 .surahmemorization-charts {
   display: flex;
   justify-content: center;
-  padding: 24px;
+  align-items: center;
+  padding: 16px; /* Réduit pour laisser plus d'espace au graphique */
   margin: 0 auto 24px;
-  max-width: 800px;
+  max-width: 1200px;
+  min-height: 600px; /* Augmenté pour plus de place */
   background-color: white;
   border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
 }
 
-/* Container pour le graphique */
+/* Canvas du graphique directement dans le container */
+.surahmemorization-charts canvas {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  min-width: 500px; /* Taille minimale pour assurer la lisibilité */
+  min-height: 500px;
+}
+
+/* Container pour le graphique - styles de compatibilité */
 .chart-container {
   background: white;
   border: 1px solid #e5e7eb;
@@ -3404,7 +3547,14 @@ button[type="submit"]:hover {
   }
 
   .surahmemorization-charts {
-    padding: 16px;
+    padding: 12px;
+    max-width: 95vw; /* Ajusté pour les tablettes */
+    min-height: 550px; /* Hauteur optimisée pour tablettes */
+  }
+
+  .surahmemorization-charts canvas {
+    min-width: 400px !important;
+    min-height: 400px !important;
   }
 
   .chart-container {
@@ -3458,7 +3608,14 @@ button[type="submit"]:hover {
   }
 
   .surahmemorization-charts {
-    padding: 12px;
+    padding: 10px;
+    max-width: 97vw; /* Ajusté pour mobile */
+    min-height: 450px; /* Hauteur optimisée pour mobile */
+  }
+
+  .surahmemorization-charts canvas {
+    min-width: 350px !important;
+    min-height: 350px !important;
   }
 
   .chart-container {
@@ -3479,6 +3636,13 @@ button[type="submit"]:hover {
 @media (max-width: 480px) {
   .surahmemorization-charts {
     padding: 8px;
+    max-width: 98vw; /* Ajusté pour très petits écrans */
+    min-height: 400px; /* Hauteur optimisée pour très petits écrans */
+  }
+
+  .surahmemorization-charts canvas {
+    min-width: 300px !important;
+    min-height: 300px !important;
   }
 
   .chart-container {
@@ -3500,6 +3664,57 @@ button[type="submit"]:hover {
   .surahmemorization-table td {
     padding: 6px;
     font-size: 0.75rem;
+  }
+}
+
+/* Boutons de sélection rapide - Style session-button uniforme */
+.quick-selection-buttons {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.quick-selection-buttons button {
+  padding: 0.75rem 1.5rem !important;
+  background-color: var(--secondary-color) !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 0.5rem !important;
+  cursor: pointer !important;
+  font-size: 0.9rem !important;
+  font-weight: 500 !important;
+  transition: all 0.2s ease !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+}
+
+.quick-selection-buttons button:hover {
+  background-color: var(--primary-color) !important;
+  transform: translateY(-1px) !important;
+}
+
+.quick-selection-buttons button i {
+  color: white !important;
+}
+
+@media (max-width: 768px) {
+  .quick-selection-buttons {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .quick-selection-buttons button {
+    padding: 0.5rem 1rem !important;
+    font-size: 0.8rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .quick-selection-buttons button {
+    padding: 0.4rem 0.8rem !important;
+    font-size: 0.75rem !important;
   }
 }
 
@@ -4411,4 +4626,315 @@ body > h1 {
 .dashboard-section h1 {
   font-size: 1.5em;
   margin-block: 0.83em;
+}
+
+/* Styles pour le texte des sourates */
+.surahmemorization-text {
+  background-color: #f8f9fa;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 20px;
+  margin: 20px 0;
+  font-family: "Amiri", "Times New Roman", serif;
+  text-align: right;
+  direction: rtl;
+  /* Container fixe avec scroll */
+  height: 400px;
+  max-height: 50vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  /* Responsive */
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  /* Animation douce pour l'apparition */
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+/* Indicateur de scroll */
+.surahmemorization-text[data-scrollable="true"]::after {
+  content: attr(data-scroll-text);
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(96, 150, 186, 0.9);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 15px;
+  font-size: 0.8rem;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  direction: ltr;
+  text-align: center;
+  pointer-events: none;
+  opacity: 0;
+  animation: fadeInOut 3s ease-in-out;
+}
+
+@keyframes fadeInOut {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  20%,
+  80% {
+    opacity: 1;
+  }
+}
+
+.surah-verse {
+  margin-bottom: 6px; /* Réduit de 12px à 6px */
+  padding: 4px 0; /* Réduit de 8px à 4px */
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 1.5rem; /* Augmenté de 1.1rem à 1.3rem */
+  line-height: 1.6; /* Ajusté pour un meilleur espacement */
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.verse-number {
+  color: #6096ba;
+  font-weight: bold;
+  font-size: 1.3rem; /* 1rem * 1.3 = 1.3rem */
+  min-width: 39px; /* 30px * 1.3 = 39px */
+  text-align: right;
+  flex-shrink: 0;
+  direction: ltr;
+  background-color: #f0f7ff;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-top: 2px;
+  order: 2; /* Placer le numéro à droite */
+}
+
+.verse-text {
+  flex: 1;
+  text-align: right;
+  direction: rtl;
+  font-family: "Amiri", "Times New Roman", serif;
+  order: 1; /* Placer le texte à gauche mais aligné à droite */
+  line-height: 2.5; /* Espacement entre lignes augmenté pour le texte arabe */
+}
+
+.verse-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  order: 2; /* Placer les contrôles à droite */
+}
+
+.verse-audio-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  background-color: #f0f7ff;
+  border: 1px solid #e0e7ff;
+  min-width: 36px; /* 28px * 1.3 = 36.4px ≈ 36px */
+  height: 36px; /* 28px * 1.3 = 36.4px ≈ 36px */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.verse-audio-btn:hover {
+  background-color: #dbeafe;
+  border-color: #6096ba;
+  transform: scale(1.05);
+}
+
+.verse-audio-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.verse-audio-btn.loading {
+  background-color: #fef3c7;
+  border-color: #f59e0b;
+}
+
+.verse-audio-btn.playing {
+  background-color: #dcfce7;
+  border-color: #16a34a;
+  animation: pulse 2s infinite;
+}
+
+.audio-icon {
+  font-size: 1.17rem; /* 0.9rem * 1.3 = 1.17rem */
+  transition: transform 0.2s ease;
+}
+
+.verse-audio-btn:hover .audio-icon {
+  transform: scale(1.1);
+}
+
+/* Animation pour le verset en cours de lecture */
+.verse-playing {
+  background-color: #fef3c7;
+  border-left: 4px solid #f59e0b;
+  padding-left: 16px;
+  animation: highlightVerse 1s ease-in-out;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes highlightVerse {
+  from {
+    background-color: #fbbf24;
+  }
+  to {
+    background-color: #fef3c7;
+  }
+}
+
+.surah-verse:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.surah-error {
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  padding: 16px;
+  color: #991b1b;
+  text-align: center;
+  direction: ltr;
+}
+
+.surah-error p {
+  margin: 4px 0;
+  font-size: 0.95rem;
+}
+
+/* Bouton toggle text avec état de chargement */
+#surahmemorization-toggle-text {
+  background-color: var(--secondary-color);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  margin: 10px 0;
+  cursor: pointer;
+  font-size: 0.9rem;
+  display: block;
+  width: auto;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#surahmemorization-toggle-text:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+}
+
+#surahmemorization-toggle-text:not(:disabled):hover {
+  background-color: #4a5568;
+}
+
+/* Styles de scroll personnalisés */
+.surahmemorization-text::-webkit-scrollbar {
+  width: 8px;
+}
+
+.surahmemorization-text::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.surahmemorization-text::-webkit-scrollbar-thumb {
+  background: #6096ba;
+  border-radius: 4px;
+}
+
+.surahmemorization-text::-webkit-scrollbar-thumb:hover {
+  background: #4a7ba7;
+}
+
+@media (max-width: 768px) {
+  .surahmemorization-text {
+    padding: 15px;
+    margin: 15px 0;
+    height: 350px; /* Légèrement réduit sur mobile */
+    max-height: 45vh;
+  }
+
+  .surah-verse {
+    font-size: 1.4rem; /* Légèrement réduit sur mobile mais toujours plus gros */
+    margin-bottom: 5px;
+    padding: 3px 0;
+    gap: 8px;
+  }
+
+  .verse-number {
+    font-size: 1.17rem; /* 0.9rem * 1.3 = 1.17rem */
+    min-width: 33px; /* 25px * 1.3 = 32.5px ≈ 33px */
+    padding: 1px 5px;
+  }
+
+  .verse-controls {
+    gap: 6px;
+  }
+
+  .verse-audio-btn {
+    min-width: 34px; /* 26px * 1.3 = 33.8px ≈ 34px */
+    height: 34px; /* 26px * 1.3 = 33.8px ≈ 34px */
+    padding: 3px 5px;
+  }
+
+  .audio-icon {
+    font-size: 1.04rem; /* 0.8rem * 1.3 = 1.04rem */
+  }
+
+  .surah-error p {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .surahmemorization-text {
+    height: 300px;
+    max-height: 40vh;
+    padding: 12px;
+  }
+
+  .surah-verse {
+    font-size: 1.3rem;
+    margin-bottom: 4px;
+    padding: 2px 0;
+    gap: 6px;
+  }
+
+  .verse-number {
+    font-size: 1.04rem; /* 0.8rem * 1.3 = 1.04rem */
+    min-width: 29px; /* 22px * 1.3 = 28.6px ≈ 29px */
+    padding: 1px 4px;
+  }
+
+  .verse-controls {
+    gap: 4px;
+  }
+
+  .verse-audio-btn {
+    min-width: 31px; /* 24px * 1.3 = 31.2px ≈ 31px */
+    height: 31px; /* 24px * 1.3 = 31.2px ≈ 31px */
+    padding: 2px 4px;
+  }
+
+  .audio-icon {
+    font-size: 0.98rem; /* 0.75rem * 1.3 = 0.975rem ≈ 0.98rem */
+  }
 }

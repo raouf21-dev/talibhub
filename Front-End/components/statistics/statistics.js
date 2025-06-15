@@ -5,6 +5,9 @@ const appState = AppState;
 class StatisticsManager {
   constructor() {
     console.debug("[StatisticsManager] constructor: Initializing...");
+    // Flag pour éviter les initialisations multiples
+    this.statisticsInitialized = false;
+
     // Le cache contiendra uniquement les enregistrements existants
     this.cache = {
       daily: { dates: [], dataMap: new Map(), lastFetch: null },
@@ -131,20 +134,33 @@ class StatisticsManager {
     return this.cache[period].dataMap.get(dateKey);
   }
 
-  async updatePeriodData(period) {
+  async updatePeriodData(period, forceRefresh = false) {
     console.debug(
-      `[StatisticsManager] updatePeriodData(${period}): Updating period data...`
+      `[StatisticsManager] updatePeriodData(${period}): Updating period data... forceRefresh=${forceRefresh}`
     );
     try {
-      // Si aucun enregistrement n'est présent, on récupère les données depuis le serveur
-      if (this.cache[period].dates.length === 0) {
+      // Si aucun enregistrement n'est présent ou si on force le rafraîchissement, on récupère les données depuis le serveur
+      if (this.cache[period].dates.length === 0 || forceRefresh) {
         console.debug(
-          `[StatisticsManager] updatePeriodData(${period}): Cache empty, fetching data...`
+          `[StatisticsManager] updatePeriodData(${period}): ${
+            forceRefresh ? "Force refresh requested" : "Cache empty"
+          }, fetching data...`
         );
         if (!(await this.fetchAndCacheData(period))) {
           throw new Error("Unable to load data");
         }
       }
+
+      // Si toujours pas de données après le fetch (historique vide)
+      if (this.cache[period].dates.length === 0) {
+        console.debug(
+          `[StatisticsManager] updatePeriodData(${period}): No data available, showing empty state`
+        );
+        ChartManager.updateChart(period, ["Aucune donnée"], [0], [0], []);
+        this.updateNavigationButtons(period);
+        return;
+      }
+
       const currentDateKey = this.getCurrentDateForPeriod(period);
       if (!currentDateKey) {
         throw new Error("Invalid date");
@@ -161,7 +177,8 @@ class StatisticsManager {
         `[StatisticsManager] updatePeriodData(${period}) Error:`,
         error
       );
-      ChartManager.updateChart(period, ["Erreur de chargement"], [0], [0], []);
+      ChartManager.updateChart(period, ["Aucune donnée"], [0], [0], []);
+      this.updateNavigationButtons(period);
     }
   }
 
@@ -187,7 +204,8 @@ class StatisticsManager {
         `[StatisticsManager] navigatePeriod(${period}): Navigating from index ${this.currentPeriodIndex[period]} to ${newIndex}`
       );
       this.currentPeriodIndex[period] = newIndex;
-      this.updatePeriodData(period);
+      // Pas de force refresh lors de la navigation, on utilise le cache
+      this.updatePeriodData(period, false);
     } catch (error) {
       console.error(
         `[StatisticsManager] navigatePeriod(${period}) Error:`,
@@ -314,53 +332,280 @@ class StatisticsManager {
       console.debug(
         "[StatisticsManager] setupListeners: Setting up navigation buttons..."
       );
+
+      // Nettoyer les listeners existants pour éviter les doublons
+      this.cleanupListeners();
+
       document.querySelectorAll(".period-navigation").forEach((nav) => {
         const period = nav.dataset.period;
-        nav.querySelector(".prev")?.addEventListener("click", () => {
-          console.debug(
-            `[StatisticsManager] setupListeners: ${period} prev button clicked.`
-          );
-          this.navigatePeriod(period, +1);
-        });
-        nav.querySelector(".next")?.addEventListener("click", () => {
-          console.debug(
-            `[StatisticsManager] setupListeners: ${period} next button clicked.`
-          );
-          this.navigatePeriod(period, -1);
-        });
+        const prevBtn = nav.querySelector(".prev");
+        const nextBtn = nav.querySelector(".next");
+
+        if (prevBtn) {
+          const prevHandler = () => {
+            console.debug(
+              `[StatisticsManager] setupListeners: ${period} prev button clicked.`
+            );
+            this.navigatePeriod(period, +1);
+          };
+          prevBtn.addEventListener("click", prevHandler);
+          // Stocker la référence pour le nettoyage
+          prevBtn._statisticsHandler = prevHandler;
+        }
+
+        if (nextBtn) {
+          const nextHandler = () => {
+            console.debug(
+              `[StatisticsManager] setupListeners: ${period} next button clicked.`
+            );
+            this.navigatePeriod(period, -1);
+          };
+          nextBtn.addEventListener("click", nextHandler);
+          // Stocker la référence pour le nettoyage
+          nextBtn._statisticsHandler = nextHandler;
+        }
       });
+
+      // Ajout du listener pour le bouton de suppression de l'historique
+      const deleteHistoryBtn = document.getElementById(
+        "delete-all-history-btn"
+      );
+      if (deleteHistoryBtn) {
+        // Nettoyer d'abord l'ancien listener s'il existe
+        if (deleteHistoryBtn._statisticsDeleteHandler) {
+          deleteHistoryBtn.removeEventListener(
+            "click",
+            deleteHistoryBtn._statisticsDeleteHandler
+          );
+        }
+
+        const deleteHandler = () => {
+          this.handleDeleteAllHistory();
+        };
+        deleteHistoryBtn.addEventListener("click", deleteHandler);
+        // Stocker la référence pour le nettoyage
+        deleteHistoryBtn._statisticsDeleteHandler = deleteHandler;
+
+        console.debug(
+          "[StatisticsManager] setupListeners: Delete history button listener added."
+        );
+      }
     } catch (error) {
       console.error("[StatisticsManager] setupListeners Error:", error);
+    }
+  }
+
+  cleanupListeners() {
+    try {
+      console.debug(
+        "[StatisticsManager] cleanupListeners: Cleaning up existing listeners..."
+      );
+
+      // Nettoyer les listeners de navigation
+      document.querySelectorAll(".period-navigation").forEach((nav) => {
+        const prevBtn = nav.querySelector(".prev");
+        const nextBtn = nav.querySelector(".next");
+
+        if (prevBtn && prevBtn._statisticsHandler) {
+          prevBtn.removeEventListener("click", prevBtn._statisticsHandler);
+          delete prevBtn._statisticsHandler;
+        }
+
+        if (nextBtn && nextBtn._statisticsHandler) {
+          nextBtn.removeEventListener("click", nextBtn._statisticsHandler);
+          delete nextBtn._statisticsHandler;
+        }
+      });
+
+      // Nettoyer le listener du bouton de suppression
+      const deleteHistoryBtn = document.getElementById(
+        "delete-all-history-btn"
+      );
+      if (deleteHistoryBtn && deleteHistoryBtn._statisticsDeleteHandler) {
+        deleteHistoryBtn.removeEventListener(
+          "click",
+          deleteHistoryBtn._statisticsDeleteHandler
+        );
+        delete deleteHistoryBtn._statisticsDeleteHandler;
+      }
+    } catch (error) {
+      console.error("[StatisticsManager] cleanupListeners Error:", error);
+    }
+  }
+
+  /**
+   * Invalide le cache et force le rechargement des données
+   */
+  async refreshAllData() {
+    console.debug(
+      "[StatisticsManager] refreshAllData: Refreshing all periods..."
+    );
+    try {
+      for (const period of this.periods) {
+        await this.updatePeriodData(period, true);
+      }
+      console.debug(
+        "[StatisticsManager] refreshAllData: All data refreshed successfully."
+      );
+    } catch (error) {
+      console.error("[StatisticsManager] refreshAllData Error:", error);
+    }
+  }
+
+  /**
+   * Gère la suppression complète de l'historique avec confirmation
+   */
+  async handleDeleteAllHistory() {
+    try {
+      console.debug(
+        "[StatisticsManager] handleDeleteAllHistory: Starting delete process..."
+      );
+
+      // Import du service de notifications
+      const { default: NotificationService } = await import(
+        "../../services/notifications/notificationService.js"
+      );
+
+      // Affichage du popup de confirmation
+      const confirmed = await NotificationService.confirm(
+        "statistics.confirm.delete_all_history",
+        "statistics.buttons.confirm",
+        "statistics.buttons.cancel"
+      );
+
+      if (!confirmed) {
+        console.debug(
+          "[StatisticsManager] handleDeleteAllHistory: User cancelled deletion."
+        );
+        return;
+      }
+
+      // Suppression effective
+      await this.deleteAllUserHistory();
+    } catch (error) {
+      console.error("[StatisticsManager] handleDeleteAllHistory Error:", error);
+      // Affichage d'une notification d'erreur
+      try {
+        const { default: NotificationService } = await import(
+          "../../services/notifications/notificationService.js"
+        );
+        NotificationService.show("statistics.delete.error", "error");
+      } catch (notifError) {
+        console.error("Error showing notification:", notifError);
+      }
+    }
+  }
+
+  /**
+   * Supprime tout l'historique de l'utilisateur
+   */
+  async deleteAllUserHistory() {
+    try {
+      console.debug(
+        "[StatisticsManager] deleteAllUserHistory: Making API call..."
+      );
+
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("No authentication token found");
+      }
+
+      const response = await fetch("/api/statistics/delete-all", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.debug(
+        "[StatisticsManager] deleteAllUserHistory: API response:",
+        result
+      );
+
+      // Nettoyage du cache local et réinitialisation des indices
+      this.periods.forEach((period) => {
+        this.cache[period].dates = [];
+        this.cache[period].dataMap.clear();
+        this.cache[period].lastFetch = null;
+        this.currentPeriodIndex[period] = 0;
+      });
+
+      // Rechargement optimisé des données (maintenant vides)
+      for (const period of this.periods) {
+        await this.updatePeriodData(period);
+      }
+
+      // Affichage d'une notification de succès
+      const { default: NotificationService } = await import(
+        "../../services/notifications/notificationService.js"
+      );
+      NotificationService.show("statistics.delete.success", "success");
+
+      console.debug(
+        "[StatisticsManager] deleteAllUserHistory: History deleted successfully."
+      );
+    } catch (error) {
+      console.error("[StatisticsManager] deleteAllUserHistory Error:", error);
+      throw error;
     }
   }
 
   async init() {
     try {
       console.debug("[StatisticsManager] init: Starting initialization...");
-      ChartManager.init();
-      this.setupListeners();
-      // Pour chaque période, on récupère et affiche les enregistrements existants
+
+      // Initialiser les composants seulement s'ils ne le sont pas déjà
+      if (!this.statisticsInitialized) {
+        ChartManager.init();
+        this.setupListeners();
+        this.statisticsInitialized = true;
+        console.debug("[StatisticsManager] init: Components initialized.");
+      } else {
+        console.debug(
+          "[StatisticsManager] init: Components already initialized, refreshing data only."
+        );
+      }
+
+      // TOUJOURS rafraîchir les données à chaque appel d'init
       for (const period of this.periods) {
         console.debug(
-          `[StatisticsManager] init: Fetching and updating data for period "${period}"`
+          `[StatisticsManager] init: Fetching and updating data for period "${period}" with force refresh`
         );
-        await this.fetchAndCacheData(period);
-        await this.updatePeriodData(period);
+        // Force refresh = true pour toujours avoir les données à jour
+        await this.updatePeriodData(period, true);
       }
       console.debug("[StatisticsManager] init: Initialization complete.");
     } catch (error) {
       console.error("[StatisticsManager] init Error:", error);
+      // Réinitialiser le flag en cas d'erreur
+      this.statisticsInitialized = false;
     }
   }
 
   cleanup() {
     try {
       console.debug("[StatisticsManager] cleanup: Cleaning up...");
+
+      // Nettoyer les listeners
+      this.cleanupListeners();
+
+      // Nettoyer le cache
       this.periods.forEach((period) => {
         this.cache[period].dates = [];
         this.cache[period].dataMap.clear();
         this.cache[period].lastFetch = null;
       });
+
+      // Réinitialiser le flag
+      this.statisticsInitialized = false;
+
       ChartManager.destroy();
     } catch (error) {
       console.error("[StatisticsManager] cleanup Error:", error);
@@ -382,6 +627,12 @@ export function cleanupStatistics() {
   console.debug("[cleanupStatistics] Starting cleanup of statistics...");
   statisticsManager.cleanup();
   console.debug("[cleanupStatistics] Cleanup complete.");
+}
+
+export async function refreshStatisticsData() {
+  console.debug("[refreshStatisticsData] Refreshing statistics data...");
+  await statisticsManager.refreshAllData();
+  console.debug("[refreshStatisticsData] Statistics data refreshed.");
 }
 
 export { statisticsManager };

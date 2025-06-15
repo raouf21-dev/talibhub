@@ -82,9 +82,16 @@ export async function initializeWelcomepage() {
       const welcomeMosqueTime = new WelcomeMosqueTime();
       await welcomeMosqueTime.initialize();
 
-      // Ajouter un écouteur pour les changements de langue
+      // 🔧 CORRECTION : Ne PAS ré-initialiser, juste mettre à jour l'interface
       document.addEventListener("languageChanged", async () => {
-        await welcomeMosqueTime.initialize();
+        console.log("WelcomePage: Language changed - updating interface");
+        // Mettre à jour seulement les textes et l'interface, pas les event listeners
+        welcomeMosqueTime.texts = welcomeMosqueTime.getLocalizedTexts();
+        welcomeMosqueTime.updateInterface();
+        // Optionnel : mettre à jour l'affichage si une ville est sélectionnée
+        if (welcomeMosqueTime.selectedCity) {
+          welcomeMosqueTime.updateDateDisplay(welcomeMosqueTime.selectedCity);
+        }
       });
     } catch (error) {
       notificationService.show("mosque.init.error", "error");

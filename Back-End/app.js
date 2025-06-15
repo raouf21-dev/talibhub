@@ -10,6 +10,7 @@ const fs = require("fs");
 const { authenticateToken } = require("./middlewares/authenticateToken");
 const authController = require("./controllers/authController");
 const mosqueTimesController = require("./controllers/mosqueTimesController");
+const passport = require("./config/passport");
 
 require("dotenv").config({
   path: path.join(__dirname, `.env.${process.env.NODE_ENV || "development"}`),
@@ -67,6 +68,8 @@ const cspDirectives = {
     "'self'",
     "https://api.example.com",
     "https://api.aladhan.com",
+    "https://api.alquran.cloud", // API Al-Quran Cloud pour les textes
+    "https://cdn.islamic.network", // CDN pour les fichiers audio
     "https://challenges.cloudflare.com",
     "https://www.talibhub.com",
     "http://www.talibhub.com",
@@ -75,7 +78,7 @@ const cspDirectives = {
     ...(isProd ? [] : ["http://localhost:*", "ws://localhost:*"]),
   ],
   objectSrc: ["'none'"],
-  mediaSrc: ["'self'"],
+  mediaSrc: ["'self'", "https://cdn.islamic.network"], // CDN pour les fichiers audio Quran
   frameSrc: [
     "'self'",
     "https://challenges.cloudflare.com",
@@ -100,6 +103,9 @@ app.use(attachCookieManager);
 
 app.use(bodyParser.json({ limit: "10kb" }));
 app.use(express.urlencoded({ extended: true }));
+
+// Initialiser Passport
+app.use(passport.initialize());
 
 // Logger pour tous les environnements
 app.use((req, res, next) => {
@@ -168,10 +174,12 @@ const mosqueTimesRoutes = require("./routes/mosqueTimesRoutes");
 const surahMemorizationRoutes = require("./routes/surahMemorizationRoutes");
 const turnstileRoutes = require("./routes/turnstileRoutes");
 const duaTimeRoutes = require("./routes/duaTimeRoutes");
+const oauthRoutes = require("./routes/oauthRoutes");
 
 // Routes API (après le middleware)
 app.use("/api/mosque-times", mosqueTimesRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/auth", oauthRoutes);
 app.use("/api/tasks", tasksRoutes);
 app.use("/api/timer", timerRoutes);
 app.use("/api/counter", counterRoutes);

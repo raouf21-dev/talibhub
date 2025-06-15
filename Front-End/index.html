@@ -13,7 +13,8 @@
     />
 
     <!-- Stylesheets -->
-    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="app-styles.css" />
+    <link rel="stylesheet" href="assets/styles/oauth.css" />
 
     <!-- Core Libraries from cdnjs -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
@@ -55,25 +56,26 @@
 
   <body>
     <nav class="top-nav">
-      <!-- Left: Hamburger + Logo -->
-      <div class="nav-left">
-        <div class="hamburger-btn" id="hamburgerBtn">☰</div>
-        <div class="app-branding">
-          <h1>TalibHub(Beta)</h1>
-        </div>
-      </div>
+      <!-- Hamburger pour mobile -->
+      <div class="hamburger-btn" id="hamburgerBtn">☰</div>
 
-      <!-- Right: Bell + Profile -->
+      <!-- Style DataDrop Dashboard - seulement la partie droite -->
       <div class="nav-right">
         <a
           href="#"
-          id="notificationBell"
-          class="notifications-link"
-          data-destination="notifications"
-          data-translate-title="notifications.viewTitle"
-          title="View notifications"
+          id="messagingButton"
+          class="messaging-link"
+          data-destination="messaging"
+          data-translate-title="messaging.viewTitle"
+          title="View messages"
         >
-          <i data-feather="bell" class="notifications-icon"></i>
+          <i data-feather="mail" class="messaging-icon"></i>
+          <span
+            id="messaging-count"
+            class="messaging-count"
+            style="display: none"
+            >0</span
+          >
         </a>
 
         <div class="profile-section">
@@ -154,84 +156,100 @@
           <button class="sidebar-close-btn" id="sidebarCloseBtn">×</button>
         </div>
         <nav>
-          <ul class="nav-list">
-            <li>
-              <a
-                href="#"
-                class="nav-link"
-                data-destination="dashboard"
-                data-translate="nav.dashboard"
-                >Dashboard</a
-              >
-            </li>
-            <li>
-              <a
-                href="#"
-                class="nav-link"
-                data-destination="todoLists"
-                data-translate="nav.todoLists"
-                >Task Lists</a
-              >
-            </li>
-            <li>
-              <a
-                href="#"
-                class="nav-link"
-                data-destination="apprentissage"
-                data-translate="nav.talibTimer"
-                >Talib Timer</a
-              >
-              <ul class="subnav">
-                <li>
-                  <a
-                    href="#"
-                    class="nav-link"
-                    data-destination="statistics"
-                    data-translate="nav.statistics"
-                    >&#8226; Statistics</a
-                  >
-                </li>
-              </ul>
-            </li>
-            <li>
-              <a
-                href="#"
-                class="nav-link"
-                data-destination="salatSurahSelector"
-                data-translate="nav.salatSurahSelector"
-                >Surah Selector</a
-              >
-            </li>
-            <li>
-              <a
-                href="#"
-                class="nav-link"
-                data-destination="duaTimeCalculator"
-                data-translate="nav.duaTimeCalculator"
-                >Dua Time</a
-              >
-            </li>
-            <li>
-              <a
-                href="#"
-                class="nav-link"
-                data-destination="surahmemorization"
-                data-translate="nav.surahmemorization"
-                >Surah Memorisation</a
-              >
-            </li>
-            <li>
-              <a
-                href="#"
-                class="nav-link"
-                data-destination="mosquetime"
-                data-translate="nav.mosquetime"
-                >Salat Mosque Time</a
-              >
-            </li>
-            <li class="nav-list-divider"></li>
-            <!-- For visual separation -->
-          </ul>
+          <!-- Section Analytics -->
+          <div class="sidebar-section">
+            <h3 class="sidebar-section-title">Analytics</h3>
+            <ul class="nav-list">
+              <li>
+                <a
+                  href="#"
+                  class="nav-link"
+                  data-destination="dashboard"
+                  data-translate="nav.dashboard"
+                  >Dashboard</a
+                >
+              </li>
+            </ul>
+          </div>
+
+          <!-- Section Tools -->
+          <div class="sidebar-section">
+            <h3 class="sidebar-section-title">Tools</h3>
+            <ul class="nav-list">
+              <li>
+                <a
+                  href="#"
+                  class="nav-link"
+                  data-destination="todoLists"
+                  data-translate="nav.todoLists"
+                  >Task Lists</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#"
+                  class="nav-link"
+                  data-destination="apprentissage"
+                  data-translate="nav.talibTimer"
+                  >Talib Timer</a
+                >
+                <ul class="subnav">
+                  <li>
+                    <a
+                      href="#"
+                      class="nav-link"
+                      data-destination="statistics"
+                      data-translate="nav.statistics"
+                      >Statistics</a
+                    >
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Section Islamic -->
+          <div class="sidebar-section">
+            <h3 class="sidebar-section-title">Islamic</h3>
+            <ul class="nav-list">
+              <li>
+                <a
+                  href="#"
+                  class="nav-link"
+                  data-destination="mosquetime"
+                  data-translate="nav.mosquetime"
+                  >Mosque Time</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#"
+                  class="nav-link"
+                  data-destination="salatSurahSelector"
+                  data-translate="nav.salatSurahSelector"
+                  >Surah Selector</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#"
+                  class="nav-link"
+                  data-destination="surahmemorization"
+                  data-translate="nav.surahmemorization"
+                  >Surah Memorisation</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#"
+                  class="nav-link"
+                  data-destination="duaTimeCalculator"
+                  data-translate="nav.duaTimeCalculator"
+                  >Dua Time</a
+                >
+              </li>
+            </ul>
+          </div>
         </nav>
       </aside>
     </header>
@@ -591,10 +609,131 @@
     </section>
 
     <section id="dashboard" class="page page-no-welcome">
+      <!-- Home Button (visible seulement en responsive) -->
+      <button
+        class="home-button"
+        id="homeButton"
+        title="Retour au Dashboard"
+        style="display: none"
+      >
+        <svg
+          class="home-icon"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+          />
+        </svg>
+      </button>
       <main class="dashboard-main-content">
         <h1 data-translate="dashboard.welcomeTitle">
           Welcome to Your Dashboard
         </h1>
+
+        <!-- Boutons TopNav intégrés dans le Dashboard -->
+        <div class="dashboard-topnav-buttons">
+          <a
+            href="#"
+            id="dashboardMessagingButton"
+            class="dashboard-messaging-link"
+            data-destination="messaging"
+            data-translate-title="messaging.viewTitle"
+            title="View messages"
+          >
+            <i data-feather="mail" class="dashboard-messaging-icon"></i>
+            <span data-translate="messaging.buttonText">Messagerie</span>
+            <span
+              id="dashboard-messaging-count"
+              class="dashboard-messaging-count"
+              style="display: none"
+              >0</span
+            >
+          </a>
+
+          <div class="dashboard-profile-section">
+            <button
+              id="dashboard-profile-button"
+              class="dashboard-profile-button"
+            >
+              <i
+                data-feather="settings"
+                class="dashboard-profile-settings-icon"
+              ></i>
+              <span id="dashboard-username-display">User</span>
+              <i class="dashboard-profile-icon">▼</i>
+            </button>
+
+            <!-- Profile dropdown menu -->
+            <div
+              id="dashboard-profile-dropdown"
+              class="dashboard-profile-dropdown"
+            >
+              <a
+                href="#"
+                class="dropdown-item"
+                data-destination="profile"
+                data-translate="nav.profile"
+                >Profile</a
+              >
+              <a
+                href="#"
+                class="dropdown-item"
+                data-destination="price"
+                data-translate="nav.contribution"
+                >Contribution</a
+              >
+              <a
+                href="#"
+                class="dropdown-item"
+                data-destination="contactform"
+                data-translate="nav.contact"
+                >Contact</a
+              >
+              <a
+                href="#"
+                class="dropdown-item"
+                data-destination="aboutus"
+                data-translate="nav.aboutUs"
+                >About Us</a
+              >
+              <div class="dropdown-divider"></div>
+
+              <!-- Toggle theme -->
+              <div class="dropdown-item">
+                <div class="theme-toggle">
+                  <span data-translate="nav.theme">Theme</span>
+                  <label class="switch">
+                    <input type="checkbox" id="dashboard-theme-toggle" />
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Language selector -->
+              <div class="dropdown-item">
+                <div class="language-selector">
+                  <button class="lang-btn" data-lang="fr">🇫🇷</button>
+                  <button class="lang-btn" data-lang="en">🇬🇧</button>
+                </div>
+              </div>
+
+              <div class="dropdown-divider"></div>
+              <a
+                href="#"
+                class="dropdown-item"
+                id="dashboard-logoutBtn"
+                data-translate="nav.logout"
+                >Logout</a
+              >
+            </div>
+          </div>
+        </div>
         <div class="dashboard-card-grid">
           <div class="dashboard-card" data-destination="mosquetime">
             <img
@@ -638,6 +777,23 @@
     </section>
 
     <section id="apprentissage" class="page page-no-welcome">
+      <!-- Home Button (visible seulement en responsive) -->
+      <button class="home-button" title="Retour au Dashboard">
+        <svg
+          class="home-icon"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+          />
+        </svg>
+      </button>
       <h1 data-translate="apprentissage.title">Learning</h1>
 
       <!-- Task Selection -->
@@ -653,22 +809,18 @@
               </option>
             </select>
             <div id="session-info">
-              <p data-translate="apprentissage.previousSession">
-                Previous session: <span id="previous-sessions-count">0</span>
+              <p>
+                <span data-translate="apprentissage.previousSession"
+                  >Previous session:</span
+                >
+                <span id="previous-sessions-count">0</span>
               </p>
-              <p data-translate="apprentissage.currentSession">
-                Current session: <span id="current-session-id">0</span>
+              <p>
+                <span data-translate="apprentissage.currentSession"
+                  >Current session:</span
+                >
+                <span id="current-session-id">0</span>
               </p>
-            </div>
-            <div class="button-group">
-              <button
-                class="session-button"
-                id="start-new-session"
-                data-action="start-new-session"
-                data-translate="apprentissage.newSession"
-              >
-                New Session
-              </button>
             </div>
           </div>
         </div>
@@ -784,8 +936,11 @@
                 />
               </div>
             </div>
-            <p class="total-time" data-translate="apprentissage.totalWorkTime">
-              Total Work Time: <span id="total-work-time">00:00:00</span>
+            <p class="total-time">
+              <span data-translate="apprentissage.totalWorkTime"
+                >Total Work Time:</span
+              >
+              <span id="total-work-time">00:00:00</span>
             </p>
             <div class="button-group">
               <button
@@ -868,13 +1023,30 @@
     </section>
 
     <section id="statistics" class="page page-no-welcome">
-      <h1>Statistics</h1>
+      <!-- Home Button (visible seulement en responsive) -->
+      <button class="home-button" title="Retour au Dashboard">
+        <svg
+          class="home-icon"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+          />
+        </svg>
+      </button>
+      <h1 data-translate="statistics.title">Statistics</h1>
       <div class="statistics-container">
         <!-- Daily Statistics -->
         <div class="chart-section">
           <div class="stats-header">
             <div class="title-area">
-              <h2 data-action="dailyStats">Daily Statistics</h2>
+              <h2 data-translate="statistics.dailyStats">Daily Statistics</h2>
             </div>
             <div class="period-navigation" data-period="daily">
               <button class="nav-btn prev">
@@ -916,16 +1088,16 @@
               <table class="task-details-table">
                 <thead>
                   <tr>
-                    <th data-action="task">Task</th>
-                    <th data-action="timeMinutes">Time (min)</th>
-                    <th data-action="counts">Counts</th>
+                    <th data-translate="statistics.task">Task</th>
+                    <th data-translate="statistics.timeMinutes">Time (min)</th>
+                    <th data-translate="statistics.counts">Counts</th>
                   </tr>
                 </thead>
                 <tbody></tbody>
               </table>
             </div>
             <button class="toggle-details-btn">
-              <span data-action="viewDetails">View details</span>
+              <span data-translate="statistics.viewDetails">View details</span>
               <svg width="12" height="12" viewBox="0 0 24 24">
                 <polyline points="6 9 12 15 18 9"></polyline>
               </svg>
@@ -937,7 +1109,7 @@
         <div class="chart-section">
           <div class="stats-header">
             <div class="title-area">
-              <h2 data-action="weeklyStats">Weekly Statistics</h2>
+              <h2 data-translate="statistics.weeklyStats">Weekly Statistics</h2>
             </div>
             <div class="period-navigation" data-period="weekly">
               <button class="nav-btn prev">
@@ -979,16 +1151,16 @@
               <table class="task-details-table">
                 <thead>
                   <tr>
-                    <th data-action="task">Task</th>
-                    <th data-action="timeMinutes">Time (min)</th>
-                    <th data-action="counts">Counts</th>
+                    <th data-translate="statistics.task">Task</th>
+                    <th data-translate="statistics.timeMinutes">Time (min)</th>
+                    <th data-translate="statistics.counts">Counts</th>
                   </tr>
                 </thead>
                 <tbody></tbody>
               </table>
             </div>
             <button class="toggle-details-btn">
-              <span data-action="viewDetails">View details</span>
+              <span data-translate="statistics.viewDetails">View details</span>
               <svg width="12" height="12" viewBox="0 0 24 24">
                 <polyline points="6 9 12 15 18 9"></polyline>
               </svg>
@@ -1000,7 +1172,9 @@
         <div class="chart-section">
           <div class="stats-header">
             <div class="title-area">
-              <h2 data-action="monthlyStats">Monthly Statistics</h2>
+              <h2 data-translate="statistics.monthlyStats">
+                Monthly Statistics
+              </h2>
             </div>
             <div class="period-navigation" data-period="monthly">
               <button class="nav-btn prev">
@@ -1042,16 +1216,16 @@
               <table class="task-details-table">
                 <thead>
                   <tr>
-                    <th data-action="task">Task</th>
-                    <th data-action="timeMinutes">Time (min)</th>
-                    <th data-action="counts">Counts</th>
+                    <th data-translate="statistics.task">Task</th>
+                    <th data-translate="statistics.timeMinutes">Time (min)</th>
+                    <th data-translate="statistics.counts">Counts</th>
                   </tr>
                 </thead>
                 <tbody></tbody>
               </table>
             </div>
             <button class="toggle-details-btn">
-              <span data-action="viewDetails">View details</span>
+              <span data-translate="statistics.viewDetails">View details</span>
               <svg width="12" height="12" viewBox="0 0 24 24">
                 <polyline points="6 9 12 15 18 9"></polyline>
               </svg>
@@ -1063,7 +1237,7 @@
         <div class="chart-section">
           <div class="stats-header">
             <div class="title-area">
-              <h2 data-action="yearlyStats">Yearly Statistics</h2>
+              <h2 data-translate="statistics.yearlyStats">Yearly Statistics</h2>
             </div>
             <div class="period-navigation" data-period="yearly">
               <button class="nav-btn prev">
@@ -1105,26 +1279,71 @@
               <table class="task-details-table">
                 <thead>
                   <tr>
-                    <th data-action="task">Task</th>
-                    <th data-action="timeMinutes">Time (min)</th>
-                    <th data-action="counts">Counts</th>
+                    <th data-translate="statistics.task">Task</th>
+                    <th data-translate="statistics.timeMinutes">Time (min)</th>
+                    <th data-translate="statistics.counts">Counts</th>
                   </tr>
                 </thead>
                 <tbody></tbody>
               </table>
             </div>
             <button class="toggle-details-btn">
-              <span data-action="viewDetails">View details</span>
+              <span data-translate="statistics.viewDetails">View details</span>
               <svg width="12" height="12" viewBox="0 0 24 24">
                 <polyline points="6 9 12 15 18 9"></polyline>
               </svg>
             </button>
           </div>
         </div>
+
+        <!-- Bouton de suppression de l'historique complet -->
+        <div class="delete-history-container">
+          <button
+            id="delete-all-history-btn"
+            class="delete-history-btn"
+            data-translate-title="statistics.deleteAllHistory"
+            title="Supprimer tout l'historique"
+          >
+            <svg
+              width="40"
+              height="40"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path
+                d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+              ></path>
+              <line x1="10" y1="11" x2="10" y2="17"></line>
+              <line x1="14" y1="11" x2="14" y2="17"></line>
+            </svg>
+          </button>
+        </div>
       </div>
     </section>
 
     <section id="todoLists" class="page page-no-welcome">
+      <!-- Home Button (visible seulement en responsive) -->
+      <button class="home-button" title="Retour au Dashboard">
+        <svg
+          class="home-icon"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+          />
+        </svg>
+      </button>
       <h1 data-translate="todoLists.title">Task List</h1>
       <div class="todo-card">
         <div class="todo-card-header">
@@ -1211,6 +1430,23 @@
     </section>
 
     <section id="surahmemorization" class="page page-no-welcome">
+      <!-- Home Button (visible seulement en responsive) -->
+      <button class="home-button" title="Retour au Dashboard">
+        <svg
+          class="home-icon"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+          />
+        </svg>
+      </button>
       <h1 data-translate="surahmemorization.title">Surah Memorisation</h1>
 
       <div id="quran-app-container">
@@ -1332,14 +1568,6 @@
             >
               0 surahs selected
             </span>
-            <!-- Save Button -->
-            <button
-              id="surahmemorization-save"
-              class="surahmemorization-button"
-              data-translate="surahmemorization.save"
-            >
-              Save
-            </button>
             <!-- Start Revision Button -->
             <button
               id="surahmemorization-start"
@@ -1362,9 +1590,7 @@
             class="surahmemorization-title"
           ></h1>
           <p id="surahmemorization-progress"></p>
-          <div class="surahmemorization-progress-bar">
-            <div class="surahmemorization-progress-bar-fill"></div>
-          </div>
+          <div class="surahmemorization-progress-bar"></div>
           <div
             id="surahmemorization-text"
             class="surahmemorization-text"
@@ -1520,6 +1746,24 @@
     </section>
 
     <section id="mosquetime" class="page page-no-welcome">
+      <!-- Home Button (visible seulement en responsive) -->
+      <button class="home-button" title="Retour au Dashboard">
+        <svg
+          class="home-icon"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+          />
+        </svg>
+      </button>
+      <h1 data-translate="mosquetime.title">Mosque Prayer Time</h1>
       <div class="mosquetime-card">
         <header class="mosquetime-header">
           <h1 class="mosquetime-title" data-translate="mosquetime.title">
@@ -1635,33 +1879,73 @@
       </div>
     </section>
 
-    <section id="notifications" class="page page-no-welcome">
-      <div class="notifications-container">
-        <h1 class="notifications-title">Notifications</h1>
-        <div class="notifications-card">
-          <div class="notifications-card-header">
-            <h2 class="notifications-card-title">Notification Center</h2>
+    <section id="messaging" class="page page-no-welcome">
+      <!-- Home Button (visible seulement en responsive) -->
+      <button class="home-button" title="Retour au Dashboard">
+        <svg
+          class="home-icon"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+          />
+        </svg>
+      </button>
+      <div class="messaging-container">
+        <h1 class="messaging-title" data-translate="messaging.title">
+          Messagerie
+        </h1>
+        <div class="messaging-card">
+          <div class="messaging-card-header">
+            <div class="messaging-actions">
+              <button
+                id="mark-all-read-btn"
+                class="messaging-action-btn"
+                data-translate="messaging.markAllRead"
+              >
+                <i data-feather="check-circle"></i> Tout marquer comme lu
+              </button>
+              <button
+                id="delete-read-btn"
+                class="messaging-action-btn"
+                data-translate="messaging.clearRead"
+              >
+                <i data-feather="trash-2"></i> Supprimer les lus
+              </button>
+            </div>
           </div>
-          <div class="notifications-card-content">
-            <ul id="notifications-list" class="notifications-list">
-              <!-- Notifications will be inserted here dynamically -->
+          <div class="messaging-card-content">
+            <ul id="messaging-list" class="messaging-list">
+              <!-- Messages will be inserted here dynamically -->
             </ul>
           </div>
         </div>
       </div>
-      <template id="notification-template">
-        <li class="notification-item">
-          <div class="notification-content">
-            <div class="notification-icon"></div>
-            <div class="notification-text">
-              <p class="notification-message"></p>
-              <p class="notification-date"></p>
+      <template id="message-template">
+        <li class="message-item">
+          <div class="message-content">
+            <div class="message-icon"></div>
+            <div class="message-text">
+              <h4 class="message-title"></h4>
+              <p class="message-body"></p>
+              <p class="message-date"></p>
             </div>
           </div>
-          <div class="notification-actions">
-            <button class="notification-read-btn">Mark as Read</button>
-            <button class="notification-delete-btn">
-              <i data-feather="x" class="notification-delete-icon"></i>
+          <div class="message-actions">
+            <button
+              class="message-read-btn"
+              data-translate="messaging.markAsRead"
+            >
+              Marquer comme lu
+            </button>
+            <button class="message-delete-btn">
+              <i data-feather="x" class="message-delete-icon"></i>
             </button>
           </div>
         </li>
@@ -1669,6 +1953,23 @@
     </section>
 
     <section id="profile" class="page page-no-welcome">
+      <!-- Home Button (visible seulement en responsive) -->
+      <button class="home-button" title="Retour au Dashboard">
+        <svg
+          class="home-icon"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+          />
+        </svg>
+      </button>
       <h1 data-translate="profile.title">Profile</h1>
       <div id="profileForm">
         <h2 data-translate="profile.personalInfo">Personal Information</h2>
@@ -1795,6 +2096,23 @@
     </section>
 
     <section id="salatSurahSelector" class="page page-no-welcome">
+      <!-- Home Button (visible seulement en responsive) -->
+      <button class="home-button" title="Retour au Dashboard">
+        <svg
+          class="home-icon"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+          />
+        </svg>
+      </button>
       <h1 data-translate="surahselector.title">Surah Selector</h1>
       <div class="surahselector-row">
         <div class="surahselector-card">
@@ -1888,6 +2206,23 @@
     </section>
 
     <section id="duaTimeCalculator" class="page page-no-welcome">
+      <!-- Home Button (visible seulement en responsive) -->
+      <button class="home-button" title="Retour au Dashboard">
+        <svg
+          class="home-icon"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+          />
+        </svg>
+      </button>
       <h1 data-translate="duaTimeCalculator.title">Dua Time Calculator</h1>
       <div class="dua-calculator-row">
         <div class="dua-calculator-card">
@@ -2081,6 +2416,23 @@
     </section>
 
     <section id="price" class="page page-no-welcome">
+      <!-- Home Button (visible seulement en responsive) -->
+      <button class="home-button" title="Retour au Dashboard">
+        <svg
+          class="home-icon"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+          />
+        </svg>
+      </button>
       <div class="price-container">
         <h1 class="price-title" data-translate="price.title">
           Choose Your Contribution
@@ -2272,6 +2624,23 @@
     </section>
 
     <section id="aboutus" class="page page-no-welcome">
+      <!-- Home Button (visible seulement en responsive) -->
+      <button class="home-button" title="Retour au Dashboard">
+        <svg
+          class="home-icon"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+          />
+        </svg>
+      </button>
       <div class="aboutus-wrapper">
         <h1 class="aboutus-title" data-translate="aboutus.title">
           About TalibHub
@@ -2397,6 +2766,23 @@
     </section>
 
     <section id="contactform" class="page page-no-welcome">
+      <!-- Home Button (visible seulement en responsive) -->
+      <button class="home-button" title="Retour au Dashboard">
+        <svg
+          class="home-icon"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+          />
+        </svg>
+      </button>
       <h1 data-translate="contactform.title">Contact Us</h1>
       <div class="contactform-wrapper">
         <div class="contactform-container">
@@ -2500,13 +2886,10 @@
     <script type="module" src="components/prayer/duaTimeCalculator.js"></script>
     <script type="module" src="components/mosqueTime/mosqueTime.js"></script>
     <script type="module" src="components/quran/surahMemorization.js"></script>
-    <script
-      type="module"
-      src="components/notifications/notifications.js"
-    ></script>
+    <script type="module" src="components/messaging/messageCenter.js"></script>
     <script type="module" src="utils/utils.js"></script>
-    <script type="module" src="utils/translations.js"></script>
     <script type="module" src="components/auth/botTracker.js"></script>
+    <script type="module" src="components/auth/oauth.js"></script>
 
     <script type="module" src="config/apiConfig.js"></script>
     <script type="module" src="services/api/dynamicLoader.js"></script>
@@ -2516,10 +2899,6 @@
     <script type="module" src="components/welcome/welcomePage.js"></script>
     <script type="module" src="services/state/state.js"></script>
     <script type="module" src="config/constants.js"></script>
-    <script
-      type="module"
-      src="services/notifications/translatNotifications.js"
-    ></script>
     <script type="module" src="services/cache/cacheService.js"></script>
     <script type="module" src="services/cache/cacheCountries.js"></script>
     <script type="module" src="components/auth/terms.js"></script>

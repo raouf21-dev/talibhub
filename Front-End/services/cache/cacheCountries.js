@@ -16,7 +16,7 @@ export const countriesCache = {
     const cacheKey = `${COUNTRIES_CACHE_KEY}_${lang}`;
 
     // Vérifier le cache d'abord
-    const cached = CacheService.get(cacheKey);
+    const cached = CacheService.getItem(cacheKey);
     if (cached) {
       console.log(
         `[COUNTRIES] Données récupérées depuis le cache pour ${lang}`
@@ -24,31 +24,15 @@ export const countriesCache = {
       return cached;
     }
 
-    try {
-      // Appel API pour récupérer les pays
-      const response = await fetch(`/api/countries?lang=${lang}`);
-      if (!response.ok) {
-        throw new Error(`Erreur HTTP: ${response.status}`);
-      }
+    // Utiliser directement la liste par défaut (pas d'appel API)
+    console.log(`[COUNTRIES] Utilisation de la liste par défaut pour ${lang}`);
+    const countries = this.getDefaultCountries(lang);
 
-      const countries = await response.json();
+    // Mettre en cache
+    const expirationTime = Date.now() + CACHE_DURATION;
+    CacheService.setItem(cacheKey, countries, expirationTime);
 
-      // Mettre en cache
-      CacheService.set(cacheKey, countries, CACHE_DURATION);
-      console.log(
-        `[COUNTRIES] Données mises en cache pour ${lang}, ${countries.length} pays`
-      );
-
-      return countries;
-    } catch (error) {
-      console.error(
-        `[COUNTRIES] Erreur lors de la récupération des pays:`,
-        error
-      );
-
-      // Retourner une liste par défaut en cas d'erreur
-      return this.getDefaultCountries(lang);
-    }
+    return countries;
   },
 
   /**
@@ -190,8 +174,8 @@ export const countriesCache = {
    * Vide le cache des pays
    */
   clear() {
-    CacheService.remove(COUNTRIES_CACHE_KEY + "_fr");
-    CacheService.remove(COUNTRIES_CACHE_KEY + "_en");
+    CacheService.removeItem(COUNTRIES_CACHE_KEY + "_fr");
+    CacheService.removeItem(COUNTRIES_CACHE_KEY + "_en");
     console.log("[COUNTRIES] Cache vidé");
   },
 };

@@ -39,29 +39,29 @@ const mosqueTimesStorageService = {
   getCityData(cityName) {
     try {
       const cacheKey = this.getCityKey(cityName);
-      console.log(
-        `[DEBUG] mosqueTimesStorageService: getCityData pour ${cityName}, clé: ${cacheKey}`
-      );
+      //console.log(
+      //  `[DEBUG] mosqueTimesStorageService: getCityData pour ${cityName}, clé: ${cacheKey}`
+      //);
 
       const cachedData = CacheService.getItem(cacheKey);
 
       if (cachedData) {
-        console.log(
-          `[DEBUG] mosqueTimesStorageService: Données trouvées dans le cache`,
-          cachedData
-        );
+        //console.log(
+        //  `[DEBUG] mosqueTimesStorageService: Données trouvées dans le cache`,
+        //  cachedData
+        //);
         return cachedData;
       } else {
-        console.log(
-          `[DEBUG] mosqueTimesStorageService: Aucune donnée dans le cache pour ${cityName}`
-        );
+        //console.log(
+          //`[DEBUG] mosqueTimesStorageService: Aucune donnée dans le cache pour ${cityName}`
+        //);
         return null;
       }
     } catch (error) {
-      console.error(
-        "[DEBUG] mosqueTimesStorageService: Erreur lors de la récupération:",
-        error
-      );
+      //console.error(
+      //  "[DEBUG] mosqueTimesStorageService: Erreur lors de la récupération:",
+      //  error
+      //);
       return null;
     }
   },
@@ -76,7 +76,7 @@ const mosqueTimesStorageService = {
     try {
       const cacheKey = this.getCityKey(cityName);
       console.log(
-        `[DEBUG] mosqueTimesStorageService: Sauvegarde pour ${cityName}, clé: ${cacheKey}`
+        //`[DEBUG] mosqueTimesStorageService: Sauvegarde pour ${cityName}, clé: ${cacheKey}`
       );
 
       // Stockage avec expiration à minuit
@@ -86,14 +86,14 @@ const mosqueTimesStorageService = {
       this.addCityToList(cityName);
 
       console.log(
-        `[DEBUG] mosqueTimesStorageService: Données stockées avec succès`
+        //`[DEBUG] mosqueTimesStorageService: Données stockées avec succès`
       );
       return true;
     } catch (error) {
-      console.error(
-        "[DEBUG] mosqueTimesStorageService: Erreur lors du stockage:",
-        error
-      );
+      //console.error(
+      //  "[DEBUG] mosqueTimesStorageService: Erreur lors du stockage:",
+      //  error
+      //);
       return false;
     }
   },
@@ -169,7 +169,7 @@ const mosqueTimesStorageService = {
       cities.forEach((city) => {
         const key = this.getCityKey(city);
         CacheService.removeItem(key);
-        console.log(`[DEBUG] mosqueTimesStorageService: Suppression de ${key}`);
+        //console.log(`[DEBUG] mosqueTimesStorageService: Suppression de ${key}`);
       });
 
       // Supprimer la liste des villes
@@ -178,15 +178,15 @@ const mosqueTimesStorageService = {
       // Supprimer la dernière ville sélectionnée
       localStorage.removeItem(this.LAST_CITY_KEY);
 
-      console.log(
-        "[DEBUG] mosqueTimesStorageService: Toutes les données ont été effacées"
-      );
+      //console.log(
+      //  "[DEBUG] mosqueTimesStorageService: Toutes les données ont été effacées"
+      //);
       return true;
     } catch (error) {
-      console.error(
-        "[DEBUG] mosqueTimesStorageService: Erreur lors du nettoyage:",
-        error
-      );
+      //console.error(
+      //  "[DEBUG] mosqueTimesStorageService: Erreur lors du nettoyage:",
+      //  error
+      //);
       return false;
     }
   },
@@ -216,15 +216,15 @@ const mosqueTimesStorageService = {
         );
       }
 
-      console.log(
-        `[DEBUG] mosqueTimesStorageService: Données de ${cityName} supprimées du cache`
-      );
+      //console.log(
+      //  `[DEBUG] mosqueTimesStorageService: Données de ${cityName} supprimées du cache`
+      //);
       return true;
     } catch (error) {
-      console.error(
-        `[DEBUG] mosqueTimesStorageService: Erreur lors de la suppression des données de ${cityName}:`,
-        error
-      );
+      //  console.error(
+      //  `[DEBUG] mosqueTimesStorageService: Erreur lors de la suppression des données de ${cityName}:`,
+      //  error
+      //);
       return false;
     }
   },
