@@ -343,6 +343,7 @@ function createQuickSelectionButtons() {
           <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
           <rect x="7" y="7" width="10" height="10" rx="1" ry="1"/>
         </svg>
+        <span class="text">Niveau</span>
         <select id="level-selector" title="Choisir le niveau">
           <option value="">Niveau</option>
           <option value="Weak">Weak</option>

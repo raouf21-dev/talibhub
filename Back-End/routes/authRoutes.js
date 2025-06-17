@@ -18,8 +18,16 @@ router.post("/forgot-password", authController.forgotPassword);
 router.get("/reset-password/:token", authController.getResetPassword);
 router.post("/reset-password/:token", authController.resetPassword);
 
+// ✅ NOUVELLE ROUTE : Migration localStorage vers cookies
+router.post(
+  "/migrate-to-cookies",
+  authenticateToken,
+  authController.migrateToCookies
+);
+
 // Routes protégées
 router.get("/profile", authenticateToken, authController.getProfile);
+router.post("/updateProfile", authenticateToken, authController.updateProfile);
 router.post(
   "/changePassword",
   authenticateToken,

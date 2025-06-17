@@ -2,33 +2,26 @@
 const jwt = require("jsonwebtoken");
 
 const authenticateToken = (req, res, next) => {
-  console.log("🔍 authenticateToken - Vérification token");
+  console.log("🔍 authenticateToken - Vérification token unifié");
   console.log("🍪 Cookies disponibles:", req.cookies);
   console.log("🔐 Cookies signés:", req.signedCookies);
-  console.log("📋 Headers Authorization:", req.headers.authorization);
 
-  let token = req.cookies?.auth_token;
+  // ✅ NOUVELLE LOGIQUE : Privilégier les cookies
+  let token = req.cookies?.auth_token || req.signedCookies?.auth_token;
+  let authMethod = "cookies";
 
-  // Si pas de cookie, vérifier le header Authorization
+  // ⚠️ COMPATIBILITÉ TEMPORAIRE : Fallback vers Bearer (à supprimer plus tard)
   if (!token && req.headers.authorization) {
     const authHeader = req.headers.authorization;
     token = authHeader.startsWith("Bearer ")
       ? authHeader.split(" ")[1]
       : authHeader;
-    console.log("🔗 Token extrait du header:", token ? "Présent" : "Absent");
-  }
-
-  // Vérifier aussi les cookies signés
-  if (!token && req.signedCookies?.auth_token) {
-    token = req.signedCookies.auth_token;
-    console.log(
-      "🔐 Token extrait des cookies signés:",
-      token ? "Présent" : "Absent"
-    );
+    authMethod = "bearer";
+    console.log("⚠️ FALLBACK: Utilisation Bearer (compatibilité temporaire)");
   }
 
   console.log(
-    "🎯 Token final utilisé:",
+    `🎯 Token obtenu via ${authMethod}:`,
     token ? token.substring(0, 20) + "..." : "Aucun"
   );
 
@@ -42,7 +35,7 @@ const authenticateToken = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    console.log("✅ Token valide pour utilisateur:", decoded.id);
+    console.log(`✅ Token ${authMethod} valide pour utilisateur:`, decoded.id);
     req.user = decoded;
     next();
   } catch (err) {

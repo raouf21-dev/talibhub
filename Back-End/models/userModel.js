@@ -45,7 +45,7 @@ const createUser = async (
 
 const getUserById = async (id) => {
   const result = await pool.query(
-    "SELECT id, username, email, first_name, last_name, age, gender FROM users WHERE id = $1",
+    "SELECT id, username, email, first_name, last_name, age, gender, country, is_oauth_user, oauth_provider, password FROM users WHERE id = $1",
     [id]
   );
   return result.rows[0];
@@ -56,6 +56,10 @@ const updateUserPassword = async (id, newPassword) => {
     newPassword,
     id,
   ]);
+};
+
+const updateUserEmail = async (id, newEmail) => {
+  await pool.query("UPDATE users SET email = $1 WHERE id = $2", [newEmail, id]);
 };
 
 // Fonctions pour la réinitialisation du mot de passe
@@ -175,6 +179,7 @@ module.exports = {
   createUser,
   getUserById,
   updateUserPassword,
+  updateUserEmail,
   setResetToken,
   getUserByResetToken,
   clearResetToken,

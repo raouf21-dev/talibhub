@@ -1,5 +1,9 @@
 // Services/authService.js
+console.log("🚀 === CHARGEMENT authService.js ===");
+
 import { apiClient } from "../../config/apiConfig.js";
+
+console.log("✅ Import apiClient réussi dans authService.js");
 
 const defaultConfig = {
   credentials: "include",
@@ -11,9 +15,43 @@ const defaultConfig = {
 
 class AuthService {
   constructor() {
-    this._token = localStorage.getItem("token");
-    this._authCheckInterval = null;
-    this.initAuthCheck();
+    console.log("🔧 === DÉBUT constructor AuthService ===");
+    try {
+      // ✅ NOUVELLE LOGIQUE UNIFIÉE : Uniquement cookies, suppression localStorage
+      console.log("🔧 Nouvelle logique unifiée : cookies uniquement");
+
+      // Nettoyer localStorage existant si présent (migration automatique)
+      const existingToken = localStorage.getItem("token");
+      if (existingToken) {
+        console.log("🔄 Migration: Nettoyage localStorage existant");
+        localStorage.removeItem("token");
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("tokenExpiry");
+        console.log("✅ localStorage nettoyé - Migration vers cookies");
+      }
+
+      // Plus de gestion _token interne
+      this._token = null;
+      this._authCheckInterval = null;
+      console.log("🔧 Variables internes initialisées");
+
+      // Initialiser la vérification périodique seulement si authentifié via cookies
+      if (this.isAuthenticated()) {
+        this.initAuthCheck();
+        console.log(
+          "🔧 initAuthCheck() appelé pour utilisateur authentifié via cookies"
+        );
+      } else {
+        console.log(
+          "ℹ️ Pas d'authentification via cookies - initAuthCheck() ignoré"
+        );
+      }
+
+      console.log("✅ === FIN constructor AuthService - SUCCÈS ===");
+    } catch (error) {
+      console.error("❌ ERREUR dans constructor AuthService:", error);
+      throw error;
+    }
   }
 
   initAuthCheck() {
@@ -38,17 +76,20 @@ class AuthService {
         }
       );
 
-      if (response?.token) {
-        this._token = response.token;
-        localStorage.setItem("token", response.token);
+      // ✅ NOUVELLE LOGIQUE : Plus de gestion token, les cookies sont automatiquement définis
+      if (response?.success) {
+        console.log(
+          "✅ Login réussi - Cookies automatiquement définis par le serveur"
+        );
         this.initAuthCheck();
         console.log(
           "Authentification réussie, déclenchement de l'événement login"
         );
         window.dispatchEvent(new Event("login"));
         return response;
+      } else {
+        throw new Error("Authentification échouée");
       }
-      throw new Error("Token non reçu dans la réponse");
     } catch (error) {
       console.error("[DEBUG] Erreur dans authService.login:", error);
       console.log("[DEBUG] Stack trace:", new Error().stack);
@@ -64,13 +105,16 @@ class AuthService {
         withCredentials: true,
       });
 
-      if (response?.token) {
-        this._token = response.token;
-        localStorage.setItem("token", response.token);
+      // ✅ NOUVELLE LOGIQUE : Plus de gestion token, les cookies sont automatiquement définis
+      if (response?.success) {
+        console.log(
+          "✅ Register réussi - Cookies automatiquement définis par le serveur"
+        );
         this.initAuthCheck();
         return response;
+      } else {
+        throw new Error("Inscription échouée");
       }
-      throw new Error("Token non reçu dans la réponse");
     } catch (error) {
       console.error("Erreur d'inscription:", error);
       this.handleAuthError(error);
@@ -80,35 +124,27 @@ class AuthService {
 
   async checkAuth() {
     try {
-      // Si on a un token en localStorage, l'utiliser (auth classique)
-      if (this._token) {
-        const response = await apiClient.get("/auth/verify", {
-          ...defaultConfig,
-          headers: {
-            ...defaultConfig.headers,
-            Authorization: `Bearer ${this._token}`,
-          },
-        });
-        return response?.success || false;
-      }
+      // ✅ NOUVELLE LOGIQUE UNIFIÉE : Uniquement cookies via credentials include
+      console.log("🔍 Vérification auth via cookies uniquement");
+      const response = await apiClient.get("/auth/verify", {
+        ...defaultConfig,
+        withCredentials: true,
+      });
 
-      // Si on a un cookie auth, vérifier via cookies (OAuth)
-      if (this.hasAuthCookie()) {
-        console.log("🔍 Vérification auth via cookies (OAuth)");
-        const response = await apiClient.get("/auth/verify", {
-          ...defaultConfig,
-          withCredentials: true,
-        });
-        return response?.success || false;
-      }
-
-      return false;
+      const isAuthenticated = response?.success || false;
+      console.log("✅ Vérification auth terminée:", isAuthenticated);
+      return isAuthenticated;
     } catch (error) {
       console.warn(
-        "Erreur lors de la vérification de l'authentification:",
+        "⚠️ Erreur lors de la vérification de l'authentification:",
         error
       );
+
+      // Si erreur 401/403, effacer les cookies côté client
       if (error.response?.status === 401 || error.response?.status === 403) {
+        console.log(
+          "⚠️ Erreur 401/403 détectée - Nettoyage cookies côté client"
+        );
         this.clearAuth();
       }
       return false;
@@ -133,11 +169,14 @@ class AuthService {
   }
 
   isAuthenticated() {
-    return this.hasAuthCookie() || !!this._token;
+    // ✅ NOUVELLE LOGIQUE : Uniquement via cookies
+    return this.hasAuthCookie();
   }
 
   getToken() {
-    return this._token;
+    // ✅ NOUVELLE LOGIQUE : Plus de gestion token interne, tout via cookies
+    console.log("⚠️ getToken() obsolète - Utilisation automatique des cookies");
+    return null;
   }
 
   async getProfile() {
@@ -224,21 +263,39 @@ class AuthService {
   }
 
   hasAuthCookie() {
-    return document.cookie.includes("auth=true");
+    // Vérifier le cookie 'auth=true' qui est accessible via JavaScript
+    const cookies = document.cookie.split(";");
+    const hasAuthTrue = cookies.some((cookie) =>
+      cookie.trim().startsWith("auth=true")
+    );
+
+    console.log("🍪 Vérification cookies d'authentification:", {
+      cookies: document.cookie,
+      hasAuthTrue,
+      allCookies: cookies,
+    });
+
+    return hasAuthTrue;
   }
 
   clearAuth() {
     console.log("[DEBUG] authService.clearAuth appelé");
     console.log("[DEBUG] Stack trace:", new Error().stack);
+
+    // ✅ NOUVELLE LOGIQUE : Plus de _token interne, plus de localStorage
     this._token = null;
-    localStorage.removeItem("token");
+
+    // Effacer les cookies côté client (best effort)
     document.cookie =
       "auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     document.cookie = "auth=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+
     if (this._authCheckInterval) {
       clearInterval(this._authCheckInterval);
       this._authCheckInterval = null;
     }
+
+    console.log("✅ Authentification nettoyée (cookies seulement)");
   }
 
   handleAuthError(error) {
@@ -268,14 +325,17 @@ class AuthService {
           withCredentials: true,
         }
       );
-      if (response?.token) {
-        this._token = response.token;
-        localStorage.setItem("token", response.token);
+
+      // ✅ NOUVELLE LOGIQUE : Plus de gestion localStorage
+      if (response?.success) {
+        console.log("✅ Token rafraîchi via cookies");
+        return response;
+      } else {
+        throw new Error("Rafraîchissement échoué");
       }
-      return response;
     } catch (error) {
       console.error("Erreur lors du rafraîchissement du token:", error);
-      localStorage.removeItem("token");
+      // Plus de localStorage à nettoyer
       window.dispatchEvent(new Event("logout"));
       throw error;
     }
@@ -284,3 +344,7 @@ class AuthService {
 
 // Export d'une instance unique du service
 export const authService = new AuthService();
+
+// 🔥 CRITIQUE: Rendre authService disponible globalement pour éviter les problèmes d'import
+window.authService = authService;
+console.log("🌐 authService rendu disponible globalement");

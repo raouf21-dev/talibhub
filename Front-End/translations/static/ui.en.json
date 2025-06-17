@@ -146,11 +146,15 @@
     "showPassword": "Show password",
     "update": "Update",
     "changePasswordBtn": "Change Password",
+    "country": "Country:",
     "usernamePlaceholder": "Username",
     "lastNamePlaceholder": "Last Name",
     "firstNamePlaceholder": "First Name",
     "agePlaceholder": "Age",
-    "emailPlaceholder": "Email Address"
+    "emailPlaceholder": "Email Address",
+    "countryPlaceholder": "To complete",
+    "oauthAccountTitle": "OAuth Account",
+    "oauthAccountMessage": "Connected via Google. Email, first name and last name are synchronized with Google. You can modify: username, age, gender and country."
   },
   "messaging": {
     "title": "Messages",

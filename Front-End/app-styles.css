@@ -2438,7 +2438,7 @@ html[lang="fr"] .welcomepage-mosque-time .additional-times-grid::after {
   background-color: #e7ecef;
   min-height: 100vh;
   font-family: Arial, sans-serif;
-  color: #274c77;
+  color: white;
 }
 
 /* === En-tête === */
@@ -2454,8 +2454,8 @@ html[lang="fr"] .welcomepage-mosque-time .additional-times-grid::after {
 }
 
 .timer h2 {
-  background-color: #6096ba8a;
-  color: #274c77;
+  background-color: var(--secondary-color);
+  color: white;
   padding: 0.75rem;
   font-size: 1.1rem;
   margin: 0;
@@ -2743,12 +2743,12 @@ html[lang="fr"] .welcomepage-mosque-time .additional-times-grid::after {
 
 /* === Stats Header === */
 .stats-header {
-  background-color: #6096ba8a;
+  background-color: var(--secondary-color);
   padding: 0.75rem 1rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  color: var(--primary-color);
+  color: var(--card-background);
 }
 
 .title-area {
@@ -2760,7 +2760,7 @@ html[lang="fr"] .welcomepage-mosque-time .additional-times-grid::after {
   margin: 0;
   font-size: 1.1rem;
   font-weight: 600;
-  color: var(--primary-color);
+  color: white;
 }
 
 /* === Period Navigation === */
@@ -3099,8 +3099,8 @@ html[lang="fr"] .welcomepage-mosque-time .additional-times-grid::after {
 }
 
 .todo-card-header {
-  background-color: #6096ba8a;
-  color: #274c77;
+  background-color: var(--secondary-color);
+  color: var(--card-background);
   padding: 1rem;
 }
 
@@ -3247,7 +3247,7 @@ html[lang="fr"] .welcomepage-mosque-time .additional-times-grid::after {
 .tasks-counter {
   font-size: var(--small-text-size);
   margin-left: 0.5rem;
-  color: var(--primary-color);
+  color: var(--card-background);
 }
 
 .todo-header-actions {
@@ -3260,7 +3260,7 @@ html[lang="fr"] .welcomepage-mosque-time .additional-times-grid::after {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: var(--primary-color);
+  color: var(--card-background);
   cursor: pointer;
 }
 
@@ -4262,8 +4262,8 @@ html[lang="fr"] .welcomepage-mosque-time .additional-times-grid::after {
   font-size: 1.25rem;
   font-weight: bold;
   margin: 0;
-  background-color: #6096ba8a;
-  color: var(--primary-color);
+  background-color: var(--secondary-color);
+  color: var(--card-background);
   padding: 1rem;
 }
 
@@ -4383,8 +4383,8 @@ html[lang="fr"] .welcomepage-mosque-time .additional-times-grid::after {
   font-size: 1.25rem;
   font-weight: bold;
   margin: 0;
-  background-color: #6096ba8a;
-  color: var(--primary-color);
+  background-color: var(--secondary-color);
+  color: var(--card-background);
   padding: 1rem;
 }
 
@@ -5527,6 +5527,109 @@ html[lang="fr"] .welcomepage-mosque-time .additional-times-grid::after {
 @media (max-width: 480px) {
   .quick-selection-buttons button {
     font-size: 0.625rem;
+  }
+}
+
+/* Styles spécifiques pour le bouton select-by-level avec menu déroulant */
+#select-by-level {
+  position: relative;
+  overflow: visible;
+  min-width: 140px;
+}
+
+#select-by-level select {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  font-size: 0.875rem;
+  z-index: 1;
+}
+
+#select-by-level:hover {
+  background-color: #2563eb;
+  transform: translateY(-1px);
+}
+
+#select-by-level:focus-within {
+  background-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+}
+
+/* Indicateur visuel pour montrer que c'est un menu déroulant */
+#select-by-level::after {
+  content: "▼";
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: white;
+  font-size: 0.6rem;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* S'assurer que le contenu du bouton reste visible */
+#select-by-level svg,
+#select-by-level .text {
+  position: relative;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Style du texte dans le bouton niveau */
+#select-by-level .text {
+  color: white;
+  font-weight: 500;
+  margin-right: 15px; /* Espace pour la flèche */
+}
+
+/* Uniformiser avec les autres boutons */
+#select-by-level {
+  background-color: var(--secondary-color);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: var(--border-radius-sm);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+@media (max-width: 768px) {
+  .quick-selection-buttons {
+    flex-direction: column;
+  }
+
+  .quick-selection-buttons button {
+    font-size: 0.75rem;
+    padding: 6px 12px;
+  }
+
+  #select-by-level {
+    min-width: 120px;
+  }
+}
+
+@media (max-width: 480px) {
+  .quick-selection-buttons button {
+    font-size: 0.625rem;
+  }
+
+  #select-by-level {
+    min-width: 100px;
+  }
+
+  #select-by-level::after {
+    font-size: 0.5rem;
+    right: 6px;
   }
 }
 

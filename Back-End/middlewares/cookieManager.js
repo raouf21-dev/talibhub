@@ -12,8 +12,8 @@ const getCookieOptions = () => {
   if (process.env.NODE_ENV === "production") {
     return {
       ...baseOptions,
-      // Supprimer ou commenter cette ligne pour les tests locaux
-      // domain: '.talibhub.com',
+      // ✅ Correction : utiliser le domaine principal sans www
+      domain: ".talibhub.com", // Permet l'utilisation sur talibhub.com et ses sous-domaines
       secure: true,
     };
   }
@@ -34,8 +34,11 @@ const getMidnightTimestamp = () => {
 
 const cookieManager = {
   setAuthCookies(res, token) {
-    console.log("🍪 setAuthCookies appelé avec token:", token.substring(0, 20) + "...");
-    
+    console.log(
+      "🍪 setAuthCookies appelé avec token:",
+      token.substring(0, 20) + "..."
+    );
+
     const options = getCookieOptions();
     console.log("🔧 Options cookies:", options);
 

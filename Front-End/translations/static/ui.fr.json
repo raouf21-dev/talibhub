@@ -146,11 +146,15 @@
     "showPassword": "Afficher le mot de passe",
     "update": "Mettre à jour",
     "changePasswordBtn": "Changer le mot de passe",
+    "country": "Pays :",
     "usernamePlaceholder": "pseudo",
     "lastNamePlaceholder": "Nom",
     "firstNamePlaceholder": "Prénom",
     "agePlaceholder": "Âge",
-    "emailPlaceholder": "Adresse e-mail"
+    "emailPlaceholder": "Adresse e-mail",
+    "countryPlaceholder": "À compléter",
+    "oauthAccountTitle": "Compte OAuth",
+    "oauthAccountMessage": "Connecté via Google. Email, nom et prénom sont synchronisés avec Google. Vous pouvez modifier : nom d'utilisateur, âge, genre et pays."
   },
   "messaging": {
     "title": "Messages",

@@ -6,17 +6,15 @@ export async function checkAppVersion() {
   try {
     // Appel à un endpoint qui renvoie la version actuelle du serveur
     const response = await fetch("/api/version");
-    const { version, buildHash } = await response.json();
+    const { version } = await response.json();
 
     const storedVersion = localStorage.getItem("app_version");
-    const storedHash = localStorage.getItem("build_hash");
 
-    if (storedVersion !== version || storedHash !== buildHash) {
-      console.log(`Nouvelle version détectée: ${version} (${buildHash})`);
+    if (storedVersion !== version) {
+      console.log(`Nouvelle version détectée: ${version}`);
       return {
         needsUpdate: true,
         version,
-        buildHash,
       };
     }
 

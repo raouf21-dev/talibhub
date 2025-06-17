@@ -1,11 +1,14 @@
+// 🚨 LOGS DE DÉBOGAGE CRITIQUES - À CONSERVER JUSQU'À RÉSOLUTION
+console.log("🚀 main.js CHARGÉ - Script principal en cours d'exécution");
+console.log("🚀 URL actuelle:", window.location.href);
+console.log("🚀 Cookies:", document.cookie);
+
 // Imports principaux pour main.js
 import { langConfig } from "./config/apiConfig.js";
 import { authService } from "./services/auth/authService.js";
 import AppState from "./services/state/state.js";
 import CacheService from "./services/cache/cacheService.js";
 import mosqueTimesStorageService from "./services/cache/mosqueTimesStorageService.js";
-import { APP_VERSION } from "./utils/version.js";
-import { BUILD_HASH, checkBuildHash } from "./build/build-info.js";
 
 // Importation du système de traductions
 import { translationManager } from "./translations/TranslationManager.js";
@@ -86,138 +89,252 @@ import { translationManager } from "./translations/TranslationManager.js";
 })();
 
 /**
- * Vérifie l'authentification de l'utilisateur en consultant le token stocké.
- * Si le token est présent, il effectue une vérification serveur.
- * @returns {Promise<string|null>} Le token si l'utilisateur est authentifié, sinon null.
- */
-async function checkAuthStatus() {
-  const token = localStorage.getItem("token");
-  if (!token) return null;
-  try {
-    const response = await fetch("/api/auth/verify", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    if (!response.ok) {
-      localStorage.removeItem("token");
-      return null;
-    }
-    return token;
-  } catch (error) {
-    console.error("Erreur de vérification du token:", error);
-    localStorage.removeItem("token");
-    return null;
-  }
-}
-
-/**
  * Fonction principale d'initialisation de l'application.
  */
 async function initializeApp() {
-  // Vérification de build-info.js...
-  console.log("Vérification de build-info.js...");
-  const buildUpdated = checkBuildHash(() => {
-    console.log(
-      "Nettoyage des données suite à la détection d'un nouveau build"
-    );
-    mosqueTimesStorageService.clearAllData();
-  });
+  console.log("🎯 === DÉBUT initializeApp() ===");
+  console.log("🎯 URL:", window.location.href);
+  console.log("🎯 Cookies actuels:", document.cookie);
 
-  // Si un nouveau build est détecté, la page sera rechargée et nous n'exécuterons pas le reste
-  if (buildUpdated) {
-    console.log("Build mis à jour - recharge en cours...");
-    return;
-  }
-
-  // Vérification de version APP_VERSION
-  const storedVersion = localStorage.getItem("app_version");
-  console.log("Version actuelle:", APP_VERSION);
-  console.log("Version stockée:", storedVersion);
-  if (storedVersion !== APP_VERSION) {
-    console.log(`Nouvelle version détectée: ${APP_VERSION}`);
-    mosqueTimesStorageService.clearAllData();
-    localStorage.setItem("app_version", APP_VERSION);
-    // Notification reportée après l'initialisation de l'interface
-    window.showUpdateNotification = true;
-  }
-
-  // Initialiser le système de traduction en premier
-  console.log("🌐 Initialisation du système de traduction...");
-  await translationManager.init();
-
-  // Détermine la langue et la définit dans le document.
-  const userLang = translationManager.getCurrentLanguage();
-  document.documentElement.lang = userLang;
-
-  // Récupère la page actuelle depuis l'URL
-  let currentPath = window.location.pathname.substring(1);
-  if (currentPath.endsWith(".html") || !currentPath) {
-    currentPath = "welcomepage";
-  }
-
-  // Importer dynamiquement les utilitaires pour éviter les dépendances circulaires
-  const { updateNavVisibility, initializeUtils } = await import(
-    "./utils/utils.js"
-  );
-  const { initializeNavigation } = await import(
-    "./components/navigation/navigation.js"
-  );
-  const { initializeTopNav } = await import(
-    "./components/navigation/topnav.js"
-  );
-
-  // Appliquer immédiatement la visibilité de la navigation
-  updateNavVisibility(currentPath);
-
-  // Initialisations communes
-  initializeUtils();
-  initializeNavigation();
-
-  // Initialiser topnav seulement si nécessaire
-  const isWelcomePage = currentPath === "welcomepage";
-  const hasToken = localStorage.getItem("token");
-  if (!isWelcomePage || hasToken) {
-    initializeTopNav();
-  } else {
-    console.log("Initialisation de topnav ignorée sur welcomepage");
-  }
-
-  // Importer dynamiquement les fonctions nécessaires
-  const { navigateTo } = await import("./utils/utils.js");
-  const { initializeAuth } = await import("./components/auth/auth.js");
-
-  const token = await checkAuthStatus();
-
-  if (token) {
-    console.log("Utilisateur authentifié");
-    await navigateTo(currentPath);
-  } else {
-    console.log("Utilisateur non authentifié");
-    await navigateTo("welcomepage");
-    await initializeAuth();
-  }
-
-  // Forcer la mise à jour des traductions après l'initialisation
-  console.log("🔄 Mise à jour finale des traductions...");
-  translationManager.updateDOM();
-
-  // Gestion des événements de navigation
-  document.querySelectorAll("[data-destination]").forEach((element) => {
-    element.addEventListener("click", (e) => {
-      const destination = e.currentTarget.dataset.destination;
-      if (destination) {
-        navigateTo(destination);
+  // ✅ NOUVELLE LOGIQUE UNIFIÉE : Nettoyage automatique localStorage obsolète
+  console.log("🔧 Nettoyage localStorage obsolète...");
+  try {
+    const legacyTokens = ["token", "refreshToken", "tokenExpiry"];
+    legacyTokens.forEach((key) => {
+      if (localStorage.getItem(key)) {
+        localStorage.removeItem(key);
+        console.log(`🧹 ${key} supprimé du localStorage`);
       }
     });
-  });
+    console.log("✅ Nettoyage localStorage terminé");
+  } catch (cleanupError) {
+    console.error("❌ Erreur nettoyage localStorage:", cleanupError);
+  }
 
-  // Gestion de la déconnexion
-  document.getElementById("logoutBtn")?.addEventListener("click", async (e) => {
-    e.preventDefault();
-    await authService.logout();
-    window.location.reload();
-  });
+  console.log(
+    "🔧 Diagnostic authentification terminé - Continuer initializeApp"
+  );
+
+  // 🔧 GESTION DE VERSION SIMPLIFIÉE (BUILD_HASH supprimé)
+  console.log("🔧 Vérification version simplifiée...");
+  try {
+    const currentVersion = "1.0.0"; // Version statique simple
+    const storedVersion = localStorage.getItem("app_version");
+    console.log("Version actuelle:", currentVersion);
+    console.log("Version stockée:", storedVersion);
+
+    if (storedVersion !== currentVersion) {
+      console.log(`🔄 Nouvelle version détectée: ${currentVersion}`);
+      console.log("💾 Sauvegarde nouvelle version...");
+      localStorage.setItem("app_version", currentVersion);
+      console.log("✅ Version mise à jour");
+    } else {
+      console.log("ℹ️ Version inchangée");
+    }
+  } catch (versionError) {
+    console.error("❌ ERREUR traitement version:", versionError);
+    // Continuer malgré l'erreur
+  }
+
+  console.log("🔧 Fin vérification version - Continuons...");
+
+  // 🔧 AUTHSERVICE CRITIQUE - Disponibilité globale immédiate
+  console.log("📥 Configuration authService global...");
+
+  // Rendre authService disponible globalement IMMÉDIATEMENT
+  window.authService = authService;
+  console.log("✅ authService rendu disponible globalement");
+
+  // Validation simple d'authService
+  if (authService && typeof authService.isAuthenticated === "function") {
+    console.log("✅ authService validé - méthodes requises présentes");
+  } else {
+    console.error("❌ authService invalide ou méthodes manquantes");
+    throw new Error("authService requis pour l'initialisation");
+  }
+
+  try {
+    // Initialiser le système de traduction en premier
+    console.log("🌐 Initialisation du système de traduction...");
+    await translationManager.init();
+
+    // Détermine la langue et la définit dans le document.
+    const userLang = translationManager.getCurrentLanguage();
+    document.documentElement.lang = userLang;
+
+    // Récupère la page actuelle depuis l'URL
+    let currentPath = window.location.pathname.substring(1);
+    if (currentPath.endsWith(".html") || !currentPath) {
+      currentPath = "welcomepage";
+    }
+    console.log("🔍 Page actuelle déterminée:", currentPath);
+
+    // Importer dynamiquement les utilitaires pour éviter les dépendances circulaires
+    console.log("📥 Import des utilitaires...");
+    const { updateNavVisibility, initializeUtils } = await import(
+      "./utils/utils.js"
+    );
+    const { initializeNavigation } = await import(
+      "./components/navigation/navigation.js"
+    );
+    const { initializeTopNav } = await import(
+      "./components/navigation/topnav.js"
+    );
+    console.log("✅ Imports utilitaires terminés");
+
+    // Appliquer immédiatement la visibilité de la navigation
+    updateNavVisibility(currentPath);
+
+    // Initialisations communes
+    console.log("🔧 Initialisation des utils et navigation...");
+    initializeUtils();
+    initializeNavigation();
+
+    // ✅ CORRECTION CRITIQUE: Utiliser authService.isAuthenticated() au lieu de checkAuthStatus()
+    console.log("🔍 Vérification de l'authentification avec authService...");
+
+    let isAuthenticated = false;
+    try {
+      console.log("🔍 Appel authService.isAuthenticated()...");
+      isAuthenticated = authService.isAuthenticated();
+      console.log(
+        "🔍 Résultat authService.isAuthenticated():",
+        isAuthenticated
+      );
+
+      console.log("🔍 Collecte état détaillé...");
+      const detailedState = {
+        hasToken: !!authService.getToken(),
+        hasAuthCookie: authService.hasAuthCookie(),
+        cookies: document.cookie,
+      };
+      console.log("🔍 État détaillé:", detailedState);
+    } catch (authError) {
+      console.error(
+        "❌ ERREUR lors de l'appel à authService.isAuthenticated():",
+        authError
+      );
+      console.error("❌ Stack trace:", authError.stack);
+      isAuthenticated = false; // valeur par défaut en cas d'erreur
+    }
+
+    // Initialiser topnav seulement si nécessaire
+    const isWelcomePage = currentPath === "welcomepage";
+    if (!isWelcomePage || isAuthenticated) {
+      console.log("🔧 Initialisation de topnav...");
+      initializeTopNav();
+    } else {
+      console.log("Initialisation de topnav ignorée sur welcomepage");
+    }
+
+    // Importer dynamiquement les fonctions nécessaires
+    console.log("📥 Import navigateTo et initializeAuth...");
+    const { navigateTo } = await import("./utils/utils.js");
+    const { initializeAuth } = await import("./components/auth/auth.js");
+
+    // ✅ CORRECTION: Utiliser authService directement
+    if (isAuthenticated) {
+      console.log("✅ Utilisateur authentifié - Navigation vers:", currentPath);
+
+      // 🔧 MODIFICATION CRITIQUE: Vérifier les paramètres OAuth
+      const urlParams = new URLSearchParams(window.location.search);
+      const authStatus = urlParams.get("auth");
+      const action = urlParams.get("action");
+      const redirect = urlParams.get("redirect");
+
+      console.log("🔍 Paramètres OAuth détectés:", {
+        authStatus,
+        action,
+        redirect,
+      });
+
+      if (authStatus === "success") {
+        if (action === "complete_profile") {
+          console.log(
+            "⚠️ OAuth complete_profile détecté mais ignoré - Redirection vers dashboard"
+          );
+
+          // Nettoyer l'URL des paramètres OAuth
+          const cleanUrl = window.location.origin + window.location.pathname;
+          window.history.replaceState({}, document.title, cleanUrl);
+
+          // Déclencher les événements d'authentification
+          console.log(
+            "🔔 Déclenchement événements d'authentification OAuth..."
+          );
+          window.dispatchEvent(new Event("login"));
+
+          // Redirection directe vers dashboard
+          console.log("🚀 Redirection OAuth vers dashboard...");
+          await navigateTo("dashboard");
+        } else if (redirect === "dashboard") {
+          console.log(
+            "🎯 Utilisateur OAuth existant détecté - Redirection directe vers dashboard"
+          );
+
+          // Nettoyer l'URL des paramètres OAuth
+          const cleanUrl = window.location.origin + window.location.pathname;
+          window.history.replaceState({}, document.title, cleanUrl);
+
+          // Déclencher les événements d'authentification
+          console.log(
+            "🔔 Déclenchement événements d'authentification OAuth..."
+          );
+          window.dispatchEvent(new Event("login"));
+
+          // Redirection directe vers dashboard
+          console.log("🚀 Redirection OAuth vers dashboard...");
+          await navigateTo("dashboard");
+        } else {
+          console.log(
+            "🚀 OAuth success détecté mais sans action spécifique - Navigation normale"
+          );
+          await navigateTo(currentPath);
+        }
+      } else {
+        console.log("🚀 Navigation normale vers:", currentPath);
+        await navigateTo(currentPath);
+      }
+    } else {
+      console.log(
+        "❌ Utilisateur non authentifié - Redirection vers welcomepage"
+      );
+      await navigateTo("welcomepage");
+      await initializeAuth();
+    }
+
+    // Forcer la mise à jour des traductions après l'initialisation
+    console.log("🔄 Mise à jour finale des traductions...");
+    translationManager.updateDOM();
+
+    // Gestion des événements de navigation - DÉSACTIVÉE
+    // La navigation est maintenant gérée par topnav.js pour éviter les doublons
+    // document.querySelectorAll("[data-destination]").forEach((element) => {
+    //   element.addEventListener("click", (e) => {
+    //     const destination = e.currentTarget.dataset.destination;
+    //     if (destination) {
+    //       navigateTo(destination);
+    //     }
+    //   });
+    // });
+
+    // Gestion de la déconnexion
+    document
+      .getElementById("logoutBtn")
+      ?.addEventListener("click", async (e) => {
+        e.preventDefault();
+        await authService.logout();
+        window.location.reload();
+      });
+
+    // authService déjà rendu global plus tôt dans initializeApp()
+
+    console.log("🎉 === FIN initializeApp() - SUCCÈS ===");
+  } catch (error) {
+    console.error("❌ ERREUR CRITIQUE dans initializeApp():", error);
+    console.error("❌ Stack trace:", error.stack);
+    throw error;
+  }
 }
 
 // Gestion globale de l'événement "login" :
@@ -255,7 +372,15 @@ window.addEventListener("popstate", async (event) => {
   if (targetPage.endsWith(".html") || !targetPage) {
     targetPage = "welcomepage";
   }
-  const isUserAuthenticated = await checkAuthStatus();
+
+  // Utiliser l'authService global si disponible, sinon l'importer
+  let authService = window.authService;
+  if (!authService) {
+    const imported = await import("./services/auth/authService.js");
+    authService = imported.authService;
+  }
+
+  const isUserAuthenticated = authService.isAuthenticated();
   if (!isUserAuthenticated && targetPage !== "welcomepage") {
     targetPage = "welcomepage";
   } else if (isUserAuthenticated && targetPage === "welcomepage") {
@@ -266,7 +391,26 @@ window.addEventListener("popstate", async (event) => {
 });
 
 // Point d'entrée
-document.addEventListener("DOMContentLoaded", initializeApp);
+console.log("🎯 Configuration du listener DOMContentLoaded...");
+console.log("🎯 État document.readyState:", document.readyState);
+
+// Si le DOM est déjà chargé, exécuter immédiatement
+if (document.readyState === "loading") {
+  console.log("🎯 DOM en cours de chargement - Configuration listener");
+  document.addEventListener("DOMContentLoaded", () => {
+    console.log("🎯 DOMContentLoaded déclenché - Appel de initializeApp()");
+    initializeApp().catch((error) => {
+      console.error("🚨 ERREUR FATALE dans initializeApp():", error);
+    });
+  });
+} else {
+  console.log("🎯 DOM déjà chargé - Exécution immédiate de initializeApp()");
+  initializeApp().catch((error) => {
+    console.error("🚨 ERREUR FATALE dans initializeApp():", error);
+  });
+}
+
+console.log("🎯 Listener DOMContentLoaded configuré");
 
 // Gestion globale des erreurs
 window.addEventListener("error", (event) => {
@@ -290,3 +434,5 @@ window.tWarning = (key, variables) =>
 
 // Exportation pour utilisation dans d'autres fichiers si nécessaire
 export { authService, CacheService, translationManager };
+
+console.log("✅ Tous les imports terminés avec succès");

@@ -219,15 +219,23 @@ function initializeDashboardProfile() {
       const user = await authService.getProfile();
 
       if (dashboardUsernameDisplay && user) {
-        let displayName = user.username;
+        let displayName;
 
-        // Si le username est temporaire (contient un timestamp), utiliser le prénom ou email
+        // Priorité 1: Username/pseudo s'il est renseigné et n'est pas temporaire
         if (
-          !displayName ||
-          (displayName.includes("_") && /\d{10,}/.test(displayName))
+          user.username &&
+          user.username.trim() &&
+          !(user.username.includes("_") && /\d{10,}/.test(user.username))
         ) {
-          displayName =
-            user.firstName || user.email?.split("@")[0] || "Utilisateur";
+          displayName = user.username;
+        }
+        // Priorité 2: Prénom si pas de username valide
+        else if (user.firstName && user.firstName.trim()) {
+          displayName = user.firstName;
+        }
+        // Fallback: email ou "Utilisateur"
+        else {
+          displayName = user.email?.split("@")[0] || "Utilisateur";
         }
 
         console.log(
@@ -509,14 +517,34 @@ export async function initializeTopNav() {
         document.getElementById("username-display") ||
         document.getElementById("usernameDisplay");
 
-      if (usernameDisplay && user && user.username) {
-        console.log("Mise à jour du nom d'utilisateur:", user.username);
-        usernameDisplay.textContent = user.username;
+      if (usernameDisplay && user) {
+        let displayName;
+
+        // Priorité 1: Username/pseudo s'il est renseigné et n'est pas temporaire
+        if (
+          user.username &&
+          user.username.trim() &&
+          !(user.username.includes("_") && /\d{10,}/.test(user.username))
+        ) {
+          displayName = user.username;
+        }
+        // Priorité 2: Prénom si pas de username valide
+        else if (user.firstName && user.firstName.trim()) {
+          displayName = user.firstName;
+        }
+        // Fallback: email ou "Utilisateur"
+        else {
+          displayName = user.email?.split("@")[0] || "Utilisateur";
+        }
+
+        console.log("Mise à jour du nom d'utilisateur:", displayName);
+        usernameDisplay.textContent = displayName;
       } else {
         console.warn("Éléments manquants pour la mise à jour du nom:", {
           usernameDisplay: !!usernameDisplay,
           user: !!user,
           username: user?.username,
+          firstName: user?.firstName,
         });
       }
     } catch (error) {

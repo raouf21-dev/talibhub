@@ -32,8 +32,16 @@ const redirectAfterAuth = (res, success, user = null, error = null) => {
       ? "https://talibhub.com"
       : "http://localhost:4000";
 
+  console.log("🔄 redirectAfterAuth appelé:", {
+    success,
+    user: user ? { id: user.id, email: user.email } : null,
+    error,
+    frontendURL,
+    environment: process.env.NODE_ENV,
+  });
+
   if (success && user) {
-    console.log("Redirection OAuth pour utilisateur:", {
+    console.log("✅ Redirection OAuth pour utilisateur:", {
       id: user.id,
       email: user.email,
       has_profile: !!(
@@ -45,30 +53,46 @@ const redirectAfterAuth = (res, success, user = null, error = null) => {
       country: user.country || "non renseigné (optionnel)",
     });
 
-    // Vérifier si l'utilisateur a rempli son profil (pays optionnel)
-    const needsProfileCompletion =
-      !user.age || !user.gender || !user.first_name || !user.last_name;
+    // Vérifier si l'utilisateur a rempli son profil OAuth
+    // Pour OAuth, on considère le profil comme valide s'il y a first_name ET last_name
+    // Les champs age, gender, country et username sont optionnels pour OAuth
+    const needsProfileCompletion = !user.first_name || !user.last_name;
 
     if (needsProfileCompletion) {
-      console.log("Profil incomplet, redirection vers complétion de profil");
-      // 🔥 CORRECTION : Rediriger vers welcomepage avec OAuth callback
-      return res.redirect(
-        `${frontendURL}/welcomepage?auth=success&action=complete_profile&user_id=${user.id}`
+      console.log(
+        "📝 Profil OAuth incomplet (manque nom/prénom), redirection vers complétion"
       );
+      const redirectUrl = `${frontendURL}/?auth=success&action=complete_profile&user_id=${
+        user.id
+      }&timestamp=${Date.now()}`;
+      console.log("🔗 URL de redirection (profil):", redirectUrl);
+      return res.redirect(redirectUrl);
     } else {
-      console.log("Profil complet, redirection vers dashboard");
-      // 🔥 CORRECTION : Rediriger vers welcomepage avec callback pour traitement
-      return res.redirect(
-        `${frontendURL}/welcomepage?auth=success&redirect=dashboard&timestamp=${Date.now()}`
+      console.log(
+        "✅ Profil OAuth valide (nom/prénom présents), redirection vers dashboard"
       );
+      console.log("👤 Profil utilisateur:", {
+        id: user.id,
+        email: user.email,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        username: user.username,
+        age: user.age,
+        gender: user.gender,
+        country: user.country,
+        provider: user.provider,
+      });
+      const redirectUrl = `${frontendURL}/?auth=success&redirect=dashboard&timestamp=${Date.now()}`;
+      console.log("🔗 URL de redirection (dashboard):", redirectUrl);
+      return res.redirect(redirectUrl);
     }
   } else {
-    console.error("Échec de l'authentification OAuth:", error);
+    console.error("❌ Échec de l'authentification OAuth:", error);
     // Rediriger vers la page d'accueil avec un message d'erreur
     const errorMessage = error || "authentication_failed";
-    return res.redirect(
-      `${frontendURL}/welcomepage?auth=error&message=${errorMessage}`
-    );
+    const redirectUrl = `${frontendURL}/?auth=error&message=${errorMessage}&timestamp=${Date.now()}`;
+    console.log("🔗 URL de redirection (erreur):", redirectUrl);
+    return res.redirect(redirectUrl);
   }
 };
 

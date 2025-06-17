@@ -24,13 +24,4 @@ jobs:
         env:
           SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
 
-      - name: Generate Build Hash with Timestamp
-        run: |
-          echo "// Généré automatiquement le $(date)" > Front-End/build/build-info.js
-          echo "export const BUILD_HASH = \"$(git rev-parse --short HEAD)-$(date +%s)\";" >> Front-End/build/build-info.js
-          echo "export const BUILD_DATE = \"$(date -u +"%Y-%m-%dT%H:%M:%SZ")\";" >> Front-End/build/build-info.js
-          echo "export function checkBuildHash(clearDataCallback) { /* Votre code existant */ }" >> Front-End/build/build-info.js
 
-      - name: Update Version
-        run: |
-          node Front-End/scripts/update-version.js

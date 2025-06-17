@@ -59,10 +59,17 @@ exports.register = async (req, res) => {
       expiresIn: process.env.JWT_EXPIRES_IN || "24h",
     });
 
-    // Définir les cookies avec le token
+    // ✅ NOUVELLE LOGIQUE : Uniquement cookies, pas de token en JSON
     cookieManager.setAuthCookies(res, token);
 
-    res.status(201).json({ token });
+    res.status(201).json({
+      success: true,
+      user: {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+      },
+    });
   } catch (error) {
     console.error("Registration error:", error);
     res.status(500).json({ message: "An error occurred during registration" });
@@ -100,12 +107,11 @@ exports.login = async (req, res) => {
       expiresIn: "24h",
     });
 
-    // Définir les cookies avec le token
+    // ✅ NOUVELLE LOGIQUE : Uniquement cookies, pas de token en JSON
     cookieManager.setAuthCookies(res, token);
 
     res.status(200).json({
       success: true,
-      token,
       user: {
         id: user.id,
         email: user.email,
@@ -155,11 +161,12 @@ exports.refreshToken = async (req, res) => {
       expiresIn: "24h",
     });
 
+    // ✅ NOUVELLE LOGIQUE : Uniquement cookies
     cookieManager.setAuthCookies(res, newToken);
 
     res.status(200).json({
       success: true,
-      token: newToken,
+      message: "Token rafraîchi avec succès",
     });
   } catch (error) {
     console.error("Erreur lors du rafraîchissement du token:", error);
@@ -233,6 +240,8 @@ exports.getProfile = async (req, res) => {
       lastName: user.last_name,
       age: user.age,
       gender: user.gender,
+      country: user.country,
+      isOAuthUser: user.is_oauth_user || false,
     };
 
     console.log("✅ Profil utilisateur retourné:", {
@@ -477,6 +486,124 @@ exports.storePublicMosqueTimesInCookie = async (req, res) => {
   }
 };
 
+// Nouvelle méthode pour migrer de localStorage vers cookies
+exports.migrateToCookies = async (req, res) => {
+  try {
+    console.log(
+      "🔄 Migration localStorage vers cookies pour utilisateur:",
+      req.user.id
+    );
+
+    // L'utilisateur est déjà authentifié via le middleware (Bearer token)
+    // On va créer des cookies avec le même token
+    const existingToken = req.headers.authorization?.split(" ")[1];
+
+    if (!existingToken) {
+      return res.status(400).json({
+        success: false,
+        message: "Aucun token à migrer",
+      });
+    }
+
+    // Définir les cookies avec le token existant
+    cookieManager.setAuthCookies(res, existingToken);
+
+    res.status(200).json({
+      success: true,
+      message: "Migration vers cookies réussie",
+    });
+
+    console.log(
+      "✅ Migration localStorage → cookies terminée pour utilisateur:",
+      req.user.id
+    );
+  } catch (error) {
+    console.error("❌ Erreur lors de la migration:", error);
+    res.status(500).json({
+      success: false,
+      message: "Erreur lors de la migration",
+    });
+  }
+};
+
+// Nouvelle méthode pour mettre à jour le profil utilisateur
+exports.updateProfile = async (req, res) => {
+  try {
+    console.log("🔄 updateProfile appelé - User:", req.user.id);
+    console.log("📝 Données reçues:", req.body);
+
+    const userId = req.user.id;
+    const { username, firstName, lastName, age, gender, email, country } =
+      req.body;
+
+    // Vérifier que l'utilisateur existe
+    const user = await userModel.getUserById(userId);
+    if (!user) {
+      console.log("❌ Utilisateur non trouvé avec ID:", userId);
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Pour les utilisateurs OAuth : seuls username, age, gender, country sont modifiables
+    // Pour les utilisateurs classiques : tous les champs sont modifiables
+    const profileData = {
+      username: username !== undefined ? username : user.username,
+      firstName: user.is_oauth_user
+        ? user.first_name
+        : firstName !== undefined
+        ? firstName
+        : user.first_name,
+      lastName: user.is_oauth_user
+        ? user.last_name
+        : lastName !== undefined
+        ? lastName
+        : user.last_name,
+      age: age !== undefined ? age : user.age,
+      gender: gender !== undefined ? gender : user.gender,
+      country: country !== undefined ? country : user.country,
+    };
+
+    // Gestion de l'email : seulement pour les utilisateurs non-OAuth
+    if (!user.is_oauth_user && email && email !== user.email) {
+      // Vérifier que le nouvel email n'est pas déjà utilisé
+      const existingUser = await userModel.getUserByEmail(email);
+      if (existingUser && existingUser.id !== userId) {
+        return res.status(400).json({
+          message: "Cette adresse email est déjà utilisée",
+        });
+      }
+
+      // Créer une méthode pour mettre à jour l'email
+      await userModel.updateUserEmail(userId, email);
+    }
+
+    // Mettre à jour le profil
+    const updatedUser = await userModel.updateOAuthUserProfile(
+      userId,
+      profileData
+    );
+
+    console.log("✅ Profil mis à jour avec succès pour utilisateur:", userId);
+
+    res.status(200).json({
+      message: "Profile updated successfully",
+      user: {
+        id: updatedUser.id,
+        username: updatedUser.username,
+        email: updatedUser.email,
+        firstName: updatedUser.first_name,
+        lastName: updatedUser.last_name,
+        age: updatedUser.age,
+        gender: updatedUser.gender,
+        country: updatedUser.country,
+        isOAuthUser: updatedUser.is_oauth_user,
+      },
+    });
+  } catch (error) {
+    console.error("❌ Error in updateProfile:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 module.exports = {
   register: exports.register,
   login: exports.login,
@@ -484,10 +611,12 @@ module.exports = {
   logout: exports.logout,
   verify: exports.verify,
   getProfile: exports.getProfile,
+  updateProfile: exports.updateProfile,
   changePassword: exports.changePassword,
   forgotPassword: exports.forgotPassword,
   getResetPassword: exports.getResetPassword,
   resetPassword: exports.resetPassword,
   storeMosqueTimesInCookie: exports.storeMosqueTimesInCookie,
   storePublicMosqueTimesInCookie: exports.storePublicMosqueTimesInCookie,
+  migrateToCookies: exports.migrateToCookies,
 };

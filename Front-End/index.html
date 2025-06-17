@@ -1981,9 +1981,8 @@
             type="text"
             id="usernameprofil"
             name="pseudo"
-            data-translate-placeholder="profile.usernamePlaceholder"
-            placeholder="Username"
-            required
+            data-translate-placeholder="profile.countryPlaceholder"
+            placeholder="À compléter"
           />
 
           <label for="last-nameprofil" data-translate="profile.lastName"
@@ -2015,17 +2014,16 @@
             type="number"
             id="ageprofil"
             name="age"
-            data-translate-placeholder="profile.agePlaceholder"
-            placeholder="Age"
-            required
+            data-translate-placeholder="profile.countryPlaceholder"
+            placeholder="À compléter"
           />
 
           <label for="genderprofil" data-translate="profile.gender"
             >Gender:</label
           >
-          <select id="genderprofil" name="gender" required>
-            <option value="" data-translate="profile.selectGender">
-              Select Gender
+          <select id="genderprofil" name="gender">
+            <option value="" data-translate="profile.countryPlaceholder">
+              À compléter
             </option>
             <option value="male" data-translate="profile.male">Male</option>
             <option value="female" data-translate="profile.female">
@@ -2043,6 +2041,17 @@
             data-translate-placeholder="profile.emailPlaceholder"
             placeholder="Email Address"
             required
+          />
+
+          <label for="countryprofil" data-translate="profile.country"
+            >Country:</label
+          >
+          <input
+            type="text"
+            id="countryprofil"
+            name="country"
+            data-translate-placeholder="profile.countryPlaceholder"
+            placeholder="Country"
           />
 
           <button type="submit" data-translate="profile.update">Update</button>

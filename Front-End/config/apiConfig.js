@@ -127,11 +127,6 @@ export const apiClient = {
       },
     };
 
-    const token = localStorage.getItem("token");
-    if (token) {
-      defaultOptions.headers["Authorization"] = `Bearer ${token}`;
-    }
-
     const finalOptions = {
       ...defaultOptions,
       ...options,

@@ -33,13 +33,27 @@ window.addEventListener("popstate", async (event) => {
 
 /**
  * Vérifie l'authentification de l'utilisateur.
+ * UTILISE AUTHSERVICE GLOBAL - Supprime les conflits
  * @returns {Promise<boolean>}
  */
 export async function isAuthenticated() {
   try {
-    return await authService.checkAuth();
+    // ✅ CORRECTION: Utiliser authService global pour éviter les conflits
+    if (
+      window.authService &&
+      typeof window.authService.isAuthenticated === "function"
+    ) {
+      return window.authService.isAuthenticated();
+    }
+
+    // Fallback vers cookies si authService non disponible
+    console.warn("⚠️ authService non disponible, utilisation cookies fallback");
+    return document.cookie.includes("auth=true");
   } catch (error) {
-    console.error("Erreur de vérification auth:", error);
+    console.error(
+      "Erreur lors de la vérification de l'authentification:",
+      error
+    );
     return false;
   }
 }
@@ -51,7 +65,21 @@ export async function isAuthenticated() {
  * @param {boolean} [addToHistory=true] - Ajoute ou non l'entrée dans l'historique.
  * @returns {Promise<boolean>}
  */
+// Variable pour éviter les navigations simultanées
+let navigationInProgress = false;
+
 export async function navigateTo(pageId, addToHistory = true) {
+  // Protection contre les appels simultanés
+  if (navigationInProgress) {
+    console.warn(
+      `[DEBUG] Navigation déjà en cours - Appel ignoré pour: ${pageId}`
+    );
+    return false;
+  }
+
+  // Marquer navigation en cours
+  navigationInProgress = true;
+
   // Ajouter un identifiant unique pour chaque appel
   const navigationId = Math.random().toString(36).substr(2, 9);
 
@@ -93,6 +121,8 @@ export async function navigateTo(pageId, addToHistory = true) {
     }
   } else {
     console.warn(`Page not found: ${pageId}`);
+    // Libérer le verrou même en cas d'erreur
+    navigationInProgress = false;
     return false;
   }
 
@@ -153,6 +183,9 @@ export async function navigateTo(pageId, addToHistory = true) {
         `Erreur lors du chargement du module pour la page ${pageId}:`,
         error
       );
+      // Libérer le verrou même en cas d'erreur
+      navigationInProgress = false;
+      return false;
     }
   } else {
     // Pour les pages qui n'ont pas de module dynamique, aucun chargement n'est nécessaire.
@@ -171,6 +204,9 @@ export async function navigateTo(pageId, addToHistory = true) {
     newPath: window.location.pathname,
     time: new Date().toISOString(),
   });
+
+  // Libérer le verrou de navigation
+  navigationInProgress = false;
 
   return result;
 }
@@ -212,7 +248,9 @@ export async function initializeApp() {
 export function updateNavVisibility(pageId) {
   const sideNav = document.getElementById("nav");
   const topNav = document.querySelector(".top-nav");
-  const hasToken = !!localStorage.getItem("token");
+
+  // ✅ NOUVELLE LOGIQUE : Vérification via cookies
+  const hasAuth = document.cookie.includes("auth=true");
 
   if (sideNav) {
     // Masquer la barre latérale si sur welcomepage
@@ -227,23 +265,24 @@ export function updateNavVisibility(pageId) {
   }
 
   //console.log(
-  //  `Navigation visibility updated: pageId=${pageId}, hasToken=${hasToken}, topNav=${
+  //  `Navigation visibility updated: pageId=${pageId}, hasAuth=${hasAuth}, topNav=${
   //    topNav ? topNav.style.display : "N/A"
   //  }`
   //);
 }
 
 /**
- * Vérifie la présence d'un token d'authentification dans le localStorage.
+ * Vérifie la présence d'une authentification via cookies.
  * @returns {boolean}
  */
 export function checkAuthOnLoad() {
-  const token = localStorage.getItem("token");
+  // ✅ NOUVELLE LOGIQUE : Vérification via cookies uniquement
+  const hasAuth = document.cookie.includes("auth=true");
   console.log(
-    "Token récupéré depuis localStorage dans checkAuthOnLoad:",
-    token
+    "Authentification vérifiée via cookies dans checkAuthOnLoad:",
+    hasAuth
   );
-  return !!token;
+  return hasAuth;
 }
 
 /**
@@ -477,5 +516,3 @@ export function updateDOMIfExists(id, value) {
 window.addEventListener("error", (event) => {
   console.error("Erreur globale:", event.error);
 });
-
-  

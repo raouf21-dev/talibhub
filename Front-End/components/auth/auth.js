@@ -183,7 +183,9 @@ async function handleSignup(event) {
     // Appel API pour inscription
     const response = await authService.register(formData);
 
-    if (response && response.token) {
+    // ✅ NOUVELLE LOGIQUE : Plus de gestion token, cookies automatiques
+    if (response && response.success) {
+      console.log("✅ Inscription réussie - Cookies définis automatiquement");
       // Déclencher l'événement login
       window.dispatchEvent(new Event("login"));
       notificationService.show("auth.signup.success", "success");
@@ -192,7 +194,7 @@ async function handleSignup(event) {
         navigateTo("dashboard");
       }, 1500);
     } else {
-      throw new Error("Token non reçu");
+      throw new Error("Inscription échouée");
     }
   } catch (error) {
     console.error("Erreur:", error);
@@ -238,7 +240,10 @@ async function handleSignin(event) {
       .value.trim();
 
     const response = await authService.login(email, password);
-    if (response && response.token) {
+
+    // ✅ NOUVELLE LOGIQUE : Vérifier success au lieu de token
+    if (response && response.success) {
+      console.log("✅ Connexion réussie - Cookies définis automatiquement");
       // Déclencher l'événement login
       window.dispatchEvent(new Event("login"));
       notificationService.show("auth.signin.success", "success");
@@ -246,7 +251,7 @@ async function handleSignin(event) {
         navigateTo("dashboard");
       }, 1500);
     } else {
-      throw new Error("Token non reçu");
+      throw new Error("Connexion échouée");
     }
   } catch (error) {
     console.error("Erreur de connexion:", error);
