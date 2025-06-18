@@ -19,18 +19,6 @@ jobs:
           echo "${{ secrets.ENV_PRODUCTION }}" > .env.production
           echo "${{ secrets.ENV_DEVELOPMENT }}" > .env.development
 
-      # Mise à jour de la version
-      - name: Update Application Version
-        run: |
-          node Front-End/scripts/update-version.js
-          echo "Version de l'application mise à jour avec succès."
-
-      # Génération du hash de build
-      - name: Generate Build Hash
-        run: |
-          node Front-End/scripts/generate-build-info.js
-          echo "Hash de build généré avec succès."
-
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.5.0
         with:
