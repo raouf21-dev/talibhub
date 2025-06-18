@@ -225,15 +225,19 @@ body {
 }
 
 /* === Style standard pour tous les titres h1 des pages === */
+
+
 .page h1,
 .dashboard-main-content h1 {
   text-align: center !important;
   font-size: var(--h1-size) !important;
   font-family: var(--main-font) !important;
   color: var(--primary-color) !important;
-  margin-bottom: var(--spacing-sm) !important;
+  margin-bottom: var(--spacing-md);
   font-weight: 600 !important;
 }
+
+
 
 /* === Boutons TopNav intégrés dans le Dashboard === */
 .dashboard-topnav-buttons {
@@ -411,7 +415,7 @@ body {
   width: 64px;
   height: 64px;
   object-fit: contain;
-  margin-bottom: var(--spacing-sm);
+  margin-bottom: 0;
 }
 
 .dashboard-card h2 {
@@ -462,8 +466,9 @@ body {
 
 @media (max-width: 768px) {
   .dashboard-topnav-buttons {
-    flex-direction: column;
+    flex-direction: row; /* Garde les boutons sur la même ligne */
     gap: var(--spacing-sm);
+    flex-wrap: wrap; /* Permet le retour à la ligne si nécessaire */
   }
 
   .dashboard-messaging-link,
@@ -902,7 +907,7 @@ input:checked + .slider:before {
 }
 
 .dropdown-item .language-selector .lang-btn {
-  font-size: 1.8rem;
+  font-size: 1.9rem;
   background: none;
   border: none;
   cursor: pointer;
@@ -1246,7 +1251,7 @@ body.logging-out .sidebar {
 }
 
 .welcomepage-header .language-selector .lang-btn {
-  font-size: 3em;
+  font-size: 3.2em;
   border: none;
   background: none;
   cursor: pointer;
@@ -2255,7 +2260,7 @@ html[lang="fr"] .welcomepage-mosque-time .additional-times-grid::after {
   }
 
   .welcomepage-header .language-selector .lang-btn {
-    font-size: 1.8rem; /* Légèrement réduit pour un meilleur alignement */
+    font-size: 2rem;
     padding: 2px;
   }
 
@@ -6113,6 +6118,7 @@ button[type="submit"] {
   transition: background-color 0.3s ease;
   width: 100%;
   margin-top: 10px;
+  margin-bottom: 10px;
 }
 
 button[type="submit"]:hover {
