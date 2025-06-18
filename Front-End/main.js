@@ -3,6 +3,35 @@ console.log("🚀 main.js CHARGÉ - Script principal en cours d'exécution");
 console.log("🚀 URL actuelle:", window.location.href);
 console.log("🚀 Cookies:", document.cookie);
 
+// ✅ MASQUAGE IMMÉDIAT DE LA SIDEBAR SUR WELCOMEPAGE - FIX pour éviter l'apparition temporaire
+(function hideSidebarOnWelcomepage() {
+  let currentPath = window.location.pathname.substring(1);
+  if (currentPath.endsWith(".html") || !currentPath) {
+    currentPath = "welcomepage";
+  }
+
+  if (currentPath === "welcomepage") {
+    // Ajouter immédiatement la classe pour masquer la sidebar
+    document.body.classList.add("on-welcomepage");
+
+    // Fonction pour masquer la sidebar dès qu'elle apparaît dans le DOM
+    function hideSidebarWhenReady() {
+      const sidebar =
+        document.getElementById("nav") || document.querySelector(".sidebar");
+      if (sidebar) {
+        sidebar.style.display = "none";
+        console.log("✅ Sidebar masquée immédiatement sur welcomepage");
+      } else {
+        // Réessayer si la sidebar n'est pas encore dans le DOM
+        setTimeout(hideSidebarWhenReady, 10);
+      }
+    }
+
+    // Démarrer immédiatement
+    hideSidebarWhenReady();
+  }
+})();
+
 // Imports principaux pour main.js
 import { langConfig } from "./config/apiConfig.js";
 import { authService } from "./services/auth/authService.js";
@@ -182,6 +211,16 @@ async function initializeApp() {
     );
     console.log("✅ Imports utilitaires terminés");
 
+    // ✅ AJOUT IMMÉDIAT DES CLASSES CSS POUR ÉVITER L'AFFICHAGE TEMPORAIRE DE LA SIDEBAR
+    if (currentPath === "welcomepage") {
+      document.body.classList.add("on-welcomepage");
+      // Masquer immédiatement la sidebar si elle existe déjà
+      const sidebar = document.getElementById("nav");
+      if (sidebar) {
+        sidebar.style.display = "none";
+      }
+    }
+
     // Appliquer immédiatement la visibilité de la navigation
     updateNavVisibility(currentPath);
 
@@ -323,6 +362,25 @@ async function initializeApp() {
       .getElementById("logoutBtn")
       ?.addEventListener("click", async (e) => {
         e.preventDefault();
+
+        // ✅ MASQUAGE IMMÉDIAT DE LA SIDEBAR LORS DU LOGOUT
+        console.log(
+          "🚪 Début du processus de logout - masquage immédiat de la sidebar"
+        );
+
+        // Masquer immédiatement la sidebar et changer les classes
+        const sidebar =
+          document.getElementById("nav") || document.querySelector(".sidebar");
+        const body = document.body;
+
+        if (sidebar) {
+          sidebar.style.display = "none";
+        }
+
+        // Supprimer immédiatement les classes d'authentification
+        body.classList.remove("authenticated", "on-dashboard");
+        body.classList.add("on-welcomepage");
+
         await authService.logout();
         window.location.reload();
       });
@@ -351,6 +409,22 @@ window.addEventListener("login", async () => {
 // Lorsqu'un logout est déclenché (par exemple via une réponse 401),
 // on supprime le token et redirige l'utilisateur vers la page de connexion.
 window.addEventListener("logout", async () => {
+  // ✅ MASQUAGE IMMÉDIAT DE LA SIDEBAR LORS DU LOGOUT
+  console.log("🚪 Événement logout global - masquage immédiat de la sidebar");
+
+  // Masquer immédiatement la sidebar et changer les classes
+  const sidebar =
+    document.getElementById("nav") || document.querySelector(".sidebar");
+  const body = document.body;
+
+  if (sidebar) {
+    sidebar.style.display = "none";
+  }
+
+  // Supprimer immédiatement les classes d'authentification
+  body.classList.remove("authenticated", "on-dashboard");
+  body.classList.add("on-welcomepage");
+
   localStorage.removeItem("token");
 
   // Vérifier si nous sommes déjà sur welcomepage pour éviter une boucle

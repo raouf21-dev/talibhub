@@ -148,58 +148,6 @@ router.get(
   }
 );
 
-// Routes GitHub OAuth
-router.get(
-  "/github",
-  passport.authenticate("github", { scope: ["user:email"] })
-);
-
-router.get(
-  "/github/callback",
-  passport.authenticate("github", { session: false, failureRedirect: "/" }),
-  (req, res) => {
-    try {
-      if (req.user) {
-        const token = createAndSendToken(req.user, res);
-        console.log("GitHub OAuth réussi pour utilisateur:", req.user.id);
-        redirectAfterAuth(res, true, req.user);
-      } else {
-        console.error("Aucun utilisateur dans req.user après GitHub OAuth");
-        redirectAfterAuth(res, false, null, "no_user_data");
-      }
-    } catch (error) {
-      console.error("Erreur dans callback GitHub:", error);
-      redirectAfterAuth(res, false, null, "callback_error");
-    }
-  }
-);
-
-// Routes Facebook OAuth
-router.get(
-  "/facebook",
-  passport.authenticate("facebook", { scope: ["email"] })
-);
-
-router.get(
-  "/facebook/callback",
-  passport.authenticate("facebook", { session: false, failureRedirect: "/" }),
-  (req, res) => {
-    try {
-      if (req.user) {
-        const token = createAndSendToken(req.user, res);
-        console.log("Facebook OAuth réussi pour utilisateur:", req.user.id);
-        redirectAfterAuth(res, true, req.user);
-      } else {
-        console.error("Aucun utilisateur dans req.user après Facebook OAuth");
-        redirectAfterAuth(res, false, null, "no_user_data");
-      }
-    } catch (error) {
-      console.error("Erreur dans callback Facebook:", error);
-      redirectAfterAuth(res, false, null, "callback_error");
-    }
-  }
-);
-
 // Route pour compléter le profil après OAuth
 router.post("/complete-profile", authenticateToken, async (req, res) => {
   try {

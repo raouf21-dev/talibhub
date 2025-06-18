@@ -379,6 +379,25 @@ function initializeDashboardProfile() {
   if (dashboardLogoutBtn) {
     eventListeners.dashboardLogoutBtn = async (e) => {
       e.preventDefault();
+
+      // ✅ MASQUAGE IMMÉDIAT DE LA SIDEBAR LORS DU LOGOUT
+      console.log(
+        "🚪 Début du processus de logout - masquage immédiat de la sidebar"
+      );
+
+      // Masquer immédiatement la sidebar et changer les classes
+      const sidebar =
+        document.getElementById("nav") || document.querySelector(".sidebar");
+      const body = document.body;
+
+      if (sidebar) {
+        sidebar.style.display = "none";
+      }
+
+      // Supprimer immédiatement les classes d'authentification
+      body.classList.remove("authenticated", "on-dashboard");
+      body.classList.add("on-welcomepage");
+
       try {
         await authService.logout();
         localStorage.removeItem("token");
@@ -386,6 +405,8 @@ function initializeDashboardProfile() {
         await navigateTo("welcomepage");
       } catch (error) {
         console.error("Erreur lors de la déconnexion:", error);
+        // Même en cas d'erreur, rediriger vers welcomepage
+        await navigateTo("welcomepage");
       }
     };
     dashboardLogoutBtn.addEventListener(
@@ -645,6 +666,25 @@ export async function initializeTopNav() {
   if (logoutBtn) {
     eventListeners.logoutBtn = async (e) => {
       e.preventDefault();
+
+      // ✅ MASQUAGE IMMÉDIAT DE LA SIDEBAR LORS DU LOGOUT
+      console.log(
+        "🚪 Début du processus de logout - masquage immédiat de la sidebar"
+      );
+
+      // Masquer immédiatement la sidebar et changer les classes
+      const sidebar =
+        document.getElementById("nav") || document.querySelector(".sidebar");
+      const body = document.body;
+
+      if (sidebar) {
+        sidebar.style.display = "none";
+      }
+
+      // Supprimer immédiatement les classes d'authentification
+      body.classList.remove("authenticated", "on-dashboard");
+      body.classList.add("on-welcomepage");
+
       try {
         await authService.logout();
         localStorage.removeItem("token");
@@ -652,6 +692,8 @@ export async function initializeTopNav() {
         await navigateTo("welcomepage");
       } catch (error) {
         console.error("Erreur lors de la déconnexion:", error);
+        // Même en cas d'erreur, rediriger vers welcomepage
+        await navigateTo("welcomepage");
       }
     };
     logoutBtn.addEventListener("click", eventListeners.logoutBtn);

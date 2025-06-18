@@ -235,6 +235,24 @@ export async function initializeApp() {
 
   // Gestionnaire d'événements pour la déconnexion
   window.addEventListener("logout", async () => {
+    // ✅ MASQUAGE IMMÉDIAT DE LA SIDEBAR LORS DU LOGOUT
+    console.log(
+      "🚪 Gestionnaire logout utils.js - masquage immédiat de la sidebar"
+    );
+
+    // Masquer immédiatement la sidebar et changer les classes
+    const sidebar =
+      document.getElementById("nav") || document.querySelector(".sidebar");
+    const body = document.body;
+
+    if (sidebar) {
+      sidebar.style.display = "none";
+    }
+
+    // Supprimer immédiatement les classes d'authentification
+    body.classList.remove("authenticated", "on-dashboard");
+    body.classList.add("on-welcomepage");
+
     localStorage.removeItem("token");
     await navigateTo("welcomepage");
     cleanupStatistics();
@@ -248,13 +266,34 @@ export async function initializeApp() {
 export function updateNavVisibility(pageId) {
   const sideNav = document.getElementById("nav");
   const topNav = document.querySelector(".top-nav");
+  const body = document.body;
 
   // ✅ NOUVELLE LOGIQUE : Vérification via cookies
   const hasAuth = document.cookie.includes("auth=true");
 
-  if (sideNav) {
-    // Masquer la barre latérale si sur welcomepage
-    sideNav.style.display = pageId === "welcomepage" ? "none" : "block";
+  // ✅ GESTION DES CLASSES CSS POUR CONTRÔLER LA SIDEBAR
+  // Supprimer toutes les classes de navigation précédentes
+  body.classList.remove("authenticated", "on-welcomepage", "on-dashboard");
+
+  // Ajouter les classes appropriées selon le contexte
+  if (pageId === "welcomepage") {
+    body.classList.add("on-welcomepage");
+    // Masquer explicitement la sidebar sur welcomepage
+    if (sideNav) {
+      sideNav.style.display = "none";
+    }
+  } else {
+    // Pour toutes les autres pages
+    if (hasAuth) {
+      body.classList.add("authenticated");
+    }
+
+    // Afficher la sidebar sur les pages authentifiées
+    if (sideNav && hasAuth) {
+      sideNav.style.display = "block";
+    } else if (sideNav) {
+      sideNav.style.display = "none";
+    }
   }
 
   if (topNav) {
@@ -264,11 +303,9 @@ export function updateNavVisibility(pageId) {
     topNav.style.display = hideTopNav ? "none" : "flex";
   }
 
-  //console.log(
-  //  `Navigation visibility updated: pageId=${pageId}, hasAuth=${hasAuth}, topNav=${
-  //    topNav ? topNav.style.display : "N/A"
-  //  }`
-  //);
+  console.log(
+    `Navigation visibility updated: pageId=${pageId}, hasAuth=${hasAuth}, body classes=${body.className}`
+  );
 }
 
 /**

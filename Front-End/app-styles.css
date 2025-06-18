@@ -991,10 +991,6 @@ input:checked + .slider:before {
   margin: 0;
 }
 
-.nav-list li {
-  /* Supprimé border-bottom pour un look plus moderne */
-}
-
 .nav-list a {
   display: flex;
   align-items: center;
@@ -1191,6 +1187,28 @@ input:checked + .slider:before {
   padding-bottom: 0;
 }
 
+/* === MASQUER SIDEBAR SUR WELCOMEPAGE - FIX pour éviter l'apparition temporaire === */
+/* Masquer la sidebar par défaut au chargement pour éviter l'affichage temporaire */
+.sidebar {
+  display: none;
+}
+
+/* Afficher la sidebar uniquement quand elle est nécessaire (pages authentifiées) */
+body.authenticated .sidebar {
+  display: block;
+}
+
+/* Masquer explicitement la sidebar sur welcomepage */
+body.on-welcomepage .sidebar {
+  display: none !important;
+}
+
+/* Masquer immédiatement la sidebar lors du logout pour éviter le délai */
+body.logging-out .sidebar {
+  display: none !important;
+  transition: none !important;
+}
+
 .welcomepage-container {
   width: 75vw;
   margin: 0 auto;
@@ -1289,7 +1307,7 @@ input:checked + .slider:before {
 /* === Auth Forms === */
 .welcomepage-auth-forms {
   margin-bottom: var(--spacing-xxl);
-  max-width: 90vw;
+  max-width: 60vw;
   margin-left: auto;
   margin-right: auto;
 }
@@ -1542,7 +1560,8 @@ input:checked + .slider:before {
 .welcomepage-features,
 .welcomepage-vision,
 .welcomepage-why-choose,
-.welcomepage-commitment {
+.welcomepage-commitment,
+.welcomepage-mosque-time {
   margin-bottom: 9rem;
 }
 
@@ -1689,7 +1708,6 @@ input:checked + .slider:before {
 /* Styles pour MosqueTime sur la page d'accueil */
 .welcomepage-mosque-time {
   padding: 0;
-  margin: 0;
   background: var(--card-background);
   border-radius: 12px;
   box-shadow: var(--shadow-card);

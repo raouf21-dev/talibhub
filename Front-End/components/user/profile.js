@@ -78,18 +78,26 @@ async function loadProfile() {
 
       if (emailField) {
         emailField.disabled = true;
-        emailField.title = "Email géré par votre fournisseur OAuth";
+        emailField.title = window.t(
+          "profile.emailManagedByProvider",
+          "Email géré par votre fournisseur OAuth"
+        );
       }
 
       if (firstNameField) {
         firstNameField.disabled = true;
-        firstNameField.title =
-          "Prénom synchronisé avec votre fournisseur OAuth";
+        firstNameField.title = window.t(
+          "profile.firstNameSyncedWithProvider",
+          "Prénom synchronisé avec votre fournisseur OAuth"
+        );
       }
 
       if (lastNameField) {
         lastNameField.disabled = true;
-        lastNameField.title = "Nom synchronisé avec votre fournisseur OAuth";
+        lastNameField.title = window.t(
+          "profile.lastNameSyncedWithProvider",
+          "Nom synchronisé avec votre fournisseur OAuth"
+        );
       }
 
       // Masquer la section de changement de mot de passe pour les utilisateurs OAuth

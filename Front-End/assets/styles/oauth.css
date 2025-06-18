@@ -36,14 +36,14 @@
 .oauth-buttons {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  gap: 12px;
   margin-bottom: 20px;
 }
 
 @media (max-width: 768px) {
   .oauth-buttons {
     grid-template-columns: 1fr;
-    gap: 8px;
+    gap: 10px;
   }
 }
 
@@ -81,47 +81,42 @@
   width: 20px;
   height: 20px;
   flex-shrink: 0;
+  margin-right: 8px;
 }
 
 /* Couleurs spécifiques par provider */
 .oauth-google {
   border-color: #db4437;
+  background: #fff;
+  color: #333;
 }
 
 .oauth-google:hover {
   background: #db4437;
   color: white;
   border-color: #db4437;
+  box-shadow: 0 4px 15px rgba(219, 68, 55, 0.3);
+}
+
+.oauth-google:hover .oauth-icon path {
+  fill: white !important;
 }
 
 .oauth-microsoft {
   border-color: #0078d4;
+  background: #fff;
+  color: #333;
 }
 
 .oauth-microsoft:hover {
   background: #0078d4;
   color: white;
   border-color: #0078d4;
+  box-shadow: 0 4px 15px rgba(0, 120, 212, 0.3);
 }
 
-.oauth-github {
-  border-color: #333;
-}
-
-.oauth-github:hover {
-  background: #333;
-  color: white;
-  border-color: #333;
-}
-
-.oauth-facebook {
-  border-color: #1877f2;
-}
-
-.oauth-facebook:hover {
-  background: #1877f2;
-  color: white;
-  border-color: #1877f2;
+.oauth-microsoft:hover .oauth-icon path {
+  fill: white !important;
 }
 
 /* Formulaire de complétion de profil OAuth */

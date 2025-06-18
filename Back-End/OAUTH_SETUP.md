@@ -1,6 +1,6 @@
 # 🔐 Configuration OAuth pour TalibHub
 
-Ce guide vous explique comment configurer l'authentification OAuth avec Google, Microsoft, GitHub et Facebook.
+Ce guide vous explique comment configurer l'authentification OAuth avec Google et Microsoft.
 
 ## 📋 Prérequis
 
@@ -24,10 +24,6 @@ Ce guide vous explique comment configurer l'authentification OAuth avec Google, 
    GOOGLE_CLIENT_SECRET=votre_google_client_secret
    MICROSOFT_CLIENT_ID=votre_microsoft_client_id
    MICROSOFT_CLIENT_SECRET=votre_microsoft_client_secret
-   GITHUB_CLIENT_ID=votre_github_client_id
-   GITHUB_CLIENT_SECRET=votre_github_client_secret
-   FACEBOOK_APP_ID=votre_facebook_app_id
-   FACEBOOK_APP_SECRET=votre_facebook_app_secret
    ```
 
 ## 🔧 Configuration par Provider
@@ -99,76 +95,13 @@ MICROSOFT_CLIENT_SECRET=votre_client_secret_value
 
 ---
 
-### 3. 🐙 GitHub OAuth
-
-#### Étape 1 : Créer une OAuth App
-
-1. Allez dans [GitHub Developer Settings](https://github.com/settings/developers)
-2. Cliquez sur "OAuth Apps" > "New OAuth App"
-
-#### Étape 2 : Configurer l'application
-
-1. Application name : "TalibHub Authentication"
-2. Homepage URL :
-   - **Développement** : `http://localhost:4000`
-   - **Production** : `https://talibhub.com`
-3. Authorization callback URL :
-   - **Développement** : `http://localhost:4000/api/auth/github/callback`
-   - **Production** : `https://talibhub.com/api/auth/github/callback`
-
-#### Étape 3 : Récupérer les identifiants
-
-```env
-GITHUB_CLIENT_ID=votre_client_id
-GITHUB_CLIENT_SECRET=votre_client_secret
-```
-
----
-
-### 4. 📘 Facebook OAuth
-
-#### Étape 1 : Créer une application Facebook
-
-1. Allez sur [Facebook Developers](https://developers.facebook.com/)
-2. Cliquez sur "My Apps" > "Create App"
-3. Type : "Consumer" ou "Business"
-
-#### Étape 2 : Ajouter Facebook Login
-
-1. Dans le dashboard de votre app, cliquez sur "Add Product"
-2. Trouvez "Facebook Login" et cliquez sur "Set Up"
-3. Sélectionnez "Web"
-
-#### Étape 3 : Configurer les URLs
-
-1. Allez dans "Facebook Login" > "Settings"
-2. Valid OAuth Redirect URIs :
-   - **Développement** : `http://localhost:4000/api/auth/facebook/callback`
-   - **Production** : `https://talibhub.com/api/auth/facebook/callback`
-
-#### Étape 4 : Configurer les domaines
-
-1. Allez dans "Settings" > "Basic"
-2. App Domains :
-   - **Développement** : `localhost`
-   - **Production** : `talibhub.com`
-
-#### Étape 5 : Récupérer les identifiants
-
-```env
-FACEBOOK_APP_ID=votre_app_id
-FACEBOOK_APP_SECRET=votre_app_secret
-```
-
----
-
 ## 🚀 Lancement et Tests
 
 ### 1. Installer les dépendances
 
 ```bash
 cd Back-End
-npm install passport passport-google-oauth20 passport-microsoft passport-github2 passport-facebook
+npm install passport passport-google-oauth20 passport-microsoft
 ```
 
 ### 2. Appliquer les migrations
@@ -206,10 +139,6 @@ GOOGLE_CLIENT_ID=votre_prod_google_client_id
 GOOGLE_CLIENT_SECRET=votre_prod_google_client_secret
 MICROSOFT_CLIENT_ID=votre_prod_microsoft_client_id
 MICROSOFT_CLIENT_SECRET=votre_prod_microsoft_client_secret
-GITHUB_CLIENT_ID=votre_prod_github_client_id
-GITHUB_CLIENT_SECRET=votre_prod_github_client_secret
-FACEBOOK_APP_ID=votre_prod_facebook_app_id
-FACEBOOK_APP_SECRET=votre_prod_facebook_app_secret
 ```
 
 ### URLs de callback en production
@@ -279,8 +208,6 @@ Tous les providers doivent avoir :
 # À garder SECRET
 GOOGLE_CLIENT_SECRET=secret
 MICROSOFT_CLIENT_SECRET=secret
-GITHUB_CLIENT_SECRET=secret
-FACEBOOK_APP_SECRET=secret
 JWT_SECRET=secret
 COOKIE_SECRET=secret
 ```
@@ -291,6 +218,4 @@ COOKIE_SECRET=secret
 
 - [Google OAuth Documentation](https://developers.google.com/identity/protocols/oauth2)
 - [Microsoft OAuth Documentation](https://docs.microsoft.com/en-us/azure/active-directory/develop/)
-- [GitHub OAuth Documentation](https://docs.github.com/en/developers/apps/building-oauth-apps)
-- [Facebook OAuth Documentation](https://developers.facebook.com/docs/facebook-login)
 - [Passport.js Documentation](http://www.passportjs.org/docs/)

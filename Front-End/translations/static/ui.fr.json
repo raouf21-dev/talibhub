@@ -154,7 +154,10 @@
     "emailPlaceholder": "Adresse e-mail",
     "countryPlaceholder": "À compléter",
     "oauthAccountTitle": "Compte OAuth",
-    "oauthAccountMessage": "Connecté via Google. Email, nom et prénom sont synchronisés avec Google. Vous pouvez modifier : nom d'utilisateur, âge, genre et pays."
+    "oauthAccountMessage": "Connecté via Google ou Microsoft. Email, nom et prénom sont synchronisés avec votre fournisseur. Vous pouvez modifier : nom d'utilisateur, âge, genre et pays.",
+    "emailManagedByProvider": "Email géré par votre fournisseur OAuth",
+    "firstNameSyncedWithProvider": "Prénom synchronisé avec votre fournisseur OAuth",
+    "lastNameSyncedWithProvider": "Nom synchronisé avec votre fournisseur OAuth"
   },
   "messaging": {
     "title": "Messages",
@@ -192,6 +195,9 @@
     "automaticResult": "Résultat automatique",
     "manualResult": "Résultat manuel",
     "submit": "Soumettre"
+  },
+  "auth": {
+    "or": "ou"
   },
   "aboutus": {
     "title": "À propos de TalibHub",
