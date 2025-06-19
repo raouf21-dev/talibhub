@@ -5,15 +5,15 @@ const getCookieOptions = () => {
     sameSite: "lax",
     path: "/",
     maxAge: 24 * 60 * 60 * 1000, // 24 heures
-    signed: true, // Activer la signature des cookies
+    signed: false, // ✅ CORRECTION : Désactiver la signature pour éviter les problèmes
   };
 
   // En production
   if (process.env.NODE_ENV === "production") {
     return {
       ...baseOptions,
-      // ✅ Correction : utiliser le domaine principal sans www
-      domain: ".talibhub.com", // Permet l'utilisation sur talibhub.com et ses sous-domaines
+      // ✅ CORRECTION : Spécifier explicitement le domaine www
+      domain: "www.talibhub.com", // Utiliser le domaine exact avec www
       secure: true,
     };
   }
@@ -50,7 +50,7 @@ const cookieManager = {
     res.cookie("auth", "true", {
       ...options,
       httpOnly: false,
-      signed: false, // Pas besoin de signer ce cookie car il ne contient pas de données sensibles
+      signed: false, // Toujours non signé pour le cookie accessible JS
     });
     console.log("✅ Cookie auth=true défini (accessible JS)");
   },
@@ -62,20 +62,18 @@ const cookieManager = {
   },
 
   getAuthToken(req) {
-    // Vérifier d'abord le cookie signé
-    const token =
-      req.cookies?.auth_token ||
-      req.signedCookies?.auth_token ||
-      (req.headers.authorization?.startsWith("Bearer ")
-        ? req.headers.authorization.split(" ")[1]
-        : req.headers.authorization);
+    // ✅ CORRECTION : Simplifier la récupération du token
+    const token = req.cookies?.auth_token || req.signedCookies?.auth_token;
 
     if (!token) {
-      console.log("Aucun token trouvé dans:", {
+      console.log("🔍 Debug - Aucun token trouvé dans:", {
         cookies: req.cookies,
         signedCookies: req.signedCookies,
-        authHeader: req.headers.authorization,
+        cookieNames: Object.keys(req.cookies || {}),
+        signedCookieNames: Object.keys(req.signedCookies || {}),
       });
+    } else {
+      console.log("✅ Token trouvé:", token.substring(0, 20) + "...");
     }
 
     return token;
