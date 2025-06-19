@@ -5,6 +5,7 @@ import { apiClient } from "../../config/apiConfig.js";
 
 console.log("✅ Import apiClient réussi dans authService.js");
 
+// ✅ CORRECTION : Configuration unifiée sans conflit
 const defaultConfig = {
   credentials: "include",
   headers: {
@@ -67,14 +68,8 @@ class AuthService {
   async login(email, password) {
     console.log("[DEBUG] authService.login appelé");
     try {
-      const response = await apiClient.post(
-        "/auth/login",
-        { email, password },
-        {
-          ...defaultConfig,
-          withCredentials: true,
-        }
-      );
+      // ✅ CORRECTION : Utiliser seulement apiClient sans override
+      const response = await apiClient.post("/auth/login", { email, password });
 
       // ✅ NOUVELLE LOGIQUE : Plus de gestion token, les cookies sont automatiquement définis
       if (response?.success) {
@@ -100,10 +95,8 @@ class AuthService {
 
   async register(userData) {
     try {
-      const response = await apiClient.post("/auth/register", userData, {
-        ...defaultConfig,
-        withCredentials: true,
-      });
+      // ✅ CORRECTION : Utiliser seulement apiClient
+      const response = await apiClient.post("/auth/register", userData);
 
       // ✅ NOUVELLE LOGIQUE : Plus de gestion token, les cookies sont automatiquement définis
       if (response?.success) {
@@ -124,12 +117,9 @@ class AuthService {
 
   async checkAuth() {
     try {
-      // ✅ NOUVELLE LOGIQUE UNIFIÉE : Uniquement cookies via credentials include
+      // ✅ CORRECTION : Utiliser seulement apiClient
       console.log("🔍 Vérification auth via cookies uniquement");
-      const response = await apiClient.get("/auth/verify", {
-        ...defaultConfig,
-        withCredentials: true,
-      });
+      const response = await apiClient.get("/auth/verify");
 
       const isAuthenticated = response?.success || false;
       console.log("✅ Vérification auth terminée:", isAuthenticated);
@@ -141,7 +131,7 @@ class AuthService {
       );
 
       // Si erreur 401/403, effacer les cookies côté client
-      if (error.response?.status === 401 || error.response?.status === 403) {
+      if (error.message?.includes("401") || error.message?.includes("403")) {
         console.log(
           "⚠️ Erreur 401/403 détectée - Nettoyage cookies côté client"
         );
@@ -153,14 +143,8 @@ class AuthService {
 
   async logout() {
     try {
-      await apiClient.post(
-        "/auth/logout",
-        {},
-        {
-          ...defaultConfig,
-          withCredentials: true,
-        }
-      );
+      // ✅ CORRECTION : Utiliser seulement apiClient
+      await apiClient.post("/auth/logout", {});
     } catch (error) {
       console.error("Erreur lors de la déconnexion:", error);
     } finally {
@@ -181,34 +165,23 @@ class AuthService {
 
   async getProfile() {
     try {
-      // Pour OAuth avec cookies httpOnly, on n'a pas de token en localStorage
-      // Mais les cookies sont automatiquement envoyés avec la requête
+      // ✅ CORRECTION : Utiliser seulement apiClient
       console.log("🔍 Appel getProfile() avec cookies automatiques");
       console.log("🍪 Cookies actuels:", document.cookie);
-      console.log("🔧 Configuration requête:", {
-        url: "/auth/profile",
-        withCredentials: true,
-        headers: defaultConfig.headers,
-      });
 
-      const response = await apiClient.get("/auth/profile", {
-        ...defaultConfig,
-        withCredentials: true, // Important pour envoyer les cookies
-      });
+      const response = await apiClient.get("/auth/profile");
 
       console.log("✅ Profil récupéré via API:", response);
       return response;
     } catch (error) {
       console.error("❌ Erreur lors de la récupération du profil:", error);
       console.error("❌ Détails erreur:", {
-        status: error.response?.status,
-        statusText: error.response?.statusText,
-        data: error.response?.data,
-        headers: error.response?.headers,
+        message: error.message,
+        stack: error.stack,
       });
 
       // Ne pas appeler handleAuthError pour OAuth car cela cause des boucles
-      if (error.response?.status === 401) {
+      if (error.message?.includes("401")) {
         console.log("⚠️ Erreur 401 - Cookie probablement expiré ou invalide");
       }
 
@@ -218,13 +191,8 @@ class AuthService {
 
   async updateProfile(profileData) {
     try {
-      const response = await apiClient.put("/auth/profile", profileData, {
-        ...defaultConfig,
-        headers: {
-          ...defaultConfig.headers,
-          Authorization: `Bearer ${this._token}`,
-        },
-      });
+      // ✅ CORRECTION : Utiliser seulement apiClient
+      const response = await apiClient.put("/auth/profile", profileData);
       return response;
     } catch (error) {
       console.error("Erreur lors de la mise à jour du profil:", error);
@@ -235,11 +203,8 @@ class AuthService {
 
   async requestPasswordReset(email) {
     try {
-      return await apiClient.post(
-        "/auth/request-reset",
-        { email },
-        defaultConfig
-      );
+      // ✅ CORRECTION : Utiliser seulement apiClient
+      return await apiClient.post("/auth/request-reset", { email });
     } catch (error) {
       console.error("Erreur lors de la demande de réinitialisation:", error);
       throw error;
@@ -248,11 +213,11 @@ class AuthService {
 
   async resetPassword(token, newPassword) {
     try {
-      return await apiClient.post(
-        "/auth/reset-password",
-        { token, newPassword },
-        defaultConfig
-      );
+      // ✅ CORRECTION : Utiliser seulement apiClient
+      return await apiClient.post("/auth/reset-password", {
+        token,
+        newPassword,
+      });
     } catch (error) {
       console.error(
         "Erreur lors de la réinitialisation du mot de passe:",
@@ -317,14 +282,8 @@ class AuthService {
 
   async refreshToken() {
     try {
-      const response = await apiClient.post(
-        "/auth/refresh",
-        {},
-        {
-          ...defaultConfig,
-          withCredentials: true,
-        }
-      );
+      // ✅ CORRECTION : Utiliser seulement apiClient
+      const response = await apiClient.post("/auth/refresh", {});
 
       // ✅ NOUVELLE LOGIQUE : Plus de gestion localStorage
       if (response?.success) {

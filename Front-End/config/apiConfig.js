@@ -36,18 +36,12 @@ const getEnvironment = () => {
   return ENV.PROD;
 };
 
-const getBaseUrl = () => {
-  const env = getEnvironment();
-  const baseUrl = window.location.origin;
-  return `${baseUrl}${API_ROUTES[env]}`;
-};
-
 export const API_BASE_URL = (() => {
   const env = getEnvironment();
+
   if (env === ENV.PROD) {
-    return "https://www.talibhub.com/api"; // Toujours utiliser www en production
+    return "https://www.talibhub.com/api";
   } else {
-    // En développement, utiliser le port 4000 (backend) au lieu du port frontend
     const isLocalhost =
       window.location.hostname === "localhost" ||
       window.location.hostname === "127.0.0.1";
@@ -69,6 +63,7 @@ export const API_CONFIG = {
       updateProfile: "/auth/updateProfile",
       changePassword: "/auth/changePassword",
       refresh: "/auth/refresh",
+      logout: "/auth/logout",
     },
     tasks: {
       getAll: "/tasks/getAllTasks",
@@ -108,7 +103,6 @@ export const API_CONFIG = {
       getRecitationStats: "/sourates/recitations/stats",
       saveRecitation: "/sourates/recitations",
     },
-
     data: {
       countries: (lang) => `/data/countries_${lang}.json`,
     },
@@ -119,6 +113,7 @@ export const API_CONFIG = {
 export const apiClient = {
   async request(endpoint, options = {}) {
     const url = new URL(`${API_CONFIG.baseUrl}${endpoint}`);
+
     const defaultOptions = {
       credentials: "include",
       headers: {
@@ -136,37 +131,96 @@ export const apiClient = {
       },
     };
 
+    console.log(`🌐 API Request: ${options.method || "GET"} ${url.toString()}`);
+    console.log(`🔧 Options:`, finalOptions);
+
     try {
       const response = await fetch(url, finalOptions);
+
+      console.log(
+        `📡 Response Status: ${response.status} ${response.statusText}`
+      );
+
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+        let errorData = null;
+
+        try {
+          const contentType = response.headers.get("content-type");
+          if (contentType && contentType.includes("application/json")) {
+            errorData = await response.json();
+            errorMessage = errorData.message || errorMessage;
+          } else {
+            errorMessage = (await response.text()) || errorMessage;
+          }
+        } catch (parseError) {
+          console.warn(
+            "⚠️ Impossible de parser l'erreur du serveur:",
+            parseError
+          );
+        }
+
+        const error = new Error(errorMessage);
+        error.status = response.status;
+        error.statusText = response.statusText;
+        error.data = errorData;
+
+        console.error(`❌ API Error (${endpoint}):`, error);
+        throw error;
       }
-      return await response.json();
+
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        const data = await response.json();
+        console.log(`✅ API Success (${endpoint}):`, data);
+        return data;
+      } else {
+        console.log(`✅ API Success (${endpoint}): Non-JSON response`);
+        return { success: true };
+      }
     } catch (error) {
-      console.error(`API Error (${endpoint}):`, error);
+      if (error.name === "TypeError" && error.message.includes("fetch")) {
+        console.error(`🌐 Network Error (${endpoint}):`, error.message);
+        const networkError = new Error("Erreur de connexion réseau");
+        networkError.originalError = error;
+        networkError.isNetworkError = true;
+        throw networkError;
+      }
+
       throw error;
     }
   },
 
-  get(endpoint) {
-    return this.request(endpoint);
+  get(endpoint, options = {}) {
+    return this.request(endpoint, { ...options, method: "GET" });
   },
 
-  post(endpoint, data) {
+  post(endpoint, data, options = {}) {
     return this.request(endpoint, {
+      ...options,
       method: "POST",
       body: JSON.stringify(data),
     });
   },
 
-  put(endpoint, data) {
+  put(endpoint, data, options = {}) {
     return this.request(endpoint, {
+      ...options,
       method: "PUT",
       body: JSON.stringify(data),
     });
   },
 
-  delete(endpoint) {
-    return this.request(endpoint, { method: "DELETE" });
+  delete(endpoint, options = {}) {
+    return this.request(endpoint, { ...options, method: "DELETE" });
   },
 };
+
+if (getEnvironment() === ENV.DEV) {
+  console.log("🔧 API Configuration Debug:", {
+    environment: getEnvironment(),
+    baseUrl: API_BASE_URL,
+    hostname: window.location.hostname,
+    origin: window.location.origin,
+  });
+}
