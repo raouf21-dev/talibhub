@@ -100,7 +100,7 @@ body {
   background-color: var(--background-color);
   color: var(--text-color);
   line-height: var(--text-line-height);
-  min-height: 100vh;
+  height: 100vh;
   margin: 0;
   overflow: hidden;
   transition: background-color var(--transition-normal),
@@ -114,6 +114,11 @@ body {
   height: 100vh;
   overflow-y: auto;
   padding-bottom: 5rem;
+}
+
+/* Exception pour la welcome page qui a son propre système de footer */
+.page#welcomepage {
+  padding-bottom: 0;
 }
 
 .page-no-welcome {
@@ -1285,6 +1290,8 @@ body.logging-out .sidebar {
 
 .welcomepage-container {
   flex: 1 0 auto; /* flex-grow: 1, flex-shrink: 0, flex-basis: auto */
+  max-width: 1200px;
+  margin: 0 auto;
   width: 100%;
   padding: 1rem;
   box-sizing: border-box;
@@ -1356,6 +1363,10 @@ body.logging-out .sidebar {
 .welcomepage-hero {
   text-align: center;
   margin-bottom: 10rem;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
 }
 
 .welcomepage-hero h2 {
@@ -1467,9 +1478,8 @@ body.logging-out .sidebar {
 /* === Auth Forms === */
 .welcomepage-auth-forms {
   margin-bottom: var(--spacing-xxl);
-  max-width: 60vw;
-  margin-left: auto;
-  margin-right: auto;
+  max-width: 800px;
+  margin: 0 auto var(--spacing-xxl) auto;
 }
 
 .welcomepage-card {
@@ -1740,12 +1750,16 @@ body.logging-out .sidebar {
   text-decoration: underline;
 }
 
-/* === Content Sections === */
+/* === Content Sections - Centrées === */
 .welcomepage-features,
 .welcomepage-vision,
 .welcomepage-why-choose,
 .welcomepage-commitment {
   margin-bottom: 6rem;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
 }
 
 .welcomepage-features h2,
@@ -1788,17 +1802,11 @@ body.logging-out .sidebar {
 /* === Feature Grids === */
 .welcomepage-features-grid,
 .welcomepage-why-choose-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: 1.5rem;
-}
-
-.welcomepage-features-grid {
-  margin-bottom: 4rem;
-}
-
-.welcomepage-why-choose-grid {
-  margin-bottom: 4rem;
+  justify-content: center;
+  max-width: 100%;
 }
 
 /* === Modern Feature Cards with Glassmorphism === */
@@ -1813,6 +1821,9 @@ body.logging-out .sidebar {
   box-shadow: 0 8px 32px rgba(39, 76, 119, 0.1);
   position: relative;
   overflow: hidden;
+  flex: 0 0 auto;
+  width: 300px;
+  max-width: 300px;
 }
 
 .welcomepage-feature-card:hover,
@@ -1860,13 +1871,29 @@ body.logging-out .sidebar {
   margin: 0;
 }
 
+.welcomepage-commitment li {
+  position: relative;
+  padding-left: 2rem;
+  margin-bottom: 0.8rem;
+  line-height: 1.6;
+}
+
 .welcomepage-commitment li:before {
   content: "✓";
   color: #274c77;
   font-weight: bold;
-  display: inline-block;
+  font-size: 1.1rem;
+  position: absolute;
+  left: 0;
+  top: 0;
   width: 1.5rem;
-  margin-left: -1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(39, 76, 119, 0.1);
+  border-radius: 50%;
+  border: 2px solid rgba(39, 76, 119, 0.2);
 }
 
 /* === Footer - Positionné naturellement en fin de page === */
@@ -2527,10 +2554,8 @@ html[lang="fr"] .welcomepage-mosque-time .additional-times-grid::after {
 
 /* === Breakpoint LG (1024px) === */
 @media (max-width: 1024px) {
-  .welcomepage-features-grid,
-  .welcomepage-why-choose-grid,
   .form-grid {
-    grid-template-columns: 1fr;
+    flex-direction: column;
   }
 
   .welcomepage-hero h2 {
@@ -2662,11 +2687,6 @@ html[lang="fr"] .welcomepage-mosque-time .additional-times-grid::after {
 
   /* Note: Les effets hover pour les boutons OAuth (Google, Microsoft) 
      sont définis dans Front-End/assets/styles/oauth.css */
-
-  .welcomepage-features-grid,
-  .welcomepage-why-choose-grid {
-    gap: var(--spacing-md);
-  }
 
   .welcomepage-feature-card,
   .welcomepage-why-choose-card {
@@ -3171,6 +3191,20 @@ html[lang="fr"] .welcomepage-mosque-time .additional-times-grid::after {
   font-weight: 700;
   color: #274c77;
   font-size: 0.9rem;
+}
+
+/* Supprimer les effets de focus et active uniquement sur les boutons counter */
+.button-group .counter-button:focus {
+  outline: none;
+  border-color: rgba(96, 150, 186, 0.3);
+  box-shadow: none;
+}
+
+.button-group .counter-button:active {
+  outline: none;
+  border-color: rgba(96, 150, 186, 0.3);
+  box-shadow: none;
+  transform: none;
 }
 
 /* Boutons de sauvegarde */
@@ -3714,13 +3748,18 @@ html[lang="fr"] .welcomepage-mosque-time .additional-times-grid::after {
   #manual-time-container {
     gap: 0.6rem;
     justify-content: center;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    display: flex;
+    flex-direction: row;
   }
 
   #manual-time-container div {
-    flex: 1;
-    min-width: 80px;
-    max-width: 120px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 70px;
+    max-width: 100px;
+    flex: 0 0 auto;
   }
 
   #manual-time-container input {
@@ -4205,151 +4244,6 @@ html[lang="fr"] .welcomepage-mosque-time .additional-times-grid::after {
 
   /* Note: Les effets hover pour les boutons OAuth (Google, Microsoft) 
      sont définis dans Front-End/assets/styles/oauth.css */
-
-  .welcomepage-features-grid,
-  .welcomepage-why-choose-grid {
-    gap: var(--spacing-md);
-  }
-
-  .welcomepage-feature-card,
-  .welcomepage-why-choose-card {
-    margin: 0 var(--spacing-md);
-    padding: var(--spacing-md);
-  }
-
-  .welcomepage-features h2,
-  .welcomepage-vision h2,
-  .welcomepage-why-choose h2,
-  .welcomepage-commitment h2 {
-    font-size: 1.5rem;
-  }
-
-  .welcomepage-features p,
-  .welcomepage-vision p,
-  .welcomepage-why-choose p,
-  .welcomepage-commitment p {
-    font-size: 1.125rem;
-  }
-
-  .welcomepage-feature-card h3,
-  .welcomepage-why-choose-card h3 {
-    font-size: 1.125rem;
-  }
-
-  .welcomepage-feature-card p,
-  .welcomepage-why-choose-card p {
-    font-size: 1rem;
-  }
-
-  .welcomepage-features,
-  .welcomepage-vision,
-  .welcomepage-why-choose,
-  .welcomepage-commitment {
-    margin-bottom: var(--spacing-xxl);
-  }
-
-  /* Réduction de l'espace entre hero et mosquetime */
-  .welcomepage-hero {
-    margin: 1.5rem 0 3rem 0;
-  }
-
-  .welcomepage-footer {
-    padding: var(--spacing-md);
-    font-size: var(--small-text-size);
-  }
-
-  /* Animation pulse pour mobile - SEULEMENT pour le bouton */
-  @keyframes pulse {
-    0% {
-      transform: scale(1);
-    }
-    50% {
-      transform: scale(1.5); /* Grossissement x1.5 */
-    }
-    100% {
-      transform: scale(1);
-    }
-  }
-
-  .welcomepage-btn {
-    animation: pulse 3s ease-in-out infinite;
-  }
-
-  /* === MosqueTime Welcome Responsive XS === */
-  .welcomepage-mosque-time .mosquetime-location-search,
-  .welcome-mosquetime-location-search {
-    flex-direction: column;
-    gap: var(--spacing-md);
-  }
-
-  .mosquetime-sort-buttons,
-  .welcomepage-mosque-time .mosquetime-sort-buttons {
-    flex-direction: row; /* Boutons alignés horizontalement */
-    justify-content: flex-start; /* Alignement à gauche */
-    gap: var(--spacing-xs);
-    flex-wrap: wrap; /* Permet le retour à la ligne si nécessaire */
-  }
-
-  .mosquetime-sort-buttons .mosquetime-button {
-    flex: none; /* Les boutons gardent leur taille naturelle */
-    padding: var(--spacing-xs) var(--spacing-sm);
-    font-size: var(--small-text-size);
-    white-space: nowrap; /* Empêche le texte de se couper */
-  }
-
-  .welcomepage-mosque-time .prayer-times-grid,
-  .welcomepage-mosque-time .additional-times-grid {
-    gap: 0.3rem;
-    padding: 5px 0;
-  }
-
-  /* === MosqueTime Mobile Ultra-Compact === */
-  .welcomepage-mosque-time {
-    width: 100%;
-    margin: 0;
-    padding: 0;
-  }
-
-  .welcomepage-mosque-time .mosquetime-content {
-    padding: 0;
-  }
-
-  .welcomepage-mosque-time .mosquetime-mosque-card {
-    width: 100%;
-    padding: 3px;
-    margin: 0;
-  }
-
-  .welcomepage-mosque-time .prayer-times-grid,
-  .welcomepage-mosque-time .additional-times-grid {
-    gap: 8px;
-    padding: 5px 0;
-  }
-
-  .welcomepage-mosque-time .prayer-item {
-    padding: 0.1rem;
-  }
-
-  .prayer-label {
-    font-size: 0.7rem;
-  }
-
-  .jamaa-time {
-    font-size: 0.8rem;
-  }
-
-  .welcomepage-mosque-time .mosquetime-title {
-    font-size: 1.25rem;
-    text-align: center;
-  }
-
-  .welcomepage-mosque-time .mosquetime-subtitle {
-    font-size: 0.75rem;
-  }
-
-  .mosque-prayer-times {
-    margin-top: 0.25rem;
-  }
 }
 
 /* ========================================
