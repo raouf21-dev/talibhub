@@ -34,17 +34,10 @@ const getMidnightTimestamp = () => {
 
 const cookieManager = {
   setAuthCookies(res, token) {
-    console.log(
-      "🍪 setAuthCookies appelé avec token:",
-      token.substring(0, 20) + "..."
-    );
-
     const options = getCookieOptions();
-    console.log("🔧 Options cookies:", options);
 
     // Cookie HTTP-only pour le token
     res.cookie("auth_token", token, options);
-    console.log("✅ Cookie auth_token défini avec options httpOnly");
 
     // Cookie accessible en JavaScript
     res.cookie("auth", "true", {
@@ -52,7 +45,6 @@ const cookieManager = {
       httpOnly: false,
       signed: false, // Toujours non signé pour le cookie accessible JS
     });
-    console.log("✅ Cookie auth=true défini (accessible JS)");
   },
 
   clearAuthCookies(res) {
@@ -72,8 +64,6 @@ const cookieManager = {
         cookieNames: Object.keys(req.cookies || {}),
         signedCookieNames: Object.keys(req.signedCookies || {}),
       });
-    } else {
-      console.log("✅ Token trouvé:", token.substring(0, 20) + "...");
     }
 
     return token;
@@ -198,8 +188,4 @@ const attachCookieManager = (req, res, next) => {
   next();
 };
 
-module.exports = {
-  cookieManager,
-  attachCookieManager,
-  getMidnightTimestamp, // Exporter cette fonction pour pouvoir l'utiliser ailleurs
-};
+module.exports = { cookieManager, attachCookieManager };

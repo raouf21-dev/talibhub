@@ -2119,11 +2119,6 @@ input:checked + .slider:before {
   background-color: #6096ba;
 }
 
-#salatSurahSelector #recitationHistory {
-  width: 100%;
-  margin-top: 1rem;
-}
-
 #knownSouratesCount,
 #recitationCyclesCount,
 #recitationProgress,
@@ -2162,109 +2157,6 @@ input:checked + .slider:before {
   #salatSurahSelector button {
     padding: 0.4rem 0.8rem;
     margin: 0.5rem;
-    width: calc(100% - 1rem);
-  }
-}
-
-/*Doua Time / Last Third of the night*/
-
-#duaTimeCalculator {
-  min-height: 100vh;
-  background-color: #e7ecef;
-  color: #274c77;
-  padding: 1rem;
-  margin-left: 250px;
-}
-
-.dua-calculator-row {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  margin-bottom: 2rem;
-}
-.dua-calculator-card {
-  background-color: white;
-  border: 1px solid #a3cef1;
-  border-radius: 0.5rem;
-  overflow: hidden;
-  flex-basis: calc(50% - 1rem);
-  margin-bottom: 2rem;
-}
-.dua-calculator-title {
-  font-size: 1.25rem;
-  font-weight: bold;
-  margin: 0;
-  background-color: #6096ba;
-  color: white;
-  padding: 1rem;
-}
-.dua-calculator-content {
-  padding: 1rem;
-}
-.dua-input-field,
-.dua-select-field {
-  width: 100%;
-  padding: 0.5rem;
-  margin: 0.5rem 0;
-  border: 1px solid #a3cef1;
-  border-radius: 0.25rem;
-}
-.dua-btn {
-  background-color: #274c77;
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 0.25rem;
-  cursor: pointer;
-  width: calc(100% - 2rem);
-  margin: 1rem 0;
-  display: block;
-}
-.dua-btn:hover {
-  background-color: #6096ba;
-}
-.dua-result-box {
-  background-color: #e7ecef;
-  padding: 1rem;
-  border-radius: 0.25rem;
-  margin-top: 1rem;
-}
-.dua-section-title {
-  color: #274c77;
-  font-size: 1.1rem;
-  margin-top: 1rem;
-}
-#duaCustomMethod {
-  display: none;
-}
-
-@media (max-width: 1024px) {
-  #duaTimeCalculator {
-    margin-left: auto;
-    margin-right: auto;
-    width: 90vw;
-    max-width: 1500px; /* Vous pouvez ajuster cette valeur selon vos besoins */
-  }
-}
-
-@media (max-width: 768px) {
-  .dua-calculator-card {
-    flex-basis: 100%;
-  }
-}
-@media (max-width: 480px) {
-  #duaTimeCalculator {
-    padding: 0.5rem;
-  }
-  .dua-calculator-card {
-    margin-bottom: 1rem;
-  }
-  .dua-calculator-title {
-    font-size: 1.1rem;
-  }
-  .dua-btn {
-    padding: 0.4rem 0.8rem;
-    margin: 0.5rem 0;
     width: calc(100% - 1rem);
   }
 }

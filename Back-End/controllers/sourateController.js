@@ -71,17 +71,6 @@ const getRecitationStats = async (req, res) => {
   }
 };
 
-const getRecitationHistory = async (req, res) => {
-  try {
-    const userId = req.user.id;
-    const history = await sourateModel.getRecitationHistory(userId);
-    res.json(history);
-  } catch (error) {
-    console.error("Erreur dans getRecitationHistory:", error);
-    res.status(500).json({ error: "Erreur serveur" });
-  }
-};
-
 const getRecitationInfo = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -190,7 +179,7 @@ module.exports = {
   updateKnownSourates,
   recordRecitation,
   getRecitationStats,
-  getRecitationHistory,
+
   getRecitationInfo,
   getNotRecitedSourates,
   startNewCycle,

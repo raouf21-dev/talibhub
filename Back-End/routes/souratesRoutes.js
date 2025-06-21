@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const { authenticateToken } = require('../middlewares/authenticateToken');const sourateController = require("../controllers/sourateController");
+const { authenticateToken } = require("../middlewares/authenticateToken");
+const sourateController = require("../controllers/sourateController");
 
 // Routes pour les sourates
 router.get("/", authenticateToken, sourateController.getAllSourates);
@@ -23,11 +24,7 @@ router.get(
   authenticateToken,
   sourateController.getRecitationStats
 );
-router.get(
-  "/recitations/history",
-  authenticateToken,
-  sourateController.getRecitationHistory
-);
+
 router.get(
   "/recitations/info",
   authenticateToken,

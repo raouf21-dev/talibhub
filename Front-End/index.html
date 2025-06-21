@@ -632,9 +632,12 @@
         </svg>
       </button>
       <main class="dashboard-main-content">
-        <h1 data-translate="dashboard.welcomeTitle">
-          Welcome to Your Dashboard
-        </h1>
+        <!-- Header moderne comme les autres sections -->
+        <div class="dashboard-header">
+          <h1 data-translate="dashboard.welcomeTitle">
+            Welcome to Your Dashboard
+          </h1>
+        </div>
 
         <!-- Boutons TopNav intégrés dans le Dashboard -->
         <div class="dashboard-topnav-buttons">
@@ -794,210 +797,213 @@
           />
         </svg>
       </button>
-      <h1 data-translate="apprentissage.title">Learning</h1>
 
-      <!-- Task Selection -->
-      <div class="timers-container">
-        <div class="timer">
-          <h2 data-translate="apprentissage.taskSelection">
-            Task Selection and Session
-          </h2>
-          <div class="timer-content">
-            <select id="task-select">
-              <option value="" data-translate="apprentissage.selectTask">
+      <!-- Modern Header -->
+      <div class="apprentissage-header">
+        <h1 data-translate="apprentissage.title">Learning</h1>
+      </div>
+
+      <div class="apprentissage-main-container">
+        <!-- Section Task Selection (en haut, pleine largeur) -->
+        <div class="apprentissage-top-section">
+          <div class="timer">
+            <h2 data-translate="apprentissage.taskSelection">
+              Task Selection and Session
+            </h2>
+            <div class="timer-content">
+              <select id="task-select">
+                <option value="" data-translate="apprentissage.selectTask">
+                  Select a task
+                </option>
+              </select>
+              <div id="session-info">
+                <p>
+                  <span data-translate="apprentissage.previousSession"
+                    >Previous session:</span
+                  >
+                  <span id="previous-sessions-count">0</span>
+                </p>
+                <p>
+                  <span data-translate="apprentissage.currentSession"
+                    >Current session:</span
+                  >
+                  <span id="current-session-id">0</span>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 2x2 pour les autres containers -->
+        <div class="apprentissage-grid-section">
+          <!-- Focus Timer -->
+          <div class="timer">
+            <h2 data-translate="apprentissage.focusTimer">Focus Timer</h2>
+            <div class="timer-content">
+              <!-- Div that displays the timer -->
+              <div id="focus-timer-control"></div>
+              <div class="button-group">
+                <button
+                  class="control-button"
+                  id="start_stop"
+                  data-action="toggle-timer"
+                >
+                  <img
+                    src="./assets/icons/ButtonsIcone/Start_icone.png"
+                    alt="Start icon"
+                  />
+                </button>
+                <button
+                  class="control-button"
+                  id="reset"
+                  data-action="reset-timer"
+                >
+                  <img
+                    src="./assets/icons/ButtonsIcone/Restart_icone.png"
+                    alt="Restart icon"
+                  />
+                </button>
+                <button
+                  id="save-button-session"
+                  class="control-button"
+                  data-action="save-session-data"
+                >
+                  <img
+                    src="./assets/icons/ButtonsIcone/Save_icone.png"
+                    alt="Save icon"
+                  />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Stopwatch -->
+          <div class="timer">
+            <h2 data-translate="apprentissage.stopwatch">Stopwatch</h2>
+            <div class="timer-content">
+              <p id="stopwatch-time" class="time_displayed">00:00:00</p>
+              <div class="button-group">
+                <button
+                  class="control-button"
+                  id="stopwatch-start"
+                  data-action="toggle-stopwatch"
+                >
+                  <img
+                    src="./assets/icons/ButtonsIcone/Start_icone.png"
+                    alt="Start Icon"
+                  />
+                </button>
+                <button
+                  class="control-button"
+                  id="stopwatch-reset"
+                  data-action="reset-stopwatch"
+                >
+                  <img
+                    src="./assets/icons/ButtonsIcone/Restart_icone.png"
+                    alt="Restart Icon"
+                  />
+                </button>
+                <button
+                  id="save-button-session"
+                  class="control-button"
+                  data-action="save-session-data"
+                >
+                  <img
+                    src="./assets/icons/ButtonsIcone/Save_icone.png"
+                    alt="Save Icon"
+                  />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Manual Study Time -->
+          <div class="timer">
+            <h2 data-translate="apprentissage.manualStudyTime">
+              Manual Study Time
+            </h2>
+            <div class="timer-content">
+              <div id="manual-time-container">
+                <div>
+                  <label for="manual-hours">Hours:</label>
+                  <input
+                    type="number"
+                    id="manual-hours"
+                    min="0"
+                    placeholder="0"
+                  />
+                </div>
+                <div>
+                  <label for="manual-minutes">Minutes:</label>
+                  <input
+                    type="number"
+                    id="manual-minutes"
+                    min="0"
+                    max="59"
+                    placeholder="0"
+                  />
+                </div>
+              </div>
+              <p class="total-time">
+                <span data-translate="apprentissage.totalWorkTime"
+                  >Total Work Time:</span
+                >
+                <span id="total-work-time">00:00:00</span>
+              </p>
+              <div class="button-group">
+                <button
+                  id="save-button-session"
+                  class="control-button"
+                  data-action="save-session-data"
+                >
+                  <img
+                    src="./assets/icons/ButtonsIcone/Save_icone.png"
+                    alt="Save Icon"
+                  />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Counter -->
+          <div class="timer">
+            <h2 data-translate="apprentissage.counter">Counter</h2>
+            <div class="timer-content">
+              <h3
+                id="counter-task-title"
+                data-translate="apprentissage.selectTask"
+              >
                 Select a task
-              </option>
-            </select>
-            <div id="session-info">
-              <p>
-                <span data-translate="apprentissage.previousSession"
-                  >Previous session:</span
+              </h3>
+              <p id="counter-value">0</p>
+              <div class="button-group">
+                <button
+                  class="counter-button"
+                  data-action="change-counter"
+                  data-value="-1"
                 >
-                <span id="previous-sessions-count">0</span>
-              </p>
-              <p>
-                <span data-translate="apprentissage.currentSession"
-                  >Current session:</span
+                  -1
+                </button>
+                <button
+                  class="counter-button"
+                  data-action="change-counter"
+                  data-value="1"
                 >
-                <span id="current-session-id">0</span>
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Timer Group -->
-      <div class="timers-container">
-        <!-- Focus Timer -->
-        <div class="timer">
-          <h2 data-translate="apprentissage.focusTimer">Focus Timer</h2>
-          <div class="timer-content">
-            <!-- Div that displays the timer -->
-            <div id="focus-timer-control"></div>
-            <div class="button-group">
-              <button
-                class="control-button"
-                id="start_stop"
-                data-action="toggle-timer"
-              >
-                <img
-                  src="./assets/icons/ButtonsIcone/Start_icone.png"
-                  alt="Start icon"
-                />
-              </button>
-              <button
-                class="control-button"
-                id="reset"
-                data-action="reset-timer"
-              >
-                <img
-                  src="./assets/icons/ButtonsIcone/Restart_icone.png"
-                  alt="Restart icon"
-                />
-              </button>
-              <button
-                id="save-button-session"
-                class="control-button"
-                data-action="save-session-data"
-              >
-                <img
-                  src="./assets/icons/ButtonsIcone/Save_icone.png"
-                  alt="Save icon"
-                />
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Stopwatch -->
-        <div class="timer">
-          <h2 data-translate="apprentissage.stopwatch">Stopwatch</h2>
-          <div class="timer-content">
-            <p id="stopwatch-time" class="time_displayed">00:00:00</p>
-            <div class="button-group">
-              <button
-                class="control-button"
-                id="stopwatch-start"
-                data-action="toggle-stopwatch"
-              >
-                <img
-                  src="./assets/icons/ButtonsIcone/Start_icone.png"
-                  alt="Start Icon"
-                />
-              </button>
-              <button
-                class="control-button"
-                id="stopwatch-reset"
-                data-action="reset-stopwatch"
-              >
-                <img
-                  src="./assets/icons/ButtonsIcone/Restart_icone.png"
-                  alt="Restart Icon"
-                />
-              </button>
-              <button
-                id="save-button-session"
-                class="control-button"
-                data-action="save-session-data"
-              >
-                <img
-                  src="./assets/icons/ButtonsIcone/Save_icone.png"
-                  alt="Save Icon"
-                />
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Manual Study Time -->
-        <div class="timer">
-          <h2 data-translate="apprentissage.manualStudyTime">
-            Manual Study Time
-          </h2>
-          <div class="timer-content">
-            <div id="manual-time-container">
-              <div>
-                <label for="manual-hours">Hours:</label>
-                <input
-                  type="number"
-                  id="manual-hours"
-                  min="0"
-                  placeholder="0"
-                />
-              </div>
-              <div>
-                <label for="manual-minutes">Minutes:</label>
-                <input
-                  type="number"
-                  id="manual-minutes"
-                  min="0"
-                  max="59"
-                  placeholder="0"
-                />
-              </div>
-            </div>
-            <p class="total-time">
-              <span data-translate="apprentissage.totalWorkTime"
-                >Total Work Time:</span
-              >
-              <span id="total-work-time">00:00:00</span>
-            </p>
-            <div class="button-group">
-              <button
-                id="save-button-session"
-                class="control-button"
-                data-action="save-session-data"
-              >
-                <img
-                  src="./assets/icons/ButtonsIcone/Save_icone.png"
-                  alt="Save Icon"
-                />
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Counter -->
-      <div class="timers-container">
-        <div class="timer">
-          <h2 data-translate="apprentissage.counter">Counter</h2>
-          <div class="timer-content">
-            <h3
-              id="counter-task-title"
-              data-translate="apprentissage.selectTask"
-            >
-              Select a task
-            </h3>
-            <p id="counter-value">0</p>
-            <div class="button-group">
-              <button
-                class="counter-button"
-                data-action="change-counter"
-                data-value="-1"
-              >
-                -1
-              </button>
-              <button
-                class="counter-button"
-                data-action="change-counter"
-                data-value="1"
-              >
-                +1
-              </button>
-              <button
-                class="counter-button"
-                data-action="change-counter"
-                data-value="3"
-              >
-                +3
-              </button>
-              <button
-                class="counter-button"
-                data-action="change-counter"
-                data-value="5"
-              >
-                +5
+                  +1
+                </button>
+                <button
+                  class="counter-button"
+                  data-action="change-counter"
+                  data-value="3"
+                >
+                  +3
+                </button>
+                <button
+                  class="counter-button"
+                  data-action="change-counter"
+                  data-value="5"
+                >
+                  +5
               </button>
               <button
                 class="counter-button"
@@ -1447,7 +1453,10 @@
           />
         </svg>
       </button>
-      <h1 data-translate="surahmemorization.title">Surah Memorisation</h1>
+      <!-- Header simple comme profile -->
+      <div class="surahmemorization-header">
+        <h1 data-translate="surahmemorization.title">Surah Memorisation</h1>
+      </div>
 
       <div id="quran-app-container">
         <!-- Navigation -->
@@ -1908,15 +1917,17 @@
                 id="mark-all-read-btn"
                 class="messaging-action-btn"
                 data-translate="messaging.markAllRead"
+                title="Tout marquer comme lu"
               >
-                <i data-feather="check-circle"></i> Tout marquer comme lu
+                <i data-feather="check-circle"></i>
               </button>
               <button
                 id="delete-read-btn"
                 class="messaging-action-btn"
                 data-translate="messaging.clearRead"
+                title="Supprimer les lus"
               >
-                <i data-feather="trash-2"></i> Supprimer les lus
+                <i data-feather="trash-2"></i>
               </button>
             </div>
           </div>
@@ -2122,61 +2133,15 @@
           />
         </svg>
       </button>
-      <h1 data-translate="surahselector.title">Surah Selector</h1>
-      <div class="surahselector-row">
-        <div class="surahselector-card">
-          <h2 data-translate="surahselector.recitationStats">
-            Recitation Statistics
-          </h2>
-          <div>
-            <div id="knownSouratesCount">
-              <span data-translate="surahselector.surahsToRecite"
-                >Surahs to Recite:</span
-              >
-              0
-            </div>
-            <br />
-            <div id="recitationProgress">
-              <span data-translate="surahselector.progress">Progress:</span> 0 /
-              0
-              <span data-translate="surahselector.surahsRecited"
-                >surahs recited</span
-              >
-            </div>
-            <div id="recitationCyclesCount">
-              <span data-translate="surahselector.completeCycles"
-                >Complete Recitation Cycles:</span
-              >
-              0
-            </div>
-          </div>
-        </div>
-        <div class="surahselector-card">
-          <h2 data-translate="surahselector.selectionForSalat">
-            Selection for Salat
-          </h2>
-          <div>
-            <button
-              data-action="select-random-sourates"
-              data-translate="surahselector.selectForSalat"
-            >
-              Select Surahs for Salat
-            </button>
-            <div>
-              <p>
-                <span data-translate="surahselector.firstRaka">1st raka:</span>
-                <span id="firstRaka"></span>
-              </p>
-              <p>
-                <span data-translate="surahselector.secondRaka">2nd raka:</span>
-                <span id="secondRaka"></span>
-              </p>
-            </div>
-          </div>
-        </div>
+
+      <!-- Header principal de la page -->
+      <div class="surahselector-header">
+        <h1 data-translate="surahselector.title">Surah Selector</h1>
       </div>
 
-      <div class="surahselector-row">
+      <!-- Container pour centrer les cartes -->
+      <div class="surahselector-container">
+        <!-- 1. Selection of Surahs to Recite (en premier) -->
         <div class="surahselector-card">
           <h2 data-translate="surahselector.selectionToRecite">
             Selection of Surahs to Recite
@@ -2193,21 +2158,56 @@
             </button>
           </div>
         </div>
+
+        <!-- 2. Recitation Statistics (en deuxième) -->
         <div class="surahselector-card">
-          <h2 data-translate="surahselector.recitationHistory">
-            Recitation History
+          <h2 data-translate="surahselector.recitationStats">
+            Recitation Statistics
+          </h2>
+          <div>
+            <div id="knownSouratesCount">
+              <span data-translate="surahselector.surahsToRecite"
+                >Surahs to Recite:</span
+              >
+              0
+            </div>
+            <div id="recitationProgress">
+              <span data-translate="surahselector.progress">Progress:</span> 0 /
+              0
+              <span data-translate="surahselector.surahsRecited"
+                >surahs recited</span
+              >
+            </div>
+            <div id="recitationCyclesCount">
+              <span data-translate="surahselector.completeCycles"
+                >Complete Recitation Cycles:</span
+              >
+              0
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Selection for Salat (en troisième) -->
+        <div class="surahselector-card">
+          <h2 data-translate="surahselector.selectionForSalat">
+            Selection for Salat
           </h2>
           <div>
             <button
-              data-action="toggle-recitation-history"
-              data-translate="surahselector.showHideHistory"
+              data-action="select-random-sourates"
+              data-translate="surahselector.selectYourSurahs"
             >
-              Show/Hide History
+              Sélectionnes tes sourates
             </button>
-            <div id="recitationHistoryContainer" style="display: none">
-              <div id="recitationHistory">
-                <!-- History will be dynamically generated here -->
-              </div>
+            <div>
+              <p>
+                <span data-translate="surahselector.firstRaka">1st raka:</span>
+                <span id="firstRaka"></span>
+              </p>
+              <p>
+                <span data-translate="surahselector.secondRaka">2nd raka:</span>
+                <span id="secondRaka"></span>
+              </p>
             </div>
           </div>
         </div>
@@ -2233,7 +2233,8 @@
         </svg>
       </button>
       <h1 data-translate="duaTimeCalculator.title">Dua Time Calculator</h1>
-      <div class="dua-calculator-row">
+      <div class="dua-main-content">
+        <div class="dua-calculator-row">
         <div class="dua-calculator-card">
           <h2
             class="dua-calculator-title"
@@ -2348,24 +2349,6 @@
         <div class="dua-calculator-card">
           <h2
             class="dua-calculator-title"
-            data-translate="duaTimeCalculator.automaticResult"
-          >
-            Automatic Calculation Result
-          </h2>
-          <div class="dua-calculator-content">
-            <div id="duaAutomaticResult" class="dua-result-box">
-              <p id="duaAutoFajrTime"></p>
-              <p id="duaAutoMaghribTime"></p>
-              <p id="duaAutoIshaEnd"></p>
-              <p id="duaAutoLastThird"></p>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="dua-calculator-row">
-        <div class="dua-calculator-card">
-          <h2
-            class="dua-calculator-title"
             data-translate="duaTimeCalculator.manualAdjustments"
           >
             Manual Adjustments
@@ -2405,23 +2388,32 @@
             </button>
           </div>
         </div>
-        <div class="dua-calculator-card">
-          <h2
-            class="dua-calculator-title"
-            data-translate="duaTimeCalculator.manualResult"
-          >
-            Manual Adjustments Result
-          </h2>
-          <div class="dua-calculator-content">
-            <div id="duaManualResult" class="dua-result-box">
-              <p id="duaManualFajrTime"></p>
-              <p id="duaManualMaghribTime"></p>
-              <p id="duaManualIshaEnd"></p>
-              <p id="duaManualLastThird"></p>
-            </div>
-          </div>
+      </div>
+      
+      <!-- Résultats sortis des conteneurs pour plus d'espace -->
+      <div class="dua-results-section">
+        <h2 class="dua-section-title" data-translate="duaTimeCalculator.automaticResult">
+          Automatic Calculation Result
+        </h2>
+        <div id="duaAutomaticResult" class="dua-result-box">
+          <p id="duaAutoFajrTime"></p>
+          <p id="duaAutoMaghribTime"></p>
+          <p id="duaAutoIshaEnd"></p>
+          <p id="duaAutoLastThird"></p>
+        </div>
+        
+        <h2 class="dua-section-title" data-translate="duaTimeCalculator.manualResult">
+          Manual Adjustments Result
+        </h2>
+        <div id="duaManualResult" class="dua-result-box">
+          <p id="duaManualFajrTime"></p>
+          <p id="duaManualMaghribTime"></p>
+          <p id="duaManualIshaEnd"></p>
+          <p id="duaManualLastThird"></p>
         </div>
       </div>
+      </div>
+      
     </section>
 
     <section id="price" class="page page-no-welcome">

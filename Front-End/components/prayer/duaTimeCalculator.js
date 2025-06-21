@@ -41,14 +41,14 @@ export class DuaTimeCalculator {
 
   // --- Écouter les changements de langue (pattern standard) ---
   setupLanguageObserver() {
-      console.log("[DUA] Configuration de l'observateur de langue");
+    console.log("[DUA] Configuration de l'observateur de langue");
     translationManager.onLanguageChange((newLang) => {
-        console.log("[DUA] Changement de langue détecté");
-        // Retraduire les résultats s'ils existent
-        if (this.currentResults) {
-          this.updateTimeDisplayTranslated(this.currentResults);
-        }
-      });
+      console.log("[DUA] Changement de langue détecté");
+      // Retraduire les résultats s'ils existent
+      if (this.currentResults) {
+        this.updateTimeDisplayTranslated(this.currentResults);
+      }
+    });
   }
 
   // Gestion centralisée du clic sur la section du calculateur
@@ -267,37 +267,63 @@ export class DuaTimeCalculator {
     const { type, Fajr, Maghrib, lastThirdStart, ishaEnd } = results;
     const prefix = type === "auto" ? "duaAuto" : "duaManual";
 
-    // Utiliser le nouveau système de traduction
-    const fajrText = translationManager.t("content.dua.results.fajr", "Fajr");
-    const maghribText = translationManager.t(
-      "content.dua.results.maghrib",
-          "Maghrib"
-    );
-    const ishaEndText = translationManager.t(
-      "content.dua.results.ishaEnd",
-          "End of Isha time"
-    );
-    const lastThirdText = translationManager.t(
-      "content.dua.results.lastThird",
-          "Last third of the night starts at"
-    );
+    // Utiliser des textes de fallback pour éviter les erreurs de traduction
+    let fajrText = "Fajr";
+    let maghribText = "Maghrib";
+    let ishaEndText = "End of Isha time";
+    let lastThirdText = "Last third of the night starts at";
 
-    document.getElementById(
-      `${prefix}FajrTime`
-    ).innerHTML = `${fajrText}: ${Fajr}`;
-    document.getElementById(
-      `${prefix}MaghribTime`
-    ).innerHTML = `${maghribText}: ${Maghrib}`;
-    document.getElementById(
-      `${prefix}IshaEnd`
-    ).innerHTML = `${ishaEndText}: <strong>${ishaEnd
-      .toTimeString()
-      .slice(0, 5)}</strong>`;
-    document.getElementById(
-      `${prefix}LastThird`
-    ).innerHTML = `${lastThirdText}: <strong>${lastThirdStart
-      .toTimeString()
-      .slice(0, 5)}</strong>`;
+    // Essayer d'utiliser les traductions, mais avec fallback sécurisé
+    try {
+      if (translationManager && typeof translationManager.t === "function") {
+        fajrText =
+          translationManager.t("content.dua.results.fajr", "Fajr") || "Fajr";
+        maghribText =
+          translationManager.t("content.dua.results.maghrib", "Maghrib") ||
+          "Maghrib";
+        ishaEndText =
+          translationManager.t(
+            "content.dua.results.ishaEnd",
+            "End of Isha time"
+          ) || "End of Isha time";
+        lastThirdText =
+          translationManager.t(
+            "content.dua.results.lastThird",
+            "Last third of the night starts at"
+          ) || "Last third of the night starts at";
+      }
+    } catch (error) {
+      console.warn("Erreur de traduction DUA:", error);
+    }
+
+    // Vérifier que les éléments existent avant de mettre à jour
+    const fajrElement = document.getElementById(`${prefix}FajrTime`);
+    const maghribElement = document.getElementById(`${prefix}MaghribTime`);
+    const ishaElement = document.getElementById(`${prefix}IshaEnd`);
+    const lastThirdElement = document.getElementById(`${prefix}LastThird`);
+
+    if (fajrElement) {
+      fajrElement.innerHTML = `${fajrText}: <strong>${Fajr.slice(
+        0,
+        5
+      )}</strong>`;
+    }
+    if (maghribElement) {
+      maghribElement.innerHTML = `${maghribText}: <strong>${Maghrib.slice(
+        0,
+        5
+      )}</strong>`;
+    }
+    if (ishaElement) {
+      ishaElement.innerHTML = `${ishaEndText}: <strong>${ishaEnd
+        .toTimeString()
+        .slice(0, 5)}</strong>`;
+    }
+    if (lastThirdElement) {
+      lastThirdElement.innerHTML = `${lastThirdText}: <strong>${lastThirdStart
+        .toTimeString()
+        .slice(0, 5)}</strong>`;
+    }
   }
 
   // --- Affichage / masquage des champs "custom method" (angles Fajr/Isha) ---

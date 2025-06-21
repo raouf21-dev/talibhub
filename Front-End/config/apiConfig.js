@@ -131,15 +131,8 @@ export const apiClient = {
       },
     };
 
-    console.log(`🌐 API Request: ${options.method || "GET"} ${url.toString()}`);
-    console.log(`🔧 Options:`, finalOptions);
-
     try {
       const response = await fetch(url, finalOptions);
-
-      console.log(
-        `📡 Response Status: ${response.status} ${response.statusText}`
-      );
 
       if (!response.ok) {
         let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
@@ -172,10 +165,8 @@ export const apiClient = {
       const contentType = response.headers.get("content-type");
       if (contentType && contentType.includes("application/json")) {
         const data = await response.json();
-        console.log(`✅ API Success (${endpoint}):`, data);
         return data;
       } else {
-        console.log(`✅ API Success (${endpoint}): Non-JSON response`);
         return { success: true };
       }
     } catch (error) {
@@ -215,12 +206,3 @@ export const apiClient = {
     return this.request(endpoint, { ...options, method: "DELETE" });
   },
 };
-
-if (getEnvironment() === ENV.DEV) {
-  console.log("🔧 API Configuration Debug:", {
-    environment: getEnvironment(),
-    baseUrl: API_BASE_URL,
-    hostname: window.location.hostname,
-    origin: window.location.origin,
-  });
-}

@@ -236,20 +236,6 @@ const getRecitationStats = async (userId) => {
   }
 };
 
-const getRecitationHistory = async (userId) => {
-  const { rows } = await pool.query(
-    `
-        SELECT sourate_number, recitation_count, last_recited
-        FROM known_sourates
-        WHERE user_id = $1
-        ORDER BY last_recited DESC
-        LIMIT 50
-    `,
-    [userId]
-  );
-  return rows;
-};
-
 const searchMosques = async (lat, lon) => {
   const query = `
       SELECT id, name, address, latitude, longitude,
@@ -434,7 +420,7 @@ module.exports = {
   saveKnownSourates,
   recordRecitation,
   getRecitationStats,
-  getRecitationHistory,
+
   incrementRecitationCount,
   checkCycleCompletion,
   searchMosques,

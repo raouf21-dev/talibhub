@@ -11,7 +11,6 @@ let knownSourates = [];
 let recitationCycles = 0;
 let recitationProgress = { totalKnown: 0, recitedAtLeastOnce: 0 };
 let cyclesCount = 0;
-let isHistoryVisible = false;
 let isSelecting = false;
 let cachedKnownSourates = null;
 
@@ -47,9 +46,6 @@ function handleSectionClick(event) {
   if (target) {
     const action = target.getAttribute("data-action");
     switch (action) {
-      case "toggle-recitation-history":
-        toggleRecitationHistory();
-        break;
       case "save-known-sourates":
         saveKnownSourates();
         break;
@@ -365,52 +361,6 @@ async function getKnownSouratesOnce() {
 async function getNotRecitedSourates() {
   const notRecitedSourates = await api.get("/sourates/recitations/not-recited");
   return notRecitedSourates;
-}
-
-/**
- * Affiche ou masque l'historique des récitations.
- */
-async function toggleRecitationHistory() {
-  const historySection = document.getElementById("recitationHistory");
-  isHistoryVisible = !isHistoryVisible;
-
-  if (isHistoryVisible) {
-    try {
-      const data = await api.get("/sourates/recitations/history");
-      displayRecitationHistory(data);
-      historySection.style.display = "block";
-    } catch (error) {
-      console.error("Erreur lors du chargement de l'historique:", error);
-      notificationService.show("surah.history_error", "error", 0);
-      isHistoryVisible = false;
-    }
-  } else {
-    historySection.style.display = "none";
-  }
-}
-
-/**
- * Affichage de l'historique récupéré.
- */
-function displayRecitationHistory(history) {
-  const historyContainer = document.getElementById("recitationHistory");
-  historyContainer.innerHTML = "";
-
-  if (history.length === 0) {
-    historyContainer.textContent = "Aucun historique de récitation disponible.";
-  } else {
-    const list = document.createElement("ul");
-    history.forEach((item) => {
-      const listItem = document.createElement("li");
-      listItem.textContent = `Sourate ${item.sourate_number}: ${
-        item.recitation_count
-      } fois (Dernière récitation: ${new Date(
-        item.last_recited
-      ).toLocaleString()})`;
-      list.appendChild(listItem);
-    });
-    historyContainer.appendChild(list);
-  }
 }
 
 /**
