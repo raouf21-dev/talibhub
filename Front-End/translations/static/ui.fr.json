@@ -57,6 +57,7 @@
     "title": "Apprentissage",
     "taskSelection": "Sélection de tâche et session",
     "selectTask": "Sélectionnez une tâche",
+    "counterTitle": "Sélectionnez une tâche",
     "previousSession": "Session précédente :",
     "currentSession": "Session actuelle :",
     "newSession": "Nouvelle Session",
@@ -124,7 +125,8 @@
     "secondRaka": "2ème raka:",
     "selectionToRecite": "Sélection des sourates à réciter",
     "saveToRecite": "Sauvegarder les sourates à réciter",
-    "selectYourSurahs": "Sélectionnes tes sourates"
+    "selectYourSurahs": "Sélectionnes tes sourates",
+    "startPraying": "Commencer à prier"
   },
   "profile": {
     "title": "Profil",
@@ -169,6 +171,7 @@
   },
   "mosquetime": {
     "title": "Horaires de Prière à la Mosquée",
+    "headerTitle": "Horaires de Prière à la Mosquée",
     "subtitle": "Trouvez les horaires de prière dans votre région",
     "useLocation": "Utiliser ma localisation",
     "selectCity": "Sélectionner une ville",
@@ -307,7 +310,14 @@
       "totalTime": "Temps total",
       "averageTime": "Temps moyen",
       "totalTasks": "Tâches totales",
-      "completedTasks": "Tâches terminées"
+      "completedTasks": "Tâches terminées",
+      "workTime": "Temps de Travail",
+      "countNumber": "Compteur",
+      "time": "Temps",
+      "counts": "Comptages",
+      "hideDetails": "Masquer les détails",
+      "viewDetails": "Voir les détails",
+      "unnamed": "Sans nom"
     }
   }
 }

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Test Hamburger</title>
+    <link rel="stylesheet" href="app-styles.css" />
+  </head>
+  <body class="authenticated">
+    <!-- Simulation du hamburger et sidebar -->
+    <nav class="top-nav">
+      <div class="hamburger-btn" id="hamburgerBtn">☰</div>
+      <div class="nav-right">
+        <span>Mode Test</span>
+      </div>
+    </nav>
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <header id="nav">
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+          <h1>TalibHub(Beta)</h1>
+          <button class="sidebar-close-btn" id="sidebarCloseBtn">×</button>
+        </div>
+        <nav>
+          <div class="sidebar-section">
+            <h3 class="sidebar-section-title">Test</h3>
+            <ul class="nav-list">
+              <li><a href="#" class="nav-link">Test Link</a></li>
+            </ul>
+          </div>
+        </nav>
+      </aside>
+    </header>
+
+    <main style="padding: 2rem; margin-top: 80px">
+      <h1>Test du Bouton Hamburger</h1>
+      <p>
+        Cette page teste le bouton hamburger sans les dépendances
+        d'authentification.
+      </p>
+      <p>Largeur actuelle: <span id="width"></span>px</p>
+      <p>Cookie auth présent: <span id="cookieStatus"></span></p>
+      <p>Body classes: <span id="bodyClasses"></span></p>
+
+      <button onclick="document.cookie='auth=true; path=/';">
+        Simuler authentification
+      </button>
+      <button
+        onclick="document.cookie='auth=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/'; location.reload();"
+      >
+        Supprimer authentification
+      </button>
+      <button onclick="location.reload();">Recharger</button>
+    </main>
+
+    <script>
+      // Script de test simple
+      function updateInfo() {
+        document.getElementById("width").textContent = window.innerWidth;
+        document.getElementById("cookieStatus").textContent =
+          document.cookie.includes("auth=true") ? "OUI" : "NON";
+        document.getElementById("bodyClasses").textContent =
+          document.body.className;
+      }
+
+      // Script hamburger basique
+      const hamburgerBtn = document.getElementById("hamburgerBtn");
+      const sidebar = document.getElementById("sidebar");
+      const overlay = document.getElementById("sidebarOverlay");
+      const closeBtn = document.getElementById("sidebarCloseBtn");
+
+      function openSidebar() {
+        sidebar.classList.add("active");
+        overlay.classList.add("active");
+        document.body.classList.add("menu-open");
+      }
+
+      function closeSidebar() {
+        sidebar.classList.remove("active");
+        overlay.classList.remove("active");
+        document.body.classList.remove("menu-open");
+      }
+
+      hamburgerBtn?.addEventListener("click", openSidebar);
+      closeBtn?.addEventListener("click", closeSidebar);
+      overlay?.addEventListener("click", closeSidebar);
+
+      window.addEventListener("resize", updateInfo);
+      updateInfo();
+
+      // Simuler authentification au chargement
+      document.cookie = "auth=true; path=/";
+      updateInfo();
+    </script>
+  </body>
+</html>

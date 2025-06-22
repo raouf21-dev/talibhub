@@ -41,14 +41,11 @@ class StatisticsManager {
       `[StatisticsManager] fetchAndCacheData(${period}): Start fetching data...`
     );
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        console.error("[StatisticsManager] No token found.");
-        return false;
-      }
-
       const response = await fetch(`/api/statistics/${period}`, {
-        headers: { Authorization: `Bearer ${token}` },
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
       });
 
       if (!response.ok) {
@@ -505,16 +502,10 @@ class StatisticsManager {
         "[StatisticsManager] deleteAllUserHistory: Making API call..."
       );
 
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("No authentication token found");
-      }
-
       const response = await fetch("/api/statistics/delete-all", {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         credentials: "include",
       });

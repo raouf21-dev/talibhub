@@ -55,98 +55,7 @@
   </head>
 
   <body>
-    <nav class="top-nav">
-      <!-- Hamburger pour mobile -->
-      <div class="hamburger-btn" id="hamburgerBtn">☰</div>
-
-      <!-- Style DataDrop Dashboard - seulement la partie droite -->
-      <div class="nav-right">
-        <a
-          href="#"
-          id="messagingButton"
-          class="messaging-link"
-          data-destination="messaging"
-          data-translate-title="messaging.viewTitle"
-          title="View messages"
-        >
-          <i data-feather="mail" class="messaging-icon"></i>
-          <span
-            id="messaging-count"
-            class="messaging-count"
-            style="display: none"
-            >0</span
-          >
-        </a>
-
-        <div class="profile-section">
-          <button id="profile-button" class="profile-button">
-            <span id="username-display">User</span>
-            <i class="profile-icon">▼</i>
-          </button>
-
-          <!-- Profile dropdown menu -->
-          <div id="profile-dropdown" class="profile-dropdown">
-            <a
-              href="#"
-              class="dropdown-item"
-              data-destination="profile"
-              data-translate="nav.profile"
-              >Profile</a
-            >
-            <a
-              href="#"
-              class="dropdown-item"
-              data-destination="price"
-              data-translate="nav.contribution"
-              >Contribution</a
-            >
-            <a
-              href="#"
-              class="dropdown-item"
-              data-destination="contactform"
-              data-translate="nav.contact"
-              >Contact</a
-            >
-            <a
-              href="#"
-              class="dropdown-item"
-              data-destination="aboutus"
-              data-translate="nav.aboutUs"
-              >About Us</a
-            >
-            <div class="dropdown-divider"></div>
-
-            <!-- Toggle theme -->
-            <div class="dropdown-item">
-              <div class="theme-toggle">
-                <span data-translate="nav.theme">Theme</span>
-                <label class="switch">
-                  <input type="checkbox" id="theme-toggle" />
-                  <span class="slider round"></span>
-                </label>
-              </div>
-            </div>
-
-            <!-- Language selector -->
-            <div class="dropdown-item">
-              <div class="language-selector">
-                <button class="lang-btn" data-lang="fr">🇫🇷</button>
-                <button class="lang-btn" data-lang="en">🇬🇧</button>
-              </div>
-            </div>
-
-            <div class="dropdown-divider"></div>
-            <a
-              href="#"
-              class="dropdown-item"
-              id="logoutBtn"
-              data-translate="nav.logout"
-              >Logout</a
-            >
-          </div>
-        </div>
-      </div>
-    </nav>
+    <!-- Top-nav supprimée - Le hamburger sera créé par JavaScript -->
 
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
     <header id="nav">
@@ -609,28 +518,6 @@
     </section>
 
     <section id="dashboard" class="page page-no-welcome">
-      <!-- Home Button (visible seulement en responsive) -->
-      <button
-        class="home-button"
-        id="homeButton"
-        title="Retour au Dashboard"
-        style="display: none"
-      >
-        <svg
-          class="home-icon"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
-          />
-        </svg>
-      </button>
       <main class="dashboard-main-content">
         <!-- Header moderne comme les autres sections -->
         <div class="dashboard-header">
@@ -780,23 +667,6 @@
     </section>
 
     <section id="apprentissage" class="page page-no-welcome">
-      <!-- Home Button (visible seulement en responsive) -->
-      <button class="home-button" title="Retour au Dashboard">
-        <svg
-          class="home-icon"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
-          />
-        </svg>
-      </button>
 
       <!-- Modern Header -->
       <div class="apprentissage-header">
@@ -971,7 +841,7 @@
             <div class="timer-content">
               <h3
                 id="counter-task-title"
-                data-translate="apprentissage.selectTask"
+                data-translate="apprentissage.counterTitle"
               >
                 Select a task
               </h3>
@@ -1029,23 +899,6 @@
     </section>
 
     <section id="statistics" class="page page-no-welcome">
-      <!-- Home Button (visible seulement en responsive) -->
-      <button class="home-button" title="Retour au Dashboard">
-        <svg
-          class="home-icon"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
-          />
-        </svg>
-      </button>
       <h1 data-translate="statistics.title">Statistics</h1>
       <div class="statistics-container">
         <!-- Daily Statistics -->
@@ -1333,23 +1186,6 @@
     </section>
 
     <section id="todoLists" class="page page-no-welcome">
-      <!-- Home Button (visible seulement en responsive) -->
-      <button class="home-button" title="Retour au Dashboard">
-        <svg
-          class="home-icon"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
-          />
-        </svg>
-      </button>
       <h1 data-translate="todoLists.title">Task List</h1>
       <div class="todo-card">
         <div class="todo-card-header">
@@ -1436,23 +1272,6 @@
     </section>
 
     <section id="surahmemorization" class="page page-no-welcome">
-      <!-- Home Button (visible seulement en responsive) -->
-      <button class="home-button" title="Retour au Dashboard">
-        <svg
-          class="home-icon"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
-          />
-        </svg>
-      </button>
       <!-- Header simple comme profile -->
       <div class="surahmemorization-header">
         <h1 data-translate="surahmemorization.title">Surah Memorisation</h1>
@@ -1755,27 +1574,10 @@
     </section>
 
     <section id="mosquetime" class="page page-no-welcome">
-      <!-- Home Button (visible seulement en responsive) -->
-      <button class="home-button" title="Retour au Dashboard">
-        <svg
-          class="home-icon"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
-          />
-        </svg>
-      </button>
       <h1 data-translate="mosquetime.title">Mosque Prayer Time</h1>
       <div class="mosquetime-card">
         <header class="mosquetime-header">
-          <h1 class="mosquetime-title" data-translate="mosquetime.title">
+          <h1 class="mosquetime-title" data-translate="mosquetime.headerTitle">
             Congregational Prayer Times at the Mosque
           </h1>
           <p class="mosquetime-subtitle" data-translate="mosquetime.subtitle">
@@ -1889,23 +1691,6 @@
     </section>
 
     <section id="messaging" class="page page-no-welcome">
-      <!-- Home Button (visible seulement en responsive) -->
-      <button class="home-button" title="Retour au Dashboard">
-        <svg
-          class="home-icon"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
-          />
-        </svg>
-      </button>
       <div class="messaging-container">
         <h1 class="messaging-title" data-translate="messaging.title">
           Messagerie
@@ -1964,23 +1749,6 @@
     </section>
 
     <section id="profile" class="page page-no-welcome">
-      <!-- Home Button (visible seulement en responsive) -->
-      <button class="home-button" title="Retour au Dashboard">
-        <svg
-          class="home-icon"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
-          />
-        </svg>
-      </button>
       <h1 data-translate="profile.title">Profile</h1>
       <div id="profileForm">
         <h2 data-translate="profile.personalInfo">Personal Information</h2>
@@ -2116,23 +1884,6 @@
     </section>
 
     <section id="salatSurahSelector" class="page page-no-welcome">
-      <!-- Home Button (visible seulement en responsive) -->
-      <button class="home-button" title="Retour au Dashboard">
-        <svg
-          class="home-icon"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
-          />
-        </svg>
-      </button>
 
       <!-- Header principal de la page -->
       <div class="surahselector-header">
@@ -2195,9 +1946,9 @@
           <div>
             <button
               data-action="select-random-sourates"
-              data-translate="surahselector.selectYourSurahs"
+              data-translate="surahselector.startPraying"
             >
-              Sélectionnes tes sourates
+              Start Praying
             </button>
             <div>
               <p>
@@ -2215,23 +1966,6 @@
     </section>
 
     <section id="duaTimeCalculator" class="page page-no-welcome">
-      <!-- Home Button (visible seulement en responsive) -->
-      <button class="home-button" title="Retour au Dashboard">
-        <svg
-          class="home-icon"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
-          />
-        </svg>
-      </button>
       <h1 data-translate="duaTimeCalculator.title">Dua Time Calculator</h1>
       <div class="dua-main-content">
         <div class="dua-calculator-row">
@@ -2417,23 +2151,6 @@
     </section>
 
     <section id="price" class="page page-no-welcome">
-      <!-- Home Button (visible seulement en responsive) -->
-      <button class="home-button" title="Retour au Dashboard">
-        <svg
-          class="home-icon"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
-          />
-        </svg>
-      </button>
       <div class="price-container">
         <h1 class="price-title" data-translate="price.title">
           Choose Your Contribution
@@ -2625,23 +2342,6 @@
     </section>
 
     <section id="aboutus" class="page page-no-welcome">
-      <!-- Home Button (visible seulement en responsive) -->
-      <button class="home-button" title="Retour au Dashboard">
-        <svg
-          class="home-icon"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
-          />
-        </svg>
-      </button>
       <div class="aboutus-wrapper">
         <h1 class="aboutus-title" data-translate="aboutus.title">
           About TalibHub
@@ -2767,23 +2467,6 @@
     </section>
 
     <section id="contactform" class="page page-no-welcome">
-      <!-- Home Button (visible seulement en responsive) -->
-      <button class="home-button" title="Retour au Dashboard">
-        <svg
-          class="home-icon"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
-          />
-        </svg>
-      </button>
       <h1 data-translate="contactform.title">Contact Us</h1>
       <div class="contactform-wrapper">
         <div class="contactform-container">

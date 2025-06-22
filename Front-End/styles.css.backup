@@ -646,7 +646,7 @@ body:has(.page:not(.page-no-welcome).active) .top-nav {
 /*    HAMBURGER BTN      */
 /* ===================== */
 .hamburger-btn {
-  display: block;
+  display: none; /* Masqué par défaut, visible seulement en mobile */
   background: none;
   border: none;
   font-size: 1.25rem;

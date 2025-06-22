@@ -449,7 +449,7 @@ export const ChartManager = {
     try {
       document.querySelectorAll("[data-action]").forEach((element) => {
         const key = element.getAttribute("data-action");
-        if (translations[getCurrentLanguage()][key]) {
+        if (key) {
           element.textContent = getTranslation(key);
         }
       });

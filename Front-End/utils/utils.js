@@ -288,11 +288,16 @@ export function updateNavVisibility(pageId) {
       body.classList.add("authenticated");
     }
 
-    // Afficher la sidebar sur les pages authentifiées
-    if (sideNav && hasAuth) {
-      sideNav.style.display = "block";
-    } else if (sideNav) {
-      sideNav.style.display = "none";
+    // Laisser le CSS gérer l'affichage de la sidebar selon la taille d'écran
+    if (sideNav) {
+      if (hasAuth) {
+        // Pour les utilisateurs authentifiés, supprimer le style inline
+        // pour laisser le CSS gérer l'affichage responsive
+        sideNav.style.display = "";
+      } else {
+        // Pour les utilisateurs non authentifiés, masquer la sidebar
+        sideNav.style.display = "none";
+      }
     }
   }
 

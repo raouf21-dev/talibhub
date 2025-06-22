@@ -57,6 +57,7 @@
     "title": "Learning",
     "taskSelection": "Task Selection and Session",
     "selectTask": "Select a task",
+    "counterTitle": "Select a task",
     "previousSession": "Previous session:",
     "currentSession": "Current session:",
     "newSession": "New Session",
@@ -124,7 +125,8 @@
     "secondRaka": "2nd raka:",
     "selectionToRecite": "Selection of Surahs to Recite",
     "saveToRecite": "Save Surahs to Recite",
-    "selectYourSurahs": "Select Your Surahs"
+    "selectYourSurahs": "Select Your Surahs",
+    "startPraying": "Start Praying"
   },
   "profile": {
     "title": "Profile",
@@ -168,7 +170,8 @@
     "viewAll": "View All Messages"
   },
   "mosquetime": {
-    "title": "Congregational Prayer Times at the Mosque",
+    "title": "Mosque Prayer Times",
+    "headerTitle": "Congregational Prayer Times at the Mosque",
     "subtitle": "Find congregational prayer times in mosques near you",
     "useLocation": "Use my location",
     "selectCity": "Select a city",
@@ -310,7 +313,14 @@
       "totalTime": "Total time",
       "averageTime": "Average time",
       "totalTasks": "Total tasks",
-      "completedTasks": "Completed tasks"
+      "completedTasks": "Completed tasks",
+      "workTime": "Work Time",
+      "countNumber": "Count",
+      "time": "Time",
+      "counts": "Counts",
+      "hideDetails": "Hide details",
+      "viewDetails": "View details",
+      "unnamed": "Unnamed"
     }
   }
 }
