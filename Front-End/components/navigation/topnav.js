@@ -78,27 +78,14 @@ function cleanupEventListeners() {
 }
 
 export async function initializeTopNav() {
-  console.log("🚀 DÉBUT initializeTopNav()");
-  console.log("🔍 URL actuelle:", window.location.href);
-  console.log("🔍 Pathname:", window.location.pathname);
-
   // Ne pas initialiser sur la page d'accueil pour utilisateurs non connectés
   const isWelcomePage = window.location.pathname.includes("welcomepage");
   const hasToken = !!localStorage.getItem("token");
   const isAuthenticated = authService.isAuthenticated();
 
-  console.log("🔍 État d'initialisation:", {
-    isWelcomePage,
-    hasToken,
-    isAuthenticated,
-  });
-
   if (isWelcomePage && !hasToken) {
-    console.log("⚠️ Initialisation de topnav ignorée sur welcomepage");
     return; // Sortie anticipée - aucune initialisation
   }
-
-  console.log("✅ Conditions remplies - poursuite de l'initialisation");
 
   // Nettoyer les anciens écouteurs d'événements pour éviter les doublons
   cleanupEventListeners();
@@ -109,14 +96,6 @@ export async function initializeTopNav() {
   const usernameDisplay = document.getElementById("username-display");
   const themeToggle = document.getElementById("theme-toggle");
   const logoutBtn = document.getElementById("logoutBtn");
-
-  console.log("🔍 Éléments top-nav trouvés:", {
-    profileDropdown: !!profileDropdown,
-    profileButton: !!profileButton,
-    usernameDisplay: !!usernameDisplay,
-    themeToggle: !!themeToggle,
-    logoutBtn: !!logoutBtn,
-  });
 
   // Fonction pour mettre à jour le nom d'utilisateur
   async function updateUsername() {
@@ -166,16 +145,12 @@ export async function initializeTopNav() {
 
   // Rétablir l'écouteur d'événement login pour la navigation classique
   eventListeners.login = async () => {
-    console.log(
-      "📢 Événement login détecté dans topnav, mise à jour du pseudo"
-    );
     await updateUsername();
   };
   window.addEventListener("login", eventListeners.login);
 
   // Écouteur supplémentaire pour événement profileUpdated
   eventListeners.profileUpdated = async () => {
-    console.log("📢 Événement profileUpdated détecté dans topnav");
     await updateUsername();
   };
   window.addEventListener("profileUpdated", eventListeners.profileUpdated);
@@ -246,8 +221,6 @@ export async function initializeTopNav() {
     eventListeners.logoutBtn = async (e) => {
       e.preventDefault();
 
-      console.log("🚪 Début du processus de logout depuis topnav");
-
       // Masquer immédiatement la sidebar et changer les classes
       const sidebar =
         document.getElementById("nav") || document.querySelector(".sidebar");
@@ -255,7 +228,6 @@ export async function initializeTopNav() {
 
       if (sidebar) {
         sidebar.classList.remove("active");
-        console.log("✅ Sidebar masquée immédiatement lors du logout");
       }
 
       // Marquer le body comme en cours de déconnexion
@@ -264,7 +236,6 @@ export async function initializeTopNav() {
 
       try {
         await authService.logout();
-        console.log("✅ Déconnexion réussie");
         await navigateTo("welcomepage");
       } catch (error) {
         console.error("Erreur lors de la déconnexion:", error);

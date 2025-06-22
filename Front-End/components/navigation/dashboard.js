@@ -184,16 +184,11 @@ async function updateDashboardUsername() {
 
 // Fonction principale d'initialisation du dashboard
 export async function initializeDashboard() {
-  console.log("🚀 DÉBUT initializeDashboard()");
-
   // Nettoyer les anciens écouteurs d'événements
   cleanupDashboardEventListeners();
 
   // Ne initialiser que si on est sur une page authentifiée
   if (!authService.isAuthenticated()) {
-    console.log(
-      "⚠️ Utilisateur non authentifié - pas d'initialisation dashboard"
-    );
     return;
   }
 
@@ -215,27 +210,16 @@ export async function initializeDashboard() {
     "dashboardMessagingButton"
   );
 
-  console.log("🔍 Éléments dashboard trouvés:", {
-    dashboardProfileDropdown: !!dashboardProfileDropdown,
-    dashboardProfileButton: !!dashboardProfileButton,
-    dashboardUsernameDisplay: !!dashboardUsernameDisplay,
-    dashboardThemeToggle: !!dashboardThemeToggle,
-    dashboardLogoutBtn: !!dashboardLogoutBtn,
-    dashboardMessagingButton: !!dashboardMessagingButton,
-  });
-
   // Mettre à jour le nom d'utilisateur initialement
   await updateDashboardUsername();
 
   // Écouteurs d'événements pour les mises à jour
   dashboardEventListeners.login = async () => {
-    console.log("📢 Événement login détecté dans dashboard");
     await updateDashboardUsername();
   };
   window.addEventListener("login", dashboardEventListeners.login);
 
   dashboardEventListeners.profileUpdated = async () => {
-    console.log("📢 Événement profileUpdated détecté dans dashboard");
     await updateDashboardUsername();
   };
   window.addEventListener(
@@ -256,7 +240,6 @@ export async function initializeDashboard() {
       "click",
       dashboardEventListeners.messagingButton
     );
-    console.log("✅ Gestionnaire messaging dashboard initialisé");
   }
 
   // === GESTION DU PROFILE ===
@@ -335,8 +318,6 @@ export async function initializeDashboard() {
     dashboardEventListeners.logoutBtn = async (e) => {
       e.preventDefault();
 
-      console.log("🚪 Début du processus de logout depuis le dashboard");
-
       // Masquer immédiatement la sidebar et changer les classes
       const sidebar =
         document.getElementById("nav") || document.querySelector(".sidebar");
@@ -344,7 +325,6 @@ export async function initializeDashboard() {
 
       if (sidebar) {
         sidebar.classList.remove("active");
-        console.log("✅ Sidebar masquée immédiatement lors du logout");
       }
 
       // Marquer le body comme en cours de déconnexion
@@ -353,7 +333,6 @@ export async function initializeDashboard() {
 
       try {
         await authService.logout();
-        console.log("✅ Déconnexion réussie");
         await navigateTo("welcomepage");
       } catch (error) {
         console.error("Erreur lors de la déconnexion:", error);
@@ -366,8 +345,6 @@ export async function initializeDashboard() {
       dashboardEventListeners.logoutBtn
     );
   }
-
-  console.log("✅ Initialisation dashboard terminée avec succès");
 }
 
 // Fonction pour nettoyer lors de la navigation vers d'autres pages

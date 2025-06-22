@@ -1,7 +1,15 @@
-// 🚨 LOGS DE DÉBOGAGE CRITIQUES - À CONSERVER JUSQU'À RÉSOLUTION
-console.log("🚀 main.js CHARGÉ - Script principal en cours d'exécution");
-console.log("🚀 URL actuelle:", window.location.href);
-console.log("🚀 Cookies:", document.cookie);
+// Imports principaux pour main.js
+import { langConfig } from "./config/apiConfig.js";
+import { authService } from "./services/auth/authService.js";
+import AppState from "./services/state/state.js";
+import CacheService from "./services/cache/cacheService.js";
+import mosqueTimesStorageService from "./services/cache/mosqueTimesStorageService.js";
+
+// Importation du système de traductions
+import { translationManager } from "./translations/TranslationManager.js";
+
+// Note: Les imports de utils.js sont supprimés pour éviter les dépendances circulaires
+// Ces fonctions seront importées dynamiquement quand nécessaire
 
 // ✅ MASQUAGE IMMÉDIAT DE LA SIDEBAR SUR WELCOMEPAGE - FIX pour éviter l'apparition temporaire
 (function hideSidebarOnWelcomepage() {
@@ -20,7 +28,6 @@ console.log("🚀 Cookies:", document.cookie);
         document.getElementById("nav") || document.querySelector(".sidebar");
       if (sidebar) {
         sidebar.style.display = "none";
-        console.log("✅ Sidebar masquée immédiatement sur welcomepage");
       } else {
         // Réessayer si la sidebar n'est pas encore dans le DOM
         setTimeout(hideSidebarWhenReady, 10);
@@ -31,19 +38,6 @@ console.log("🚀 Cookies:", document.cookie);
     hideSidebarWhenReady();
   }
 })();
-
-// Imports principaux pour main.js
-import { langConfig } from "./config/apiConfig.js";
-import { authService } from "./services/auth/authService.js";
-import AppState from "./services/state/state.js";
-import CacheService from "./services/cache/cacheService.js";
-import mosqueTimesStorageService from "./services/cache/mosqueTimesStorageService.js";
-
-// Importation du système de traductions
-import { translationManager } from "./translations/TranslationManager.js";
-
-// Note: Les imports de utils.js sont supprimés pour éviter les dépendances circulaires
-// Ces fonctions seront importées dynamiquement quand nécessaire
 
 // Fonction pour détecter et corriger les boucles de redirection
 (function detectRedirectLoop() {
@@ -62,9 +56,6 @@ import { translationManager } from "./translations/TranslationManager.js";
   // Créer une variable de session qui empêche de rentrer dans une boucle
   // Mais permet encore d'exécuter le code de vérification de version
   if (sessionStorage.getItem("stopRedirects")) {
-    console.log(
-      "Redirection bloquée précédemment - mais continuons l'exécution"
-    );
     // Supprimer la référence pour une future tentative
     sessionStorage.removeItem("stopRedirects");
     // Ne pas quitter la fonction, continuons l'exécution
@@ -121,70 +112,43 @@ import { translationManager } from "./translations/TranslationManager.js";
  * Fonction principale d'initialisation de l'application.
  */
 async function initializeApp() {
-  console.log("🎯 === DÉBUT initializeApp() ===");
-  console.log("🎯 URL:", window.location.href);
-  console.log("🎯 Cookies actuels:", document.cookie);
-
   // ✅ NOUVELLE LOGIQUE UNIFIÉE : Nettoyage automatique localStorage obsolète
-  console.log("🔧 Nettoyage localStorage obsolète...");
   try {
     const legacyTokens = ["token", "refreshToken", "tokenExpiry"];
     legacyTokens.forEach((key) => {
       if (localStorage.getItem(key)) {
         localStorage.removeItem(key);
-        console.log(`🧹 ${key} supprimé du localStorage`);
       }
     });
-    console.log("✅ Nettoyage localStorage terminé");
   } catch (cleanupError) {
     console.error("❌ Erreur nettoyage localStorage:", cleanupError);
   }
 
-  console.log(
-    "🔧 Diagnostic authentification terminé - Continuer initializeApp"
-  );
-
   // 🔧 GESTION DE VERSION SIMPLIFIÉE (BUILD_HASH supprimé)
-  console.log("🔧 Vérification version simplifiée...");
   try {
     const currentVersion = "1.0.0"; // Version statique simple
     const storedVersion = localStorage.getItem("app_version");
-    console.log("Version actuelle:", currentVersion);
-    console.log("Version stockée:", storedVersion);
 
     if (storedVersion !== currentVersion) {
-      console.log(`🔄 Nouvelle version détectée: ${currentVersion}`);
-      console.log("💾 Sauvegarde nouvelle version...");
       localStorage.setItem("app_version", currentVersion);
-      console.log("✅ Version mise à jour");
-    } else {
-      console.log("ℹ️ Version inchangée");
     }
   } catch (versionError) {
     console.error("❌ ERREUR traitement version:", versionError);
     // Continuer malgré l'erreur
   }
 
-  console.log("🔧 Fin vérification version - Continuons...");
-
   // 🔧 AUTHSERVICE CRITIQUE - Disponibilité globale immédiate
-  console.log("📥 Configuration authService global...");
-
   // Rendre authService disponible globalement IMMÉDIATEMENT
   window.authService = authService;
-  console.log("✅ authService rendu disponible globalement");
 
   // Validation simple d'authService
-  if (authService && typeof authService.isAuthenticated === "function") {
-    console.log("✅ authService validé - méthodes requises présentes");
-  } else {
+  if (!authService || typeof authService.isAuthenticated !== "function") {
     console.error("❌ authService invalide ou méthodes manquantes");
     throw new Error("authService requis pour l'initialisation");
   }
 
   try {
     // Initialiser le système de traduction en premier
-    console.log("🌐 Initialisation du système de traduction...");
     await translationManager.init();
 
     // Détermine la langue et la définit dans le document.
@@ -196,7 +160,6 @@ async function initializeApp() {
     if (currentPath.endsWith(".html") || !currentPath) {
       currentPath = "welcomepage";
     }
-    console.log("🔍 Page actuelle déterminée:", currentPath);
 
     // Importer dynamiquement les utilitaires pour éviter les dépendances circulaires
     console.log("📥 Import des utilitaires...");
@@ -230,24 +193,15 @@ async function initializeApp() {
     initializeNavigation();
 
     // ✅ CORRECTION CRITIQUE: Utiliser authService.isAuthenticated() au lieu de checkAuthStatus()
-    console.log("🔍 Vérification de l'authentification avec authService...");
-
     let isAuthenticated = false;
     try {
-      console.log("🔍 Appel authService.isAuthenticated()...");
       isAuthenticated = authService.isAuthenticated();
-      console.log(
-        "🔍 Résultat authService.isAuthenticated():",
-        isAuthenticated
-      );
 
-      console.log("🔍 Collecte état détaillé...");
       const detailedState = {
         hasToken: !!authService.getToken(),
         hasAuthCookie: authService.hasAuthCookie(),
         cookies: document.cookie,
       };
-      console.log("🔍 État détaillé:", detailedState);
     } catch (authError) {
       console.error(
         "❌ ERREUR lors de l'appel à authService.isAuthenticated():",
@@ -260,90 +214,54 @@ async function initializeApp() {
     // Initialiser topnav seulement si nécessaire
     const isWelcomePage = currentPath === "welcomepage";
     if (!isWelcomePage || isAuthenticated) {
-      console.log("🔧 Initialisation de topnav...");
       initializeTopNav();
-    } else {
-      console.log("Initialisation de topnav ignorée sur welcomepage");
     }
 
     // Importer dynamiquement les fonctions nécessaires
-    console.log("📥 Import navigateTo et initializeAuth...");
     const { navigateTo } = await import("./utils/utils.js");
     const { initializeAuth } = await import("./components/auth/auth.js");
 
     // ✅ CORRECTION: Utiliser authService directement
     if (isAuthenticated) {
-      console.log("✅ Utilisateur authentifié - Navigation vers:", currentPath);
-
       // 🔧 MODIFICATION CRITIQUE: Vérifier les paramètres OAuth
       const urlParams = new URLSearchParams(window.location.search);
       const authStatus = urlParams.get("auth");
       const action = urlParams.get("action");
       const redirect = urlParams.get("redirect");
 
-      console.log("🔍 Paramètres OAuth détectés:", {
-        authStatus,
-        action,
-        redirect,
-      });
-
       if (authStatus === "success") {
         if (action === "complete_profile") {
-          console.log(
-            "⚠️ OAuth complete_profile détecté mais ignoré - Redirection vers dashboard"
-          );
-
           // Nettoyer l'URL des paramètres OAuth
           const cleanUrl = window.location.origin + window.location.pathname;
           window.history.replaceState({}, document.title, cleanUrl);
 
           // Déclencher les événements d'authentification
-          console.log(
-            "🔔 Déclenchement événements d'authentification OAuth..."
-          );
           window.dispatchEvent(new Event("login"));
 
           // Redirection directe vers dashboard
-          console.log("🚀 Redirection OAuth vers dashboard...");
           await navigateTo("dashboard");
         } else if (redirect === "dashboard") {
-          console.log(
-            "🎯 Utilisateur OAuth existant détecté - Redirection directe vers dashboard"
-          );
-
           // Nettoyer l'URL des paramètres OAuth
           const cleanUrl = window.location.origin + window.location.pathname;
           window.history.replaceState({}, document.title, cleanUrl);
 
           // Déclencher les événements d'authentification
-          console.log(
-            "🔔 Déclenchement événements d'authentification OAuth..."
-          );
           window.dispatchEvent(new Event("login"));
 
           // Redirection directe vers dashboard
-          console.log("🚀 Redirection OAuth vers dashboard...");
           await navigateTo("dashboard");
         } else {
-          console.log(
-            "🚀 OAuth success détecté mais sans action spécifique - Navigation normale"
-          );
           await navigateTo(currentPath);
         }
       } else {
-        console.log("🚀 Navigation normale vers:", currentPath);
         await navigateTo(currentPath);
       }
     } else {
-      console.log(
-        "❌ Utilisateur non authentifié - Redirection vers welcomepage"
-      );
       await navigateTo("welcomepage");
       await initializeAuth();
     }
 
     // Forcer la mise à jour des traductions après l'initialisation
-    console.log("🔄 Mise à jour finale des traductions...");
     translationManager.updateDOM();
 
     // Gestion des événements de navigation - DÉSACTIVÉE
@@ -364,9 +282,6 @@ async function initializeApp() {
         e.preventDefault();
 
         // ✅ MASQUAGE IMMÉDIAT DE LA SIDEBAR LORS DU LOGOUT
-        console.log(
-          "🚪 Début du processus de logout - masquage immédiat de la sidebar"
-        );
 
         // Masquer immédiatement la sidebar et changer les classes
         const sidebar =
@@ -386,8 +301,6 @@ async function initializeApp() {
       });
 
     // authService déjà rendu global plus tôt dans initializeApp()
-
-    console.log("🎉 === FIN initializeApp() - SUCCÈS ===");
   } catch (error) {
     console.error("❌ ERREUR CRITIQUE dans initializeApp():", error);
     console.error("❌ Stack trace:", error.stack);
@@ -398,7 +311,6 @@ async function initializeApp() {
 // Gestion globale de l'événement "login" :
 // Lorsqu'un login réussi est déclenché, on initialise la topnav
 window.addEventListener("login", async () => {
-  console.log("Événement login détecté, initialisation de la topnav");
   const { initializeTopNav } = await import(
     "./components/navigation/topnav.js"
   );
@@ -410,7 +322,6 @@ window.addEventListener("login", async () => {
 // on supprime le token et redirige l'utilisateur vers la page de connexion.
 window.addEventListener("logout", async () => {
   // ✅ MASQUAGE IMMÉDIAT DE LA SIDEBAR LORS DU LOGOUT
-  console.log("🚪 Événement logout global - masquage immédiat de la sidebar");
 
   // Masquer immédiatement la sidebar et changer les classes
   const sidebar =
@@ -429,7 +340,6 @@ window.addEventListener("logout", async () => {
 
   // Vérifier si nous sommes déjà sur welcomepage pour éviter une boucle
   if (window.location.pathname !== "/welcomepage") {
-    console.log("Redirection vers welcomepage suite à une déconnexion");
     const { navigateTo } = await import("./utils/utils.js");
     navigateTo("welcomepage");
   }
