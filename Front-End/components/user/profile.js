@@ -30,17 +30,13 @@ function initializeProfile() {
 async function loadProfile() {
   try {
     if (!window.authService || !window.authService.isAuthenticated()) {
-      console.log(
-        "❌ Utilisateur non authentifié - redirection vers welcomepage"
-      );
+      // Utilisateur non authentifié - redirection vers welcomepage
       notificationService.show("profile.auth.required", "error", 0);
       navigateTo("welcomepage");
       return;
     }
 
-    console.log("✅ Utilisateur authentifié, chargement du profil...");
     const user = await api.get("/auth/profile");
-    console.log("📋 Données profil reçues:", user);
 
     const setField = (id, value, isOptional = false) => {
       const element = document.getElementById(id);
@@ -126,13 +122,12 @@ async function loadProfile() {
       }
     }
 
-    console.log("✅ Profil chargé avec succès");
     notificationService.show("profile.load.success", "success");
   } catch (error) {
-    console.error("❌ Erreur lors du chargement du profil:", error);
+    // Erreur lors du chargement du profil
 
     if (error.response?.status === 401) {
-      console.log("🔐 Erreur 401 - redirection vers welcomepage");
+      // Erreur 401 - redirection vers welcomepage
       notificationService.show("profile.auth.required", "error", 0);
       navigateTo("welcomepage");
       return;
@@ -172,13 +167,11 @@ async function updateProfile(event) {
     if (email) profileData.email = email;
     if (country) profileData.country = country;
 
-    console.log("📤 Mise à jour du profil:", profileData);
     await api.post("/auth/updateProfile", profileData);
 
-    console.log("✅ Profil mis à jour avec succès");
     notificationService.show("profile.update.success", "success");
   } catch (error) {
-    console.error("❌ Erreur mise à jour profil:", error);
+    // Erreur mise à jour profil
 
     if (error.response?.status === 401) {
       notificationService.show("profile.auth.required", "error", 0);
@@ -223,11 +216,10 @@ async function handleChangePassword(event) {
       newPassword,
     });
 
-    console.log("✅ Mot de passe changé avec succès");
     notificationService.show("profile.password.success", "success");
     document.getElementById("passwordChangeForm").reset();
   } catch (error) {
-    console.error("❌ Erreur changement mot de passe:", error);
+    // Erreur changement mot de passe
 
     if (error.response?.status === 401) {
       notificationService.show("profile.auth.required", "error", 0);

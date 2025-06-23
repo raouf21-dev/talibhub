@@ -13,10 +13,8 @@ export class DuaTimeCalculator {
   async initialize() {
     // Si déjà initialisé, ne pas ré-attacher les écouteurs
     if (this.initialized) {
-      console.log("DuaTimeCalculator déjà initialisé.");
       return;
     }
-    console.log("Initializing duaTime calculator");
     this.setupEventListeners();
     this.initialized = true;
   }
@@ -41,9 +39,7 @@ export class DuaTimeCalculator {
 
   // --- Écouter les changements de langue (pattern standard) ---
   setupLanguageObserver() {
-    console.log("[DUA] Configuration de l'observateur de langue");
     translationManager.onLanguageChange((newLang) => {
-      console.log("[DUA] Changement de langue détecté");
       // Retraduire les résultats s'ils existent
       if (this.currentResults) {
         this.updateTimeDisplayTranslated(this.currentResults);
@@ -67,7 +63,8 @@ export class DuaTimeCalculator {
           this.calculateDuaManually();
           break;
         default:
-          console.warn("Action inconnue :", action);
+          // Action inconnue
+          break;
       }
     }
   }
@@ -88,7 +85,7 @@ export class DuaTimeCalculator {
           await this.fetchPrayerTimesByCoordinates(latitude, longitude);
           notificationService.show("dua.times.loaded", "success");
         } catch (error) {
-          console.error("Error getting prayer times:", error);
+          // Erreur lors de la récupération des horaires de prière
           notificationService.show("dua.times.error", "error", 0);
         }
       },
@@ -155,7 +152,7 @@ export class DuaTimeCalculator {
       this.calculateDuaLastThird(Fajr, Maghrib, "auto");
       notificationService.show("dua.times.loaded", "success");
     } catch (error) {
-      console.error("Error fetching prayer times:", error);
+      // Erreur lors de la récupération des horaires de prière
       notificationService.show("dua.city.notfound", "error", 0);
     }
   }
@@ -197,7 +194,7 @@ export class DuaTimeCalculator {
       this.calculateDuaLastThird(Fajr, Maghrib, "auto");
       notificationService.show("dua.times.loaded", "success");
     } catch (error) {
-      console.error("Error fetching prayer times:", error);
+      // Erreur lors de la récupération des horaires de prière
       notificationService.show("dua.times.error", "error", 0);
     }
   }
@@ -211,7 +208,7 @@ export class DuaTimeCalculator {
       this.calculateDuaLastThird(fajr, maghrib, "manual");
       notificationService.show("dua.calculation.success", "success");
     } catch (error) {
-      console.error("Error in manual calculation:", error);
+      // Erreur lors du calcul manuel
       notificationService.show("dua.times.error", "error", 0);
     }
   }
@@ -293,7 +290,7 @@ export class DuaTimeCalculator {
           ) || "Last third of the night starts at";
       }
     } catch (error) {
-      console.warn("Erreur de traduction DUA:", error);
+      // Erreur de traduction DUA
     }
 
     // Vérifier que les éléments existent avant de mettre à jour

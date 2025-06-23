@@ -16,8 +16,6 @@ const eventListeners = {
 };
 
 function cleanupEventListeners() {
-  console.log("🧹 Nettoyage des écouteurs d'événements topnav");
-
   if (eventListeners.profileButton) {
     const profileButton = document.getElementById("profile-button");
     if (profileButton) {
@@ -100,7 +98,6 @@ export async function initializeTopNav() {
   // Fonction pour mettre à jour le nom d'utilisateur
   async function updateUsername() {
     try {
-      console.log("Tentative de mise à jour du nom d'utilisateur");
       const user = await authService.getProfile();
 
       if (usernameDisplay && user) {
@@ -123,18 +120,10 @@ export async function initializeTopNav() {
           displayName = user.email?.split("@")[0] || "Utilisateur";
         }
 
-        console.log("Mise à jour du nom d'utilisateur:", displayName);
         usernameDisplay.textContent = displayName;
-      } else {
-        console.warn("Éléments manquants pour la mise à jour du nom:", {
-          usernameDisplay: !!usernameDisplay,
-          user: !!user,
-          username: user?.username,
-          firstName: user?.firstName,
-        });
       }
     } catch (error) {
-      console.error("Erreur lors du chargement du pseudo:", error);
+      // Erreur lors du chargement du pseudo ignorée
     }
   }
 
@@ -238,7 +227,6 @@ export async function initializeTopNav() {
         await authService.logout();
         await navigateTo("welcomepage");
       } catch (error) {
-        console.error("Erreur lors de la déconnexion:", error);
         // Même en cas d'erreur, rediriger vers welcomepage
         await navigateTo("welcomepage");
       }
@@ -254,6 +242,4 @@ export async function initializeTopNav() {
     }
   };
   document.addEventListener("keydown", eventListeners.keydown);
-
-  console.log("✅ Initialisation de topnav terminée avec succès");
 }

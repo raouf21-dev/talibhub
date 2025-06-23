@@ -71,7 +71,6 @@ import { translationManager } from "./translations/TranslationManager.js";
   // Remplacer pushState
   history.pushState = function () {
     if (window.stopRedirects) {
-      console.warn("Redirection bloquée:", arguments[2]);
       return;
     }
     return originalPushState.apply(this, arguments);
@@ -80,7 +79,6 @@ import { translationManager } from "./translations/TranslationManager.js";
   // Remplacer replaceState
   history.replaceState = function () {
     if (window.stopRedirects) {
-      console.warn("Redirection bloquée:", arguments[2]);
       return;
     }
     return originalReplaceState.apply(this, arguments);
@@ -98,7 +96,6 @@ import { translationManager } from "./translations/TranslationManager.js";
       },
       set: function (value) {
         if (window.stopRedirects) {
-          console.warn("Redirection bloquée:", value);
           return;
         }
         originalLocationDescriptor.set.call(this, value);
@@ -121,7 +118,7 @@ async function initializeApp() {
       }
     });
   } catch (cleanupError) {
-    console.error("❌ Erreur nettoyage localStorage:", cleanupError);
+    // Erreur de nettoyage localStorage ignorée
   }
 
   // 🔧 GESTION DE VERSION SIMPLIFIÉE (BUILD_HASH supprimé)
@@ -133,7 +130,6 @@ async function initializeApp() {
       localStorage.setItem("app_version", currentVersion);
     }
   } catch (versionError) {
-    console.error("❌ ERREUR traitement version:", versionError);
     // Continuer malgré l'erreur
   }
 
@@ -143,7 +139,6 @@ async function initializeApp() {
 
   // Validation simple d'authService
   if (!authService || typeof authService.isAuthenticated !== "function") {
-    console.error("❌ authService invalide ou méthodes manquantes");
     throw new Error("authService requis pour l'initialisation");
   }
 
@@ -162,7 +157,6 @@ async function initializeApp() {
     }
 
     // Importer dynamiquement les utilitaires pour éviter les dépendances circulaires
-    console.log("📥 Import des utilitaires...");
     const { updateNavVisibility, initializeUtils } = await import(
       "./utils/utils.js"
     );
@@ -172,7 +166,6 @@ async function initializeApp() {
     const { initializeTopNav } = await import(
       "./components/navigation/topnav.js"
     );
-    console.log("✅ Imports utilitaires terminés");
 
     // ✅ AJOUT IMMÉDIAT DES CLASSES CSS POUR ÉVITER L'AFFICHAGE TEMPORAIRE DE LA SIDEBAR
     if (currentPath === "welcomepage") {
@@ -188,7 +181,6 @@ async function initializeApp() {
     updateNavVisibility(currentPath);
 
     // Initialisations communes
-    console.log("🔧 Initialisation des utils et navigation...");
     initializeUtils();
     initializeNavigation();
 
@@ -203,11 +195,6 @@ async function initializeApp() {
         cookies: document.cookie,
       };
     } catch (authError) {
-      console.error(
-        "❌ ERREUR lors de l'appel à authService.isAuthenticated():",
-        authError
-      );
-      console.error("❌ Stack trace:", authError.stack);
       isAuthenticated = false; // valeur par défaut en cas d'erreur
     }
 
@@ -302,8 +289,6 @@ async function initializeApp() {
 
     // authService déjà rendu global plus tôt dans initializeApp()
   } catch (error) {
-    console.error("❌ ERREUR CRITIQUE dans initializeApp():", error);
-    console.error("❌ Stack trace:", error.stack);
     throw error;
   }
 }
@@ -375,30 +360,23 @@ window.addEventListener("popstate", async (event) => {
 });
 
 // Point d'entrée
-console.log("🎯 Configuration du listener DOMContentLoaded...");
-console.log("🎯 État document.readyState:", document.readyState);
 
 // Si le DOM est déjà chargé, exécuter immédiatement
 if (document.readyState === "loading") {
-  console.log("🎯 DOM en cours de chargement - Configuration listener");
   document.addEventListener("DOMContentLoaded", () => {
-    console.log("🎯 DOMContentLoaded déclenché - Appel de initializeApp()");
     initializeApp().catch((error) => {
-      console.error("🚨 ERREUR FATALE dans initializeApp():", error);
+      // Erreur fatale dans initializeApp()
     });
   });
 } else {
-  console.log("🎯 DOM déjà chargé - Exécution immédiate de initializeApp()");
   initializeApp().catch((error) => {
-    console.error("🚨 ERREUR FATALE dans initializeApp():", error);
+    // Erreur fatale dans initializeApp()
   });
 }
 
-console.log("🎯 Listener DOMContentLoaded configuré");
-
 // Gestion globale des erreurs
 window.addEventListener("error", (event) => {
-  console.error("Erreur globale:", event.error);
+  // Erreur globale ignorée
 });
 
 // Rendre le translationManager disponible globalement
@@ -418,5 +396,3 @@ window.tWarning = (key, variables) =>
 
 // Exportation pour utilisation dans d'autres fichiers si nécessaire
 export { authService, CacheService, translationManager };
-
-console.log("✅ Tous les imports terminés avec succès");

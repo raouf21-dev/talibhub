@@ -16,8 +16,6 @@ const dashboardEventListeners = {
 };
 
 function cleanupDashboardEventListeners() {
-  console.log("🧹 Nettoyage des écouteurs d'événements dashboard");
-
   if (dashboardEventListeners.profileButton) {
     const dashboardProfileButton = document.getElementById(
       "dashboard-profile-button"
@@ -109,13 +107,8 @@ function cleanupDashboardEventListeners() {
 // Fonction pour mettre à jour le nom d'utilisateur dans le dashboard
 async function updateDashboardUsername() {
   try {
-    console.log("🔄 Mise à jour du nom d'utilisateur dans le dashboard");
-
     // Vérifier si l'utilisateur est authentifié
     if (!authService.isAuthenticated()) {
-      console.log(
-        "⏳ Utilisateur non authentifié - attente de l'authentification"
-      );
       const dashboardUsernameDisplay = document.getElementById(
         "dashboard-username-display"
       );
@@ -125,7 +118,6 @@ async function updateDashboardUsername() {
       return;
     }
 
-    console.log("🔍 Récupération du profil utilisateur...");
     const user = await authService.getProfile();
     const dashboardUsernameDisplay = document.getElementById(
       "dashboard-username-display"
@@ -151,18 +143,8 @@ async function updateDashboardUsername() {
         displayName = user.email?.split("@")[0] || "Utilisateur";
       }
 
-      console.log(
-        "✅ Mise à jour du nom d'utilisateur dashboard:",
-        displayName
-      );
       dashboardUsernameDisplay.textContent = displayName;
     } else {
-      console.warn("Éléments manquants pour la mise à jour du nom dashboard:", {
-        dashboardUsernameDisplay: !!dashboardUsernameDisplay,
-        user: !!user,
-        username: user?.username,
-      });
-
       // Afficher un nom par défaut
       const dashboardUsernameDisplay = document.getElementById(
         "dashboard-username-display"
@@ -172,7 +154,7 @@ async function updateDashboardUsername() {
       }
     }
   } catch (error) {
-    console.error("Erreur lors de la mise à jour du nom dashboard:", error);
+    // Erreur lors de la mise à jour du nom dashboard
     const dashboardUsernameDisplay = document.getElementById(
       "dashboard-username-display"
     );
@@ -335,7 +317,7 @@ export async function initializeDashboard() {
         await authService.logout();
         await navigateTo("welcomepage");
       } catch (error) {
-        console.error("Erreur lors de la déconnexion:", error);
+        // Erreur lors de la déconnexion
         // Même en cas d'erreur, rediriger vers welcomepage
         await navigateTo("welcomepage");
       }

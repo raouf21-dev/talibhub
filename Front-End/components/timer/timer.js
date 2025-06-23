@@ -288,8 +288,6 @@ let timerInitialized = false;
 
 // Initialiser les valeurs de session stockées
 function initializeSessionValues() {
-  console.log("[TIMER] Initialisation des valeurs de session stockées");
-
   // Récupérer les valeurs actuelles des éléments s'ils existent
   const currentSessionElement = document.getElementById("current-session-id");
   const previousSessionElement = document.getElementById(
@@ -304,8 +302,6 @@ function initializeSessionValues() {
     sessionValues.previousSessionsCount =
       previousSessionElement.textContent || "0";
   }
-
-  console.log("[TIMER] Valeurs de session initialisées:", sessionValues);
 }
 
 // Initialisation du Timer
@@ -313,12 +309,9 @@ function initializeTimer() {
   try {
     // Éviter les initialisations complètes multiples
     if (timerInitialized) {
-      console.log("Timer déjà initialisé, saut de l'initialisation");
       return;
     }
     timerInitialized = true;
-
-    console.log("[TIMER] Début de l'initialisation du timer");
 
     // Diagnostic immédiat de l'état de la page
     setTimeout(() => fullDOMDiagnosis(), 100);
@@ -326,16 +319,8 @@ function initializeTimer() {
     // Attendre que la page soit visible et accessible avant d'initialiser
     waitForPageVisible(async () => {
       try {
-        console.log(
-          "[TIMER] Page active, vérification des éléments de session..."
-        );
-
         // Attendre que les éléments de session soient disponibles
         await ensureSessionElementsExist();
-
-        console.log(
-          "[TIMER] Éléments de session confirmés, continuation de l'initialisation"
-        );
 
         // Maintenant procéder à l'initialisation normale
         loadTasks();
@@ -376,15 +361,7 @@ function initializeTimer() {
 
         // Vérifier la synchronisation des éléments de session après initialisation
         setTimeout(() => verifySessionElementsSync(), 300);
-
-        console.log(
-          "[TIMER] ✓ Initialisation complète du timer terminée avec succès"
-        );
       } catch (error) {
-        console.error(
-          "[TIMER] ✗ Erreur lors de l'initialisation après activation de la page:",
-          error
-        );
         // Continuer quand même avec l'initialisation de base
         loadTasks();
         initializeSessionState();
@@ -394,7 +371,7 @@ function initializeTimer() {
       }
     });
   } catch (error) {
-    console.error("Erreur dans initializeTimer:", error);
+    // Erreur dans initializeTimer ignorée
   }
 }
 
@@ -507,7 +484,7 @@ function handleApprentissageEvents(event) {
       actions[action]();
     }
   } catch (error) {
-    console.error("Erreur lors du traitement de l'action:", error);
+    // Erreur lors du traitement de l'action ignorée
   }
 }
 
@@ -560,7 +537,6 @@ function saveSessionToCache() {
     };
     localStorage.setItem("currentSessionData", JSON.stringify(sessionData));
   } catch (error) {
-    console.error("Erreur lors de la sauvegarde en cache:", error);
     notificationService.show("session.cache_save_error", "error", 0);
   }
 }
@@ -614,10 +590,6 @@ async function initializeSessionState() {
     }
     enableControls();
   } catch (error) {
-    console.error(
-      "Erreur lors de l'initialisation de l'état de la session:",
-      error
-    );
     notificationService.show("session.init_error", "error", 0);
     AppState.set("session.isActive", false);
     enableControls();
@@ -646,7 +618,6 @@ async function loadTimerState() {
       });
     }
   } catch (error) {
-    console.error("Erreur lors du chargement des paramètres:", error);
     notificationService.show("timer.settings_load_error", "error");
 
     const savedSettings = localStorage.getItem("timerSettings");
@@ -867,7 +838,6 @@ function createAutomaticSession() {
     saveSessionToCache();
     notificationService.show("session.started_for_task", "success");
   } catch (error) {
-    console.error("Erreur lors de la création automatique de session:", error);
     notificationService.show("session.init_error", "error");
   }
 }
@@ -930,7 +900,6 @@ async function saveSessionData() {
 
     notificationService.show("session.saved", "success");
   } catch (error) {
-    console.error("Erreur lors de la sauvegarde:", error);
     notificationService.show("session.save_error", "error", 0);
   }
 }
@@ -1102,7 +1071,6 @@ async function applyTimerDuration() {
     await saveTimerState();
     notificationService.show("timer.duration_updated", "success");
   } catch (error) {
-    console.error("Erreur lors de la sauvegarde de la durée:", error);
     notificationService.show("timer.save_error", "error");
   }
 }
@@ -1121,7 +1089,6 @@ async function saveTimerState() {
     localStorage.setItem("timerSettings", JSON.stringify(state));
     await api.post("/timer/saveState", state);
   } catch (error) {
-    console.error("Erreur lors de la sauvegarde de l'état:", error);
     notificationService.show("timer.settings_save_error", "error");
   }
 }
@@ -1140,29 +1107,19 @@ function handleSessionError() {
 
 // Reset de l'état de l'UI
 function resetUIState() {
-  const defaultSessionText = translationManager.t(
-    "content.timer.selectTaskToStart",
-    "Sélectionnez une tâche pour commencer"
-  );
+  const resetElements = [
+    "current-session-id",
+    "previous-sessions-count",
+    "total-time",
+    "session-info",
+    "counter-value",
+  ];
 
-  console.log("[TIMER] Reset de l'état UI");
+  resetElements.forEach((id) => {
+    updateDOMIfExists(id, "0");
+  });
 
-  updateSessionDOMIfExists("current-session-id", defaultSessionText);
-  updateSessionDOMIfExists("previous-sessions-count", "0");
-  updateDOMIfExists("counter-value", "0");
-  updateDOMIfExists("total-work-time", "00:00:00");
-
-  // Remettre le texte par défaut traduit pour le counter-task-title
-  const selectedTaskTitle = document.getElementById("counter-task-title");
-  if (selectedTaskTitle) {
-    selectedTaskTitle.textContent = translationManager.t(
-      "content.timer.selectTask",
-      "Select a task"
-    );
-  }
-
-  AppState.set("session.isActive", false);
-  enableControls();
+  updateDOMIfExists("session-info", "session.waiting");
 }
 
 // Reset de l'état de la session
@@ -1214,11 +1171,6 @@ function restoreSessionFromCache(sessionData) {
 
 // Mise à jour avec les dernières données de session
 function updateSessionWithLastData(lastSession, sessionCount) {
-  console.log(`[TIMER] Mise à jour avec les données de session:`, {
-    lastSession,
-    sessionCount,
-  });
-
   AppState.set("session.counter.value", lastSession.counter_value || 0);
   AppState.set("timer.timerTime", lastSession.timer_time || 0);
   AppState.set("timer.stopwatchTime", lastSession.stopwatch_time || 0);
@@ -1228,11 +1180,6 @@ function updateSessionWithLastData(lastSession, sessionCount) {
     "Dernière session trouvée"
   );
   const sessionCountText = sessionCount?.toString() || "N/A";
-
-  console.log(`[TIMER] Mise à jour des éléments de session avec:`, {
-    currentSessionText,
-    sessionCountText,
-  });
 
   updateSessionDOMIfExists("current-session-id", currentSessionText);
   updateSessionDOMIfExists("previous-sessions-count", sessionCountText);
@@ -1249,157 +1196,124 @@ async function updateTaskTitle(
   skipDataLoad = false,
   isUserAction = false
 ) {
-  const taskSelect = document.getElementById("task-select");
-  const selectedTaskTitle = document.getElementById("counter-task-title");
-  const selectedTask = taskSelect?.options[taskSelect.selectedIndex]?.text;
+  try {
+    // Récupérer l'ID de la tâche sélectionnée
+    const taskSelect = document.getElementById("task-select");
+    const selectedTaskId = taskSelect?.value;
 
-  const newTaskId = taskSelect?.value || "";
-  const currentTaskId = AppState.get("session.selectedTaskId");
-
-  // Si une session est active et qu'on change de tâche ET que c'est une action utilisateur, forcer la sauvegarde
-  if (
-    isUserAction &&
-    AppState.get("session.isActive") &&
-    currentTaskId &&
-    newTaskId !== currentTaskId
-  ) {
-    const confirmed = await notificationService.confirm(
-      "Vous avez une session en cours. Voulez-vous la sauvegarder avant de changer de tâche ?"
-    );
-
-    if (confirmed) {
-      await saveSessionData();
-    } else {
-      // Annuler le changement de tâche
-      taskSelect.value = currentTaskId;
+    if (!selectedTaskId) {
+      AppState.set("session.selectedTaskId", null);
+      enableControls();
       return;
     }
-  }
 
-  AppState.set("session.selectedTaskId", newTaskId);
+    AppState.set("session.selectedTaskId", selectedTaskId);
 
-  if (!newTaskId) {
-    // Remettre le texte par défaut traduit
-    selectedTaskTitle.textContent = translationManager.t(
-      "content.timer.selectTask",
-      "Select a task"
-    );
-    resetUIState();
-    return;
-  }
-
-  selectedTaskTitle.textContent = selectedTask;
-
-  if (!skipDataLoad) {
-    try {
-      console.log(
-        `[TIMER] Chargement des données de session pour la tâche: ${newTaskId}`
+    if (!skipDataLoad) {
+      const data = await api.get(
+        `/sessions/task/${selectedTaskId}/last?getCount=true`
       );
-      const data = await api.get(`/session/last/${newTaskId}`);
-      console.log(`[TIMER] Données reçues de l'API:`, data);
 
-      if (data.message === "No previous session found for this task") {
-        console.log(
-          `[TIMER] Aucune session précédente trouvée pour la tâche ${newTaskId}`
-        );
-        resetSessionState();
-        updateSessionDOMIfExists(
-          "current-session-id",
-          translationManager.t(
-            "content.timer.noOldSession",
-            "Pas d'ancienne session"
-          )
-        );
-        updateSessionDOMIfExists("previous-sessions-count", "0");
+      if (data && data.last_session) {
+        const lastSession = data.last_session;
+        const sessionCount = data.session_count || 0;
+
+        updateSessionWithLastData(lastSession, sessionCount);
       } else {
-        console.log(`[TIMER] Session précédente trouvée, mise à jour de l'UI`);
-        updateSessionWithLastData(data.lastSession, data.sessionCount);
+        updateUIForNewSession();
       }
-
-      // Vérifier la synchronisation après mise à jour
-      setTimeout(() => verifySessionElementsSync(), 200);
-    } catch (error) {
-      console.error("Erreur lors du chargement de la dernière session:", error);
-      notificationService.show("session.load_error", "error", 0);
-      handleSessionError();
     }
-  }
 
-  AppState.set("session.isActive", false);
-  enableControls();
+    enableControls();
+  } catch (error) {
+    notificationService.show("session.load_error", "error", 0);
+    handleSessionError();
+  }
 }
 
-// Fonction utilitaire pour mettre à jour les éléments de session de manière robuste
+// Met à jour un élément de session avec valeur
 function updateSessionElement(elementId, value) {
   const element = document.getElementById(elementId);
   if (element) {
     element.textContent = value;
-    // Forcer le re-rendu pour éviter les problèmes de cache DOM
-    element.style.display = "none";
-    element.offsetHeight; // Force reflow
-    element.style.display = "";
   }
 }
 
-// Améliorer la fonction updateDOMIfExists pour les éléments de session
+// Met à jour le DOM avec une valeur si l'élément existe
 function updateSessionDOMIfExists(id, value) {
-  console.log(
-    `[TIMER] Mise à jour de l'élément ${id} avec la valeur: ${value}`
-  );
-
-  // Vérifier d'abord si l'élément existe
   const element = document.getElementById(id);
-  if (!element) {
-    console.warn(
-      `[TIMER] Élément ${id} non trouvé, mise en attente de la valeur: ${value}`
-    );
+  if (element) {
+    let displayValue = value;
 
-    // Stocker la valeur pour plus tard
-    if (id === "current-session-id") {
-      sessionValues.currentSessionId = value;
-    } else if (id === "previous-sessions-count") {
-      sessionValues.previousSessionsCount = value;
+    // Traduction spéciale pour les valeurs textuelles
+    if (typeof value === "string" && value.includes(".")) {
+      displayValue = translationManager.t(value, value);
     }
 
-    // Réessayer après un délai
-    setTimeout(() => {
-      const retryElement = document.getElementById(id);
-      if (retryElement) {
-        console.log(
-          `[TIMER] Élément ${id} maintenant disponible, mise à jour avec: ${value}`
-        );
-        forceUpdateSessionElement(id, value);
-      } else {
-        console.error(
-          `[TIMER] Élément ${id} toujours non disponible après délai`
-        );
-      }
-    }, 500);
+    element.textContent = displayValue;
 
-    return;
+    // Sauvegarder dans sessionValues
+    if (id === "current-session-id") {
+      sessionValues.currentSessionId = displayValue;
+    } else if (id === "previous-sessions-count") {
+      sessionValues.previousSessionsCount = displayValue;
+    }
+
+    setupSessionElementsObserver();
+  } else {
+    // Créer l'élément s'il n'existe pas
+    const container = document.querySelector("#apprentissage");
+    if (container) {
+      const newElement = document.createElement("span");
+      newElement.id = id;
+      let displayValue = value;
+
+      if (typeof value === "string" && value.includes(".")) {
+        displayValue = translationManager.t(value, value);
+      }
+
+      newElement.textContent = displayValue;
+      container.appendChild(newElement);
+
+      if (id === "current-session-id") {
+        sessionValues.currentSessionId = displayValue;
+      } else if (id === "previous-sessions-count") {
+        sessionValues.previousSessionsCount = displayValue;
+      }
+
+      setupSessionElementsObserver();
+    }
+  }
+}
+
+// Vérifier la synchronisation des éléments de session
+function verifySessionElementsSync() {
+  const currentElement = document.getElementById("current-session-id");
+  const previousElement = document.getElementById("previous-sessions-count");
+
+  const currentValue = currentElement?.textContent || "N/A";
+  const previousValue = previousElement?.textContent || "N/A";
+
+  // Correction automatique si nécessaire
+  if (
+    sessionValues.currentSessionId &&
+    sessionValues.currentSessionId !== currentValue
+  ) {
+    forceUpdateSessionElement(
+      "current-session-id",
+      sessionValues.currentSessionId
+    );
   }
 
-  // Utiliser la fonction renforcée pour les éléments de session
-  forceUpdateSessionElement(id, value);
-
-  // Ajouter plusieurs vérifications avec des délais différents
-  setTimeout(() => {
-    forceUpdateSessionElement(id, value);
-    console.log(
-      `[TIMER] Vérification après 100ms - ${id}: ${
-        document.getElementById(id)?.textContent
-      }`
+  if (
+    sessionValues.previousSessionsCount &&
+    sessionValues.previousSessionsCount !== previousValue
+  ) {
+    forceUpdateSessionElement(
+      "previous-sessions-count",
+      sessionValues.previousSessionsCount
     );
-  }, 100);
-
-  setTimeout(() => {
-    forceUpdateSessionElement(id, value);
-    console.log(
-      `[TIMER] Vérification après 300ms - ${id}: ${
-        document.getElementById(id)?.textContent
-      }`
-    );
-  }, 300);
+  }
 }
 
 // Stockage des valeurs de session pour éviter les conflits avec les traductions
@@ -1408,377 +1322,180 @@ let sessionValues = {
   previousSessionsCount: "0",
 };
 
-// Fonction pour vérifier et synchroniser les éléments de session
-function verifySessionElementsSync() {
-  const currentSessionElement = document.getElementById("current-session-id");
-  const previousSessionElement = document.getElementById(
-    "previous-sessions-count"
-  );
-
-  console.log(`[TIMER] Vérification de la synchronisation:`);
-  console.log(
-    `  - current-session-id: ${
-      currentSessionElement?.textContent || "NON TROUVÉ"
-    }`
-  );
-  console.log(
-    `  - previous-sessions-count: ${
-      previousSessionElement?.textContent || "NON TROUVÉ"
-    }`
-  );
-  console.log(`  - Valeurs stockées:`, sessionValues);
-
-  // Vérifier si les éléments existent dans le DOM
-  if (!currentSessionElement) {
-    console.error(
-      `[TIMER] ERREUR: L'élément current-session-id n'est pas trouvé dans le DOM`
-    );
-  } else {
-    // Forcer la restauration de la valeur stockée si elle diffère
-    if (currentSessionElement.textContent !== sessionValues.currentSessionId) {
-      console.log(
-        `[TIMER] Restauration de current-session-id: ${sessionValues.currentSessionId}`
-      );
-      currentSessionElement.textContent = sessionValues.currentSessionId;
-    }
-  }
-
-  if (!previousSessionElement) {
-    console.error(
-      `[TIMER] ERREUR: L'élément previous-sessions-count n'est pas trouvé dans le DOM`
-    );
-  } else {
-    // Forcer la restauration de la valeur stockée si elle diffère
-    if (
-      previousSessionElement.textContent !== sessionValues.previousSessionsCount
-    ) {
-      console.log(
-        `[TIMER] Restauration de previous-sessions-count: ${sessionValues.previousSessionsCount}`
-      );
-      previousSessionElement.textContent = sessionValues.previousSessionsCount;
-    }
-  }
-}
-
 // Fonction renforcée pour mettre à jour les éléments de session
 function forceUpdateSessionElement(elementId, value) {
-  // Stocker la valeur
-  if (elementId === "current-session-id") {
-    sessionValues.currentSessionId = value;
-  } else if (elementId === "previous-sessions-count") {
-    sessionValues.previousSessionsCount = value;
-  }
-
   const element = document.getElementById(elementId);
   if (element) {
-    console.log(`[TIMER] Mise à jour forcée de ${elementId} avec: ${value}`);
+    let displayValue = value;
 
-    // Méthode 1: Mise à jour directe
-    element.textContent = value;
+    // Traduction spéciale pour les valeurs textuelles
+    if (typeof value === "string" && value.includes(".")) {
+      displayValue = translationManager.t(value, value);
+    }
 
-    // Méthode 2: Forcer le reflow
+    element.textContent = displayValue;
+
+    // Force le re-rendu
     element.style.display = "none";
     element.offsetHeight; // Force reflow
     element.style.display = "";
 
-    // Méthode 3: Utiliser setAttribute pour forcer la mise à jour
-    element.setAttribute("data-session-value", value);
-    element.textContent = value;
-
-    // Vérification immédiate
-    setTimeout(() => {
-      if (element.textContent !== value) {
-        console.warn(
-          `[TIMER] CONFLIT DÉTECTÉ - Restauration de ${elementId} vers ${value}`
-        );
-        element.textContent = value;
-      }
-    }, 10);
+    // Sauvegarder dans sessionValues
+    if (elementId === "current-session-id") {
+      sessionValues.currentSessionId = displayValue;
+    } else if (elementId === "previous-sessions-count") {
+      sessionValues.previousSessionsCount = displayValue;
+    }
   }
 }
 
-// Écouter les changements de langue pour mettre à jour les traductions dynamiques
+// Configurer l'observateur de changement de langue
 function setupLanguageObserver() {
-  console.log("[TIMER] Configuration de l'observateur de langue");
-  translationManager.onLanguageChange(() => {
-    console.log("[TIMER] Changement de langue détecté");
+  // Observer les changements de langue
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (mutation.type === "attributes" && mutation.attributeName === "lang") {
+        // Vérifier si les éléments ont des valeurs stockées
+        if (sessionValues.currentSessionId) {
+          // Ne pas restaurer "session.waiting" après traduction
+          if (!sessionValues.currentSessionId.includes("session.waiting")) {
+            setTimeout(() => {
+              forceUpdateSessionElement(
+                "current-session-id",
+                sessionValues.currentSessionId
+              );
+            }, 100);
+          }
+        }
 
-    // Mettre à jour le titre de la tâche s'il n'y a pas de tâche sélectionnée
-    const selectedTaskTitle = document.getElementById("counter-task-title");
-    const taskSelect = document.getElementById("task-select");
+        if (sessionValues.previousSessionsCount) {
+          setTimeout(() => {
+            forceUpdateSessionElement(
+              "previous-sessions-count",
+              sessionValues.previousSessionsCount
+            );
+          }, 100);
+        }
 
-    if (selectedTaskTitle && (!taskSelect || !taskSelect.value)) {
-      selectedTaskTitle.textContent = translationManager.t(
-        "content.timer.selectTask",
-        "Select a task"
-      );
-    }
+        // Double vérification après traduction
+        setTimeout(() => verifySessionElementsSync(), 300);
+      }
+    });
+  });
 
-    // Préserver et restaurer les valeurs des éléments de session avec les valeurs stockées
-    console.log(
-      `[TIMER] Changement de langue - Restoration des valeurs stockées:`,
-      sessionValues
-    );
-
-    // Attendre que les traductions soient appliquées puis restaurer les valeurs
-    setTimeout(() => {
-      console.log(`[TIMER] Restoration des valeurs après traduction`);
-      forceUpdateSessionElement(
-        "current-session-id",
-        sessionValues.currentSessionId
-      );
-      forceUpdateSessionElement(
-        "previous-sessions-count",
-        sessionValues.previousSessionsCount
-      );
-
-      // Vérifier après la restauration
-      setTimeout(() => verifySessionElementsSync(), 100);
-    }, 100);
-
-    // Double vérification après un délai plus long
-    setTimeout(() => {
-      console.log(`[TIMER] Double vérification après traduction`);
-      forceUpdateSessionElement(
-        "current-session-id",
-        sessionValues.currentSessionId
-      );
-      forceUpdateSessionElement(
-        "previous-sessions-count",
-        sessionValues.previousSessionsCount
-      );
-    }, 300);
-
-    // Forcer la re-traduction de l'option task-select
-    const taskSelectOption = document.querySelector(
-      '#task-select option[value=""]'
-    );
-    if (taskSelectOption) {
-      taskSelectOption.textContent = translationManager.t(
-        "content.task.selectTask",
-        "Sélectionnez une tâche"
-      );
-    }
+  observer.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ["lang"],
   });
 }
 
-// Observer les mutations DOM pour les éléments de session
+// Observer pour surveiller les modifications des éléments de session
 function setupSessionElementsObserver() {
-  // Attendre un peu que les éléments soient disponibles
-  setTimeout(() => {
-    const targetNodes = [
-      document.getElementById("current-session-id"),
-      document.getElementById("previous-sessions-count"),
-    ].filter(Boolean);
+  // S'assurer qu'on n'ajoute pas plusieurs observateurs
+  if (window.sessionElementsObserver) {
+    window.sessionElementsObserver.disconnect();
+  }
 
-    if (targetNodes.length === 0) {
-      console.warn(
-        "[TIMER] Aucun élément de session trouvé pour l'observation, nouvelle tentative dans 1s"
-      );
-      // Réessayer plus tard
-      setTimeout(setupSessionElementsObserver, 1000);
-      return;
-    }
+  const targetElements = ["current-session-id", "previous-sessions-count"];
 
-    console.log(
-      `[TIMER] Configuration de l'observateur pour ${targetNodes.length} éléments de session`
-    );
+  targetElements.forEach((elementId) => {
+    const element = document.getElementById(elementId);
+    if (element) {
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (
+            mutation.type === "childList" ||
+            mutation.type === "characterData"
+          ) {
+            const newValue = element.textContent;
 
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (
-          mutation.type === "childList" ||
-          mutation.type === "characterData"
-        ) {
-          const elementId = mutation.target.id;
-          const currentValue = mutation.target.textContent;
-
-          let expectedValue = null;
-          if (elementId === "current-session-id") {
-            expectedValue = sessionValues.currentSessionId;
-          } else if (elementId === "previous-sessions-count") {
-            expectedValue = sessionValues.previousSessionsCount;
-          }
-
-          if (expectedValue && currentValue !== expectedValue) {
-            console.log(
-              `[TIMER] Mutation détectée sur ${elementId}: "${currentValue}" -> "${expectedValue}"`
-            );
-
-            // Restaurer la valeur attendue avec un petit délai
-            setTimeout(() => {
-              if (mutation.target.textContent !== expectedValue) {
-                console.log(`[TIMER] Correction automatique de ${elementId}`);
-                mutation.target.textContent = expectedValue;
+            // Sauvegarder la nouvelle valeur si ce n'est pas une traduction
+            if (
+              !newValue.includes("content.") &&
+              !newValue.includes("session.")
+            ) {
+              if (elementId === "current-session-id") {
+                sessionValues.currentSessionId = newValue;
+              } else if (elementId === "previous-sessions-count") {
+                sessionValues.previousSessionsCount = newValue;
               }
-            }, 50);
+            }
           }
-        }
+        });
       });
-    });
 
-    // Observer les changements de contenu textuel
-    targetNodes.forEach((node) => {
-      observer.observe(node, {
+      observer.observe(element, {
         childList: true,
         characterData: true,
         subtree: true,
       });
-    });
 
-    console.log(
-      "[TIMER] ✓ Observateur de mutations DOM configuré pour les éléments de session"
-    );
-    return observer;
-  }, 1000);
-}
-
-// Initialiser les observateurs quand la page est chargée
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", () => {
-    setupLanguageObserver();
-    // Attendre un peu que les éléments soient initialisés
-    setTimeout(() => setupSessionElementsObserver(), 500);
+      // Stocker l'observateur pour pouvoir le déconnecter plus tard
+      if (!window.sessionElementsObserver) {
+        window.sessionElementsObserver = observer;
+      }
+    } else {
+      // Réessayer après un délai si l'élément n'existe pas encore
+      setTimeout(() => setupSessionElementsObserver(), 100);
+    }
   });
-} else {
-  setupLanguageObserver();
-  setTimeout(() => setupSessionElementsObserver(), 500);
 }
 
-// Fonction de test pour vérifier le bon fonctionnement des éléments de session
+// Fonction de test pour vérifier les éléments de session
 function testSessionElementsUpdate() {
-  console.log("[TIMER] === TEST DES ÉLÉMENTS DE SESSION ===");
+  const currentElement = document.getElementById("current-session-id");
+  const previousElement = document.getElementById("previous-sessions-count");
 
-  // Test 1: Vérifier la présence des éléments
-  const currentSessionElement = document.getElementById("current-session-id");
-  const previousSessionElement = document.getElementById(
-    "previous-sessions-count"
-  );
-
-  console.log("Test 1 - Présence des éléments:");
-  console.log(
-    `  current-session-id: ${currentSessionElement ? "✓ TROUVÉ" : "✗ MANQUANT"}`
-  );
-  console.log(
-    `  previous-sessions-count: ${
-      previousSessionElement ? "✓ TROUVÉ" : "✗ MANQUANT"
-    }`
-  );
-
-  if (!currentSessionElement || !previousSessionElement) {
-    console.error("[TIMER] ✗ ÉCHEC DU TEST - Éléments manquants dans le DOM");
-    return false;
+  if (!currentElement || !previousElement) {
+    return;
   }
 
-  // Test 2: Mise à jour forcée
-  console.log("Test 2 - Mise à jour forcée:");
-  const testCurrentValue = "TEST_SESSION_" + Date.now();
-  const testPreviousValue =
-    "TEST_COUNT_" + Math.random().toString(36).substr(2, 5);
+  // Test 2 - Mise à jour forcée:
+  forceUpdateSessionElement("current-session-id", "TEST_CURRENT");
+  forceUpdateSessionElement("previous-sessions-count", "TEST_PREVIOUS");
 
-  updateSessionDOMIfExists("current-session-id", testCurrentValue);
-  updateSessionDOMIfExists("previous-sessions-count", testPreviousValue);
-
-  // Vérifier immédiatement
+  // Vérifier après 500ms
   setTimeout(() => {
-    const currentActual = currentSessionElement.textContent;
-    const previousActual = previousSessionElement.textContent;
+    const newCurrentValue =
+      document.getElementById("current-session-id")?.textContent;
+    const newPreviousValue = document.getElementById(
+      "previous-sessions-count"
+    )?.textContent;
 
-    console.log(
-      `  current-session-id: "${currentActual}" === "${testCurrentValue}" ? ${
-        currentActual === testCurrentValue ? "✓" : "✗"
-      }`
+    // Test final - Restaurer les valeurs originales
+    forceUpdateSessionElement(
+      "current-session-id",
+      sessionValues.currentSessionId
     );
-    console.log(
-      `  previous-sessions-count: "${previousActual}" === "${testPreviousValue}" ? ${
-        previousActual === testPreviousValue ? "✓" : "✗"
-      }`
+    forceUpdateSessionElement(
+      "previous-sessions-count",
+      sessionValues.previousSessionsCount
     );
-
-    if (
-      currentActual === testCurrentValue &&
-      previousActual === testPreviousValue
-    ) {
-      console.log(
-        "[TIMER] ✓ TEST RÉUSSI - Les éléments de session se mettent à jour correctement"
-      );
-    } else {
-      console.error(
-        "[TIMER] ✗ TEST ÉCHOUÉ - Les éléments de session ne se mettent pas à jour correctement"
-      );
-    }
-
-    // Restaurer les valeurs par défaut
-    updateSessionDOMIfExists("current-session-id", "0");
-    updateSessionDOMIfExists("previous-sessions-count", "0");
   }, 500);
 
-  return true;
+  // Fonctions de debug globales
+  window.testSessionSync = testSessionElementsUpdate;
+  window.verifySessionSync = verifySessionElementsSync;
+  window.forceSessionUpdate = forceUpdateSessionElement;
 }
 
-// Ajouter des commandes globales pour debugging depuis la console
-if (typeof window !== "undefined") {
-  window.testTimerSessionElements = testSessionElementsUpdate;
-  window.diagnoseTimerPageState = fullDOMDiagnosis;
-  window.resetTimerInit = resetTimerInitialization;
-  console.log("[TIMER] Fonctions de debug disponibles:");
-  console.log(
-    "  - window.testTimerSessionElements() : Tester les éléments de session"
-  );
-  console.log(
-    "  - window.diagnoseTimerPageState() : Diagnostiquer l'état de la page"
-  );
-  console.log("  - window.resetTimerInit() : Réinitialiser le timer");
-}
-
-// Fonction pour attendre que la page soit visible et accessible
+// Attendre que la page soit visible et que les éléments critiques soient chargés
 function waitForPageVisible(callback, maxAttempts = 15) {
   let attempts = 0;
-
   const checkPageVisible = () => {
     attempts++;
     const apprentissagePage = document.getElementById("apprentissage");
-
-    // Vérifier plusieurs conditions pour s'assurer que la page est vraiment accessible
-    const hasActiveClass =
-      apprentissagePage && apprentissagePage.classList.contains("active");
-    const isDisplayVisible =
-      apprentissagePage &&
-      getComputedStyle(apprentissagePage).display !== "none";
+    const hasActiveClass = apprentissagePage?.classList.contains("active");
     const sessionElements =
       document.getElementById("current-session-id") &&
       document.getElementById("previous-sessions-count");
 
-    console.log(`[TIMER] Tentative ${attempts} - État de la page:`);
-    console.log(`  - Élément apprentissage trouvé: ${!!apprentissagePage}`);
-    console.log(`  - Classe 'active': ${hasActiveClass}`);
-    console.log(
-      `  - CSS display: ${
-        apprentissagePage ? getComputedStyle(apprentissagePage).display : "N/A"
-      }`
-    );
-    console.log(`  - Éléments de session présents: ${!!sessionElements}`);
-
-    // La page est considérée comme prête si elle est visible ET que les éléments de session existent
-    const isPageReady =
-      apprentissagePage && isDisplayVisible && sessionElements;
-
-    if (isPageReady) {
-      console.log(
-        "[TIMER] ✓ Page apprentissage prête et éléments accessibles, initialisation"
-      );
+    if (hasActiveClass && sessionElements) {
       callback();
     } else if (attempts < maxAttempts) {
-      // Réessayer après un court délai
-      setTimeout(checkPageVisible, 250);
+      setTimeout(checkPageVisible, 200);
     } else {
-      console.error(
-        "[TIMER] ✗ Échec: La page apprentissage n'est pas devenue accessible après",
-        maxAttempts,
-        "tentatives"
-      );
-      console.log("[TIMER] Tentative d'initialisation forcée...");
-      // Essayer quand même l'initialisation
+      // Forcer l'initialisation après le timeout
       callback();
     }
   };
@@ -1786,49 +1503,26 @@ function waitForPageVisible(callback, maxAttempts = 15) {
   checkPageVisible();
 }
 
-// Fonction pour vérifier que les éléments de session existent
+// S'assurer que les éléments de session existent avant l'initialisation
 function ensureSessionElementsExist() {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     let attempts = 0;
-    const maxAttempts = 15;
+    const maxAttempts = 30;
 
     const checkElements = () => {
       attempts++;
-      const currentSessionElement =
-        document.getElementById("current-session-id");
-      const previousSessionElement = document.getElementById(
+      const currentElement = document.getElementById("current-session-id");
+      const previousElement = document.getElementById(
         "previous-sessions-count"
       );
 
-      console.log(`[TIMER] Vérification éléments (tentative ${attempts}):`);
-      console.log(
-        `  - current-session-id: ${
-          currentSessionElement ? "✓ TROUVÉ" : "✗ MANQUANT"
-        }`
-      );
-      console.log(
-        `  - previous-sessions-count: ${
-          previousSessionElement ? "✓ TROUVÉ" : "✗ MANQUANT"
-        }`
-      );
-
-      if (currentSessionElement && previousSessionElement) {
-        console.log("[TIMER] ✓ Tous les éléments de session sont disponibles");
-        // Initialiser les valeurs stockées avec les valeurs actuelles
-        sessionValues.currentSessionId =
-          currentSessionElement.textContent || "0";
-        sessionValues.previousSessionsCount =
-          previousSessionElement.textContent || "0";
+      if (currentElement && previousElement) {
         resolve();
       } else if (attempts < maxAttempts) {
-        setTimeout(checkElements, 300);
+        setTimeout(checkElements, 100);
       } else {
-        console.error(
-          "[TIMER] ✗ ÉCHEC: Les éléments de session ne sont pas disponibles après",
-          maxAttempts,
-          "tentatives"
-        );
-        reject(new Error("Éléments de session non trouvés"));
+        // Timeout - continuer quand même
+        resolve();
       }
     };
 
@@ -1836,162 +1530,64 @@ function ensureSessionElementsExist() {
   });
 }
 
-// Fonction pour réinitialiser le timer (utile pour les tests)
+// Fonction pour réinitialiser le flag d'initialisation (utile pour les tests)
 function resetTimerInitialization() {
-  console.log("[TIMER] Réinitialisation du flag d'initialisation du timer");
   timerInitialized = false;
+  sessionInitialized = false;
 }
 
-// Fonction de diagnostic COMPLÈTE pour chercher les éléments partout
+// Fonction de diagnostic complet du DOM
 function fullDOMDiagnosis() {
-  console.log("[TIMER] === DIAGNOSTIC COMPLET DU DOM ===");
-
-  // 1. État de la page apprentissage
   const apprentissagePage = document.getElementById("apprentissage");
-  console.log(
-    `📄 #apprentissage:`,
-    apprentissagePage ? "✓ TROUVÉ" : "✗ MANQUANT"
-  );
-
   if (apprentissagePage) {
-    const computedStyle = getComputedStyle(apprentissagePage);
-    console.log(`📱 Classes:`, Array.from(apprentissagePage.classList));
-    console.log(`👁️  Display:`, computedStyle.display);
-    console.log(`🔍 Visibility:`, computedStyle.visibility);
-    console.log(`📏 Opacity:`, computedStyle.opacity);
+    const computedStyle = window.getComputedStyle(apprentissagePage);
+    // Élément apprentissage présent et styles calculés
   }
 
-  // 2. Recherche des éléments de session PARTOUT dans le DOM
-  console.log("\n🔍 === RECHERCHE DES ÉLÉMENTS DE SESSION ===");
-
-  // Recherche par ID
-  const currentSessionById = document.getElementById("current-session-id");
-  const previousSessionById = document.getElementById(
-    "previous-sessions-count"
+  // Recherche des éléments de session dans apprentissage
+  const sessionIdsInApp = apprentissagePage?.querySelectorAll(
+    "#current-session-id"
   );
-
-  console.log(
-    `🎯 getElementById("current-session-id"):`,
-    currentSessionById ? "✓ TROUVÉ" : "✗ MANQUANT"
-  );
-  console.log(
-    `🎯 getElementById("previous-sessions-count"):`,
-    previousSessionById ? "✓ TROUVÉ" : "✗ MANQUANT"
-  );
-
-  // Recherche par querySelector (plus large)
-  const currentSessionByQuery = document.querySelector("#current-session-id");
-  const previousSessionByQuery = document.querySelector(
+  const sessionCountsInApp = apprentissagePage?.querySelectorAll(
     "#previous-sessions-count"
   );
 
-  console.log(
-    `🔍 querySelector("#current-session-id"):`,
-    currentSessionByQuery ? "✓ TROUVÉ" : "✗ MANQUANT"
-  );
-  console.log(
-    `🔍 querySelector("#previous-sessions-count"):`,
-    previousSessionByQuery ? "✓ TROUVÉ" : "✗ MANQUANT"
-  );
+  // Recherche globale dans tout le document
+  const currentGlobal = document.getElementById("current-session-id");
+  const previousGlobal = document.getElementById("previous-sessions-count");
 
-  // Recherche avec querySelectorAll pour voir s'il y en a plusieurs
-  const allCurrentSession = document.querySelectorAll(
-    "#current-session-id, [id*='current-session'], [id*='session-id']"
-  );
-  const allPreviousSession = document.querySelectorAll(
-    "#previous-sessions-count, [id*='previous-session'], [id*='sessions-count']"
-  );
-
-  console.log(
-    `📊 Éléments similaires à current-session-id:`,
-    allCurrentSession.length
-  );
-  allCurrentSession.forEach((el, i) => {
-    console.log(
-      `  ${i + 1}. ID: "${el.id}", Parent: ${el.parentElement?.tagName}#${
-        el.parentElement?.id
-      }, Visible: ${getComputedStyle(el).display !== "none"}`
-    );
-  });
-
-  console.log(
-    `📊 Éléments similaires à previous-sessions-count:`,
-    allPreviousSession.length
-  );
-  allPreviousSession.forEach((el, i) => {
-    console.log(
-      `  ${i + 1}. ID: "${el.id}", Parent: ${el.parentElement?.tagName}#${
-        el.parentElement?.id
-      }, Visible: ${getComputedStyle(el).display !== "none"}`
-    );
-  });
-
-  // 3. Recherche dans toutes les sections/pages
-  console.log("\n🗂️ === RECHERCHE DANS TOUTES LES SECTIONS ===");
-  const allSections = document.querySelectorAll("section[id], div[id]");
-
+  // Recherche dans toutes les sections pour voir où sont les éléments
+  const allSections = document.querySelectorAll(".page");
   allSections.forEach((section) => {
-    if (
-      section.id &&
-      (section.id.includes("page") || section.classList.contains("page"))
-    ) {
-      const sectionCurrentSession = section.querySelector(
-        "#current-session-id"
-      );
-      const sectionPreviousSession = section.querySelector(
-        "#previous-sessions-count"
-      );
-
-      if (sectionCurrentSession || sectionPreviousSession) {
-        console.log(
-          `📄 Section "${section.id}":`,
-          sectionCurrentSession ? "✓ current-session-id" : "✗",
-          sectionPreviousSession ? "✓ previous-sessions-count" : "✗",
-          `Display: ${getComputedStyle(section).display}`
-        );
-      }
+    const currentInSection = section.querySelector("#current-session-id");
+    const previousInSection = section.querySelector("#previous-sessions-count");
+    if (currentInSection || previousInSection) {
+      // Éléments trouvés dans une section
     }
   });
 
-  // 4. Vérification du contenu HTML brut
-  console.log("\n📝 === VÉRIFICATION HTML BRUT ===");
+  // Vérification HTML brut pour debug
   const htmlContent = document.documentElement.innerHTML;
   const hasCurrentInHTML = htmlContent.includes('id="current-session-id"');
-  const hasPreviousInHTML = htmlContent.includes(
-    'id="previous-sessions-count"'
-  );
+  const hasCountInHTML = htmlContent.includes('id="previous-sessions-count"');
 
-  console.log(`📄 HTML contient 'id="current-session-id"':`, hasCurrentInHTML);
-  console.log(
-    `📄 HTML contient 'id="previous-sessions-count"':`,
-    hasPreviousInHTML
-  );
-
-  // 5. Si ils existent, vérifier pourquoi ils ne sont pas trouvés
-  if (hasCurrentInHTML && !currentSessionById) {
-    console.log(
-      "⚠️ ANOMALIE: L'élément existe dans le HTML mais getElementById ne le trouve pas !"
-    );
-
-    // Recherche manuelle
-    const manualSearch = document.documentElement.outerHTML.match(
-      /id="current-session-id"[^>]*>/g
-    );
-    console.log("🔍 Recherche manuelle:", manualSearch);
-  }
-
-  console.log("\n[TIMER] === FIN DU DIAGNOSTIC COMPLET ===");
+  // Recherche manuelle dans le texte HTML
+  const manualSearch = {
+    currentSessionInHTML: hasCurrentInHTML,
+    countInHTML: hasCountInHTML,
+  };
 }
 
-// Export des fonctions nécessaires
+// Exportation globale pour utilisation externe
+window.initializeTimer = initializeTimer;
+window.resetTimerInit = resetTimerInitialization;
+
+// Export des fonctions pour utilisation dans d'autres modules
 export {
   initializeTimer,
-  resetTimerInitialization,
-  saveSessionToCache,
+  updateTimerDisplay,
   resetTimer,
-  handleApprentissageEvents,
-  createTimerControlUI,
-  initializeTimerControls,
-  testSessionElementsUpdate,
-  fullDOMDiagnosis,
+  toggleTimer,
+  saveSessionData,
+  resetTimerInitialization,
 };

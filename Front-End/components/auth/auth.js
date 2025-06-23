@@ -25,15 +25,12 @@ let termsHandler;
    INITIALISATION DE L'AUTH
    ========================= */
 function initializeAuth() {
-  console.log("🔧 DÉMARRAGE initializeAuth()");
-
   initializeAuthForms();
   initializeTabToggle();
   initializeCountryInput(); // Appelé une seule fois grâce au flag
   termsHandler = new TermsHandler();
 
   // 🔥 CRITIQUE: Vérifier les callbacks OAuth
-  console.log("🔍 Vérification callback OAuth...");
   oauthHandler.checkAuthCallback();
 }
 
@@ -116,7 +113,6 @@ function showAuthForms() {
     switchTab("signin");
 
     // 🔥 INITIALISATION OAUTH - CRITIQUE !
-    console.log("🔄 Initialisation OAuth après affichage des formulaires...");
     oauthHandler.init();
   }
 }
@@ -185,7 +181,6 @@ async function handleSignup(event) {
 
     // ✅ NOUVELLE LOGIQUE : Plus de gestion token, cookies automatiques
     if (response && response.success) {
-      console.log("✅ Inscription réussie - Cookies définis automatiquement");
       // Déclencher l'événement login
       window.dispatchEvent(new Event("login"));
       notificationService.show("auth.signup.success", "success");
@@ -197,7 +192,7 @@ async function handleSignup(event) {
       throw new Error("Inscription échouée");
     }
   } catch (error) {
-    console.error("Erreur:", error);
+    // Erreur lors de l'inscription
     notificationService.show("auth.signup.error", "error", 0);
   }
 
@@ -243,7 +238,6 @@ async function handleSignin(event) {
 
     // ✅ NOUVELLE LOGIQUE : Vérifier success au lieu de token
     if (response && response.success) {
-      console.log("✅ Connexion réussie - Cookies définis automatiquement");
       // Déclencher l'événement login
       window.dispatchEvent(new Event("login"));
       notificationService.show("auth.signin.success", "success");
@@ -254,7 +248,7 @@ async function handleSignin(event) {
       throw new Error("Connexion échouée");
     }
   } catch (error) {
-    console.error("Erreur de connexion:", error);
+    // Erreur de connexion
     notificationService.show("auth.signin.error", "error", 0);
   }
 }
@@ -284,7 +278,7 @@ function initializeCountryInput() {
       filteredCountries = [...countries];
       displayCountries(countries);
     } catch (error) {
-      console.error("Erreur de chargement des pays:", error);
+      // Erreur de chargement des pays
       countries = [];
       filteredCountries = [];
       displayCountries([]);

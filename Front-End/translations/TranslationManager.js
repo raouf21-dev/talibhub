@@ -18,30 +18,22 @@ class TranslationManager {
    */
   async init() {
     try {
-      console.log("🚀 Initialisation du TranslationManager...");
-
       // Initialiser les gestionnaires (sans langue par défaut)
-      console.log("📚 Initialisation des gestionnaires de traductions...");
       await this.staticManager.init();
       await this.notificationManager.init();
 
       // Détecter la langue à utiliser
       let detectedLanguage = this.detectLanguage();
-      console.log(`🌐 Langue détectée: ${detectedLanguage}`);
 
       // Définir la langue détectée
-      console.log(`🔧 Application de la langue: ${detectedLanguage}`);
       await this.setLanguage(detectedLanguage);
 
       // Configurer les boutons de langue
-      console.log("🔘 Configuration des boutons de langue...");
       this.setupLanguageButtons();
-
-      console.log("✅ TranslationManager principal initialisé");
     } catch (error) {
-      console.error("❌ Erreur d'initialisation TranslationManager:", error);
+      // Erreur d'initialisation TranslationManager
       // S'assurer que l'application continue de fonctionner même si les traductions échouent
-      console.warn("⚠️ L'application va continuer sans traductions complètes");
+      // L'application va continuer sans traductions complètes
 
       // Définir une langue par défaut même en cas d'erreur
       this.currentLanguage = this.currentLanguage || "fr";
@@ -55,7 +47,6 @@ class TranslationManager {
     // 1. Vérifier localStorage (préférence utilisateur sauvegardée)
     let savedLanguage = localStorage.getItem("userLang");
     if (savedLanguage && (savedLanguage === "fr" || savedLanguage === "en")) {
-      console.log(`💾 Langue récupérée du localStorage: ${savedLanguage}`);
       return savedLanguage;
     }
 
@@ -72,9 +63,6 @@ class TranslationManager {
 
     // Sauvegarder la détection pour la prochaine fois
     localStorage.setItem("userLang", selectedLanguage);
-    console.log(
-      `🌐 Langue détectée automatiquement: ${selectedLanguage} (navigateur: ${browserLang})`
-    );
 
     return selectedLanguage;
   }
@@ -95,12 +83,8 @@ class TranslationManager {
           this.staticManager.setLanguage(language),
           this.notificationManager.setLanguage(language),
         ]);
-        console.log(`🌍 Langue changée vers: ${language}`);
       } catch (error) {
-        console.error(
-          `❌ Erreur lors du changement de langue vers ${language}:`,
-          error
-        );
+        // Erreur lors du changement de langue
         // Continuer malgré l'erreur pour ne pas bloquer l'application
       }
 
@@ -125,10 +109,7 @@ class TranslationManager {
       try {
         callback(this.currentLanguage);
       } catch (error) {
-        console.error(
-          "❌ Erreur dans listener de changement de langue:",
-          error
-        );
+        // Erreur dans listener de changement de langue
       }
     });
 
@@ -137,7 +118,6 @@ class TranslationManager {
       detail: { language: this.currentLanguage },
     });
     document.dispatchEvent(languageEvent);
-    console.log(`📢 Événement languageChanged émis: ${this.currentLanguage}`);
   }
 
   /**
@@ -257,12 +237,10 @@ class TranslationManager {
    * Force le rechargement des traductions (utile après mise à jour des JSON)
    */
   async forceReload() {
-    console.log("🔄 Rechargement forcé des traductions...");
     await this.staticManager.loadLanguage(this.currentLanguage);
     await this.notificationManager.loadLanguage(this.currentLanguage);
     this.updateDOM();
     this.notifyLanguageChange();
-    console.log("✅ Rechargement terminé");
   }
 
   /**
@@ -274,13 +252,8 @@ class TranslationManager {
       const langButtons = document.querySelectorAll(".lang-btn");
 
       if (langButtons.length === 0) {
-        console.log("⚠️ Aucun bouton de langue trouvé (.lang-btn)");
         return;
       }
-
-      console.log(
-        `🔘 Configuration de ${langButtons.length} boutons de langue`
-      );
 
       langButtons.forEach((button) => {
         // Nettoyer les anciens listeners pour éviter les doublons
@@ -292,9 +265,6 @@ class TranslationManager {
           const selectedLang = button.getAttribute("data-lang");
 
           if (selectedLang) {
-            console.log(
-              `🔄 Changement langue: ${this.currentLanguage} → ${selectedLang}`
-            );
             this.setLanguage(selectedLang);
 
             // Marquer le bouton comme actif

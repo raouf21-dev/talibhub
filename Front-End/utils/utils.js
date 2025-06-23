@@ -47,13 +47,9 @@ export async function isAuthenticated() {
     }
 
     // Fallback vers cookies si authService non disponible
-    console.warn("⚠️ authService non disponible, utilisation cookies fallback");
     return document.cookie.includes("auth=true");
   } catch (error) {
-    console.error(
-      "Erreur lors de la vérification de l'authentification:",
-      error
-    );
+    // Erreur lors de la vérification de l'authentification
     return false;
   }
 }
@@ -71,9 +67,6 @@ let navigationInProgress = false;
 export async function navigateTo(pageId, addToHistory = true) {
   // Protection contre les appels simultanés
   if (navigationInProgress) {
-    console.warn(
-      `[DEBUG] Navigation déjà en cours - Appel ignoré pour: ${pageId}`
-    );
     return false;
   }
 
@@ -83,20 +76,8 @@ export async function navigateTo(pageId, addToHistory = true) {
   // Ajouter un identifiant unique pour chaque appel
   const navigationId = Math.random().toString(36).substr(2, 9);
 
-  //console.log(`[DEBUG] NavigateTo #${navigationId} - Début`, {
-  //pageId,
-  //addToHistory,
-  //currentPath: window.location.pathname,
-  //stack: new Error().stack,
-  //time: new Date().toISOString(),
-  //});
-
   // Bloquer toute navigation vers login
   if (pageId === "login") {
-    console.warn(
-      "[DEBUG] navigateTo - Tentative de navigation vers login bloquée"
-    );
-    console.warn("[DEBUG] navigateTo - Stack trace:", new Error().stack);
     pageId = "welcomepage";
   }
 
@@ -120,7 +101,6 @@ export async function navigateTo(pageId, addToHistory = true) {
       history.pushState({ pageId }, "", `/${pageId}`);
     }
   } else {
-    console.warn(`Page not found: ${pageId}`);
     // Libérer le verrou même en cas d'erreur
     navigationInProgress = false;
     return false;
@@ -179,17 +159,11 @@ export async function navigateTo(pageId, addToHistory = true) {
     try {
       await moduleLoaders[pageId]();
     } catch (error) {
-      console.error(
-        `Erreur lors du chargement du module pour la page ${pageId}:`,
-        error
-      );
+      // Erreur lors du chargement du module
       // Libérer le verrou même en cas d'erreur
       navigationInProgress = false;
       return false;
     }
-  } else {
-    // Pour les pages qui n'ont pas de module dynamique, aucun chargement n'est nécessaire.
-    console.log(`Aucun module dynamique à charger pour la page: ${pageId}`);
   }
 
   currentPage = pageId;
@@ -197,13 +171,6 @@ export async function navigateTo(pageId, addToHistory = true) {
 
   // Ajouter un log à la fin de la fonction
   const result = true;
-
-  console.log(`[DEBUG] NavigateTo #${navigationId} - Fin`, {
-    pageId,
-    result,
-    newPath: window.location.pathname,
-    time: new Date().toISOString(),
-  });
 
   // Libérer le verrou de navigation
   navigationInProgress = false;
@@ -215,15 +182,12 @@ export async function navigateTo(pageId, addToHistory = true) {
  * Point d'entrée principal de l'application.
  */
 export async function initializeApp() {
-  console.log("Initialisation de l'application");
   // Récupérer la page cible depuis l'URL (ou utiliser 'welcomepage' par défaut)
   let path = window.location.pathname.substring(1);
   if (path.endsWith(".html") || !path) {
     path = "welcomepage";
   }
   const isUserAuthenticated = await isAuthenticated();
-
-  console.log("DOMContentLoaded - Auth:", isUserAuthenticated, "Target:", path);
 
   if (!isUserAuthenticated && path !== "welcomepage") {
     await navigateTo("welcomepage");
@@ -236,9 +200,6 @@ export async function initializeApp() {
   // Gestionnaire d'événements pour la déconnexion
   window.addEventListener("logout", async () => {
     // ✅ MASQUAGE IMMÉDIAT DE LA SIDEBAR LORS DU LOGOUT
-    console.log(
-      "🚪 Gestionnaire logout utils.js - masquage immédiat de la sidebar"
-    );
 
     // Masquer immédiatement la sidebar et changer les classes
     const sidebar =
@@ -307,10 +268,6 @@ export function updateNavVisibility(pageId) {
     const hideTopNav = pageId === "welcomepage";
     topNav.style.display = hideTopNav ? "none" : "flex";
   }
-
-  console.log(
-    `Navigation visibility updated: pageId=${pageId}, hasAuth=${hasAuth}, body classes=${body.className}`
-  );
 }
 
 /**
@@ -320,10 +277,6 @@ export function updateNavVisibility(pageId) {
 export function checkAuthOnLoad() {
   // ✅ NOUVELLE LOGIQUE : Vérification via cookies uniquement
   const hasAuth = document.cookie.includes("auth=true");
-  console.log(
-    "Authentification vérifiée via cookies dans checkAuthOnLoad:",
-    hasAuth
-  );
   return hasAuth;
 }
 
@@ -334,12 +287,11 @@ export function checkAuthOnLoad() {
 export function loadInitialPage(pageId) {
   const pageLoaders = {
     welcomepage: async () => {
-      console.log("Welcome page loaded");
       try {
         const authModule = await import("../components/auth/auth.js");
         authModule.initializeAuth();
       } catch (error) {
-        console.error("Erreur lors du chargement de la page d'accueil:", error);
+        // Erreur lors du chargement de la page d'accueil
       }
     },
     profile: async () => {
@@ -347,7 +299,7 @@ export function loadInitialPage(pageId) {
         const profileModule = await import("../components/user/profile.js");
         await profileModule.initializeProfile();
       } catch (error) {
-        console.error("Erreur lors du chargement du profil:", error);
+        // Erreur lors du chargement du profil
       }
     },
     statistics: async () => {
@@ -360,7 +312,7 @@ export function loadInitialPage(pageId) {
         }
         await statsModule.initializeStatistics();
       } catch (error) {
-        console.error("Erreur lors du chargement des statistiques:", error);
+        // Erreur lors du chargement des statistiques
       }
     },
     todoLists: async () => {
@@ -368,7 +320,7 @@ export function loadInitialPage(pageId) {
         const tasksModule = await import("../components/timer/tasks.js");
         await tasksModule.initializeTasks();
       } catch (error) {
-        console.error("Erreur lors du chargement des tâches:", error);
+        // Erreur lors du chargement des tâches
       }
     },
     apprentissage: async () => {
@@ -376,7 +328,7 @@ export function loadInitialPage(pageId) {
         const timerModule = await import("../components/timer/timer.js");
         await timerModule.initializeTimer();
       } catch (error) {
-        console.error("Erreur lors du chargement du timer:", error);
+        // Erreur lors du chargement du timer
       }
     },
     notifications: async () => {
@@ -386,7 +338,7 @@ export function loadInitialPage(pageId) {
         );
         await notifModule.initializeNotifications();
       } catch (error) {
-        console.error("Erreur lors du chargement des notifications:", error);
+        // Erreur lors du chargement des notifications
       }
     },
     contactform: async () => {
@@ -394,33 +346,28 @@ export function loadInitialPage(pageId) {
         const contactModule = await import("../components/welcome/contact.js");
         await contactModule.initializeContactForm();
       } catch (error) {
-        console.error(
-          "Erreur lors du chargement du formulaire de contact:",
-          error
-        );
+        // Erreur lors du chargement du formulaire de contact
       }
     },
     aboutus: async () => {
       try {
-        console.log("About Us page loaded");
         document.title = "About Us - TalibHub";
         const aboutusPage = document.getElementById("aboutus");
         if (aboutusPage) {
           aboutusPage.style.display = "block";
         }
       } catch (error) {
-        console.error("Erreur lors du chargement de la page About Us:", error);
+        // Erreur lors du chargement de la page About Us
       }
     },
     dashboard: async () => {
       try {
-        console.log("Dashboard loading...");
         const dashboardModule = await import(
           "../components/navigation/dashboard.js"
         );
         await dashboardModule.initializeDashboard();
       } catch (error) {
-        console.error("Erreur lors du chargement du dashboard:", error);
+        // Erreur lors du chargement du dashboard
       }
     },
     mosquetime: async () => {
@@ -430,10 +377,7 @@ export function loadInitialPage(pageId) {
         );
         await mosqueModule.initializeMosqueTime();
       } catch (error) {
-        console.error(
-          "Erreur lors du chargement des horaires de mosquée:",
-          error
-        );
+        // Erreur lors du chargement des horaires de mosquée
       }
     },
     salatSurahSelector: async () => {
@@ -443,10 +387,7 @@ export function loadInitialPage(pageId) {
         );
         await surahModule.initializeSurahSelector();
       } catch (error) {
-        console.error(
-          "Erreur lors du chargement du sélecteur de sourates:",
-          error
-        );
+        // Erreur lors du chargement du sélecteur de sourates
       }
     },
     surahmemorization: async () => {
@@ -456,7 +397,7 @@ export function loadInitialPage(pageId) {
         );
         await memorizationModule.initSurahMemorization();
       } catch (error) {
-        console.error("Erreur lors du chargement de la mémorisation:", error);
+        // Erreur lors du chargement de la mémorisation
       }
     },
     duaTimeCalculator: async () => {
@@ -466,10 +407,7 @@ export function loadInitialPage(pageId) {
         );
         await duaModule.initializeDuaTimeCalculator();
       } catch (error) {
-        console.error(
-          "Erreur lors du chargement du calculateur de dua:",
-          error
-        );
+        // Erreur lors du chargement du calculateur de dua
       }
     },
   };
@@ -477,10 +415,8 @@ export function loadInitialPage(pageId) {
   const loader = pageLoaders[pageId];
   if (loader) {
     loader().catch((error) => {
-      console.error(`Erreur lors du chargement de la page ${pageId}:`, error);
+      // Erreur lors du chargement de la page
     });
-  } else {
-    console.warn(`Aucun loader défini pour la page: ${pageId}`);
   }
 }
 
@@ -488,7 +424,6 @@ export function loadInitialPage(pageId) {
  * Initialise les fonctions utilitaires (si nécessaire).
  */
 export function initializeUtils() {
-  console.log("Initializing utils");
   // Placez ici tout code d'initialisation supplémentaire
 }
 
@@ -497,7 +432,6 @@ export function initializeUtils() {
  * @param {string} tabId - L'identifiant de l'onglet à activer.
  */
 export function switchTab(tabId) {
-  console.log("Switching to tab:", tabId);
   const tabs = document.querySelectorAll(".welcomepage-tab-btn");
   const contents = document.querySelectorAll(".welcomepage-tab-content");
   tabs.forEach((tab) => {
@@ -514,7 +448,6 @@ export function switchTab(tabId) {
  * Initialise la bascule des onglets (exemple pour la welcomepage).
  */
 export function initializeTabToggle() {
-  console.log("Initializing tab toggle");
   const tabBtns = document.querySelectorAll(".welcomepage-tab-btn");
   tabBtns.forEach((btn) => {
     btn.addEventListener("click", function () {
@@ -556,5 +489,5 @@ export function updateDOMIfExists(id, value) {
 
 // Gestion globale des erreurs
 window.addEventListener("error", (event) => {
-  console.error("Erreur globale:", event.error);
+  // Erreur globale détectée
 });

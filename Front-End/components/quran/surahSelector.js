@@ -23,7 +23,6 @@ let surahSelectorInitialized = false;
  */
 function initializeSurahSelector() {
   if (surahSelectorInitialized) {
-    console.log("SurahSelector déjà initialisé.");
     return;
   }
   const surahSelectorSection = document.getElementById("salatSurahSelector");
@@ -34,7 +33,7 @@ function initializeSurahSelector() {
     // Lancement de l'initialisation de l'application
     initializeApplication();
   } else {
-    console.error("Élément #salatSurahSelector non trouvé dans le DOM.");
+    // Élément #salatSurahSelector non trouvé dans le DOM
   }
 }
 
@@ -53,7 +52,8 @@ function handleSectionClick(event) {
         selectRandomSourates();
         break;
       default:
-        console.warn("Action inconnue :", action);
+        // Action inconnue
+        break;
     }
   }
 }
@@ -71,7 +71,7 @@ async function initializeApplication() {
     updateKnownSouratesCount();
     updateRecitationInfo(recitationData);
   } catch (error) {
-    console.error("Erreur lors de l'initialisation:", error);
+    // Erreur lors de l'initialisation
     notificationService.show("surah.load_error", "error", 0);
   }
 }
@@ -85,7 +85,7 @@ async function loadAllSourates() {
     sourates.length = 0;
     sourates.push(...data);
   } catch (error) {
-    console.error("Erreur lors du chargement des sourates:", error);
+    // Erreur lors du chargement des sourates
     notificationService.show("surah.load_error", "error", 0);
     throw error;
   }
@@ -103,8 +103,8 @@ async function loadKnownSourates() {
       .map((s) => s.sourate_number);
     localStorage.setItem("knownSourates", JSON.stringify(knownSourates));
   } catch (error) {
-    console.error("Erreur lors du chargement des sourates à réciter:", error);
-    // En cas d’échec, on tente de récupérer la liste depuis le localStorage
+    // Erreur lors du chargement des sourates à réciter
+    // En cas d'échec, on tente de récupérer la liste depuis le localStorage
     knownSourates = JSON.parse(localStorage.getItem("knownSourates") || "[]");
     notificationService.show("surah.load_error", "error", 0);
   }
@@ -132,10 +132,7 @@ async function saveKnownSourates() {
     updateKnownSouratesCount();
     notificationService.show("surah.saved", "success");
   } catch (error) {
-    console.error(
-      "Erreur lors de la sauvegarde des sourates à réciter:",
-      error
-    );
+    // Erreur lors de la sauvegarde des sourates à réciter
     notificationService.show("surah.save_error", "error", 0);
   }
 }
@@ -144,10 +141,9 @@ async function saveKnownSourates() {
  * Génération dynamique de la liste des sourates à cocher.
  */
 function generateSourateList() {
-  console.log("Début de la génération de la liste des sourates");
   const sourateList = document.getElementById("sourateList");
   if (!sourateList) {
-    console.error("Élément #sourateList non trouvé dans le DOM.");
+    // Élément #sourateList non trouvé dans le DOM
     return;
   }
 
@@ -162,7 +158,6 @@ function generateSourateList() {
     checkbox.value = sourate.number;
     if (knownSourates.includes(sourate.number)) {
       checkbox.checked = true;
-      console.log(`Sourate ${sourate.number} cochée`);
     }
 
     const label = document.createElement("label");
@@ -176,7 +171,6 @@ function generateSourateList() {
 
     sourateList.appendChild(listItem);
   }
-  console.log("Fin de la génération de la liste des sourates");
 }
 
 /**
@@ -201,9 +195,7 @@ function updateKnownSouratesCount() {
  */
 async function loadRecitationInfo() {
   try {
-    console.log("Début du chargement des informations de récitation");
     const data = await api.get("/sourates/recitations/stats");
-    console.log("Statistiques reçues:", data);
 
     return {
       cycles: data.complete_cycles || 0,
@@ -211,10 +203,7 @@ async function loadRecitationInfo() {
       total_known: data.total_known || 0,
     };
   } catch (error) {
-    console.error(
-      "Erreur lors du chargement des informations de récitation:",
-      error
-    );
+    // Erreur lors du chargement des informations de récitation
     return { cycles: 0, recited_at_least_once: 0, total_known: 0 };
   }
 }
@@ -242,7 +231,7 @@ async function selectRandomSourates() {
     // Récupérer les sourates non encore récitées
     const notRecitedSourates = await getNotRecitedSourates();
 
-    // Cas particulier : il ne reste plus qu’une sourate non récitée
+    // Cas particulier : il ne reste plus qu'une sourate non récitée
     if (notRecitedSourates.length === 1) {
       const lastSourate = notRecitedSourates[0];
       updateUIWithSelectedSourates(lastSourate, lastSourate);
@@ -298,7 +287,7 @@ async function selectRandomSourates() {
       }, 1000);
     }
   } catch (error) {
-    console.error("Erreur dans selectRandomSourates:", error);
+    // Erreur dans selectRandomSourates
     notificationService.show("surah.selection_error", "error", 0);
   } finally {
     isSelecting = false;
@@ -319,7 +308,7 @@ function selectTwoRandomSourates(sourates) {
     shuffledSourates.find((s) => s.number !== firstSourate.number) ||
     firstSourate;
 
-  // On s’assure que la première sourate a un numéro inférieur à la deuxième
+  // On s'assure que la première sourate a un numéro inférieur à la deuxième
   if (firstSourate.number > secondSourate.number) {
     [firstSourate, secondSourate] = [secondSourate, firstSourate];
   }
@@ -369,10 +358,9 @@ async function getNotRecitedSourates() {
 async function getRecitationStats() {
   try {
     const stats = await api.get("/sourates/recitations/stats");
-    console.log("Statistiques récupérées:", stats);
     updateRecitationInfo(stats);
   } catch (error) {
-    console.error("Erreur:", error);
+    // Erreur lors de la récupération des statistiques
     notificationService.show("surah.load_error", "error", 0);
   }
 }
@@ -385,9 +373,7 @@ function updateRecitationInfo(data) {
   const progressElement = document.getElementById("recitationProgress");
 
   if (!data) {
-    console.error(
-      "Pas de données reçues pour la mise à jour des informations de récitation"
-    );
+    // Pas de données reçues pour la mise à jour des informations de récitation
     return;
   }
 
