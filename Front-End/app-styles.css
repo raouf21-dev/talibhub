@@ -4788,7 +4788,7 @@ html[lang="fr"] .welcomepage-mosque-time .additional-times-grid::after {
   align-items: center;
   margin: 0;
   cursor: pointer;
-  font-weight: 500;
+  font-weight: 600;
   color: #274c77;
   line-height: 1.4;
   padding: 4px 0; /* Padding vertical pour meilleur alignement */
@@ -4869,7 +4869,7 @@ html[lang="fr"] .welcomepage-mosque-time .additional-times-grid::after {
 .select-all-container {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   color: rgba(255, 255, 255, 0.9);
   cursor: pointer;
   background: rgba(255, 255, 255, 0.1);
@@ -4951,6 +4951,7 @@ html[lang="fr"] .welcomepage-mosque-time .additional-times-grid::after {
     padding: 8px;
     background: linear-gradient(135deg, #e7ecef 0%, #f5f7fa 100%);
     min-height: 100vh;
+    width: 97vw;
   }
 
   /* Header mobile */
@@ -5134,7 +5135,7 @@ html[lang="fr"] .welcomepage-mosque-time .additional-times-grid::after {
   }
 
   .select-all-container {
-    padding: 8px 10px;
+    padding: 6px 8px;
     border-radius: 6px;
     font-size: 13px;
     flex: 0 1 auto; /* Permet une légère flexibilité */
@@ -5281,7 +5282,7 @@ html[lang="fr"] .welcomepage-mosque-time .additional-times-grid::after {
   display: flex;
   flex-direction: column;
   height: 100%;
-  min-height: 600px;
+  min-height: 650px;
 }
 
 .messaging-card:hover {
@@ -5322,6 +5323,17 @@ html[lang="fr"] .welcomepage-mosque-time .additional-times-grid::after {
   position: relative;
 }
 
+/* Ajout d'emojis spécifiques pour chaque carte */
+.messaging-card:nth-child(1) .messaging-card-title::before {
+  content: "📨";
+  font-size: 1.1rem;
+}
+
+.messaging-card:nth-child(2) .messaging-card-title::before {
+  content: "📬";
+  font-size: 1.1rem;
+}
+
 .messaging-actions {
   display: flex;
   gap: 0.8rem;
@@ -5335,20 +5347,26 @@ html[lang="fr"] .welcomepage-mosque-time .additional-times-grid::after {
   background: rgba(255, 255, 255, 0.2);
   border: 1px solid rgba(255, 255, 255, 0.3);
   color: white;
-  padding: 0.5rem;
+  padding: 0.6rem 1rem;
   border-radius: 0.5rem;
   cursor: pointer;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
-  width: 36px;
-  height: 36px;
+  min-width: 100px;
+  height: 38px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  gap: 0.4rem;
 }
 
-.messaging-action-btn::before {
+/* Boutons d'action messaging avec icônes Feather */
+
+/* Effet de brillance sur hover */
+.messaging-action-btn::after {
   content: "";
   position: absolute;
   top: 0;
@@ -5369,7 +5387,7 @@ html[lang="fr"] .welcomepage-mosque-time .additional-times-grid::after {
   transform: translateY(-1px);
 }
 
-.messaging-action-btn:hover::before {
+.messaging-action-btn:hover::after {
   left: 100%;
 }
 
@@ -5553,13 +5571,41 @@ html[lang="fr"] .welcomepage-mosque-time .additional-times-grid::after {
   box-shadow: 0 4px 12px rgba(255, 77, 77, 0.3);
 }
 
+/* Media Queries pour la gestion de la sidebar comme les autres sections */
+@media (min-width: 1245px) {
+  #messaging {
+    padding: 1.5rem;
+    max-width: calc(100vw - 250px);
+    margin-left: var(--sidebar-width);
+  }
+
+  .messaging-main-content {
+    max-width: 1400px;
+  }
+
+  .messaging-card {
+    min-height: 700px;
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1244px) {
+  #messaging {
+    padding: 1.2rem;
+    max-width: calc(100vw - 220px);
+  }
+
+  .messaging-main-content {
+    max-width: 1200px;
+  }
+}
+
 /* Responsive design */
 @media (max-width: 1024px) {
   #messaging {
-    margin-left: auto;
-    margin-right: auto;
     width: 95vw;
     max-width: 1500px;
+    margin-left: auto;
+    margin-right: auto;
   }
 
   .messaging-container {
@@ -5568,13 +5614,15 @@ html[lang="fr"] .welcomepage-mosque-time .additional-times-grid::after {
   }
 
   .messaging-actions {
-    flex-direction: column;
-    gap: calc(var(--spacing-xs) / 2);
+    flex-direction: row;
+    gap: 0.5rem;
+    flex-wrap: nowrap;
   }
 
   .messaging-action-btn {
     font-size: 0.75rem;
-    padding: calc(var(--spacing-xs) / 2) var(--spacing-sm);
+    padding: 0.4rem 0.8rem;
+    min-width: 90px;
   }
 }
 
@@ -5610,6 +5658,9 @@ html[lang="fr"] .welcomepage-mosque-time .additional-times-grid::after {
     flex: 1;
     justify-content: flex-end;
     gap: 0.5rem;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
   }
 
   .messaging-card-content {
@@ -7076,7 +7127,7 @@ html[lang="fr"] .welcomepage-mosque-time .additional-times-grid::after {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   grid-template-rows: auto auto;
-  gap: 2rem;
+
   padding: 0 1rem;
 }
 
@@ -7898,7 +7949,7 @@ button[onclick*="getLocation"] {
 
   .dua-calculator-row {
     grid-template-columns: 1fr;
-    gap: 0.8rem;
+    gap: 0.3rem;
     margin-bottom: 0.8rem;
   }
 
@@ -9297,12 +9348,10 @@ button[onclick*="getLocation"] {
 
 /* Canvas du graphique directement dans le container */
 .surahmemorization-charts canvas {
-  width: 100% !important;
-  height: 100% !important;
   max-width: 100% !important;
-  max-height: 100% !important;
-  min-width: 500px;
-  min-height: 500px;
+  max-height: 400px !important;
+  width: 100% !important;
+  height: auto !important;
 }
 
 /* Container pour le graphique - styles de compatibilité */
@@ -9365,12 +9414,17 @@ button[onclick*="getLocation"] {
   flex: 1;
   position: relative;
   width: 100%;
-  min-height: 0;
+  min-height: 300px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 /* Style du canvas */
 #surahmemorization-performance-chart {
   max-height: 400px;
+  width: 100% !important;
+  height: 350px !important;
 }
 
 /* Légende */
@@ -9480,8 +9534,7 @@ button[onclick*="getLocation"] {
   }
 
   .surahmemorization-charts canvas {
-    min-width: 300px;
-    min-height: 300px;
+    max-height: 300px !important;
   }
 
   .chart-container {
@@ -9573,8 +9626,7 @@ button[onclick*="getLocation"] {
   }
 
   .surahmemorization-charts canvas {
-    min-width: 200px;
-    min-height: 200px;
+    max-height: 250px !important;
   }
 
   .chart-container {
@@ -9710,8 +9762,7 @@ button[onclick*="getLocation"] {
   }
 
   .surahmemorization-charts canvas {
-    min-width: 150px;
-    min-height: 150px;
+    max-height: 200px !important;
   }
 
   .chart-container {
@@ -9734,8 +9785,8 @@ button[onclick*="getLocation"] {
   }
 
   .quick-selection-buttons {
-    padding: 4px;
-    gap: 3px;
+    padding: 4px !important;
+    gap: 3px !important;
   }
 
   .quick-selection-buttons button {
