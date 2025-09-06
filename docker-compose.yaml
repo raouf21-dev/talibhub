@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "4000:4000"
+    environment:
+      - NODE_ENV=development
+      # Option 1: Using connection string (your code checks for this first)
+      - DATABASE_URL=postgresql://postgres:yourpassword@postgres:5432/talibhub
+      
+      # Option 2: Individual variables (fallback if DATABASE_URL not set)
+      # - PGUSER=postgres
+      # - PGHOST=postgres
+      # - PGDATABASE=talibhub
+      # - PGPASSWORD=yourpassword
+      # - PGPORT=5432
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  postgres:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=talibhub
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=yourpassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql  # Optional: for initial schema
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+  
+  pgadmin4:
+      image: elestio/pgadmin:latest
+      restart: always
+      environment:
+        PGADMIN_DEFAULT_EMAIL: admin@email.com⁠
+        PGADMIN_DEFAULT_PASSWORD: "yourpassword"
+        PGADMIN_LISTEN_PORT: 8080
+      ports:
+      - "8080:8080"
+      volumes:
+      - ./servers.json:/pgadmin4/servers.json
+
+volumes:
+  postgres_data:
+
+networks:
+  app-network:
+    driver: bridge
